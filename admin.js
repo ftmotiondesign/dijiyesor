@@ -8,7 +8,7 @@ const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
 const ADMIN_EMAIL="ftmotiondesign@gmail.com";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
-let firms=[],applications=[],campaignFilter="all";
+let firms=[],applications=[],members=[],campaignFilter="all";
 
 const $=id=>document.getElementById(id);
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -37,7 +37,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -55,7 +55,7 @@ document.addEventListener("click",e=>{
 $("mobileMenuBtn").addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("open"));
 
 async function loadAll(){
-  await Promise.all([loadFirms(),loadApplications()]);
+  await Promise.all([loadFirms(),loadApplications(),loadMembers()]);
   renderAll();
 }
 async function loadFirms(){
@@ -65,6 +65,10 @@ async function loadFirms(){
 async function loadApplications(){
   const snap=await db.collection("institutionApplications").get();
   applications=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+}
+async function loadMembers(){
+  const snap=await db.collection("institutionUsers").get();
+  members=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.institutionName||a.email||"").localeCompare(String(b.institutionName||b.email||""),"tr"));
 }
 function isCampaignActive(f){
   if(!(f.campaignActive||f.hasCampaign)||!String(f.campaignTitle||f.promotionTitle||"").trim())return false;
@@ -81,7 +85,8 @@ function renderAll(){
   $("statSponsors").textContent=sponsors.length;
   $("statCampaigns").textContent=campaigns.length;$("navCampaignCount").textContent=campaigns.length;
   $("statApplications").textContent=pending.length;$("navApplicationCount").textContent=pending.length;
-  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMedia();fillCampaignFirmSelect();
+  $("navMemberCount").textContent=members.length;
+  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();
 }
 function renderRecentApplications(){
   const list=applications.filter(a=>String(a.status||"new")==="new").slice(0,5);
@@ -426,6 +431,62 @@ function openQrForFirm(id){
 }
 $("qrClearFirm").addEventListener("click",()=>openQrForFirm(""));
 
+function memberStatusLabel(status){
+  return ({approved:"Aktif",pending:"Bekleyen",rejected:"Reddedildi"})[String(status||"pending")]||String(status||"-");
+}
+function renderMembers(){
+  const q=norm($("memberSearch")?.value||"");
+  const status=$("memberStatus")?.value||"";
+  const list=members.filter(m=>{
+    const firm=firms.find(f=>f.id===m.institutionId);
+    const hay=[m.institutionName,m.email,firm?.name,firm?.city,firm?.district].join(" ");
+    return (!q||norm(hay).includes(q))&&(!status||String(m.status||"pending")===status);
+  });
+
+  $("memberStatTotal").textContent=members.length;
+  $("memberStatApproved").textContent=members.filter(m=>m.status==="approved").length;
+  $("memberStatPending").textContent=members.filter(m=>m.status==="pending").length;
+
+  $("memberList").innerHTML=list.length?list.map(m=>{
+    const firm=firms.find(f=>f.id===m.institutionId);
+    const statusValue=String(m.status||"pending");
+    return '<article class="member-row">'+
+      '<div class="member-avatar">'+esc(initials(m.institutionName||m.email))+'</div>'+
+      '<div class="member-main"><strong>'+esc(m.institutionName||firm?.name||"Kurum")+'</strong><small>'+esc(m.email||"E-posta yok")+'</small></div>'+
+      '<div class="member-place">'+esc([firm?.city,firm?.district].filter(Boolean).join(" · ")||"Konum yok")+'</div>'+
+      '<span class="member-status '+esc(statusValue)+'">'+esc(memberStatusLabel(statusValue))+'</span>'+
+      '<div class="member-actions"><button data-member-detail="'+esc(m.id)+'">Detay</button>'+(firm?'<button data-edit-firm="'+esc(firm.id)+'">Firma</button>':'')+'</div>'+
+    '</article>';
+  }).join(""):'<div class="empty">Üye bulunamadı.</div>';
+}
+$("memberSearch")?.addEventListener("input",renderMembers);
+$("memberStatus")?.addEventListener("change",renderMembers);
+
+function openMemberDetail(id){
+  const m=members.find(x=>x.id===id);
+  if(!m)return;
+  const firm=firms.find(f=>f.id===m.institutionId);
+
+  $("memberDetailTitle").textContent=m.institutionName||firm?.name||"Üye Detayı";
+  $("memberDetailBody").innerHTML=
+    '<div class="member-detail-status '+esc(String(m.status||"pending"))+'"><span>HESAP DURUMU</span><strong>'+esc(memberStatusLabel(m.status))+'</strong></div>'+
+    '<div class="member-detail-grid">'+
+      detailRow("Firma",m.institutionName||firm?.name||"-")+
+      detailRow("E-posta",m.email||"-")+
+      detailRow("Kurum ID",m.institutionId||"-")+
+      detailRow("Kullanıcı UID",m.id||"-")+
+      detailRow("İl",firm?.city||"-")+
+      detailRow("İlçe",firm?.district||"-")+
+      detailRow("Telefon",firm?.phone||"-")+
+      detailRow("Kayıt tarihi",formatApplicationDate(m.date))+
+    '</div>';
+
+  $("memberOpenFirm").dataset.firmId=firm?.id||"";
+  $("memberOpenFirm").disabled=!firm;
+  $("memberCopyLogin").dataset.loginUrl="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1";
+  $("memberDetailModal").classList.remove("hidden");
+}
+
 function renderMedia(){
   const list=applications.filter(a=>a.wantsPhoto||a.wantsVideo||a.wants360Tour||a.wantsVip);
   $("mediaList").innerHTML=list.length?list.map(a=>'<article class="media-card"><h3>'+esc(a.name)+'</h3><div class="media-tags">'+(a.wants360Tour?'<span>360° Tur</span>':'')+(a.wantsPhoto?'<span>Fotoğraf</span>':'')+(a.wantsVideo?'<span>Video</span>':'')+(a.wantsVip?'<span>VIP</span>':'')+'</div><p>'+esc([a.city,a.district].filter(Boolean).join(" · "))+'</p></article>').join(""):'<div class="empty">Medya hizmeti isteyen firma yok.</div>';
@@ -444,6 +505,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const memberDetail=e.target.closest("[data-member-detail]");if(memberDetail){openMemberDetail(memberDetail.dataset.memberDetail);return}
   const legacyCreate=e.target.closest("#createLegacyInstitutionAccount");if(legacyCreate){await createLegacyInstitutionAccount(legacyCreate.dataset.appId);return}
   const detailApp=e.target.closest("[data-detail-app]");if(detailApp)return openApplicationDetail(detailApp.dataset.detailApp);
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
@@ -471,7 +533,24 @@ document.addEventListener("click",async e=>{
         date:a.date||new Date().toISOString()
       },{merge:true});
     }
-    await Promise.all([loadFirms(),loadApplications()]);renderAll();$("applicationDetailModal")?.classList.add("hidden");return
+    await Promise.all([loadFirms(),loadApplications(),loadMembers()]);renderAll();$("applicationDetailModal")?.classList.add("hidden");return
   }
   const reject=e.target.closest("[data-reject-app]");if(reject){await db.collection("institutionApplications").doc(reject.dataset.rejectApp).set({status:"rejected",rejectedAt:new Date().toISOString()},{merge:true});await loadApplications();renderAll();$("applicationDetailModal")?.classList.add("hidden")}
+});
+
+$("memberCopyLogin")?.addEventListener("click",async()=>{
+  const url=$("memberCopyLogin").dataset.loginUrl||"https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1";
+  try{
+    await navigator.clipboard.writeText(url);
+    const old=$("memberCopyLogin").textContent;
+    $("memberCopyLogin").textContent="Kopyalandı ✓";
+    setTimeout(()=>$("memberCopyLogin").textContent=old,1400);
+  }catch(_){}
+});
+$("memberOpenFirm")?.addEventListener("click",()=>{
+  const id=$("memberOpenFirm").dataset.firmId;
+  if(!id)return;
+  $("memberDetailModal").classList.add("hidden");
+  setView("firms");
+  openFirmModal(id);
 });
