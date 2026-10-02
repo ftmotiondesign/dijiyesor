@@ -1,0 +1,52 @@
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const categoryLabels={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
+const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
+const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
+const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const mainCategory=d=>d.mainCategory||legacyMain[d.subCategory||d.category]||"diger";
+const initials=n=>String(n||"Firma").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
+let companies=[];
+
+async function loadProvinces(select,district){
+  select.innerHTML='<option value="">İller yükleniyor...</option>';
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");const j=await r.json();
+    select.innerHTML='<option value="">Tüm İller</option>';
+    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{const o=document.createElement("option");o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;select.appendChild(o)});
+  }catch(_){select.innerHTML='<option value="">Tüm İller</option>'}
+  if(district){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=true}
+}
+async function fillDistricts(city,district){
+  district.disabled=true;district.innerHTML='<option value="">İlçeler yükleniyor...</option>';
+  const o=city.options[city.selectedIndex],id=o?.dataset?.id;
+  if(!city.value){district.innerHTML='<option value="">Tüm İlçeler</option>';return}
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");const j=await r.json();
+    district.innerHTML='<option value="">Tüm İlçeler</option>';
+    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{const x=document.createElement("option");x.value=d.name;x.textContent=d.name;district.appendChild(x)});
+    district.disabled=false;
+  }catch(_){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=false}
+}
+async function loadCompanies(){
+  const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
+  try{
+    const snap=await db.collection("institutions").get();companies=[];
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",location:d.location||"",description:d.description||"",highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||""})});
+    companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));render(companies);
+  }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
+}
+function render(data){
+  const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");if(!grid||!sum)return;
+  sum.textContent=data.length+" firma bulundu";
+  if(!data.length){grid.innerHTML='<div class="state"><strong>Uygun firma bulunamadı.</strong>Arama veya konum filtresini değiştirerek tekrar deneyin.</div>';return}
+  grid.innerHTML=data.map(i=>{const logo=i.logoUrl?'<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">':esc(initials(i.name));const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";const desc=i.description||(i.highlights||[]).slice(0,2).join(" · ")||"Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin.";return '<article class="card"><div class="card-top"><div class="logo">'+logo+'</div><div><h3>'+esc(i.name)+'</h3><div class="meta">📍 '+esc(loc)+'</div></div></div><span class="tag">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span><p class="desc">'+esc(desc)+'</p><div class="card-actions"><a class="action-main" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a><a class="action-soft" href="firma.html?id='+encodeURIComponent(i.id)+'#iletisim">Bilgi Al</a></div></article>'}).join("");
+}
+function initHome(){
+  const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
+  if(!search)return;
+  const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value;render(companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.location,i.category,i.subCategory,i.mainCategory,(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));return(!q||h.includes(q))&&(!c||norm(i.city)===c)&&(!d||norm(i.district)===d)&&(!s||i.mainCategory===s)}))};
+  loadProvinces(city,district);city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});district.addEventListener("change",filter);sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));filter()});search.addEventListener("input",filter);btn.addEventListener("click",filter);chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));loadCompanies();
+}
+document.addEventListener("DOMContentLoaded",initHome);
