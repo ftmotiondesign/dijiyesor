@@ -97,7 +97,8 @@ campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
 campaignBadge:d.campaignBadge||d.promotionBadge||"Kampanya",
 campaignEnd:d.campaignEnd||d.campaignEndDate||"",
 campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
-campaignUrl:d.campaignUrl||d.promotionUrl||""
+campaignUrl:d.campaignUrl||d.promotionUrl||"",
+sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser)
 })});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));render(companies);
   }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
@@ -164,11 +165,11 @@ function render(data){
       i.galleryUrls?.length?'<span class="result-badge">📷 Fotoğraflı</span>':''
     ].filter(Boolean).join("");
 
-    return '<article class="result-card">'+
+    return '<article class="result-card'+(i.sponsored?' is-sponsored':'')+'">'+
       '<div class="result-card-top">'+
         '<div class="result-logo">'+logo+'</div>'+
         '<div class="result-card-copy">'+
-          '<div class="result-name-row"><h2>'+esc(i.name)+'</h2>'+badges+'</div>'+
+          '<div class="result-name-row"><h2>'+esc(i.name)+'</h2>'+(i.sponsored?'<span class="mini-sponsor">Sponsor</span>':'')+badges+'</div>'+
           '<div class="result-location">📍 '+esc(loc)+'</div>'+
           '<span class="result-category">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span>'+
         '</div>'+
