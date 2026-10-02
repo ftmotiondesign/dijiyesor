@@ -1,77 +1,111 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DijiyeSor | Firma Ara</title>
-<meta name="description" content="DijiyeSor ile firma, sektör veya hizmet ara.">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DijiyeSor | Firma Ara</title>
+  <meta name="description" content="DijiyeSor ile firma, kurum, sektör veya hizmet ara.">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="google-home">
+<body>
+  <header class="topbar">
+    <a class="top-link" href="firma-ekle.html">Firmanı Tanıt</a>
+  </header>
 
-<main class="google-main">
-  <section class="google-center">
-    <div class="google-search-shell">
-      <div class="google-search-main">
-        <span class="google-search-icon">⌕</span>
-        <input id="homeSearchInput" type="search" autocomplete="off" placeholder="Ne arıyorsun?">
-        <button id="homeSearchBtn" type="button">Ara</button>
+  <main class="home-main">
+    <section class="search-center">
+      <img class="mascot" src="assets/diji-mascot.png" alt="DijiyeSor maskotu">
+
+      <div class="search-box">
+        <div class="search-main">
+          <span class="search-icon">⌕</span>
+          <input id="homeSearchInput" type="search" autocomplete="off" placeholder="Ne arıyorsun?">
+          <button id="homeSearchBtn" type="button">Ara</button>
+        </div>
+
+        <div class="location-row">
+          <select id="homeCitySelect">
+            <option value="">Tüm Türkiye</option>
+          </select>
+          <select id="homeDistrictSelect" disabled>
+            <option value="">Tüm İlçeler</option>
+          </select>
+        </div>
       </div>
+    </section>
+  </main>
 
-      <div class="google-location-row">
-        <select id="homeCitySelect">
-          <option value="">Tüm Türkiye</option>
-        </select>
-        <select id="homeDistrictSelect" disabled>
-          <option value="">Tüm İlçeler</option>
-        </select>
-      </div>
-    </div>
-  </section>
-</main>
+  <script>
+    const searchInput = document.getElementById('homeSearchInput');
+    const searchBtn = document.getElementById('homeSearchBtn');
+    const citySelect = document.getElementById('homeCitySelect');
+    const districtSelect = document.getElementById('homeDistrictSelect');
 
-<script>
-const searchInput=document.getElementById("homeSearchInput");
-const searchBtn=document.getElementById("homeSearchBtn");
-const citySelect=document.getElementById("homeCitySelect");
-const districtSelect=document.getElementById("homeDistrictSelect");
+    async function loadCities() {
+      try {
+        const response = await fetch('https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81');
+        if (!response.ok) throw new Error('İller alınamadı');
+        const result = await response.json();
 
-async function loadCities(){
-  try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
-    const j=await r.json();
-    citySelect.innerHTML='<option value="">Tüm Türkiye</option>';
-    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{
-      const o=document.createElement("option");
-      o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;citySelect.appendChild(o);
+        citySelect.innerHTML = '<option value="">Tüm Türkiye</option>';
+        (result.data || [])
+          .sort((a, b) => a.name.localeCompare(b.name, 'tr'))
+          .forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.name;
+            option.textContent = city.name;
+            option.dataset.id = city.id;
+            citySelect.appendChild(option);
+          });
+      } catch (_) {
+        citySelect.innerHTML = '<option value="">Tüm Türkiye</option>';
+      }
+    }
+
+    async function loadDistricts() {
+      const provinceId = citySelect.options[citySelect.selectedIndex]?.dataset?.id;
+      districtSelect.disabled = true;
+      districtSelect.innerHTML = '<option value="">Tüm İlçeler</option>';
+      if (!provinceId) return;
+
+      try {
+        const response = await fetch(
+          'https://api.turkiyeapi.dev/v2/provinces/' + provinceId + '/districts?fields=id,name&limit=100'
+        );
+        if (!response.ok) throw new Error('İlçeler alınamadı');
+        const result = await response.json();
+
+        (result.data || [])
+          .sort((a, b) => a.name.localeCompare(b.name, 'tr'))
+          .forEach(district => {
+            const option = document.createElement('option');
+            option.value = district.name;
+            option.textContent = district.name;
+            districtSelect.appendChild(option);
+          });
+
+        districtSelect.disabled = false;
+      } catch (_) {
+        districtSelect.disabled = false;
+      }
+    }
+
+    function goSearch() {
+      const params = new URLSearchParams();
+      const query = searchInput.value.trim();
+      if (query) params.set('q', query);
+      if (citySelect.value) params.set('city', citySelect.value);
+      if (districtSelect.value) params.set('district', districtSelect.value);
+      window.location.href = 'arama.html' + (params.toString() ? '?' + params.toString() : '');
+    }
+
+    citySelect.addEventListener('change', loadDistricts);
+    searchBtn.addEventListener('click', goSearch);
+    searchInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') goSearch();
     });
-  }catch(_){}
-}
-async function loadDistricts(){
-  const id=citySelect.options[citySelect.selectedIndex]?.dataset?.id;
-  districtSelect.disabled=true;
-  districtSelect.innerHTML='<option value="">Tüm İlçeler</option>';
-  if(!id)return;
-  try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");
-    const j=await r.json();
-    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{
-      const o=document.createElement("option");o.value=d.name;o.textContent=d.name;districtSelect.appendChild(o);
-    });
-    districtSelect.disabled=false;
-  }catch(_){}
-}
-function goSearch(){
-  const p=new URLSearchParams();
-  if(searchInput.value.trim())p.set("q",searchInput.value.trim());
-  if(citySelect.value)p.set("city",citySelect.value);
-  if(districtSelect.value)p.set("district",districtSelect.value);
-  location.href="arama.html"+(p.toString()?"?"+p.toString():"");
-}
-citySelect.addEventListener("change",loadDistricts);
-searchBtn.addEventListener("click",goSearch);
-searchInput.addEventListener("keydown",e=>{if(e.key==="Enter")goSearch()});
-loadCities();
-</script>
+
+    loadCities();
+  </script>
 </body>
 </html>
