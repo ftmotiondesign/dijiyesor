@@ -228,6 +228,23 @@
   </div>
 </div>
 
+<div id="applicationDetailModal" class="modal hidden">
+  <div class="modal-card modal-large application-detail-modal">
+    <div class="modal-head">
+      <div><span>ÜYE / FİRMA BAŞVURUSU</span><h2 id="applicationDetailTitle">Başvuru Detayı</h2></div>
+      <button class="modal-close" data-close="applicationDetailModal">×</button>
+    </div>
+
+    <div id="applicationDetailBody" class="application-detail-body"></div>
+
+    <div class="application-detail-actions">
+      <button type="button" class="secondary" data-close="applicationDetailModal">Kapat</button>
+      <button type="button" class="reject" id="applicationDetailReject">Reddet</button>
+      <button type="button" class="approve" id="applicationDetailApprove">Onayla</button>
+    </div>
+  </div>
+</div>
+
 <div id="campaignModal" class="modal hidden">
   <div class="modal-card">
     <div class="modal-head"><div><span>KAMPANYA & REKLAM</span><h2>Kampanya Düzenle</h2></div><button class="modal-close" data-close="campaignModal">×</button></div>
