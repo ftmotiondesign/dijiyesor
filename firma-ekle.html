@@ -195,6 +195,7 @@
             <label class="check"><input id="wantVideo" type="checkbox"><span>Tanıtım videosu</span></label>
             <label class="check"><input id="want360" type="checkbox"><span>360° mekan turu</span></label>
             <label class="check"><input id="wantVip" type="checkbox"><span>VIP / öne çıkan profil</span></label>
+            <label class="check"><input id="wantQrNfc" type="checkbox"><span>QR / NFC Akıllı Firma Kartı</span></label>
           </div>
 
           <div class="campaign-request">
@@ -354,6 +355,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     if(document.getElementById("wantVideo").checked)interests.push("tanitim_videosu");
     if(document.getElementById("want360").checked)interests.push("360_mekan_turu");
     if(document.getElementById("wantVip").checked)interests.push("vip_profil");
+    if(document.getElementById("wantQrNfc").checked)interests.push("qr_nfc_kart");
     if(document.getElementById("wantCampaign").checked)interests.push("kampanya_reklami");
 
     await db.collection("institutionApplications").add({
@@ -374,6 +376,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
       wantsVideo:interests.includes("tanitim_videosu"),
       wants360Tour:interests.includes("360_mekan_turu"),
       wantsVip:interests.includes("vip_profil"),
+      wantsQrNfc:interests.includes("qr_nfc_kart"),
       wantsCampaign:document.getElementById("wantCampaign").checked,
       wantsSponsoredCampaign:document.getElementById("wantSponsoredCampaign").checked,
       campaignRequest:document.getElementById("wantCampaign").checked ? {
