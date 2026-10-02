@@ -107,3 +107,16 @@ button,input,select{font:inherit}
   .filters{grid-template-columns:1fr 1fr}
   .filters .clear-btn{grid-column:1/-1}
 }
+
+.sponsored-card{grid-column:1/-1;border:1px solid #d9e7fb;background:linear-gradient(135deg,#f8fbff,#eef5ff);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:180px 1fr;min-height:145px}
+.sponsored-top{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #dce8f7;background:rgba(255,255,255,.72)}
+.sponsored-label{font-size:9px;font-weight:900;letter-spacing:.12em;color:#6f7d91;border:1px solid #cfd9e6;border-radius:999px;padding:4px 7px;background:#fff}
+.sponsored-brand{font-size:11px;font-weight:800;color:#53627a}
+.sponsored-image{width:180px;height:100%;min-height:135px;object-fit:cover}
+.sponsored-body{padding:17px 18px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.campaign-badge{font-size:10px;font-weight:900;color:#1677ff;background:#e7f1ff;border-radius:999px;padding:5px 8px}
+.sponsored-body h3{margin:8px 0 5px;font-size:20px;line-height:1.2;color:#172139}
+.sponsored-body p{margin:0 0 8px;color:#657187;font-size:12.5px;line-height:1.5}
+.sponsored-body small{color:#8490a2;font-size:10.5px;margin-bottom:10px}
+.sponsored-body a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border-radius:9px;background:#1677ff;color:#fff;font-size:11px;font-weight:900}
+@media(max-width:680px){.sponsored-card{grid-template-columns:1fr}.sponsored-image{width:100%;height:150px}.sponsored-body h3{font-size:18px}}
