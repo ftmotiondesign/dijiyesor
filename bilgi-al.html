@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bilgi Al | DijiyeSor</title>
+<meta name="description" content="DijiyeSor üzerinden kayıtlı firmalardan bilgi alın.">
+<link rel="stylesheet" href="bilgi-al.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html"><span class="mark">D</span><span>DijiyeSor</span></a>
+  <a class="back" href="javascript:history.back()">← Geri</a>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <span>BİLGİ AL</span>
+    <h1>İhtiyacını yaz, uygun firmalar sana ulaşsın.</h1>
+    <p>Talebin seçtiğin sektör ve şehirdeki DijiyeSor'a kayıtlı uygun firmalara iletilir.</p>
+  </section>
+
+  <section class="card">
+    <div id="sourceInfo" class="source hidden"></div>
+    <div id="message" class="message hidden"></div>
+
+    <form id="infoForm">
+      <div class="grid two">
+        <label>Ad Soyad
+          <input id="name" required autocomplete="name" placeholder="Adınız Soyadınız">
+        </label>
+        <label>Telefon
+          <input id="phone" required type="tel" autocomplete="tel" placeholder="05xx xxx xx xx">
+        </label>
+      </div>
+
+      <div class="grid two">
+        <label>E-posta
+          <input id="email" type="email" autocomplete="email" placeholder="ornek@email.com">
+        </label>
+        <label>Şehir
+          <select id="city" required><option value="">Şehir seçin</option></select>
+        </label>
+      </div>
+
+      <div class="grid two">
+        <label>Sektör
+          <select id="mainCategory" required>
+            <option value="">Sektör seçin</option>
+            <option value="egitim">Eğitim</option>
+            <option value="otomotiv">Otomotiv</option>
+            <option value="yemeicme">Yeme & İçme</option>
+            <option value="saglikguzellik">Sağlık & Güzellik</option>
+            <option value="evyapi">Ev & Yapı</option>
+            <option value="emlak">Emlak</option>
+            <option value="turizm">Turizm & Konaklama</option>
+            <option value="organizasyonmedya">Organizasyon & Medya</option>
+            <option value="tasimacilik">Taşımacılık & Teslimat</option>
+            <option value="profesyonel">Profesyonel Hizmetler</option>
+            <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+            <option value="diger">Diğer</option>
+          </select>
+        </label>
+        <label>Alt kategori
+          <select id="subCategory" required disabled><option value="">Önce sektör seçin</option></select>
+        </label>
+      </div>
+
+      <label>Ne hakkında bilgi almak istiyorsun?
+        <textarea id="note" required rows="5" placeholder="İhtiyacını, istediğin hizmeti veya sormak istediğin konuyu yaz."></textarea>
+      </label>
+
+      <label class="consent">
+        <input id="consent" type="checkbox" required>
+        <span>İletişim bilgilerimin talebime yanıt verecek uygun firmalarla paylaşılmasını kabul ediyorum.</span>
+      </label>
+
+      <button id="submitBtn" type="submit">Talebi Gönder</button>
+      <small class="hint">Talep aynı sektör ve şehirdeki uygun kayıtlı firmaların panelinde görünür.</small>
+    </form>
+  </section>
+</main>
+
+<footer>© 2026 DijiyeSor</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
+const subs={
+egitim:[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],
+otomotiv:[["oto_servis","Oto Servis"],["kaporta_boya","Kaporta & Boya"],["oto_elektrik","Oto Elektrik"],["lastik_jant","Lastik & Jant"],["oto_yikama","Oto Yıkama"],["ekspertiz","Ekspertiz"],["galeri","Oto Galeri"],["rentacar","Rent a Car"],["yedek_parca","Yedek Parça"],["motosiklet","Motosiklet"]],
+yemeicme:[["restoran","Restoran"],["kafe","Kafe"],["fastfood","Fast Food"],["pastane","Pastane"],["pizza","Pizza"],["doner","Döner"],["pide_lahmacun","Pide & Lahmacun"],["catering","Catering"],["ev_yemekleri","Ev Yemekleri"]],
+saglikguzellik:[["dis_klinigi","Diş Kliniği"],["klinik","Klinik"],["psikolog","Psikolog"],["diyetisyen","Diyetisyen"],["fizyoterapi","Fizyoterapi"],["guzellik","Güzellik Merkezi"],["kuafor","Kuaför"],["berber","Berber"],["spor","Spor Merkezi"]],
+evyapi:[["mobilya","Mobilya"],["dekorasyon","Dekorasyon"],["insaat","İnşaat"],["elektrikci","Elektrikçi"],["tesisatci","Tesisatçı"],["teknik_servis","Teknik Servis"],["klima","Klima"],["cam_balkon","Cam Balkon"],["temizlik","Temizlik"]],
+emlak:[["emlak_ofisi","Emlak Ofisi"],["konut","Konut"],["arsa","Arsa"],["ticari","Ticari Gayrimenkul"],["gunluk_kiralik","Günlük Kiralık"]],
+turizm:[["otel","Otel"],["pansiyon","Pansiyon"],["apart","Apart"],["bungalov","Bungalov"],["seyahat","Seyahat Acentesi"],["kamp","Kamp"]],
+organizasyonmedya:[["dugun_salonu","Düğün Salonu"],["organizasyon","Organizasyon"],["fotograf","Fotoğrafçı"],["video","Video Prodüksiyon"],["drone","Drone Çekimi"],["gelinlik","Gelinlik"],["cicekci","Çiçekçi"],["reklam","Reklam Ajansı"]],
+tasimacilik:[["nakliyat","Nakliyat"],["kurye","Kurye"],["sehirici","Şehir İçi Taşımacılık"],["depolama","Depolama"]],
+profesyonel:[["hukuk","Hukuk"],["muhasebe","Muhasebe"],["web","Web Tasarım"],["sosyal_medya","Sosyal Medya"],["teknoloji","Teknoloji"],["bilgisayar","Bilgisayar"],["danismanlik","Danışmanlık"],["veteriner","Veteriner"],["tarim","Tarım"]],
+alisveris:[["giyim","Giyim"],["ayakkabi","Ayakkabı"],["market","Market"],["elektronik","Elektronik"],["kirtasiye","Kırtasiye"],["petshop","Pet Shop"],["zuccaciye","Züccaciye"],["esnaf","Yerel Esnaf"]],
+diger:[["diger","Diğer"]]
+};
+
+const params=new URLSearchParams(location.search);
+const city=document.getElementById("city"),main=document.getElementById("mainCategory"),sub=document.getElementById("subCategory");
+const source=document.getElementById("sourceInfo"),msg=document.getElementById("message");
+const firma=params.get("firma")||"";
+
+function fillSubs(){
+  const rows=subs[main.value]||[];
+  sub.innerHTML='<option value="">Alt kategori seçin</option>';
+  rows.forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;sub.appendChild(o)});
+  sub.disabled=!main.value;
+}
+
+main.addEventListener("change",fillSubs);
+
+(async()=>{
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+    const j=await r.json();
+    city.innerHTML='<option value="">Şehir seçin</option>';
+    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(x=>{
+      const o=document.createElement("option");o.value=x.name;o.textContent=x.name;city.appendChild(o);
+    });
+    if(params.get("city"))city.value=params.get("city");
+  }catch(_){}
+
+  if(params.get("mainCategory")){
+    main.value=params.get("mainCategory");
+    fillSubs();
+    if(params.get("subCategory"))sub.value=params.get("subCategory");
+  }
+  if(firma){
+    source.classList.remove("hidden");
+    source.innerHTML='<strong>'+firma.replace(/[&<>]/g,"")+'</strong> sayfasından geldiniz. Talebiniz aynı alandaki uygun firmalara da iletilecek.';
+  }
+})();
+
+document.getElementById("infoForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=document.getElementById("submitBtn");
+  const phone=document.getElementById("phone").value.trim();
+  const digits=phone.replace(/\D/g,"");
+  if(digits.length<10){msg.className="message error";msg.textContent="Telefon numarasını kontrol edin.";return}
+
+  btn.disabled=true;btn.textContent="Gönderiliyor...";
+  msg.className="message";msg.textContent="Talebiniz hazırlanıyor...";
+
+  const subLabel=sub.options[sub.selectedIndex]?.textContent||"Bilgi Talebi";
+  const request={
+    mainCategory:main.value,
+    subCategory:sub.value,
+    category:sub.value,
+    service:subLabel,
+    city:city.value,
+    district:"",
+    name:document.getElementById("name").value.trim(),
+    phone,
+    email:document.getElementById("email").value.trim().toLowerCase(),
+    note:document.getElementById("note").value.trim(),
+    status:"new",
+    requestType:"bulk",
+    source:"dijiyesor-bilgi-al",
+    sourceInstitutionName:firma,
+    broadcastScope:"matching_registered_institutions",
+    consent:true,
+    date:new Date().toISOString()
+  };
+
+  try{
+    const ref=await db.collection("quoteRequests").add(request);
+    msg.className="message success";
+    msg.innerHTML='<strong>Talebiniz gönderildi.</strong><br>Uygun kayıtlı firmalar talebinizi kurum panellerinde görebilecek. Talep No: DJY-'+ref.id.slice(-8).toUpperCase();
+    e.target.reset();
+    sub.disabled=true;sub.innerHTML='<option value="">Önce sektör seçin</option>';
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(err){
+    console.error(err);
+    msg.className="message error";
+    msg.textContent="Talep gönderilemedi. Lütfen tekrar deneyin.";
+  }finally{
+    btn.disabled=false;btn.textContent="Talebi Gönder";
+  }
+});
+</script>
+</body>
+</html>
