@@ -70,3 +70,32 @@
   .qr-manager-frame{height:1100px}
   .qr-order-frame{height:980px}
 }
+
+.application-submeta{display:block;margin-top:5px;color:#7b8798;font-size:10px}
+.application-mini-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.application-mini-tags span{font-size:9px;font-weight:800;background:#eef4ff;color:#155db8;border-radius:999px;padding:4px 6px}
+.application-detail-modal{max-width:900px}
+.application-detail-body{display:grid;gap:12px;max-height:70vh;overflow:auto;padding-right:4px}
+.application-detail-status{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#f7fbff,#eef5ff);border:1px solid #d8e8fb;border-radius:14px;padding:14px}
+.application-detail-status span,.application-detail-section-head span{font-size:9px;font-weight:900;letter-spacing:.11em;color:#1677ff}
+.application-detail-status strong{display:block;margin-top:3px;font-size:15px}
+.application-detail-status small{color:#7c8798}
+.application-detail-section{border:1px solid #e2e8f0;border-radius:14px;padding:14px;background:#fff}
+.application-detail-section.campaign{background:#fffaf0;border-color:#f0dfb6}
+.application-detail-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+.application-detail-section-head strong{font-size:13px}
+.application-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.application-detail-row{background:#f8fafc;border-radius:10px;padding:9px 10px;min-width:0}
+.application-detail-row span{display:block;font-size:9px;color:#8b96a6;font-weight:800;margin-bottom:3px}
+.application-detail-row strong{display:block;font-size:11px;word-break:break-word}
+.application-detail-description{margin-top:9px;border-top:1px solid #edf1f5;padding-top:9px}
+.application-detail-description span{display:block;font-size:9px;color:#8b96a6;font-weight:800;margin-bottom:4px}
+.application-detail-description p{margin:0;font-size:11px;line-height:1.55;color:#4c596b}
+.application-detail-tags{display:flex;gap:7px;flex-wrap:wrap}
+.application-detail-tags span{background:#eef4ff;color:#155db8;border-radius:999px;padding:6px 8px;font-size:10px;font-weight:850}
+.application-detail-tags em{font-style:normal;color:#8994a5;font-size:11px}
+.application-detail-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid #e6ebf1}
+@media(max-width:700px){
+  .application-detail-grid{grid-template-columns:1fr}
+  .application-detail-status,.application-detail-section-head{align-items:flex-start;flex-direction:column}
+}
