@@ -99,3 +99,21 @@
   .application-detail-grid{grid-template-columns:1fr}
   .application-detail-status,.application-detail-section-head{align-items:flex-start;flex-direction:column}
 }
+
+.application-account-state{border-radius:14px;padding:14px;border:1px solid;margin-bottom:2px}
+.application-account-state.ready{background:#f0fbf4;border-color:#ccebd7}
+.application-account-state.missing{background:#fff8ef;border-color:#f1d8ad}
+.application-account-state span{display:block;font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:4px}
+.application-account-state.ready span{color:#168447}
+.application-account-state.missing span{color:#a46100}
+.application-account-state strong{display:block;font-size:13px}
+.application-account-state small{display:block;color:#758196;font-size:10.5px;margin-top:4px}
+.legacy-account-form{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end;margin-top:12px}
+.legacy-account-form label{font-size:10px;font-weight:800;color:#475467}
+.legacy-account-form input{margin-top:5px}
+.legacy-account-form button{height:40px;white-space:nowrap}
+.application-detail-actions .approve:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){
+  .legacy-account-form{grid-template-columns:1fr}
+  .legacy-account-form button{width:100%}
+}
