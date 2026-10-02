@@ -18,6 +18,77 @@
 
   const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 
+  function normalizeWa(value){
+    let digits=String(value||"").replace(/\D/g,"");
+    if(!digits)return "";
+    if(digits.startsWith("90") && digits.length>=12)return digits;
+    if(digits.startsWith("0") && digits.length===11)return "90"+digits.slice(1);
+    if(digits.length===10)return "90"+digits;
+    return digits;
+  }
+
+  function whatsappMessage(inst,request,quoteId){
+    const no="DJY-"+String(quoteId||"").slice(-8).toUpperCase();
+    const place=[request.city,request.district].filter(Boolean).join(" / ")||"Konum belirtilmedi";
+    return [
+      "Merhaba, DijiyeSor üzerinden yeni bir bilgi talebi oluşturdum.",
+      "",
+      "Konu: "+String(request.service||"Bilgi Talebi"),
+      "Bölge: "+place,
+      "Talep No: "+no,
+      "",
+      "Talep detayını kurum panelinizden görebilirsiniz."
+    ].join("\n");
+  }
+
+  async function matchingInstitutions(request,broadcast){
+    try{
+      const snap=await db.collection("institutions").get();
+      const rows=[];
+      snap.forEach(doc=>{
+        const d=doc.data()||{};
+        if(String(d.status||"active")==="passive" || d.offer===false)return;
+        const id=String(doc.id);
+        if(!broadcast){
+          if(id===String(request.targetInstitutionId||""))rows.push({id,...d});
+          return;
+        }
+        const sameCity=String(d.city||"").trim().toLocaleLowerCase("tr-TR")===String(request.city||"").trim().toLocaleLowerCase("tr-TR");
+        const sameSub=String(d.subCategory||d.category||"")===String(request.subCategory||request.category||"");
+        const sameMain=String(d.mainCategory||"")===String(request.mainCategory||"");
+        if(sameCity && (sameSub || sameMain))rows.push({id,...d});
+      });
+      return rows;
+    }catch(error){
+      console.warn("WhatsApp bildirimi için kurumlar okunamadı:",error);
+      return [];
+    }
+  }
+
+  async function renderWhatsappButtons(request,broadcast,quoteId){
+    const host=document.getElementById("bilgiWhatsapp");
+    if(!host)return;
+    const rows=(await matchingInstitutions(request,broadcast))
+      .filter(inst=>normalizeWa(inst.whatsapp||inst.phone));
+
+    if(!rows.length){
+      host.innerHTML='<div class="bilgi-wa-note">Kayıtlı firmalarda WhatsApp numarası bulunamadı. Panel bildirimi yine gönderildi.</div>';
+      host.classList.remove("hidden");
+      return;
+    }
+
+    host.innerHTML=
+      '<div class="bilgi-wa-title"><strong>WhatsApp ile de bildir</strong><span>Hazır mesajı tek tıkla aç.</span></div>'+
+      '<div class="bilgi-wa-list">'+
+      rows.slice(0,8).map(inst=>{
+        const phone=normalizeWa(inst.whatsapp||inst.phone);
+        const url="https://wa.me/"+phone+"?text="+encodeURIComponent(whatsappMessage(inst,request,quoteId));
+        return '<a class="bilgi-wa-btn" target="_blank" rel="noopener" href="'+esc(url)+'">WhatsApp · '+esc(inst.name||"Firma")+'</a>';
+      }).join("")+
+      '</div>';
+    host.classList.remove("hidden");
+  }
+
   function ensureModal(){
     if(document.getElementById("bilgiModal"))return;
     const wrap=document.createElement("div");
@@ -60,6 +131,7 @@
             </label>
 
             <div id="bilgiMessage" class="bilgi-message hidden"></div>
+            <div id="bilgiWhatsapp" class="bilgi-whatsapp hidden"></div>
             <button id="bilgiSubmit" type="submit">Talebi Gönder</button>
           </form>
         </div>
@@ -84,6 +156,8 @@
     document.getElementById("bilgiMessage").className="bilgi-message hidden";
     document.getElementById("bilgiMessage").textContent="";
     document.getElementById("bilgiBroadcast").checked=false;
+    const wa=document.getElementById("bilgiWhatsapp");
+    if(wa){wa.className="bilgi-whatsapp hidden";wa.innerHTML="";}
     document.getElementById("bilgiModal").hidden=false;
     document.body.classList.add("bilgi-modal-open");
     setTimeout(()=>document.getElementById("bilgiName")?.focus(),50);
@@ -148,10 +222,10 @@
       const ref=await db.collection("quoteRequests").add(request);
       msg.className="bilgi-message success";
       msg.innerHTML=broadcast
-        ? "<strong>Talebin gönderildi.</strong><br>Seçtiğin firma ve aynı sektördeki uygun diğer firmalar talebi görebilecek."
-        : "<strong>Talebin gönderildi.</strong><br>Sadece seçtiğin firmaya iletildi.";
+        ? "<strong>Talebin gönderildi.</strong><br>Seçtiğin firma ve aynı sektördeki uygun diğer firmalar panel bildirimi alacak."
+        : "<strong>Talebin gönderildi.</strong><br>Seçtiğin firma panel bildirimi alacak.";
+      await renderWhatsappButtons(request,broadcast,ref.id);
       e.target.reset();
-      setTimeout(closeModal,1800);
     }catch(err){
       console.error(err);
       msg.className="bilgi-message error";
