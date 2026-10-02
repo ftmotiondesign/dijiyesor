@@ -85,7 +85,7 @@ function renderAll(){
   $("statSponsors").textContent=sponsors.length;
   $("statCampaigns").textContent=campaigns.length;$("navCampaignCount").textContent=campaigns.length;
   $("statApplications").textContent=pending.length;$("navApplicationCount").textContent=pending.length;
-  $("navMemberCount").textContent=members.length;
+  $("navMemberCount").textContent=getMemberRows().length;
   renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();
 }
 function renderRecentApplications(){
@@ -351,7 +351,7 @@ async function createLegacyInstitutionAccount(applicationId){
 
     await legacyAccountRegistrationAuth.signOut();
 
-    await loadApplications();
+    await Promise.all([loadApplications(),loadMembers()]);
     renderAll();
 
     const refreshed=applications.find(x=>x.id===a.id);
@@ -434,56 +434,115 @@ $("qrClearFirm").addEventListener("click",()=>openQrForFirm(""));
 function memberStatusLabel(status){
   return ({approved:"Aktif",pending:"Bekleyen",rejected:"Reddedildi"})[String(status||"pending")]||String(status||"-");
 }
+function getMemberRows(){
+  const rows=[];
+  const seenApplicationIds=new Set();
+  const seenInstitutionIds=new Set();
+
+  members.forEach(m=>{
+    const app=applications.find(a=>
+      (a.authUid && a.authUid===m.id) ||
+      (a.approvedInstitutionId && a.approvedInstitutionId===m.institutionId)
+    );
+    if(app?.id)seenApplicationIds.add(app.id);
+    if(m.institutionId)seenInstitutionIds.add(m.institutionId);
+
+    rows.push({
+      source:"account",
+      id:m.id,
+      memberId:m.id,
+      applicationId:app?.id||"",
+      institutionId:m.institutionId||app?.approvedInstitutionId||"",
+      institutionName:m.institutionName||app?.name||"",
+      email:m.email||app?.accountEmail||"",
+      status:m.status||"pending",
+      date:m.date||app?.approvedAt||app?.date||"",
+      hasAccount:true
+    });
+  });
+
+  applications
+    .filter(a=>String(a.status||"")==="approved")
+    .forEach(a=>{
+      if(seenApplicationIds.has(a.id))return;
+      if(a.approvedInstitutionId && seenInstitutionIds.has(a.approvedInstitutionId))return;
+
+      rows.push({
+        source:"approved_application",
+        id:"app:"+a.id,
+        memberId:"",
+        applicationId:a.id,
+        institutionId:a.approvedInstitutionId||a.requestedInstitutionId||"",
+        institutionName:a.name||"",
+        email:a.accountEmail||"",
+        status:"approved",
+        date:a.approvedAt||a.date||"",
+        hasAccount:Boolean(a.authUid)
+      });
+    });
+
+  return rows.sort((a,b)=>String(a.institutionName||a.email||"").localeCompare(String(b.institutionName||b.email||""),"tr"));
+}
+
 function renderMembers(){
   const q=norm($("memberSearch")?.value||"");
   const status=$("memberStatus")?.value||"";
-  const list=members.filter(m=>{
+  const allRows=getMemberRows();
+
+  const list=allRows.filter(m=>{
     const firm=firms.find(f=>f.id===m.institutionId);
     const hay=[m.institutionName,m.email,firm?.name,firm?.city,firm?.district].join(" ");
     return (!q||norm(hay).includes(q))&&(!status||String(m.status||"pending")===status);
   });
 
-  $("memberStatTotal").textContent=members.length;
-  $("memberStatApproved").textContent=members.filter(m=>m.status==="approved").length;
-  $("memberStatPending").textContent=members.filter(m=>m.status==="pending").length;
+  $("memberStatTotal").textContent=allRows.length;
+  $("memberStatApproved").textContent=allRows.filter(m=>m.status==="approved").length;
+  $("memberStatPending").textContent=allRows.filter(m=>m.status==="pending").length;
+  $("navMemberCount").textContent=allRows.length;
 
   $("memberList").innerHTML=list.length?list.map(m=>{
     const firm=firms.find(f=>f.id===m.institutionId);
     const statusValue=String(m.status||"pending");
+    const accountBadge=m.hasAccount
+      ? '<span class="member-account-badge ready">Hesap Hazır</span>'
+      : '<span class="member-account-badge missing">Hesap Yok</span>';
+
     return '<article class="member-row">'+
       '<div class="member-avatar">'+esc(initials(m.institutionName||m.email))+'</div>'+
-      '<div class="member-main"><strong>'+esc(m.institutionName||firm?.name||"Kurum")+'</strong><small>'+esc(m.email||"E-posta yok")+'</small></div>'+
+      '<div class="member-main"><strong>'+esc(m.institutionName||firm?.name||"Kurum")+'</strong><small>'+esc(m.email||"E-posta yok")+'</small>'+accountBadge+'</div>'+
       '<div class="member-place">'+esc([firm?.city,firm?.district].filter(Boolean).join(" · ")||"Konum yok")+'</div>'+
       '<span class="member-status '+esc(statusValue)+'">'+esc(memberStatusLabel(statusValue))+'</span>'+
       '<div class="member-actions"><button data-member-detail="'+esc(m.id)+'">Detay</button>'+(firm?'<button data-edit-firm="'+esc(firm.id)+'">Firma</button>':'')+'</div>'+
     '</article>';
   }).join(""):'<div class="empty">Üye bulunamadı.</div>';
 }
-$("memberSearch")?.addEventListener("input",renderMembers);
-$("memberStatus")?.addEventListener("change",renderMembers);
-
 function openMemberDetail(id){
-  const m=members.find(x=>x.id===id);
+  const m=getMemberRows().find(x=>x.id===id);
   if(!m)return;
   const firm=firms.find(f=>f.id===m.institutionId);
+  const app=applications.find(a=>a.id===m.applicationId);
 
   $("memberDetailTitle").textContent=m.institutionName||firm?.name||"Üye Detayı";
   $("memberDetailBody").innerHTML=
     '<div class="member-detail-status '+esc(String(m.status||"pending"))+'"><span>HESAP DURUMU</span><strong>'+esc(memberStatusLabel(m.status))+'</strong></div>'+
+    (!m.hasAccount
+      ? '<div class="member-no-account"><span>! HESAP YOK</span><strong>Bu onaylı firma için kurum giriş hesabı bulunamadı.</strong><small>Başvurular bölümünden Detay açıp e-posta ve geçici şifre ile Kurum Hesabı Oluşturabilirsiniz.</small>'+(app?'<button type="button" class="primary" data-open-approved-app="'+esc(app.id)+'">Başvuruyu Aç ve Hesap Oluştur</button>':'')+'</div>'
+      : '<div class="member-account-ready">✓ Kurum giriş hesabı hazır</div>')+
     '<div class="member-detail-grid">'+
       detailRow("Firma",m.institutionName||firm?.name||"-")+
       detailRow("E-posta",m.email||"-")+
       detailRow("Kurum ID",m.institutionId||"-")+
-      detailRow("Kullanıcı UID",m.id||"-")+
-      detailRow("İl",firm?.city||"-")+
-      detailRow("İlçe",firm?.district||"-")+
-      detailRow("Telefon",firm?.phone||"-")+
+      detailRow("Kullanıcı UID",m.memberId||"-")+
+      detailRow("İl",firm?.city||app?.city||"-")+
+      detailRow("İlçe",firm?.district||app?.district||"-")+
+      detailRow("Telefon",firm?.phone||app?.phone||"-")+
       detailRow("Kayıt tarihi",formatApplicationDate(m.date))+
     '</div>';
 
   $("memberOpenFirm").dataset.firmId=firm?.id||"";
   $("memberOpenFirm").disabled=!firm;
   $("memberCopyLogin").dataset.loginUrl="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1";
+  $("memberCopyLogin").disabled=!m.hasAccount;
   $("memberDetailModal").classList.remove("hidden");
 }
 
@@ -505,6 +564,12 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const openApprovedApp=e.target.closest("[data-open-approved-app]");if(openApprovedApp){
+    $("memberDetailModal")?.classList.add("hidden");
+    setView("applications");
+    openApplicationDetail(openApprovedApp.dataset.openApprovedApp);
+    return;
+  }
   const memberDetail=e.target.closest("[data-member-detail]");if(memberDetail){openMemberDetail(memberDetail.dataset.memberDetail);return}
   const legacyCreate=e.target.closest("#createLegacyInstitutionAccount");if(legacyCreate){await createLegacyInstitutionAccount(legacyCreate.dataset.appId);return}
   const detailApp=e.target.closest("[data-detail-app]");if(detailApp)return openApplicationDetail(detailApp.dataset.detailApp);
