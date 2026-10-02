@@ -162,3 +162,26 @@ button{font:inherit}
   .contact-actions{grid-template-columns:1fr 1fr}
 }
 .hero-btn.info{background:#f4f6f9;color:#38506f;border:0;cursor:pointer}
+
+.tour-section{overflow:hidden}
+.profile-badge.tour{background:#eaf3ff;color:#1677ff}
+.tour-copy{margin:12px 0 14px;color:#657186;font-size:13px;line-height:1.6}
+.tour-preview{
+  width:100%;
+  aspect-ratio:16/8.5;
+  border-radius:14px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#eef4fb,#e3ebf5);
+  border:1px solid #e0e7f0;
+}
+.tour-preview iframe{width:100%;height:100%;border:0;display:block;background:#eef3f8}
+.tour-open-btn{
+  display:flex;align-items:center;justify-content:center;
+  margin-top:12px;height:44px;border-radius:11px;
+  background:#1677ff;color:#fff;font-size:13px;font-weight:900;
+}
+.tour-open-btn:hover{background:#0c6be5}
+@media(max-width:650px){
+  .tour-preview{aspect-ratio:4/3}
+  .tour-open-btn{height:42px}
+}
