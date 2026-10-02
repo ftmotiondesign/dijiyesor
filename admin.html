@@ -30,6 +30,7 @@
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="qr">QR / NFC Kartlar</button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
+      <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
       <button class="nav-item" data-view="media">360° & Medya</button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
     </nav>
@@ -166,6 +167,35 @@
       </section>
     </section>
 
+    <section class="view" data-panel-view="members">
+      <div class="member-admin-head">
+        <div>
+          <span>KURUM HESAPLARI</span>
+          <h2>Onaylanan ve kayıtlı üyeleri yönet.</h2>
+          <p>Başvuru onaylandıktan sonra kurum hesabı burada görünmeye devam eder.</p>
+        </div>
+      </div>
+
+      <div class="member-stat-grid">
+        <article><span>Toplam Üye</span><strong id="memberStatTotal">0</strong></article>
+        <article class="approved"><span>Aktif</span><strong id="memberStatApproved">0</strong></article>
+        <article class="pending"><span>Bekleyen</span><strong id="memberStatPending">0</strong></article>
+      </div>
+
+      <section class="card">
+        <div class="toolbar member-toolbar">
+          <div class="search-wrap"><input id="memberSearch" type="search" placeholder="Üye, firma veya e-posta ara..."></div>
+          <select id="memberStatus">
+            <option value="">Tüm üyeler</option>
+            <option value="approved">Aktif</option>
+            <option value="pending">Bekleyen</option>
+            <option value="rejected">Reddedilen</option>
+          </select>
+        </div>
+        <div id="memberList" class="member-list"></div>
+      </section>
+    </section>
+
     <section class="view" data-panel-view="media">
       <div class="media-intro">
         <span>360° & MEDYA</span><h2>Medya hizmeti fırsatlarını gör.</h2>
@@ -225,6 +255,21 @@
       <div id="firmFormMessage" class="message hidden"></div>
       <div class="modal-actions"><button type="button" class="secondary" data-close="firmModal">Vazgeç</button><button type="submit" class="primary">Kaydet</button></div>
     </form>
+  </div>
+</div>
+
+<div id="memberDetailModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div><span>KURUM ÜYELİĞİ</span><h2 id="memberDetailTitle">Üye Detayı</h2></div>
+      <button class="modal-close" data-close="memberDetailModal">×</button>
+    </div>
+    <div id="memberDetailBody" class="member-detail-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="memberCopyLogin">Giriş Linkini Kopyala</button>
+      <button type="button" class="primary" id="memberOpenFirm">Firma Profilini Aç</button>
+      <button type="button" class="secondary" data-close="memberDetailModal">Kapat</button>
+    </div>
   </div>
 </div>
 
