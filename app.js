@@ -87,7 +87,7 @@ function render(data){
       '<p class="result-desc">'+esc(desc)+'</p>'+
       '<div class="result-actions">'+
         '<a class="result-primary" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a>'+
-        '<a class="result-secondary" href="bilgi-al.html?mainCategory='+encodeURIComponent(i.mainCategory||'')+'&subCategory='+encodeURIComponent(i.subCategory||i.category||'')+'&city='+encodeURIComponent(i.city||'')+'&district='+encodeURIComponent(i.district||'')+'&firma='+encodeURIComponent(i.name||'')+'">Bilgi Al</a>'+
+        '<button type="button" class="result-secondary bilgi-al-open" data-bilgi-al data-institution-id="'+esc(i.id)+'" data-institution-name="'+esc(i.name||'')+'" data-main-category="'+esc(i.mainCategory||'')+'" data-sub-category="'+esc(i.subCategory||i.category||'')+'" data-city="'+esc(i.city||'')+'" data-district="'+esc(i.district||'')+'">Bilgi Al</button>'+
       '</div>'+
     '</article>';
   }).join("");
