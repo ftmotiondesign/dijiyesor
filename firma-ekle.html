@@ -1,27 +1,344 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Firmanı Ekle | DijiyeSor</title><link rel="stylesheet" href="styles.css"></head>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Firmanı Tanıt | DijiyeSor</title>
+  <meta name="description" content="Firmanı DijiyeSor'a ekle, müşteriler seni bulsun. Fotoğraf, video, 360° tur ve VIP profil seçenekleriyle öne çık.">
+  <link rel="stylesheet" href="firma-ekle.css">
+</head>
 <body>
-<header class="topbar"><div class="container"><a class="brand" href="index.html"><span class="brand-mark">D</span><span class="brand-name">DijiyeSor</span></a><nav class="nav"><a class="btn btn-soft" href="index.html">Firma Ara</a></nav></div></header>
-<section class="page-hero"><div class="container"><div class="eyebrow">DİJİYESOR · FİRMA BAŞVURUSU</div><h1 style="margin:10px 0 8px">Firmanı DijiyeSor’a ekle</h1><p style="color:#6d7890;margin:0">Temel bilgileri gönder. Başvurun incelendikten sonra firma profili yayına alınabilir.</p></div></section>
-<main class="container" style="padding:30px 0 52px"><section class="panel" style="max-width:820px;margin:auto">
-<div id="message" class="notice hidden"></div>
-<form id="form" class="form">
-<div class="form-grid"><label class="label">Firma adı<input id="name" class="field" required></label><label class="label">Sektör<select id="mainCategory" class="field" required><option value="">Seçin</option><option value="egitim">Eğitim</option><option value="otomotiv">Otomotiv</option><option value="yemeicme">Yeme & İçme</option><option value="saglikguzellik">Sağlık & Güzellik</option><option value="evyapi">Ev & Yapı</option><option value="emlak">Emlak</option><option value="turizm">Turizm</option><option value="organizasyonmedya">Organizasyon & Medya</option><option value="tasimacilik">Taşımacılık</option><option value="profesyonel">Profesyonel Hizmetler</option><option value="alisveris">Yerel Esnaf</option><option value="diger">Diğer</option></select></label></div>
-<div class="form-grid"><label class="label">Alt kategori<select id="subCategory" class="field" required disabled><option value="">Önce sektör seçin</option></select></label><label class="label">İl<select id="city" class="field" required><option value="">İl seçin</option></select></label><label class="label">İlçe<select id="district" class="field" required disabled><option value="">Önce il seçin</option></select></label></div>
-<label class="label">Adres<input id="address" class="field" required></label>
-<div class="form-grid"><label class="label">Telefon<input id="phone" class="field" required placeholder="05xx xxx xx xx"></label><label class="label">Web sitesi<input id="website" class="field" placeholder="https://..."></label></div>
-<label class="label">Kısa açıklama<textarea id="description" class="field" placeholder="Firmanızı ve verdiğiniz hizmetleri kısaca anlatın."></textarea></label>
-<button class="btn btn-primary" type="submit">Başvuruyu Gönder</button>
-</form></section></main>
-<footer class="footer"><div class="container">© 2026 DijiyeSor</div></footer>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="index.html"><span class="brand-mark">D</span><span>DijiyeSor</span></a>
+    <a class="top-link" href="index.html">Firma Ara</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">DİJİYESOR · FİRMA PROFİLİ</span>
+        <h1>Firmanı DijiyeSor’da göster, müşteriler seni bulsun.</h1>
+        <p>Firma profilini oluştur, iletişim bilgilerini yayınla, fotoğraf ve videolarını ekle, bilgi talepleri al. 360° mekan turu ve VIP profil ile daha güçlü görün.</p>
+        <div class="hero-actions">
+          <a href="#basvuru" class="primary">Firmanı Ekle</a>
+          <a href="#paketler" class="secondary">Paketleri İncele</a>
+        </div>
+        <div class="hero-points">
+          <span>✓ Aramalarda görün</span>
+          <span>✓ Bilgi talepleri al</span>
+          <span>✓ Fotoğraf & video ekle</span>
+          <span>✓ 360° turla öne çık</span>
+        </div>
+      </div>
+
+      <div class="profile-preview">
+        <div class="preview-top">
+          <div class="preview-logo">D</div>
+          <div>
+            <strong>Örnek Firma</strong>
+            <small>Çanakkale · Merkez</small>
+          </div>
+          <span class="vip">VIP</span>
+        </div>
+        <div class="preview-cover"></div>
+        <div class="preview-content">
+          <div class="preview-row"><span>📷 Fotoğraflar</span><span>🎬 Video</span></div>
+          <div class="preview-row"><span>360° Mekan Turu</span><span>Bilgi Al</span></div>
+          <button type="button">Firmayı İncele</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits">
+    <div class="container">
+      <div class="section-head">
+        <span>NELER KAZANIRSIN?</span>
+        <h2>Sadece listelenme değil, gerçek bir firma vitrini.</h2>
+      </div>
+      <div class="benefit-grid">
+        <article><div class="icon">⌕</div><h3>Aramalarda Görün</h3><p>İl, ilçe, sektör, alt kategori ve anahtar kelimelerle müşterilerin seni bulsun.</p></article>
+        <article><div class="icon">✉</div><h3>Bilgi Talebi Al</h3><p>Müşteriler profilinden doğrudan bilgi talebi gönderebilsin.</p></article>
+        <article><div class="icon">▧</div><h3>Fotoğraf & Video</h3><p>Mekanını, hizmetlerini ve çalışmalarını görsellerle daha güçlü anlat.</p></article>
+        <article><div class="icon">360°</div><h3>360° Mekan Turu</h3><p>Müşteriler gelmeden önce mekanını sanal olarak gezebilsin.</p></article>
+        <article><div class="icon">↗</div><h3>İletişim Butonları</h3><p>Telefon, WhatsApp, web sitesi ve Instagram tek profilde toplansın.</p></article>
+        <article><div class="icon">★</div><h3>VIP Görünürlük</h3><p>VIP rozeti ve gelişmiş profil alanlarıyla daha dikkat çekici görün.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="packages" id="paketler">
+    <div class="container">
+      <div class="section-head">
+        <span>PROFİL SEÇENEKLERİ</span>
+        <h2>İhtiyacına göre profilini geliştir.</h2>
+        <p>Başvuru ücretsiz alınır. Gelişmiş medya ve tanıtım seçenekleri sonradan eklenebilir.</p>
+      </div>
+      <div class="package-grid">
+        <article class="package-card">
+          <span class="package-tag">STANDART</span>
+          <h3>Firma Profili</h3>
+          <ul>
+            <li>Firma adı ve açıklama</li>
+            <li>Adres ve iletişim bilgileri</li>
+            <li>Arama sonuçlarında görünme</li>
+            <li>Bilgi Al talepleri</li>
+          </ul>
+          <a href="#basvuru">Başvuru Yap</a>
+        </article>
+
+        <article class="package-card">
+          <span class="package-tag">PROFESYONEL</span>
+          <h3>Görsel Profil</h3>
+          <ul>
+            <li>Standart profil özellikleri</li>
+            <li>Fotoğraf galerisi</li>
+            <li>Tanıtım videosu</li>
+            <li>Daha güçlü firma vitrini</li>
+          </ul>
+          <a href="#basvuru">Başvuru Yap</a>
+        </article>
+
+        <article class="package-card featured">
+          <div class="recommended">ÖNE ÇIKAN</div>
+          <span class="package-tag">VIP</span>
+          <h3>360° & VIP Profil</h3>
+          <ul>
+            <li>Profesyonel profil özellikleri</li>
+            <li>360° mekan turu</li>
+            <li>VIP rozeti</li>
+            <li>Öne çıkan profil alanları</li>
+          </ul>
+          <a href="#basvuru">VIP Başvurusu</a>
+        </article>
+      </div>
+      <div class="service-note">
+        <div>
+          <strong>360° mekan turu veya profesyonel mekan fotoğrafı mı istiyorsun?</strong>
+          <p>Başvuruda bu hizmetlerle ilgilendiğini belirt; ekip seninle iletişime geçsin.</p>
+        </div>
+        <a href="#basvuru">İlgileniyorum</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="application" id="basvuru">
+    <div class="container application-grid">
+      <aside class="application-side">
+        <span class="eyebrow">FİRMA BAŞVURUSU</span>
+        <h2>Firmanı eklemek birkaç dakika sürer.</h2>
+        <p>Temel bilgileri gönder. Başvurun incelendikten sonra firma profilin yayına alınabilir.</p>
+        <div class="steps">
+          <div><b>1</b><span><strong>Bilgilerini gönder</strong><small>Firma ve iletişim bilgilerini doldur.</small></span></div>
+          <div><b>2</b><span><strong>Başvurun incelensin</strong><small>Kayıt kontrol edilip onaylansın.</small></span></div>
+          <div><b>3</b><span><strong>Profilini geliştir</strong><small>Fotoğraf, video, 360° tur ve VIP seçeneklerini ekle.</small></span></div>
+        </div>
+      </aside>
+
+      <section class="form-card">
+        <div id="message" class="notice hidden"></div>
+        <form id="form">
+          <div class="form-grid two">
+            <label>Firma adı<input id="name" required placeholder="Firma veya kurum adı"></label>
+            <label>Sektör
+              <select id="mainCategory" required>
+                <option value="">Sektör seçin</option>
+                <option value="egitim">Eğitim</option>
+                <option value="otomotiv">Otomotiv</option>
+                <option value="yemeicme">Yeme & İçme</option>
+                <option value="saglikguzellik">Sağlık & Güzellik</option>
+                <option value="evyapi">Ev & Yapı</option>
+                <option value="emlak">Emlak</option>
+                <option value="turizm">Turizm & Konaklama</option>
+                <option value="organizasyonmedya">Organizasyon & Medya</option>
+                <option value="tasimacilik">Taşımacılık & Teslimat</option>
+                <option value="profesyonel">Profesyonel Hizmetler</option>
+                <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+                <option value="diger">Diğer</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-grid two">
+            <label>Alt kategori
+              <select id="subCategory" required disabled><option value="">Önce sektör seçin</option></select>
+            </label>
+            <label>İl
+              <select id="city" required><option value="">İl seçin</option></select>
+            </label>
+          </div>
+
+          <div class="form-grid two">
+            <label>İlçe
+              <select id="district" required disabled><option value="">Önce il seçin</option></select>
+            </label>
+            <label>Telefon<input id="phone" required placeholder="05xx xxx xx xx"></label>
+          </div>
+
+          <label>Adres<input id="address" required placeholder="Açık adres"></label>
+
+          <div class="form-grid two">
+            <label>WhatsApp<input id="whatsapp" placeholder="05xx xxx xx xx"></label>
+            <label>Web sitesi<input id="website" placeholder="https://..."></label>
+          </div>
+
+          <label>Instagram<input id="instagram" placeholder="@kullaniciadi veya profil bağlantısı"></label>
+          <label>Kısa açıklama<textarea id="description" rows="4" placeholder="Firmanızı ve sunduğunuz hizmetleri kısaca anlatın."></textarea></label>
+
+          <div class="interest-box">
+            <strong>Ek tanıtım hizmetleri</strong>
+            <p>İstersen başvurunla birlikte bu hizmetlerden hangileriyle ilgilendiğini belirt.</p>
+            <label class="check"><input id="wantPhoto" type="checkbox"><span>Profesyonel mekan fotoğrafı</span></label>
+            <label class="check"><input id="wantVideo" type="checkbox"><span>Tanıtım videosu</span></label>
+            <label class="check"><input id="want360" type="checkbox"><span>360° mekan turu</span></label>
+            <label class="check"><input id="wantVip" type="checkbox"><span>VIP / öne çıkan profil</span></label>
+          </div>
+
+          <label class="consent">
+            <input id="consent" type="checkbox" required>
+            <span>Verdiğim firma bilgilerinin DijiyeSor üzerinde yayınlanmak üzere incelenmesini kabul ediyorum.</span>
+          </label>
+
+          <button id="submitBtn" type="submit">Başvuruyu Gönder</button>
+          <small class="form-note">Başvuru göndermek, ücretli paket satın alma zorunluluğu oluşturmaz.</small>
+        </form>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">© 2026 DijiyeSor</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};firebase.initializeApp(firebaseConfig);const db=firebase.firestore();
-const city=document.getElementById("city"),district=document.getElementById("district"),msg=document.getElementById("message"),mainCategory=document.getElementById("mainCategory"),subCategory=document.getElementById("subCategory");
-const subcategoryOptions={"egitim":[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],"otomotiv":[["oto_servis","Oto Servis"],["kaporta_boya","Kaporta & Boya"],["oto_elektrik","Oto Elektrik"],["lastik_jant","Lastik & Jant"],["oto_yikama","Oto Yıkama"],["ekspertiz","Ekspertiz"],["galeri","Oto Galeri"],["rentacar","Rent a Car"],["yedek_parca","Yedek Parça"],["motosiklet","Motosiklet"]],"yemeicme":[["restoran","Restoran"],["kafe","Kafe"],["fastfood","Fast Food"],["pastane","Pastane"],["pizza","Pizza"],["doner","Döner"],["pide_lahmacun","Pide & Lahmacun"],["catering","Catering"],["ev_yemekleri","Ev Yemekleri"]],"saglikguzellik":[["dis_klinigi","Diş Kliniği"],["klinik","Klinik"],["psikolog","Psikolog"],["diyetisyen","Diyetisyen"],["fizyoterapi","Fizyoterapi"],["guzellik","Güzellik Merkezi"],["kuafor","Kuaför"],["berber","Berber"],["spor","Spor Merkezi"]],"evyapi":[["mobilya","Mobilya"],["dekorasyon","Dekorasyon"],["insaat","İnşaat"],["elektrikci","Elektrikçi"],["tesisatci","Tesisatçı"],["teknik_servis","Teknik Servis"],["klima","Klima"],["cam_balkon","Cam Balkon"],["temizlik","Temizlik"]],"emlak":[["emlak_ofisi","Emlak Ofisi"],["konut","Konut"],["arsa","Arsa"],["ticari","Ticari Gayrimenkul"],["gunluk_kiralik","Günlük Kiralık"]],"turizm":[["otel","Otel"],["pansiyon","Pansiyon"],["apart","Apart"],["bungalov","Bungalov"],["seyahat","Seyahat Acentesi"],["kamp","Kamp"]],"organizasyonmedya":[["dugun_salonu","Düğün Salonu"],["organizasyon","Organizasyon"],["fotograf","Fotoğrafçı"],["video","Video Prodüksiyon"],["drone","Drone Çekimi"],["gelinlik","Gelinlik"],["cicekci","Çiçekçi"],["reklam","Reklam Ajansı"]],"tasimacilik":[["nakliyat","Nakliyat"],["kurye","Kurye"],["sehirici","Şehir İçi Taşımacılık"],["depolama","Depolama"]],"profesyonel":[["hukuk","Hukuk"],["muhasebe","Muhasebe"],["web","Web Tasarım"],["sosyal_medya","Sosyal Medya"],["teknoloji","Teknoloji"],["bilgisayar","Bilgisayar"],["danismanlik","Danışmanlık"],["veteriner","Veteriner"],["tarim","Tarım"]],"alisveris":[["giyim","Giyim"],["ayakkabi","Ayakkabı"],["market","Market"],["elektronik","Elektronik"],["kirtasiye","Kırtasiye"],["petshop","Pet Shop"],["zuccaciye","Züccaciye"],["esnaf","Yerel Esnaf"]],"diger":[["diger","Diğer"]]};
-function fillSubCategory(){const list=subcategoryOptions[mainCategory.value]||[];subCategory.innerHTML='<option value="">Alt kategori seçin</option>';list.forEach(([value,label])=>{const o=document.createElement("option");o.value=value;o.textContent=label;subCategory.appendChild(o)});subCategory.disabled=!mainCategory.value}
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
+const city=document.getElementById("city");
+const district=document.getElementById("district");
+const msg=document.getElementById("message");
+const mainCategory=document.getElementById("mainCategory");
+const subCategory=document.getElementById("subCategory");
+
+const subcategoryOptions={
+"egitim":[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],
+"otomotiv":[["oto_servis","Oto Servis"],["kaporta_boya","Kaporta & Boya"],["oto_elektrik","Oto Elektrik"],["lastik_jant","Lastik & Jant"],["oto_yikama","Oto Yıkama"],["ekspertiz","Ekspertiz"],["galeri","Oto Galeri"],["rentacar","Rent a Car"],["yedek_parca","Yedek Parça"],["motosiklet","Motosiklet"]],
+"yemeicme":[["restoran","Restoran"],["kafe","Kafe"],["fastfood","Fast Food"],["pastane","Pastane"],["pizza","Pizza"],["doner","Döner"],["pide_lahmacun","Pide & Lahmacun"],["catering","Catering"],["ev_yemekleri","Ev Yemekleri"]],
+"saglikguzellik":[["dis_klinigi","Diş Kliniği"],["klinik","Klinik"],["psikolog","Psikolog"],["diyetisyen","Diyetisyen"],["fizyoterapi","Fizyoterapi"],["guzellik","Güzellik Merkezi"],["kuafor","Kuaför"],["berber","Berber"],["spor","Spor Merkezi"]],
+"evyapi":[["mobilya","Mobilya"],["dekorasyon","Dekorasyon"],["insaat","İnşaat"],["elektrikci","Elektrikçi"],["tesisatci","Tesisatçı"],["teknik_servis","Teknik Servis"],["klima","Klima"],["cam_balkon","Cam Balkon"],["temizlik","Temizlik"]],
+"emlak":[["emlak_ofisi","Emlak Ofisi"],["konut","Konut"],["arsa","Arsa"],["ticari","Ticari Gayrimenkul"],["gunluk_kiralik","Günlük Kiralık"]],
+"turizm":[["otel","Otel"],["pansiyon","Pansiyon"],["apart","Apart"],["bungalov","Bungalov"],["seyahat","Seyahat Acentesi"],["kamp","Kamp"]],
+"organizasyonmedya":[["dugun_salonu","Düğün Salonu"],["organizasyon","Organizasyon"],["fotograf","Fotoğrafçı"],["video","Video Prodüksiyon"],["drone","Drone Çekimi"],["gelinlik","Gelinlik"],["cicekci","Çiçekçi"],["reklam","Reklam Ajansı"]],
+"tasimacilik":[["nakliyat","Nakliyat"],["kurye","Kurye"],["sehirici","Şehir İçi Taşımacılık"],["depolama","Depolama"]],
+"profesyonel":[["hukuk","Hukuk"],["muhasebe","Muhasebe"],["web","Web Tasarım"],["sosyal_medya","Sosyal Medya"],["teknoloji","Teknoloji"],["bilgisayar","Bilgisayar"],["danismanlik","Danışmanlık"],["veteriner","Veteriner"],["tarim","Tarım"]],
+"alisveris":[["giyim","Giyim"],["ayakkabi","Ayakkabı"],["market","Market"],["elektronik","Elektronik"],["kirtasiye","Kırtasiye"],["petshop","Pet Shop"],["zuccaciye","Züccaciye"],["esnaf","Yerel Esnaf"]],
+"diger":[["diger","Diğer"]]
+};
+
+function fillSubCategory(){
+  const list=subcategoryOptions[mainCategory.value]||[];
+  subCategory.innerHTML='<option value="">Alt kategori seçin</option>';
+  list.forEach(([value,label])=>{
+    const o=document.createElement("option");
+    o.value=value;o.textContent=label;subCategory.appendChild(o);
+  });
+  subCategory.disabled=!mainCategory.value;
+}
 mainCategory.addEventListener("change",fillSubCategory);
-(async()=>{try{const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");const j=await r.json();city.innerHTML='<option value="">İl seçin</option>';j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{const o=document.createElement("option");o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;city.appendChild(o)})}catch(_){}})();
-city.addEventListener("change",async()=>{district.disabled=true;district.innerHTML='<option>İlçeler yükleniyor...</option>';const id=city.options[city.selectedIndex]?.dataset?.id;if(!id){district.innerHTML='<option value="">Önce il seçin</option>';return}try{const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");const j=await r.json();district.innerHTML='<option value="">İlçe seçin</option>';j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{const o=document.createElement("option");o.value=d.name;o.textContent=d.name;district.appendChild(o)});district.disabled=false}catch(_){district.innerHTML='<option value="">İlçeler alınamadı</option>'}});
-document.getElementById("form").addEventListener("submit",async e=>{e.preventDefault();const btn=e.submitter;btn.disabled=true;msg.className="notice";msg.textContent="Başvuru gönderiliyor...";try{await db.collection("institutionApplications").add({name:document.getElementById("name").value.trim(),mainCategory:mainCategory.value,subCategory:subCategory.value,category:subCategory.value||mainCategory.value,city:city.value,district:district.value,address:document.getElementById("address").value.trim(),phone:document.getElementById("phone").value.trim(),website:document.getElementById("website").value.trim(),description:document.getElementById("description").value.trim(),date:new Date().toISOString(),source:"dijiyesor-site"});msg.className="notice success";msg.textContent="Başvurunuz alındı. Teşekkür ederiz.";e.target.reset();subCategory.disabled=true;subCategory.innerHTML='<option value="">Önce sektör seçin</option>';district.disabled=true;district.innerHTML='<option value="">Önce il seçin</option>'}catch(err){console.error(err);msg.className="notice error";msg.textContent="Başvuru gönderilemedi. Lütfen daha sonra tekrar deneyin."}finally{btn.disabled=false}});
-</script></body></html>
+
+(async()=>{
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+    const j=await r.json();
+    city.innerHTML='<option value="">İl seçin</option>';
+    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;city.appendChild(o);
+    });
+  }catch(_){}
+})();
+
+city.addEventListener("change",async()=>{
+  district.disabled=true;
+  district.innerHTML='<option>İlçeler yükleniyor...</option>';
+  const id=city.options[city.selectedIndex]?.dataset?.id;
+  if(!id){district.innerHTML='<option value="">Önce il seçin</option>';return}
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");
+    const j=await r.json();
+    district.innerHTML='<option value="">İlçe seçin</option>';
+    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{
+      const o=document.createElement("option");
+      o.value=d.name;o.textContent=d.name;district.appendChild(o);
+    });
+    district.disabled=false;
+  }catch(_){
+    district.innerHTML='<option value="">İlçeler alınamadı</option>';
+  }
+});
+
+document.getElementById("form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=document.getElementById("submitBtn");
+  btn.disabled=true;
+  btn.textContent="Gönderiliyor...";
+  msg.className="notice";
+  msg.textContent="Başvurunuz gönderiliyor...";
+
+  try{
+    const interests=[];
+    if(document.getElementById("wantPhoto").checked)interests.push("mekan_fotografi");
+    if(document.getElementById("wantVideo").checked)interests.push("tanitim_videosu");
+    if(document.getElementById("want360").checked)interests.push("360_mekan_turu");
+    if(document.getElementById("wantVip").checked)interests.push("vip_profil");
+
+    await db.collection("institutionApplications").add({
+      name:document.getElementById("name").value.trim(),
+      mainCategory:mainCategory.value,
+      subCategory:subCategory.value,
+      category:subCategory.value||mainCategory.value,
+      city:city.value,
+      district:district.value,
+      address:document.getElementById("address").value.trim(),
+      phone:document.getElementById("phone").value.trim(),
+      whatsapp:document.getElementById("whatsapp").value.trim(),
+      website:document.getElementById("website").value.trim(),
+      instagram:document.getElementById("instagram").value.trim(),
+      description:document.getElementById("description").value.trim(),
+      promotionInterests:interests,
+      wantsPhoto:interests.includes("mekan_fotografi"),
+      wantsVideo:interests.includes("tanitim_videosu"),
+      wants360Tour:interests.includes("360_mekan_turu"),
+      wantsVip:interests.includes("vip_profil"),
+      status:"new",
+      date:new Date().toISOString(),
+      source:"dijiyesor-firma-tanit"
+    });
+
+    msg.className="notice success";
+    msg.innerHTML="<strong>Başvurunuz alındı.</strong><br>Başvurunuz incelendikten sonra firma profiliniz için sizinle iletişime geçilebilir.";
+    e.target.reset();
+    subCategory.disabled=true;
+    subCategory.innerHTML='<option value="">Önce sektör seçin</option>';
+    district.disabled=true;
+    district.innerHTML='<option value="">Önce il seçin</option>';
+    msg.scrollIntoView({behavior:"smooth",block:"center"});
+  }catch(err){
+    console.error(err);
+    msg.className="notice error";
+    msg.textContent="Başvuru gönderilemedi. Lütfen daha sonra tekrar deneyin.";
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Başvuruyu Gönder";
+  }
+});
+</script>
+</body>
+</html>
