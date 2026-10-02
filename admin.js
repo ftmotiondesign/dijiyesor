@@ -339,9 +339,18 @@ async function createLegacyInstitutionAccount(applicationId){
       email,
       institutionId:pendingInstitutionId,
       institutionName:a.name||"Firma",
-      status:a.approvedInstitutionId?"approved":"pending",
+      status:"pending",
       date:a.date||new Date().toISOString()
     });
+
+    if(String(a.status||"")==="approved" || a.approvedInstitutionId){
+      await db.collection("institutionUsers").doc(createdUser.uid).set({
+        institutionId:pendingInstitutionId,
+        institutionName:a.name||"Firma",
+        status:"approved",
+        approvedAt:new Date().toISOString()
+      },{merge:true});
+    }
 
     await db.collection("institutionApplications").doc(a.id).set({
       authUid:createdUser.uid,
@@ -526,7 +535,7 @@ function openMemberDetail(id){
   $("memberDetailBody").innerHTML=
     '<div class="member-detail-status '+esc(String(m.status||"pending"))+'"><span>HESAP DURUMU</span><strong>'+esc(memberStatusLabel(m.status))+'</strong></div>'+
     (!m.hasAccount
-      ? '<div class="member-no-account"><span>! HESAP YOK</span><strong>Bu onaylı firma için kurum giriş hesabı bulunamadı.</strong><small>Başvurular bölümünden Detay açıp e-posta ve geçici şifre ile Kurum Hesabı Oluşturabilirsiniz.</small>'+(app?'<button type="button" class="primary" data-open-approved-app="'+esc(app.id)+'">Başvuruyu Aç ve Hesap Oluştur</button>':'')+'</div>'
+      ? '<div class="member-no-account"><span>! HESAP YOK</span><strong>Bu onaylı firma için kurum giriş hesabı bulunamadı.</strong><small>E-posta ve geçici şifre girerek hesabı burada oluşturabilirsiniz.</small>'+(app?'<div class="member-create-account-form"><label>E-posta<input id="memberCreateEmail" type="email" placeholder="ornek@firma.com"></label><label>Geçici şifre<input id="memberCreatePassword" type="text" minlength="8" placeholder="En az 8 karakter"></label><button type="button" class="primary" data-create-member-account="'+esc(app.id)+'">Kurum Hesabı Oluştur</button></div><div id="memberCreateAccountMessage" class="message"></div>':'<div class="message error">Bu üyeye bağlı başvuru kaydı bulunamadı.</div>')+'</div>'
       : '<div class="member-account-ready">✓ Kurum giriş hesabı hazır</div>')+
     '<div class="member-detail-grid">'+
       detailRow("Firma",m.institutionName||firm?.name||"-")+
@@ -564,6 +573,49 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const createMemberAccount=e.target.closest("[data-create-member-account]");if(createMemberAccount){
+    const appId=createMemberAccount.dataset.createMemberAccount;
+    const email=String($("memberCreateEmail")?.value||"").trim();
+    const password=String($("memberCreatePassword")?.value||"");
+    const msg=$("memberCreateAccountMessage");
+    const app=applications.find(a=>a.id===appId);
+    if(!app)return;
+
+    if(!email){
+      if(msg){msg.className="message error";msg.textContent="E-posta adresini yazın."}
+      return;
+    }
+    if(password.length<8){
+      if(msg){msg.className="message error";msg.textContent="Geçici şifre en az 8 karakter olmalı."}
+      return;
+    }
+
+    createMemberAccount.disabled=true;
+    createMemberAccount.textContent="Hesap oluşturuluyor...";
+    if(msg){msg.className="message";msg.textContent="Kurum hesabı hazırlanıyor..."}
+
+    const hiddenEmail=document.createElement("input");
+    const hiddenPassword=document.createElement("input");
+    hiddenEmail.id="legacyAccountEmail";hiddenEmail.value=email;hiddenEmail.type="hidden";
+    hiddenPassword.id="legacyAccountPassword";hiddenPassword.value=password;hiddenPassword.type="hidden";
+    document.body.appendChild(hiddenEmail);document.body.appendChild(hiddenPassword);
+
+    try{
+      await createLegacyInstitutionAccount(appId);
+      await Promise.all([loadApplications(),loadMembers(),loadFirms()]);
+      renderAll();
+      $("memberDetailModal")?.classList.add("hidden");
+      const row=getMemberRows().find(x=>x.applicationId===appId);
+      if(row)openMemberDetail(row.id);
+    }finally{
+      hiddenEmail.remove();hiddenPassword.remove();
+      if(createMemberAccount){
+        createMemberAccount.disabled=false;
+        createMemberAccount.textContent="Kurum Hesabı Oluştur";
+      }
+    }
+    return;
+  }
   const openApprovedApp=e.target.closest("[data-open-approved-app]");if(openApprovedApp){
     $("memberDetailModal")?.classList.add("hidden");
     setView("applications");
