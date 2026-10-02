@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DijiyeSor | Firma Ara, İncele, Bilgi Al</title>
+<meta name="description" content="DijiyeSor ile Türkiye genelindeki firmaları şehir, ilçe, sektör ve hizmete göre ara.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar"><div class="container">
+  <a class="brand" href="index.html"><span class="brand-mark">D</span><span class="brand-name">DijiyeSor</span></a>
+  <nav class="nav"><a class="btn btn-soft" href="#firmalar">Firmalar</a><a class="btn btn-primary" href="firma-ekle.html">Firmanı Ekle</a></nav>
+</div></header>
+
+<section class="hero"><div class="container"><div class="hero-copy">
+  <div class="eyebrow">DİJİYESOR · FİRMA ARAMA</div>
+  <h1>Aradığın firmayı kolayca bul.</h1>
+  <p>Firma adı, sektör veya hizmete göre ara. İl ve ilçe seçerek bulunduğun bölgedeki işletmeleri görüntüle ve firma tanıtım sayfalarını incele.</p>
+  <div class="search-box">
+    <div class="search-grid">
+      <input id="searchInput" class="field search-main" type="search" autocomplete="off" placeholder="Firma, sektör veya hizmet ara...">
+      <select id="citySelect" class="field"><option value="">Tüm İller</option></select>
+      <select id="districtSelect" class="field" disabled><option value="">Tüm İlçeler</option></select>
+      <select id="sectorSelect" class="field">
+        <option value="">Tüm Sektörler</option><option value="egitim">Eğitim</option><option value="otomotiv">Otomotiv</option>
+        <option value="yemeicme">Yeme & İçme</option><option value="saglikguzellik">Sağlık & Güzellik</option>
+        <option value="evyapi">Ev & Yapı</option><option value="emlak">Emlak</option><option value="turizm">Turizm & Konaklama</option>
+        <option value="organizasyonmedya">Organizasyon & Medya</option><option value="tasimacilik">Taşımacılık & Teslimat</option>
+        <option value="profesyonel">Profesyonel Hizmetler</option><option value="alisveris">Alışveriş & Yerel Esnaf</option><option value="diger">Diğer</option>
+      </select>
+      <button id="searchBtn" class="search-btn">Firma Ara</button>
+    </div>
+    <div class="search-note"><span>✓ 81 il</span><span>✓ İlçe filtreleme</span><span>✓ DijiyeSor firma profilleri</span></div>
+  </div>
+</div></div></section>
+
+<main id="firmalar" class="section"><div class="container">
+  <div class="section-head"><div><h2>Firmaları keşfet</h2><p>Kayıtlı işletmeleri filtreleyerek görüntüle.</p></div>
+    <div class="chips"><button class="chip active" data-sector="">Tümü</button><button class="chip" data-sector="egitim">Eğitim</button><button class="chip" data-sector="otomotiv">Otomotiv</button><button class="chip" data-sector="yemeicme">Yeme & İçme</button><button class="chip" data-sector="evyapi">Ev & Yapı</button></div>
+  </div>
+  <div id="resultSummary" class="summary">Firmalar yükleniyor...</div>
+  <div id="companyGrid" class="grid"><div class="state"><strong>Firmalar yükleniyor</strong>Lütfen kısa bir süre bekleyin.</div></div>
+</div></main>
+
+<section class="promo"><div class="container"><div class="promo-box">
+  <div><h2>Firman DijiyeSor’da yer alsın.</h2><p>Firma profilini oluştur; konumunu, hizmetlerini ve iletişim bilgilerini tek sayfada göster.</p></div>
+  <a class="btn btn-white" href="firma-ekle.html">Firma Ekle</a>
+</div></div></section>
+
+<footer class="footer"><div class="container">© 2026 DijiyeSor · Firma Arama ve Tanıtım</div></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="app.js"></script>
+</body></html>
