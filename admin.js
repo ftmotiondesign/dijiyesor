@@ -2,6 +2,9 @@ const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomai
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
+const legacyAccountRegistrationApp=firebase.apps.find(a=>a.name==="legacyInstitutionRegistration")||firebase.initializeApp(firebaseConfig,"legacyInstitutionRegistration");
+const legacyAccountRegistrationAuth=legacyAccountRegistrationApp.auth();
+const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
 const ADMIN_EMAIL="ftmotiondesign@gmail.com";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
@@ -204,6 +207,21 @@ function detailRow(label,value){
   return '<div class="application-detail-row"><span>'+esc(label)+'</span><strong>'+esc(value||"-")+'</strong></div>';
 }
 
+function legacyAccountCreateHtml(a){
+  if(a.authUid){
+    return '<section class="application-account-state ready"><div><span>✓ HESAP HAZIR</span><strong>Kurum hesabı kayıt sırasında oluşturulmuş.</strong><small>'+esc(a.accountEmail||"-")+'</small></div></section>';
+  }
+  return '<section class="application-account-state missing">'+
+    '<div class="application-account-warning"><span>! HESAP YOK</span><strong>Bu eski başvuruda e-posta ve şifre oluşturulmamış.</strong><small>Onaylamadan önce kurum giriş hesabını oluştur.</small></div>'+
+    '<div class="legacy-account-form">'+
+      '<label>E-posta<input id="legacyAccountEmail" type="email" placeholder="ornek@firma.com" autocomplete="off"></label>'+
+      '<label>Geçici şifre<input id="legacyAccountPassword" type="text" minlength="8" placeholder="En az 8 karakter" autocomplete="off"></label>'+
+      '<button type="button" class="primary" id="createLegacyInstitutionAccount" data-app-id="'+esc(a.id)+'">Kurum Hesabı Oluştur</button>'+
+    '</div>'+
+    '<div id="legacyAccountMessage" class="message"></div>'+
+  '</section>';
+}
+
 function openApplicationDetail(id){
   const a=applications.find(x=>x.id===id);
   if(!a)return;
@@ -235,6 +253,7 @@ function openApplicationDetail(id){
 
   $("applicationDetailTitle").textContent=a.name||"Başvuru Detayı";
   $("applicationDetailBody").innerHTML=
+    legacyAccountCreateHtml(a)+
     '<section class="application-detail-status"><div><span>BAŞVURU DURUMU</span><strong>'+esc(applicationStatusLabel(status))+'</strong></div><small>'+esc(formatApplicationDate(a.date))+'</small></section>'+
     '<section class="application-detail-section">'+
       '<div class="application-detail-section-head"><span>HESAP BİLGİLERİ</span><strong>Üye bilgileri</strong></div>'+
@@ -269,8 +288,93 @@ function openApplicationDetail(id){
   $("applicationDetailApprove").dataset.approveApp=a.id;
   $("applicationDetailReject").dataset.rejectApp=a.id;
   $("applicationDetailApprove").style.display=status==="new"?"":"none";
+  $("applicationDetailApprove").disabled=status==="new"&&!a.authUid;
+  $("applicationDetailApprove").title=!a.authUid?"Önce kurum hesabı oluşturulmalı":"";
   $("applicationDetailReject").style.display=status==="new"?"":"none";
   $("applicationDetailModal").classList.remove("hidden");
+}
+
+async function createLegacyInstitutionAccount(applicationId){
+  const a=applications.find(x=>x.id===applicationId);
+  if(!a)return;
+
+  const email=String($("legacyAccountEmail")?.value||"").trim();
+  const password=String($("legacyAccountPassword")?.value||"");
+  const message=$("legacyAccountMessage");
+  const button=$("createLegacyInstitutionAccount");
+
+  if(!email){
+    message.className="message error";
+    message.textContent="E-posta adresini yazın.";
+    return;
+  }
+  if(password.length<8){
+    message.className="message error";
+    message.textContent="Geçici şifre en az 8 karakter olmalı.";
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="Hesap oluşturuluyor...";
+  message.className="message";
+  message.textContent="Firebase hesabı hazırlanıyor...";
+
+  let createdUser=null;
+  try{
+    if(legacyAccountRegistrationAuth.currentUser){
+      await legacyAccountRegistrationAuth.signOut();
+    }
+
+    const credential=await legacyAccountRegistrationAuth.createUserWithEmailAndPassword(email,password);
+    createdUser=credential.user;
+
+    const pendingInstitutionId=a.approvedInstitutionId||a.requestedInstitutionId||a.id;
+
+    await legacyAccountRegistrationDb.collection("institutionUsers").doc(createdUser.uid).set({
+      email,
+      institutionId:pendingInstitutionId,
+      institutionName:a.name||"Firma",
+      status:a.approvedInstitutionId?"approved":"pending",
+      date:a.date||new Date().toISOString()
+    });
+
+    await db.collection("institutionApplications").doc(a.id).set({
+      authUid:createdUser.uid,
+      accountEmail:email,
+      accountCreatedAt:new Date().toISOString()
+    },{merge:true});
+
+    await legacyAccountRegistrationAuth.signOut();
+
+    await loadApplications();
+    renderAll();
+
+    const refreshed=applications.find(x=>x.id===a.id);
+    if(refreshed)openApplicationDetail(refreshed.id);
+
+    const msg=$("legacyAccountMessage");
+    if(msg){
+      msg.className="message success";
+      msg.textContent="Kurum hesabı oluşturuldu. Bu e-posta ve geçici şifre müşteriye gönderilebilir.";
+    }
+  }catch(err){
+    console.error("Eski başvuru için kurum hesabı oluşturulamadı:",err);
+    if(createdUser){
+      try{await createdUser.delete();}catch(_){}
+    }
+    message.className="message error";
+    const map={
+      "auth/email-already-in-use":"Bu e-posta ile zaten bir Firebase hesabı var.",
+      "auth/invalid-email":"Geçerli bir e-posta adresi yazın.",
+      "auth/weak-password":"Şifre yeterince güçlü değil."
+    };
+    message.textContent=map[err.code]||err.message||"Kurum hesabı oluşturulamadı.";
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent="Kurum Hesabı Oluştur";
+    }
+  }
 }
 
 function renderApplications(){
@@ -340,6 +444,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const legacyCreate=e.target.closest("#createLegacyInstitutionAccount");if(legacyCreate){await createLegacyInstitutionAccount(legacyCreate.dataset.appId);return}
   const detailApp=e.target.closest("[data-detail-app]");if(detailApp)return openApplicationDetail(detailApp.dataset.detailApp);
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
   const edit=e.target.closest("[data-edit-firm]");if(edit)return openFirmModal(edit.dataset.editFirm);
@@ -348,6 +453,12 @@ document.addEventListener("click",async e=>{
   const stop=e.target.closest("[data-stop-campaign]");if(stop){await db.collection("institutions").doc(stop.dataset.stopCampaign).set({campaignActive:false,sponsored:false},{merge:true});await loadFirms();renderAll();return}
   const approve=e.target.closest("[data-approve-app]");if(approve){
     const a=applications.find(x=>x.id===approve.dataset.approveApp);if(!a)return;
+    if(!a.authUid){
+      openApplicationDetail(a.id);
+      const m=$("legacyAccountMessage");
+      if(m){m.className="message error";m.textContent="Önce bu başvuru için Kurum Hesabı Oluştur. Sonra onaylayabilirsin."}
+      return;
+    }
     const data={name:a.name||"Firma",mainCategory:a.mainCategory||"diger",subCategory:a.subCategory||a.category||"",category:a.subCategory||a.category||a.mainCategory||"diger",city:a.city||"",district:a.district||"",address:a.address||"",phone:a.phone||"",whatsapp:a.whatsapp||"",website:a.website||"",instagram:a.instagram||"",description:a.description||"",status:"active",createdAt:new Date().toISOString(),vip:false,sponsored:false};
     const ref=await db.collection("institutions").add(data);
     await db.collection("institutionApplications").doc(a.id).set({status:"approved",approvedInstitutionId:ref.id,approvedAt:new Date().toISOString()},{merge:true});
