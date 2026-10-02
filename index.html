@@ -27,8 +27,6 @@
           <button id="homeSearchBtn" type="button">Ara</button>
         </div>
 
-        <div class="search-suggestions hidden" id="searchSuggestions" role="listbox"></div>
-
         <div class="location-row">
           <label class="location-field">
             <span>📍</span>
@@ -73,21 +71,6 @@
     const searchBtn = document.getElementById('homeSearchBtn');
     const citySelect = document.getElementById('homeCitySelect');
     const districtSelect = document.getElementById('homeDistrictSelect');
-    const suggestions = document.getElementById('searchSuggestions');
-    const searchMain = document.getElementById('searchMain');
-
-    let institutions = [];
-    let activeSuggestion = -1;
-
-    function normalize(value) {
-      return String(value || '').toLocaleLowerCase('tr-TR').trim();
-    }
-
-    function escapeHtml(value) {
-      return String(value || '').replace(/[&<>"']/g, ch => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-      }[ch]));
-    }
 
     async function loadCities() {
       try {
@@ -138,90 +121,6 @@
       }
     }
 
-    async function loadInstitutions() {
-      try {
-        const snapshot = await db.collection('institutions').get();
-        institutions = [];
-        snapshot.forEach(doc => {
-          const data = doc.data() || {};
-          if (String(data.status || 'active') === 'passive') return;
-          institutions.push({
-            id: doc.id,
-            name: data.name || 'Firma',
-            city: data.city || '',
-            district: data.district || '',
-            category: data.mainCategory || data.subCategory || data.category || '',
-            description: data.description || ''
-          });
-        });
-      } catch (_) {
-        institutions = [];
-      }
-    }
-
-    function getMatches() {
-      const q = normalize(searchInput.value);
-      if (q.length < 2) return [];
-
-      const city = normalize(citySelect.value);
-      const district = normalize(districtSelect.value);
-
-      return institutions
-        .filter(item => {
-          const haystack = normalize([
-            item.name,
-            item.city,
-            item.district,
-            item.category,
-            item.description
-          ].join(' '));
-
-          return haystack.includes(q)
-            && (!city || normalize(item.city) === city)
-            && (!district || normalize(item.district) === district);
-        })
-        .slice(0, 6);
-    }
-
-    function hideSuggestions() {
-      suggestions.classList.add('hidden');
-      suggestions.innerHTML = '';
-      activeSuggestion = -1;
-      searchMain.classList.remove('suggestions-open');
-    }
-
-    function renderSuggestions() {
-      const matches = getMatches();
-
-      if (!matches.length) {
-        hideSuggestions();
-        return;
-      }
-
-      suggestions.innerHTML = matches.map((item, index) => {
-        const location = [item.city, item.district].filter(Boolean).join(' · ');
-        return `
-          <button type="button" class="suggestion-item" data-index="${index}" data-id="${escapeHtml(item.id)}">
-            <span class="suggestion-icon">🏢</span>
-            <span class="suggestion-copy">
-              <strong>${escapeHtml(item.name)}</strong>
-              <small>${escapeHtml(location || 'Konum bilgisi')}</small>
-            </span>
-            <span class="suggestion-arrow">→</span>
-          </button>
-        `;
-      }).join('');
-
-      suggestions.classList.remove('hidden');
-      searchMain.classList.add('suggestions-open');
-      activeSuggestion = -1;
-    }
-
-    function openInstitution(id) {
-      if (!id) return;
-      window.location.href = 'firma.html?id=' + encodeURIComponent(id);
-    }
-
     function goSearch() {
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
@@ -231,54 +130,12 @@
       window.location.href = 'arama.html' + (params.toString() ? '?' + params.toString() : '');
     }
 
-    citySelect.addEventListener('change', async () => {
-      await loadDistricts();
-      renderSuggestions();
-    });
-
-    districtSelect.addEventListener('change', renderSuggestions);
+    citySelect.addEventListener('change', loadDistricts);
     searchBtn.addEventListener('click', goSearch);
-    searchInput.addEventListener('input', renderSuggestions);
 
-    searchInput.addEventListener('keydown', event => {
-      const items = [...suggestions.querySelectorAll('.suggestion-item')];
+    searchInput.addEventListener('keydown', event => { if (event.key === 'Enter') goSearch(); });
 
-      if (event.key === 'ArrowDown' && items.length) {
-        event.preventDefault();
-        activeSuggestion = Math.min(activeSuggestion + 1, items.length - 1);
-      } else if (event.key === 'ArrowUp' && items.length) {
-        event.preventDefault();
-        activeSuggestion = Math.max(activeSuggestion - 1, 0);
-      } else if (event.key === 'Enter') {
-        if (activeSuggestion >= 0 && items[activeSuggestion]) {
-          event.preventDefault();
-          openInstitution(items[activeSuggestion].dataset.id);
-          return;
-        }
-        goSearch();
-        return;
-      } else if (event.key === 'Escape') {
-        hideSuggestions();
-        return;
-      } else {
-        return;
-      }
-
-      items.forEach((item, index) => item.classList.toggle('active', index === activeSuggestion));
-      items[activeSuggestion]?.scrollIntoView({ block: 'nearest' });
-    });
-
-    suggestions.addEventListener('click', event => {
-      const item = event.target.closest('.suggestion-item');
-      if (!item) return;
-      openInstitution(item.dataset.id);
-    });
-
-    document.addEventListener('click', event => {
-      if (!event.target.closest('.search-box')) hideSuggestions();
-    });
-
-    Promise.all([loadCities(), loadInstitutions()]);
+    loadCities();
   </script>
 </body>
 </html>
