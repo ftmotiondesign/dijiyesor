@@ -28,6 +28,7 @@
       <button class="nav-item active" data-view="overview">Genel Bakış</button>
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
+      <button class="nav-item" data-view="qr">QR / NFC Kartlar</button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="media">360° & Medya</button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
@@ -108,6 +109,38 @@
         <button data-campaign-filter="expired">Süresi Dolan</button>
       </div>
       <div id="campaignList" class="campaign-admin-grid"></div>
+    </section>
+
+    <section class="view" data-panel-view="qr">
+      <div class="qr-admin-head">
+        <div>
+          <span>QR / NFC KARTLAR</span>
+          <h2>Firma kartını oluştur ve sipariş ekranını yönet.</h2>
+          <p>Firmalar listesindeki QR/NFC butonuyla seçili firmayı buraya otomatik getir.</p>
+        </div>
+        <div class="qr-admin-actions">
+          <a id="qrOpenExternal" class="secondary" href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html" target="_blank" rel="noopener">Yeni Sekmede Aç ↗</a>
+        </div>
+      </div>
+
+      <section class="card qr-selected-card">
+        <div>
+          <span>SEÇİLİ FİRMA</span>
+          <h3 id="qrSelectedFirmName">Henüz firma seçilmedi</h3>
+          <p id="qrSelectedFirmMeta">Firmalar bölümünden QR/NFC butonuna basabilirsin.</p>
+        </div>
+        <button id="qrClearFirm" class="secondary" type="button">Seçimi Temizle</button>
+      </section>
+
+      <section class="card qr-embed-card">
+        <div class="qr-embed-head">
+          <div>
+            <strong>QR / NFC Kart Sipariş Sayfası</strong>
+            <small>Mevcut çalışan kart sistemi burada açılır.</small>
+          </div>
+        </div>
+        <iframe id="qrOrderFrame" title="QR NFC Kart Siparişi" src="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"></iframe>
+      </section>
     </section>
 
     <section class="view" data-panel-view="applications">
