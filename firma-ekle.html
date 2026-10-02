@@ -11,7 +11,10 @@
 <header class="topbar">
   <div class="container topbar-inner">
     <a class="brand" href="index.html"><span class="brand-mark">D</span><span>DijiyeSor</span></a>
-    <a class="top-link" href="index.html">Firma Ara</a>
+    <div class="top-actions">
+      <a class="top-link muted-link" href="index.html">Firma Ara</a>
+      <a class="top-link login-link" href="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1">Kurum Girişi</a>
+    </div>
   </div>
 </header>
 
@@ -23,7 +26,7 @@
         <h1>Firmanı DijiyeSor’da göster, müşteriler seni bulsun.</h1>
         <p>Firma profilini oluştur, iletişim bilgilerini yayınla, fotoğraf ve videolarını ekle, bilgi talepleri al. 360° mekan turu ve VIP profil ile daha güçlü görün.</p>
         <div class="hero-actions">
-          <a href="#basvuru" class="primary">Firmanı Ekle</a>
+          <a href="#basvuru" class="primary">Kayıt Ol</a>
           <a href="#paketler" class="secondary">Paketleri İncele</a>
         </div>
         <div class="hero-points">
@@ -128,19 +131,38 @@
   <section class="application" id="basvuru">
     <div class="container application-grid">
       <aside class="application-side">
-        <span class="eyebrow">FİRMA BAŞVURUSU</span>
-        <h2>Firmanı eklemek birkaç dakika sürer.</h2>
-        <p>Temel bilgileri gönder. Başvurun incelendikten sonra firma profilin yayına alınabilir.</p>
+        <span class="eyebrow">FİRMA KAYDI</span>
+        <h2>Hesabını oluştur, firmanı ekle.</h2>
+        <p>Tek formda kurum hesabını ve firma başvurunu oluştur. Yönetici onayından sonra kurum paneline giriş yapabilirsin.</p>
         <div class="steps">
-          <div><b>1</b><span><strong>Bilgilerini gönder</strong><small>Firma ve iletişim bilgilerini doldur.</small></span></div>
-          <div><b>2</b><span><strong>Başvurun incelensin</strong><small>Kayıt kontrol edilip onaylansın.</small></span></div>
-          <div><b>3</b><span><strong>Profilini geliştir</strong><small>Fotoğraf, video, 360° tur ve VIP seçeneklerini ekle.</small></span></div>
+          <div><b>1</b><span><strong>Hesabını oluştur</strong><small>E-posta ve şifrenle kurum hesabını aç.</small></span></div>
+          <div><b>2</b><span><strong>Firmanı gönder</strong><small>Firma bilgilerin yönetici onayına düşsün.</small></span></div>
+          <div><b>3</b><span><strong>Panelini kullan</strong><small>Onay sonrası profil, kampanya ve QR/NFC işlemlerini yönet.</small></span></div>
         </div>
       </aside>
 
       <section class="form-card">
         <div id="message" class="notice hidden"></div>
         <form id="form">
+          <div class="account-create-box">
+            <div class="account-create-head">
+              <div>
+                <span>KURUM HESABI</span>
+                <strong>Kayıt bilgileri</strong>
+                <p>Bu bilgiler daha sonra kurum paneline giriş yapmak için kullanılacak.</p>
+              </div>
+              <a href="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1">Zaten hesabın var mı? Giriş Yap</a>
+            </div>
+            <div class="form-grid two">
+              <label>Yetkili adı soyadı<input id="contactName" required maxlength="100" placeholder="Ad Soyad"></label>
+              <label>E-posta<input id="accountEmail" type="email" required autocomplete="email" placeholder="ornek@firma.com"></label>
+            </div>
+            <div class="form-grid two">
+              <label>Şifre<input id="accountPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="En az 8 karakter"></label>
+              <label>Şifre tekrar<input id="accountPasswordAgain" type="password" required minlength="8" autocomplete="new-password" placeholder="Şifreyi tekrar yaz"></label>
+            </div>
+          </div>
+
           <div class="form-grid two">
             <label>Firma adı<input id="name" required placeholder="Firma veya kurum adı"></label>
             <label>Sektör
@@ -248,7 +270,7 @@
             <span>Verdiğim firma bilgilerinin DijiyeSor üzerinde yayınlanmak üzere incelenmesini kabul ediyorum.</span>
           </label>
 
-          <button id="submitBtn" type="submit">Başvuruyu Gönder</button>
+          <button id="submitBtn" type="submit">Hesap Oluştur ve Başvuruyu Gönder</button>
           <small class="form-note">Başvuru göndermek, ücretli paket satın alma zorunluluğu oluşturmaz.</small>
         </form>
       </section>
@@ -261,11 +283,15 @@
 </footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+const registrationApp=firebase.apps.find(a=>a.name==="dijiyesorRegistration")||firebase.initializeApp(firebaseConfig,"dijiyesorRegistration");
+const registrationAuth=registrationApp.auth();
+const registrationDb=registrationApp.firestore();
 
 const city=document.getElementById("city");
 const district=document.getElementById("district");
@@ -349,7 +375,27 @@ document.getElementById("form").addEventListener("submit",async e=>{
   msg.className="notice";
   msg.textContent="Başvurunuz gönderiliyor...";
 
+  let createdUser=null;
+  let applicationRef=null;
+
   try{
+    const password=document.getElementById("accountPassword").value;
+    const passwordAgain=document.getElementById("accountPasswordAgain").value;
+    const email=document.getElementById("accountEmail").value.trim();
+    const contactName=document.getElementById("contactName").value.trim();
+
+    if(password!==passwordAgain)throw new Error("Şifreler birbiriyle aynı değil.");
+    if(password.length<8)throw new Error("Şifre en az 8 karakter olmalı.");
+
+    if(registrationAuth.currentUser){
+      await registrationAuth.signOut();
+    }
+
+    const credential=await registrationAuth.createUserWithEmailAndPassword(email,password);
+    createdUser=credential.user;
+
+    applicationRef=registrationDb.collection("institutionApplications").doc();
+
     const interests=[];
     if(document.getElementById("wantPhoto").checked)interests.push("mekan_fotografi");
     if(document.getElementById("wantVideo").checked)interests.push("tanitim_videosu");
@@ -358,8 +404,14 @@ document.getElementById("form").addEventListener("submit",async e=>{
     if(document.getElementById("wantQrNfc").checked)interests.push("qr_nfc_kart");
     if(document.getElementById("wantCampaign").checked)interests.push("kampanya_reklami");
 
-    await db.collection("institutionApplications").add({
-      name:document.getElementById("name").value.trim(),
+    const institutionName=document.getElementById("name").value.trim();
+
+    await applicationRef.set({
+      name:institutionName,
+      contactName,
+      accountEmail:email,
+      authUid:createdUser.uid,
+      requestedInstitutionId:applicationRef.id,
       mainCategory:mainCategory.value,
       subCategory:subCategory.value,
       category:subCategory.value||mainCategory.value,
@@ -390,11 +442,21 @@ document.getElementById("form").addEventListener("submit",async e=>{
       } : null,
       status:"new",
       date:new Date().toISOString(),
-      source:"dijiyesor-firma-tanit"
+      source:"dijiyesor-firma-tanit-kayit"
     });
 
+    await registrationDb.collection("institutionUsers").doc(createdUser.uid).set({
+      email,
+      institutionId:applicationRef.id,
+      institutionName,
+      status:"pending",
+      date:new Date().toISOString()
+    });
+
+    await registrationAuth.signOut();
+
     msg.className="notice success";
-    msg.innerHTML="<strong>Başvurunuz alındı.</strong><br>Başvurunuz incelendikten sonra firma profiliniz için sizinle iletişime geçilebilir.";
+    msg.innerHTML="<strong>Hesabınız ve firma başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra <a href='https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1'>Kurum Girişi</a> üzerinden panelinize giriş yapabilirsiniz.";
     e.target.reset();
     subCategory.disabled=true;
     subCategory.innerHTML='<option value="">Önce sektör seçin</option>';
@@ -405,11 +467,19 @@ document.getElementById("form").addEventListener("submit",async e=>{
     msg.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
     console.error(err);
+    if(createdUser){
+      try{await createdUser.delete();}catch(_){}
+    }
     msg.className="notice error";
-    msg.textContent="Başvuru gönderilemedi. Lütfen daha sonra tekrar deneyin.";
+    const authMessages={
+      "auth/email-already-in-use":"Bu e-posta ile daha önce hesap oluşturulmuş. Kurum Girişi'ni kullanabilirsiniz.",
+      "auth/invalid-email":"Geçerli bir e-posta adresi yazın.",
+      "auth/weak-password":"Şifre yeterince güçlü değil. En az 8 karakter kullanın."
+    };
+    msg.textContent=authMessages[err.code]||err.message||"Başvuru gönderilemedi. Lütfen tekrar deneyin.";
   }finally{
     btn.disabled=false;
-    btn.textContent="Başvuruyu Gönder";
+    btn.textContent="Hesap Oluştur ve Başvuruyu Gönder";
   }
 });
 </script>
