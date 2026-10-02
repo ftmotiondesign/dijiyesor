@@ -61,3 +61,39 @@ textarea.field{height:auto;min-height:120px;padding:14px;resize:vertical}
 .hidden{display:none!important}
 @media(max-width:980px){.search-grid{grid-template-columns:1fr 1fr}.search-main{grid-column:1/-1}.search-btn{grid-column:1/-1}.grid{grid-template-columns:1fr 1fr}.detail-layout{grid-template-columns:1fr}}
 @media(max-width:680px){.container{width:min(100% - 28px,1180px)}.nav .btn-soft{display:none}.hero{padding:46px 0 34px}.hero h1{font-size:36px}.hero p{font-size:16px}.search-grid{grid-template-columns:1fr}.search-main,.search-btn{grid-column:auto}.grid{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.promo-box{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr}}
+
+.google-home{min-height:100vh;background:#fff;display:flex;flex-direction:column}
+.google-top{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.google-small-brand{display:flex;align-items:center;gap:9px;font-weight:900;color:#1f2b43}
+.google-small-brand .brand-mark{width:34px;height:34px;border-radius:11px;font-size:18px}
+.google-add{font-size:14px;font-weight:800;color:#1677ff;padding:10px 14px;border-radius:10px}
+.google-add:hover{background:#f3f7fd}
+.google-main{flex:1;display:grid;place-items:center;padding:20px 18px 120px}
+.google-center{width:min(720px,100%);text-align:center}
+.google-logo-wrap{display:flex;align-items:center;justify-content:center;gap:15px}
+.google-logo-mark{width:72px;height:72px;border-radius:22px;background:#1677ff;color:#fff;display:grid;place-items:center;font-size:42px;font-weight:900;box-shadow:0 12px 30px rgba(22,119,255,.2)}
+.google-logo-text{font-size:54px;line-height:1;font-weight:900;letter-spacing:-2px;color:#172139}
+.google-tagline{margin:18px 0 26px;color:#7c879a;font-size:16px}
+.google-search-shell{width:100%}
+.google-search-main{height:60px;border:1px solid #d8dee8;border-radius:30px;display:flex;align-items:center;background:#fff;box-shadow:0 2px 9px rgba(32,46,72,.08);overflow:hidden}
+.google-search-main:focus-within{box-shadow:0 5px 18px rgba(32,46,72,.13);border-color:#cfd6e2}
+.google-search-icon{font-size:24px;color:#707b8f;margin-left:20px}
+.google-search-main input{flex:1;height:100%;border:0;outline:0;padding:0 14px;font-size:17px;background:transparent;min-width:0}
+.google-search-main button{height:42px;margin-right:9px;border:0;border-radius:22px;padding:0 22px;background:#1677ff;color:#fff;font-weight:900;cursor:pointer}
+.google-location-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.google-location-row select{height:44px;border:1px solid #e0e5ed;border-radius:12px;padding:0 13px;background:#fff;color:#59657b;outline:none}
+.google-location-row select:focus{border-color:#1677ff}
+.google-actions{display:flex;justify-content:center;gap:10px;margin-top:24px}
+.google-action-btn{border:1px solid transparent;background:#f4f6f8;color:#28344b;border-radius:8px;padding:10px 17px;font-size:14px;font-weight:700;cursor:pointer}
+.google-action-btn:hover{border-color:#d9dee7;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.google-footer{height:52px;border-top:1px solid #edf0f4;background:#f8f9fa;display:flex;align-items:center;justify-content:space-between;padding:0 28px;color:#7c8798;font-size:13px}
+@media(max-width:680px){
+  .google-top{padding:0 16px}
+  .google-main{padding:20px 16px 80px}
+  .google-logo-mark{width:58px;height:58px;border-radius:18px;font-size:34px}
+  .google-logo-text{font-size:41px}
+  .google-location-row{grid-template-columns:1fr}
+  .google-actions{flex-direction:column}
+  .google-action-btn{width:100%}
+  .google-footer{padding:0 16px;font-size:12px}
+}
