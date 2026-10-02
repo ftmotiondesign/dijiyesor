@@ -45,7 +45,7 @@ document.addEventListener("click",e=>{
   const quick=e.target.closest("[data-quick]");
   if(quick){
     if(quick.dataset.quick==="addFirm")openFirmModal();
-    else setView(quick.dataset.quick);
+    else { setView(quick.dataset.quick); if(quick.dataset.quick==="qr")setQrMode("orders"); }
   }
   const close=e.target.closest("[data-close]");if(close)$(close.dataset.close).classList.add("hidden");
 });
@@ -197,6 +197,14 @@ function renderApplications(){
 }
 $("applicationSearch").addEventListener("input",renderApplications);$("applicationFilter").addEventListener("change",renderApplications);
 
+function setQrMode(mode){
+  document.querySelectorAll("[data-qr-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.qrMode===mode));
+  $("qrOrdersPanel")?.classList.toggle("active",mode==="orders");
+  $("qrManagerPanel")?.classList.toggle("active",mode==="manager");
+  $("qrOrderPanel")?.classList.toggle("active",mode==="order");
+}
+document.querySelectorAll("[data-qr-mode]").forEach(btn=>btn.addEventListener("click",()=>setQrMode(btn.dataset.qrMode)));
+
 function openQrForFirm(id){
   const f=firms.find(x=>x.id===id);
   const base="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html";
@@ -208,6 +216,7 @@ function openQrForFirm(id){
     ? [f.city,f.district,f.phone].filter(Boolean).join(" · ")
     : "Firmalar bölümünden QR/NFC butonuna basabilirsin.";
   setView("qr");
+  setQrMode("order");
 }
 $("qrClearFirm").addEventListener("click",()=>openQrForFirm(""));
 
