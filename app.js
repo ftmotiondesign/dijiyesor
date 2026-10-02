@@ -33,15 +33,63 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",location:d.location||"",description:d.description||"",highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||""})});
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",location:d.location||"",description:d.description||"",highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[]})});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));render(companies);
   }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
 }
 function render(data){
-  const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");if(!grid||!sum)return;
-  sum.textContent=data.length+" firma bulundu";
-  if(!data.length){grid.innerHTML='<div class="state"><strong>Uygun firma bulunamadı.</strong>Arama veya konum filtresini değiştirerek tekrar deneyin.</div>';return}
-  grid.innerHTML=data.map(i=>{const logo=i.logoUrl?'<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">':esc(initials(i.name));const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";const desc=i.description||(i.highlights||[]).slice(0,2).join(" · ")||"Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin.";return '<article class="card"><div class="card-top"><div class="logo">'+logo+'</div><div><h3>'+esc(i.name)+'</h3><div class="meta">📍 '+esc(loc)+'</div></div></div><span class="tag">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span><p class="desc">'+esc(desc)+'</p><div class="card-actions"><a class="action-main" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a><a class="action-soft" href="firma.html?id='+encodeURIComponent(i.id)+'#iletisim">Bilgi Al</a></div></article>'}).join("");
+  const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
+  if(!grid||!sum)return;
+
+  sum.textContent=data.length+" firma";
+  const title=document.getElementById("resultsTitle");
+  const context=document.getElementById("resultsContext");
+  const search=document.getElementById("searchInput");
+  const city=document.getElementById("citySelect");
+  const district=document.getElementById("districtSelect");
+
+  if(title){
+    const q=String(search?.value||"").trim();
+    title.textContent=q ? "“"+q+"” için sonuçlar" : "Arama sonuçları";
+  }
+  if(context){
+    const loc=[city?.value,district?.value].filter(Boolean).join(" / ");
+    context.textContent=loc ? loc+" bölgesindeki uygun işletmeler." : "Aramana uygun işletmeler listeleniyor.";
+  }
+
+  if(!data.length){
+    grid.innerHTML='<div class="results-state"><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><a href="index.html">Yeni arama yap</a></div>';
+    return;
+  }
+
+  grid.innerHTML=data.map(i=>{
+    const logo=i.logoUrl
+      ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
+      : '<span>'+esc(initials(i.name))+'</span>';
+    const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
+    const desc=i.description||(i.highlights||[]).slice(0,2).join(" · ")||"Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin.";
+    const badges=[
+      i.vip?'<span class="result-badge vip">VIP</span>':'',
+      i.has360Tour?'<span class="result-badge">360° Tur</span>':'',
+      i.galleryUrls?.length?'<span class="result-badge">📷 Fotoğraflı</span>':''
+    ].filter(Boolean).join("");
+
+    return '<article class="result-card">'+
+      '<div class="result-card-top">'+
+        '<div class="result-logo">'+logo+'</div>'+
+        '<div class="result-card-copy">'+
+          '<div class="result-name-row"><h2>'+esc(i.name)+'</h2>'+badges+'</div>'+
+          '<div class="result-location">📍 '+esc(loc)+'</div>'+
+          '<span class="result-category">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<p class="result-desc">'+esc(desc)+'</p>'+
+      '<div class="result-actions">'+
+        '<a class="result-primary" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a>'+
+        '<a class="result-secondary" href="firma.html?id='+encodeURIComponent(i.id)+'#iletisim">Bilgi Al</a>'+
+      '</div>'+
+    '</article>';
+  }).join("");
 }
 async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
@@ -62,6 +110,16 @@ async function initHome(){
   district.addEventListener("change",filter);
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));filter()});
   search.addEventListener("input",filter);btn.addEventListener("click",filter);
+  search.addEventListener("keydown",e=>{if(e.key==="Enter")filter()});
+  document.getElementById("clearFiltersBtn")?.addEventListener("click",async()=>{
+    search.value="";
+    city.value="";
+    sector.value="";
+    district.innerHTML='<option value="">Tüm İlçeler</option>';
+    district.disabled=true;
+    history.replaceState({}, "", "arama.html");
+    filter();
+  });
   chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
   await loadCompanies();
   filter();
