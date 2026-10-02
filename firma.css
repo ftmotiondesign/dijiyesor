@@ -161,3 +161,4 @@ button{font:inherit}
   .media-grid{grid-template-columns:1fr}
   .contact-actions{grid-template-columns:1fr 1fr}
 }
+.hero-btn.info{background:#f4f6f9;color:#38506f;border:0;cursor:pointer}
