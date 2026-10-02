@@ -115,32 +115,44 @@
       <div class="qr-admin-head">
         <div>
           <span>QR / NFC KARTLAR</span>
-          <h2>Firma kartını oluştur ve sipariş ekranını yönet.</h2>
-          <p>Firmalar listesindeki QR/NFC butonuyla seçili firmayı buraya otomatik getir.</p>
+          <h2>QR kart siparişlerini ve karekodları yönet.</h2>
+          <p>Gelen siparişleri kontrol et, yeni QR kart oluştur veya seçili firma için sipariş hazırla.</p>
         </div>
-        <div class="qr-admin-actions">
-          <a id="qrOpenExternal" class="secondary" href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html" target="_blank" rel="noopener">Yeni Sekmede Aç ↗</a>
-        </div>
+        <a class="secondary" href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html" target="_blank" rel="noopener">Müşteri Sipariş Sayfası ↗</a>
       </div>
 
-      <section class="card qr-selected-card">
-        <div>
-          <span>SEÇİLİ FİRMA</span>
-          <h3 id="qrSelectedFirmName">Henüz firma seçilmedi</h3>
-          <p id="qrSelectedFirmMeta">Firmalar bölümünden QR/NFC butonuna basabilirsin.</p>
+      <div class="qr-center-tabs">
+        <button type="button" class="active" data-qr-mode="orders">📦 Gelen Siparişler</button>
+        <button type="button" data-qr-mode="manager">▣ QR / Karekodu Oluştur</button>
+        <button type="button" data-qr-mode="order">＋ Yeni Kart Siparişi</button>
+      </div>
+
+      <section id="qrOrdersPanel" class="qr-panel active">
+        <div class="qr-panel-head">
+          <div><span>GELEN SİPARİŞLER</span><h3>QR / NFC Kart Siparişleri</h3><p>Yeni siparişleri kontrol et, hazırlamaya al ve kartı aktifleştir.</p></div>
+          <a class="secondary" href="https://ftmotiondesign.github.io/dijiyer/qr-card-orders-admin.html" target="_blank" rel="noopener">Tam Sayfa Aç ↗</a>
         </div>
-        <button id="qrClearFirm" class="secondary" type="button">Seçimi Temizle</button>
+        <iframe class="qr-tool-frame qr-orders-frame" src="https://ftmotiondesign.github.io/dijiyer/qr-card-orders-admin.html?embed=1&v=3" title="QR NFC Kart Siparişleri"></iframe>
       </section>
 
-      <section class="card qr-embed-card">
-        <div class="qr-embed-head">
-          <div>
-            <strong>QR / NFC Kart Sipariş Sayfası</strong>
-            <small>Mevcut çalışan kart sistemi tam genişlikte burada açılır.</small>
-          </div>
+      <section id="qrManagerPanel" class="qr-panel">
+        <div class="qr-panel-head">
+          <div><span>KART YÖNETİMİ</span><h3>QR / Karekodu Oluştur</h3><p>Yeni firma kartı oluştur, QR üret, kayıtlı kartları ara, düzenle veya sil.</p></div>
+          <a class="secondary" href="https://ftmotiondesign.github.io/dijiyer/demo-card-admin.html" target="_blank" rel="noopener">Tam Sayfa Aç ↗</a>
+        </div>
+        <iframe class="qr-tool-frame qr-manager-frame" src="https://ftmotiondesign.github.io/dijiyer/demo-card-admin.html?embed=1&v=3" title="QR NFC Kart Oluştur ve Yönet"></iframe>
+      </section>
+
+      <section id="qrOrderPanel" class="qr-panel">
+        <div class="qr-panel-head">
+          <div><span>YENİ SİPARİŞ</span><h3>Firma Kartı Siparişi Oluştur</h3><p>Firmalar bölümünden QR/NFC butonuna bastığında seçili firma bilgileri otomatik gelir.</p></div>
           <a id="qrOpenFull" class="secondary" href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html" target="_blank" rel="noopener">Tam Sayfa Aç ↗</a>
         </div>
-        <iframe id="qrOrderFrame" title="QR NFC Kart Siparişi" src="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"></iframe>
+        <section class="qr-selected-card">
+          <div><span>SEÇİLİ FİRMA</span><h3 id="qrSelectedFirmName">Henüz firma seçilmedi</h3><p id="qrSelectedFirmMeta">Firmalar bölümünden QR/NFC butonuna basabilirsin.</p></div>
+          <button id="qrClearFirm" class="secondary" type="button">Seçimi Temizle</button>
+        </section>
+        <iframe id="qrOrderFrame" class="qr-tool-frame qr-order-frame" title="QR NFC Kart Siparişi" src="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"></iframe>
       </section>
     </section>
 
