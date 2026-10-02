@@ -1,15 +1,254 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Firma | DijiyeSor</title><link rel="stylesheet" href="styles.css"></head>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Firma | DijiyeSor</title>
+  <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
+  <link rel="stylesheet" href="firma.css">
+</head>
 <body>
-<header class="topbar"><div class="container"><a class="brand" href="index.html"><span class="brand-mark">D</span><span class="brand-name">DijiyeSor</span></a><nav class="nav"><a class="btn btn-soft" href="index.html">Firma Ara</a><a class="btn btn-primary" href="firma-ekle.html">Firmanı Ekle</a></nav></div></header>
-<section class="page-hero"><div class="container"><div class="breadcrumb"><a href="index.html">Ana Sayfa</a> / Firma</div><div id="detailHead">Firma bilgileri yükleniyor...</div></div></section>
-<main class="container"><div id="detailRoot" class="detail-layout"><div class="panel">Yükleniyor...</div></div></main>
-<footer class="footer"><div class="container">© 2026 DijiyeSor</div></footer>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};firebase.initializeApp(firebaseConfig);const db=firebase.firestore();
-const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-const id=new URLSearchParams(location.search).get("id");const head=document.getElementById("detailHead"),root=document.getElementById("detailRoot");
-(async()=>{if(!id){head.innerHTML="<h1>Firma bulunamadı</h1>";root.innerHTML='<div class="panel">Geçerli bir firma seçilmedi.</div>';return}
-try{const snap=await db.collection("institutions").doc(id).get();if(!snap.exists)throw new Error("not-found");const d=snap.data()||{};document.title=(d.name||"Firma")+" | DijiyeSor";const initials=String(d.name||"Firma").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");const logo=d.logoUrl?'<img src="'+esc(d.logoUrl)+'" alt="'+esc(d.name)+' logosu">':esc(initials);head.innerHTML='<div class="detail-title"><div class="logo">'+logo+'</div><div><h1>'+esc(d.name||"Firma")+'</h1><p>📍 '+esc([d.city,d.district].filter(Boolean).join(" · ")||d.location||"Konum bilgisi")+'</p></div></div>';root.innerHTML='<section class="panel"><h2>Firma Hakkında</h2><p class="desc" style="min-height:0">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p><div class="info-list">'+(d.address?'<div class="info-row"><strong>Adres:</strong> '+esc(d.address)+'</div>':'')+(d.website?'<div class="info-row"><strong>Web:</strong> '+esc(d.website)+'</div>':'')+(d.instagram?'<div class="info-row"><strong>Instagram:</strong> '+esc(d.instagram)+'</div>':'')+'</div></section><aside id="iletisim" class="panel"><h2>İletişim</h2><div class="info-list">'+(d.phone?'<div class="info-row"><strong>Telefon:</strong> '+esc(d.phone)+'</div>':'')+(d.whatsapp||d.phone?'<a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/90'+String(d.whatsapp||d.phone).replace(/\D/g,"").replace(/^90/,"").replace(/^0/,"")+'">WhatsApp</a>':'')+'</div></aside>'}catch(e){head.innerHTML="<h1>Firma bulunamadı</h1>";root.innerHTML='<div class="panel">Bu firma kaydına ulaşılamadı.</div>'}})();
-</script></body></html>
+  <header class="profile-topbar">
+    <a class="profile-brand" href="index.html">
+      <span class="profile-brand-mark">D</span>
+      <span>DijiyeSor</span>
+    </a>
+    <a class="back-search" href="arama.html">← Firma Ara</a>
+  </header>
+
+  <main id="profileRoot" class="profile-page">
+    <section class="profile-loading">
+      <strong>Firma bilgileri yükleniyor...</strong>
+    </section>
+  </main>
+
+  <footer class="profile-footer">© 2026 DijiyeSor</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig={
+      apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",
+      authDomain:"dijiyer.firebaseapp.com",
+      projectId:"dijiyer",
+      storageBucket:"dijiyer.firebasestorage.app",
+      messagingSenderId:"847787778815",
+      appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"
+    };
+
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db=firebase.firestore();
+
+    const root=document.getElementById("profileRoot");
+    const id=new URLSearchParams(location.search).get("id");
+
+    const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+
+    const safeUrl=value=>{
+      let v=String(value||"").trim();
+      if(!v) return "";
+      if(/^https?:\/\//i.test(v)) return v;
+      return "https://"+v;
+    };
+
+    const telUrl=value=>{
+      const digits=String(value||"").replace(/[^\d+]/g,"");
+      return digits ? "tel:"+digits : "";
+    };
+
+    const waUrl=value=>{
+      let digits=String(value||"").replace(/\D/g,"");
+      digits=digits.replace(/^90/,"").replace(/^0/,"");
+      return digits ? "https://wa.me/90"+digits : "";
+    };
+
+    const initials=name=>String(name||"Firma")
+      .split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("")
+      .toLocaleUpperCase("tr-TR");
+
+    const asArray=value=>Array.isArray(value) ? value.filter(Boolean) : (value ? [value] : []);
+
+    function youtubeEmbed(url){
+      const value=String(url||"");
+      let match=value.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+      if(match) return "https://www.youtube.com/embed/"+match[1];
+      return "";
+    }
+
+    function buildGallery(d){
+      const photos=[
+        ...asArray(d.galleryUrls),
+        ...asArray(d.photos),
+        ...asArray(d.photoUrls)
+      ].filter(Boolean);
+
+      const videos=[
+        ...asArray(d.videoUrls),
+        ...asArray(d.videos),
+        d.videoUrl,
+        d.youtubeUrl,
+        d.promoVideoUrl
+      ].filter(Boolean);
+
+      const items=[];
+
+      photos.slice(0,12).forEach((url,index)=>{
+        items.push(
+          '<button class="media-card photo-card" type="button" data-image="'+esc(url)+'" aria-label="Fotoğrafı büyüt">'+
+            '<img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+" fotoğraf "+(index+1))+'" loading="lazy">'+
+          '</button>'
+        );
+      });
+
+      videos.slice(0,4).forEach(url=>{
+        const embed=youtubeEmbed(url);
+        if(embed){
+          items.push(
+            '<div class="media-card video-card">'+
+              '<iframe src="'+esc(embed)+'" title="Firma videosu" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'+
+            '</div>'
+          );
+        }else{
+          items.push(
+            '<div class="media-card video-card">'+
+              '<video controls preload="metadata"><source src="'+esc(url)+'"></video>'+
+            '</div>'
+          );
+        }
+      });
+
+      if(!items.length){
+        return '<div class="empty-media"><div class="empty-media-icon">📷</div><strong>Fotoğraf ve video henüz eklenmemiş.</strong><span>Firma görselleri eklendiğinde burada görüntülenecek.</span></div>';
+      }
+
+      return '<div class="media-grid">'+items.join("")+'</div>';
+    }
+
+    function contactRow(icon,label,value,href){
+      if(!value) return "";
+      const content=href
+        ? '<a href="'+esc(href)+'" target="'+(/^http/.test(href)?"_blank":"_self")+'" rel="noopener">'+esc(value)+'</a>'
+        : '<span>'+esc(value)+'</span>';
+
+      return '<div class="contact-row">'+
+        '<div class="contact-icon">'+icon+'</div>'+
+        '<div><small>'+esc(label)+'</small>'+content+'</div>'+
+      '</div>';
+    }
+
+    async function loadProfile(){
+      if(!id){
+        root.innerHTML='<section class="profile-error"><strong>Firma bulunamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
+        return;
+      }
+
+      try{
+        const snap=await db.collection("institutions").doc(id).get();
+        if(!snap.exists) throw new Error("not-found");
+
+        const d=snap.data()||{};
+        document.title=(d.name||"Firma")+" | DijiyeSor";
+
+        const logo=d.logoUrl
+          ? '<img src="'+esc(d.logoUrl)+'" alt="'+esc(d.name||"Firma")+' logosu">'
+          : '<span>'+esc(initials(d.name))+'</span>';
+
+        const cover=d.coverUrl
+          ? '<div class="profile-cover"><img src="'+esc(d.coverUrl)+'" alt="'+esc(d.name||"Firma")+' kapak görseli"></div>'
+          : '';
+
+        const locationText=[d.city,d.district].filter(Boolean).join(" · ") || d.location || "";
+        const website=safeUrl(d.website);
+        const instagram=d.instagram ? safeUrl(String(d.instagram).includes("instagram.com") ? d.instagram : "instagram.com/"+String(d.instagram).replace(/^@/,"")) : "";
+        const phone=telUrl(d.phone);
+        const whatsapp=waUrl(d.whatsapp||d.phone);
+
+        root.innerHTML=
+          cover+
+          '<section class="profile-hero">'+
+            '<div class="profile-logo">'+logo+'</div>'+
+            '<div class="profile-main-info">'+
+              '<div class="profile-title-row">'+
+                '<h1>'+esc(d.name||"Firma")+'</h1>'+
+                (d.vip?'<span class="profile-badge">VIP</span>':'')+
+              '</div>'+
+              (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
+              (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
+            '</div>'+
+            '<div class="hero-actions">'+
+              (phone?'<a class="hero-btn secondary" href="'+esc(phone)+'">Ara</a>':'')+
+              (whatsapp?'<a class="hero-btn primary" href="'+esc(whatsapp)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+
+            '</div>'+
+          '</section>'+
+
+          '<div class="profile-layout">'+
+            '<div class="profile-content">'+
+              '<section class="section-card">'+
+                '<div class="section-title"><div><span>HAKKINDA</span><h2>Firma hakkında</h2></div></div>'+
+                '<p class="about-text">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p>'+
+              '</section>'+
+
+              '<section class="section-card">'+
+                '<div class="section-title"><div><span>GALERİ</span><h2>Fotoğraf & Video</h2></div></div>'+
+                buildGallery(d)+
+              '</section>'+
+            '</div>'+
+
+            '<aside id="iletisim" class="contact-card">'+
+              '<div class="section-title"><div><span>İLETİŞİM</span><h2>İletişim bilgileri</h2></div></div>'+
+              '<div class="contact-list">'+
+                contactRow("☎","Telefon",d.phone,phone)+
+                contactRow("●","WhatsApp",d.whatsapp||d.phone,whatsapp)+
+                contactRow("⌖","Adres",d.address,"")+
+                contactRow("↗","Web sitesi",d.website,website)+
+                contactRow("◎","Instagram",d.instagram,instagram)+
+              '</div>'+
+              ((phone||whatsapp)?'<div class="contact-actions">'+
+                (phone?'<a href="'+esc(phone)+'" class="contact-action secondary">Telefon Et</a>':'')+
+                (whatsapp?'<a href="'+esc(whatsapp)+'" target="_blank" rel="noopener" class="contact-action primary">WhatsApp</a>':'')+
+              '</div>':'')+
+            '</aside>'+
+          '</div>'+
+
+          '<div id="imageModal" class="image-modal" hidden>'+
+            '<button id="closeModal" type="button" aria-label="Kapat">×</button>'+
+            '<img id="modalImage" alt="Firma fotoğrafı">'+
+          '</div>';
+
+        document.querySelectorAll("[data-image]").forEach(btn=>{
+          btn.addEventListener("click",()=>{
+            const modal=document.getElementById("imageModal");
+            const image=document.getElementById("modalImage");
+            image.src=btn.dataset.image;
+            modal.hidden=false;
+            document.body.classList.add("modal-open");
+          });
+        });
+
+        const closeModal=()=>{
+          const modal=document.getElementById("imageModal");
+          if(!modal) return;
+          modal.hidden=true;
+          document.body.classList.remove("modal-open");
+        };
+
+        document.getElementById("closeModal")?.addEventListener("click",closeModal);
+        document.getElementById("imageModal")?.addEventListener("click",e=>{
+          if(e.target.id==="imageModal") closeModal();
+        });
+        document.addEventListener("keydown",e=>{
+          if(e.key==="Escape") closeModal();
+        });
+
+      }catch(e){
+        console.error(e);
+        root.innerHTML='<section class="profile-error"><strong>Bu firma kaydına ulaşılamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
+      }
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
