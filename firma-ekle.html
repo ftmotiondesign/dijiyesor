@@ -13,7 +13,7 @@
     <a class="brand" href="index.html"><span class="brand-mark">D</span><span>DijiyeSor</span></a>
     <div class="top-actions">
       <a class="top-link muted-link" href="index.html">Firma Ara</a>
-      <a class="top-link login-link" href="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1">Kurum Girişi</a>
+      <button class="top-link login-link login-popup-trigger" type="button" data-open-login>Kurum Girişi</button>
     </div>
   </div>
 </header>
@@ -151,7 +151,7 @@
                 <strong>Kayıt bilgileri</strong>
                 <p>Bu bilgiler daha sonra kurum paneline giriş yapmak için kullanılacak.</p>
               </div>
-              <a href="https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1">Zaten hesabın var mı? Giriş Yap</a>
+              <button type="button" class="account-login-link" data-open-login>Zaten hesabın var mı? Giriş Yap</button>
             </div>
             <div class="form-grid two">
               <label>Yetkili adı soyadı<input id="contactName" required maxlength="100" placeholder="Ad Soyad"></label>
@@ -278,6 +278,32 @@
   </section>
 </main>
 
+<div id="institutionLoginModal" class="login-modal hidden" role="dialog" aria-modal="true" aria-labelledby="institutionLoginTitle">
+  <div class="login-modal-card">
+    <button type="button" class="login-modal-close" data-close-login aria-label="Kapat">×</button>
+    <div class="login-modal-brand"><span>D</span><strong>DijiyeSor</strong></div>
+    <span class="login-modal-kicker">KURUM PANELİ</span>
+    <h2 id="institutionLoginTitle">Kurum Girişi</h2>
+    <p>Onaylanan kurum hesabınızla giriş yapın.</p>
+
+    <form id="institutionLoginForm">
+      <label>E-posta
+        <input id="institutionLoginEmail" type="email" required autocomplete="username" placeholder="ornek@firma.com">
+      </label>
+      <label>Şifre
+        <input id="institutionLoginPassword" type="password" required autocomplete="current-password" placeholder="Şifreniz">
+      </label>
+      <label class="login-remember">
+        <input id="institutionRememberMe" type="checkbox" checked>
+        <span>Beni hatırla</span>
+      </label>
+      <button id="institutionLoginSubmit" type="submit" class="login-submit">Giriş Yap</button>
+      <button id="institutionForgotPassword" type="button" class="login-forgot">Şifremi unuttum</button>
+      <div id="institutionLoginMessage" class="login-message"></div>
+    </form>
+  </div>
+</div>
+
 <footer class="footer">
   <div class="container">© 2026 DijiyeSor</div>
 </footer>
@@ -364,6 +390,90 @@ city.addEventListener("change",async()=>{
     district.disabled=false;
   }catch(_){
     district.innerHTML='<option value="">İlçeler alınamadı</option>';
+  }
+});
+
+function openInstitutionLoginModal(){
+  document.getElementById("institutionLoginModal").classList.remove("hidden");
+  setTimeout(()=>document.getElementById("institutionLoginEmail")?.focus(),50);
+}
+function closeInstitutionLoginModal(){
+  document.getElementById("institutionLoginModal").classList.add("hidden");
+  document.getElementById("institutionLoginMessage").textContent="";
+}
+document.querySelectorAll("[data-open-login]").forEach(btn=>btn.addEventListener("click",openInstitutionLoginModal));
+document.querySelectorAll("[data-close-login]").forEach(btn=>btn.addEventListener("click",closeInstitutionLoginModal));
+document.getElementById("institutionLoginModal").addEventListener("click",e=>{
+  if(e.target.id==="institutionLoginModal")closeInstitutionLoginModal();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeInstitutionLoginModal()});
+
+document.getElementById("institutionLoginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const email=document.getElementById("institutionLoginEmail").value.trim();
+  const password=document.getElementById("institutionLoginPassword").value;
+  const remember=document.getElementById("institutionRememberMe").checked;
+  const message=document.getElementById("institutionLoginMessage");
+  const submit=document.getElementById("institutionLoginSubmit");
+
+  submit.disabled=true;
+  submit.textContent="Giriş yapılıyor...";
+  message.className="login-message";
+  message.textContent="Hesap kontrol ediliyor...";
+
+  try{
+    await registrationAuth.setPersistence(
+      remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION
+    );
+    const cred=await registrationAuth.signInWithEmailAndPassword(email,password);
+    const accountDoc=await registrationDb.collection("institutionUsers").doc(cred.user.uid).get();
+
+    if(!accountDoc.exists){
+      await registrationAuth.signOut();
+      throw new Error("Bu kullanıcıya bağlı kurum hesabı bulunamadı.");
+    }
+
+    const account=accountDoc.data()||{};
+    if(account.status!=="approved"){
+      await registrationAuth.signOut();
+      if(account.status==="rejected")throw new Error("Kurum hesabı başvurunuz onaylanmadı.");
+      throw new Error("Kurum hesabınız henüz yönetici onayında.");
+    }
+
+    message.className="login-message success";
+    message.textContent="Giriş başarılı. Kurum paneli açılıyor...";
+    window.location.href="https://ftmotiondesign.github.io/dijiyer/institution.html";
+  }catch(err){
+    const map={
+      "auth/invalid-credential":"E-posta veya şifre doğru değil.",
+      "auth/wrong-password":"Şifre doğru değil.",
+      "auth/user-not-found":"Bu e-posta ile kayıtlı hesap bulunamadı.",
+      "auth/invalid-email":"Geçerli bir e-posta adresi yazın.",
+      "auth/too-many-requests":"Çok fazla giriş denemesi yapıldı. Bir süre sonra tekrar deneyin."
+    };
+    message.className="login-message error";
+    message.textContent=map[err.code]||err.message||"Giriş yapılamadı.";
+  }finally{
+    submit.disabled=false;
+    submit.textContent="Giriş Yap";
+  }
+});
+
+document.getElementById("institutionForgotPassword").addEventListener("click",async()=>{
+  const email=document.getElementById("institutionLoginEmail").value.trim();
+  const message=document.getElementById("institutionLoginMessage");
+  if(!email){
+    message.className="login-message error";
+    message.textContent="Önce e-posta adresinizi yazın.";
+    return;
+  }
+  try{
+    await registrationAuth.sendPasswordResetEmail(email);
+    message.className="login-message success";
+    message.textContent="Şifre yenileme bağlantısı e-posta adresinize gönderildi.";
+  }catch(err){
+    message.className="login-message error";
+    message.textContent="Şifre yenileme bağlantısı gönderilemedi.";
   }
 });
 
@@ -456,7 +566,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     await registrationAuth.signOut();
 
     msg.className="notice success";
-    msg.innerHTML="<strong>Hesabınız ve firma başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra <a href='https://ftmotiondesign.github.io/dijiyer/index.html?kurumgiris=1'>Kurum Girişi</a> üzerinden panelinize giriş yapabilirsiniz.";
+    msg.innerHTML="<strong>Hesabınız ve firma başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> üzerinden panelinize giriş yapabilirsiniz.";
     e.target.reset();
     subCategory.disabled=true;
     subCategory.innerHTML='<option value="">Önce sektör seçin</option>';
