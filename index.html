@@ -8,17 +8,9 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="google-home">
-<header class="google-top">
-  <a class="google-small-brand" href="index.html"><span class="brand-mark">D</span><span>DijiyeSor</span></a>
-  <a class="google-add" href="firma-ekle.html">Firmanı Ekle</a>
-</header>
 
 <main class="google-main">
   <section class="google-center">
-    <div class="google-logo-wrap">
-      <img class="google-mascot" src="assets/diji-mascot.webp" alt="DijiyeSor maskotu">
-    </div>
-
     <div class="google-search-shell">
       <div class="google-search-main">
         <span class="google-search-icon">⌕</span>
@@ -35,45 +27,12 @@
         </select>
       </div>
     </div>
-
-    <div class="google-actions">
-      <button id="homeMainSearchBtn" type="button" class="google-action-btn">Firma Ara</button>
-      <a href="firma-ekle.html" class="google-action-btn">Firmanı Tanıt</a>
-    </div>
-
-    <section class="revenue-priority" aria-label="Öncelikli çekim hizmetleri">
-
-      <div class="priority-grid">
-        <a class="priority-card priority-card-360" href="360-mekan.html">
-          <div class="priority-icon">360°</div>
-          <div class="priority-copy">
-            <span class="priority-badge">ÖNE ÇIKAN</span>
-            <h3>360° Mekan Çekimi</h3>
-            <span class="priority-cta">Detayları Gör →</span>
-          </div>
-        </a>
-
-        <a class="priority-card" href="mekan-fotograf.html">
-          <div class="priority-icon">📸</div>
-          <div class="priority-copy">
-            <span class="priority-badge">PROFESYONEL ÇEKİM</span>
-            <h3>Mekan Fotoğrafları</h3>
-            <span class="priority-cta">Detayları Gör →</span>
-          </div>
-        </a>
-      </div>
-    </section>
   </section>
 </main>
-
-<footer class="google-footer">
-  <span>DijiyeSor</span>
-</footer>
 
 <script>
 const searchInput=document.getElementById("homeSearchInput");
 const searchBtn=document.getElementById("homeSearchBtn");
-const mainSearchBtn=document.getElementById("homeMainSearchBtn");
 const citySelect=document.getElementById("homeCitySelect");
 const districtSelect=document.getElementById("homeDistrictSelect");
 
@@ -111,7 +70,6 @@ function goSearch(){
 }
 citySelect.addEventListener("change",loadDistricts);
 searchBtn.addEventListener("click",goSearch);
-mainSearchBtn.addEventListener("click",goSearch);
 searchInput.addEventListener("keydown",e=>{if(e.key==="Enter")goSearch()});
 loadCities();
 </script>
