@@ -152,3 +152,9 @@
 .member-no-account small{display:block;font-size:10px;color:#7c6a55;margin-top:4px;line-height:1.5}
 .member-no-account button{margin-top:10px}
 .member-account-ready{background:#ecfdf3;border:1px solid #bbf7d0;color:#15803d;border-radius:11px;padding:10px 12px;font-size:11px;font-weight:850}
+
+.member-create-account-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px}
+.member-create-account-form label{font-size:10px;font-weight:800;color:#5f6b7a}
+.member-create-account-form input{width:100%;margin-top:5px;border:1px solid #d8e0ea;border-radius:9px;padding:9px}
+.member-create-account-form button{height:39px;white-space:nowrap}
+@media(max-width:720px){.member-create-account-form{grid-template-columns:1fr}.member-create-account-form button{width:100%}}
