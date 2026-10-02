@@ -3,53 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DijiyeSor | Firma Ara, İncele, Bilgi Al</title>
-<meta name="description" content="DijiyeSor ile Türkiye genelindeki firmaları şehir, ilçe, sektör ve hizmete göre ara.">
+<title>DijiyeSor | Firma Ara</title>
+<meta name="description" content="DijiyeSor ile firma, sektör veya hizmet ara.">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<header class="topbar"><div class="container">
-  <a class="brand" href="index.html"><span class="brand-mark">D</span><span class="brand-name">DijiyeSor</span></a>
-  <nav class="nav"><a class="btn btn-soft" href="#firmalar">Firmalar</a><a class="btn btn-primary" href="firma-ekle.html">Firmanı Ekle</a></nav>
-</div></header>
+<body class="google-home">
+<header class="google-top">
+  <a class="google-small-brand" href="index.html"><span class="brand-mark">D</span><span>DijiyeSor</span></a>
+  <a class="google-add" href="firma-ekle.html">Firmanı Ekle</a>
+</header>
 
-<section class="hero"><div class="container"><div class="hero-copy">
-  <div class="eyebrow">DİJİYESOR · FİRMA ARAMA</div>
-  <h1>Aradığın firmayı kolayca bul.</h1>
-  <p>Firma adı, sektör veya hizmete göre ara. İl ve ilçe seçerek bulunduğun bölgedeki işletmeleri görüntüle ve firma tanıtım sayfalarını incele.</p>
-  <div class="search-box">
-    <div class="search-grid">
-      <input id="searchInput" class="field search-main" type="search" autocomplete="off" placeholder="Firma, sektör veya hizmet ara...">
-      <select id="citySelect" class="field"><option value="">Tüm İller</option></select>
-      <select id="districtSelect" class="field" disabled><option value="">Tüm İlçeler</option></select>
-      <select id="sectorSelect" class="field">
-        <option value="">Tüm Sektörler</option><option value="egitim">Eğitim</option><option value="otomotiv">Otomotiv</option>
-        <option value="yemeicme">Yeme & İçme</option><option value="saglikguzellik">Sağlık & Güzellik</option>
-        <option value="evyapi">Ev & Yapı</option><option value="emlak">Emlak</option><option value="turizm">Turizm & Konaklama</option>
-        <option value="organizasyonmedya">Organizasyon & Medya</option><option value="tasimacilik">Taşımacılık & Teslimat</option>
-        <option value="profesyonel">Profesyonel Hizmetler</option><option value="alisveris">Alışveriş & Yerel Esnaf</option><option value="diger">Diğer</option>
-      </select>
-      <button id="searchBtn" class="search-btn">Firma Ara</button>
+<main class="google-main">
+  <section class="google-center">
+    <div class="google-logo-wrap">
+      <div class="google-logo-mark">D</div>
+      <div class="google-logo-text">DijiyeSor</div>
     </div>
-    <div class="search-note"><span>✓ 81 il</span><span>✓ İlçe filtreleme</span><span>✓ DijiyeSor firma profilleri</span></div>
-  </div>
-</div></div></section>
+    <p class="google-tagline">Firma, kurum, sektör veya hizmet ara</p>
 
-<main id="firmalar" class="section"><div class="container">
-  <div class="section-head"><div><h2>Firmaları keşfet</h2><p>Kayıtlı işletmeleri filtreleyerek görüntüle.</p></div>
-    <div class="chips"><button class="chip active" data-sector="">Tümü</button><button class="chip" data-sector="egitim">Eğitim</button><button class="chip" data-sector="otomotiv">Otomotiv</button><button class="chip" data-sector="yemeicme">Yeme & İçme</button><button class="chip" data-sector="evyapi">Ev & Yapı</button></div>
-  </div>
-  <div id="resultSummary" class="summary">Firmalar yükleniyor...</div>
-  <div id="companyGrid" class="grid"><div class="state"><strong>Firmalar yükleniyor</strong>Lütfen kısa bir süre bekleyin.</div></div>
-</div></main>
+    <div class="google-search-shell">
+      <div class="google-search-main">
+        <span class="google-search-icon">⌕</span>
+        <input id="homeSearchInput" type="search" autocomplete="off" placeholder="Ne arıyorsun?">
+        <button id="homeSearchBtn" type="button">Ara</button>
+      </div>
 
-<section class="promo"><div class="container"><div class="promo-box">
-  <div><h2>Firman DijiyeSor’da yer alsın.</h2><p>Firma profilini oluştur; konumunu, hizmetlerini ve iletişim bilgilerini tek sayfada göster.</p></div>
-  <a class="btn btn-white" href="firma-ekle.html">Firma Ekle</a>
-</div></div></section>
+      <div class="google-location-row">
+        <select id="homeCitySelect">
+          <option value="">Tüm Türkiye</option>
+        </select>
+        <select id="homeDistrictSelect" disabled>
+          <option value="">Tüm İlçeler</option>
+        </select>
+      </div>
+    </div>
 
-<footer class="footer"><div class="container">© 2026 DijiyeSor · Firma Arama ve Tanıtım</div></footer>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="app.js"></script>
-</body></html>
+    <div class="google-actions">
+      <button id="homeMainSearchBtn" type="button" class="google-action-btn">Firma Ara</button>
+      <a href="firma-ekle.html" class="google-action-btn">Firmanı Tanıt</a>
+    </div>
+  </section>
+</main>
+
+<footer class="google-footer">
+  <span>DijiyeSor</span>
+  <span>Firma Arama ve Tanıtım</span>
+</footer>
+
+<script>
+const searchInput=document.getElementById("homeSearchInput");
+const searchBtn=document.getElementById("homeSearchBtn");
+const mainSearchBtn=document.getElementById("homeMainSearchBtn");
+const citySelect=document.getElementById("homeCitySelect");
+const districtSelect=document.getElementById("homeDistrictSelect");
+
+async function loadCities(){
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+    const j=await r.json();
+    citySelect.innerHTML='<option value="">Tüm Türkiye</option>';
+    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;citySelect.appendChild(o);
+    });
+  }catch(_){}
+}
+async function loadDistricts(){
+  const id=citySelect.options[citySelect.selectedIndex]?.dataset?.id;
+  districtSelect.disabled=true;
+  districtSelect.innerHTML='<option value="">Tüm İlçeler</option>';
+  if(!id)return;
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");
+    const j=await r.json();
+    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{
+      const o=document.createElement("option");o.value=d.name;o.textContent=d.name;districtSelect.appendChild(o);
+    });
+    districtSelect.disabled=false;
+  }catch(_){}
+}
+function goSearch(){
+  const p=new URLSearchParams();
+  if(searchInput.value.trim())p.set("q",searchInput.value.trim());
+  if(citySelect.value)p.set("city",citySelect.value);
+  if(districtSelect.value)p.set("district",districtSelect.value);
+  location.href="arama.html"+(p.toString()?"?"+p.toString():"");
+}
+citySelect.addEventListener("change",loadDistricts);
+searchBtn.addEventListener("click",goSearch);
+mainSearchBtn.addEventListener("click",goSearch);
+searchInput.addEventListener("keydown",e=>{if(e.key==="Enter")goSearch()});
+loadCities();
+</script>
+</body>
+</html>
