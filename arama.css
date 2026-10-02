@@ -36,7 +36,7 @@ button,input,select{font:inherit}
 .search-line input{flex:1;min-width:0;height:100%;border:0;outline:0;padding:0 12px;font-size:16px}
 .search-line button{height:40px;margin-right:8px;border:0;border-radius:21px;padding:0 21px;background:#1677ff;color:#fff;font-weight:900;cursor:pointer}
 
-.filters{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;margin-top:12px}
+.filters{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;margin-top:12px}
 .filters select,.clear-btn{height:44px;border:1px solid #e0e5ed;border-radius:12px;background:#fff;padding:0 12px;color:#59657b;outline:none}
 .filters select:focus{border-color:#1677ff}
 .filters select:disabled{background:#f7f8fa;color:#a1a9b5}
@@ -101,4 +101,9 @@ button,input,select{font:inherit}
   .result-card{padding:14px}
   .result-name-row h2{font-size:15px}
   .result-actions{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:900px){
+  .filters{grid-template-columns:1fr 1fr}
+  .filters .clear-btn{grid-column:1/-1}
 }
