@@ -190,10 +190,112 @@ function renderCampaigns(){
 }
 document.querySelectorAll("[data-campaign-filter]").forEach(b=>b.addEventListener("click",()=>{campaignFilter=b.dataset.campaignFilter;document.querySelectorAll("[data-campaign-filter]").forEach(x=>x.classList.toggle("active",x===b));renderCampaigns()}));
 
+function formatApplicationDate(value){
+  if(!value)return "-";
+  const d=new Date(value);
+  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString("tr-TR");
+}
+
+function applicationStatusLabel(status){
+  return ({new:"Bekliyor",approved:"Onaylandı",rejected:"Reddedildi"})[String(status||"new")]||String(status||"-");
+}
+
+function detailRow(label,value){
+  return '<div class="application-detail-row"><span>'+esc(label)+'</span><strong>'+esc(value||"-")+'</strong></div>';
+}
+
+function openApplicationDetail(id){
+  const a=applications.find(x=>x.id===id);
+  if(!a)return;
+
+  const status=String(a.status||"new");
+  const interests=[
+    a.wantsPhoto?"Profesyonel mekan fotoğrafı":"",
+    a.wantsVideo?"Tanıtım videosu":"",
+    a.wants360Tour?"360° mekan turu":"",
+    a.wantsVip?"VIP / öne çıkan profil":"",
+    a.wantsQrNfc?"QR / NFC Akıllı Firma Kartı":"",
+    a.wantsCampaign?"Kampanya / reklam":""
+  ].filter(Boolean);
+
+  let campaignHtml="";
+  if(a.wantsCampaign || a.campaignRequest){
+    const c=a.campaignRequest||{};
+    campaignHtml='<section class="application-detail-section campaign">'+
+      '<div class="application-detail-section-head"><span>KAMPANYA TALEBİ</span><strong>'+esc(c.title||"Kampanya talebi")+'</strong></div>'+
+      '<div class="application-detail-grid">'+
+        detailRow("Tür",c.type||"-")+
+        detailRow("Bitiş",c.end||"-")+
+        detailRow("Sponsor",c.sponsored?"Evet":"Hayır")+
+        detailRow("Bağlantı",c.url||"-")+
+      '</div>'+
+      (c.text?'<div class="application-detail-description"><span>Açıklama</span><p>'+esc(c.text)+'</p></div>':'')+
+    '</section>';
+  }
+
+  $("applicationDetailTitle").textContent=a.name||"Başvuru Detayı";
+  $("applicationDetailBody").innerHTML=
+    '<section class="application-detail-status"><div><span>BAŞVURU DURUMU</span><strong>'+esc(applicationStatusLabel(status))+'</strong></div><small>'+esc(formatApplicationDate(a.date))+'</small></section>'+
+    '<section class="application-detail-section">'+
+      '<div class="application-detail-section-head"><span>HESAP BİLGİLERİ</span><strong>Üye bilgileri</strong></div>'+
+      '<div class="application-detail-grid">'+
+        detailRow("Yetkili",a.contactName||"-")+
+        detailRow("E-posta",a.accountEmail||"-")+
+        detailRow("Telefon",a.phone||"-")+
+        detailRow("Hesap UID",a.authUid||"-")+
+      '</div>'+
+    '</section>'+
+    '<section class="application-detail-section">'+
+      '<div class="application-detail-section-head"><span>FİRMA BİLGİLERİ</span><strong>'+esc(a.name||"Firma")+'</strong></div>'+
+      '<div class="application-detail-grid">'+
+        detailRow("Sektör",categories[a.mainCategory]||a.mainCategory||"-")+
+        detailRow("Alt kategori",a.subCategory||a.category||"-")+
+        detailRow("İl",a.city||"-")+
+        detailRow("İlçe",a.district||"-")+
+        detailRow("WhatsApp",a.whatsapp||"-")+
+        detailRow("Web sitesi",a.website||"-")+
+        detailRow("Instagram",a.instagram||"-")+
+        detailRow("Başvuru kaynağı",a.source||"-")+
+      '</div>'+
+      '<div class="application-detail-description"><span>Adres</span><p>'+esc(a.address||"-")+'</p></div>'+
+      '<div class="application-detail-description"><span>Firma açıklaması</span><p>'+esc(a.description||"-")+'</p></div>'+
+    '</section>'+
+    '<section class="application-detail-section">'+
+      '<div class="application-detail-section-head"><span>EK HİZMETLER</span><strong>Talep edilenler</strong></div>'+
+      '<div class="application-detail-tags">'+(interests.length?interests.map(x=>'<span>'+esc(x)+'</span>').join(""):'<em>Ek hizmet seçilmemiş.</em>')+'</div>'+
+    '</section>'+
+    campaignHtml;
+
+  $("applicationDetailApprove").dataset.approveApp=a.id;
+  $("applicationDetailReject").dataset.rejectApp=a.id;
+  $("applicationDetailApprove").style.display=status==="new"?"":"none";
+  $("applicationDetailReject").style.display=status==="new"?"":"none";
+  $("applicationDetailModal").classList.remove("hidden");
+}
+
 function renderApplications(){
   const q=norm($("applicationSearch").value),filter=$("applicationFilter").value;
-  const list=applications.filter(a=>(!q||norm([a.name,a.city,a.district,a.phone].join(" ")).includes(q))&&(!filter||String(a.status||"new")===filter));
-  $("applicationList").innerHTML=list.length?list.map(a=>'<article class="application-card"><div><h3>'+esc(a.name)+'</h3><p>'+esc([categories[a.mainCategory]||a.mainCategory,a.city,a.district].filter(Boolean).join(" · "))+'</p></div><div class="application-meta">'+esc(a.phone||"")+(a.wantsCampaign?'<br>📣 Kampanya istiyor':'')+(a.wants360Tour?'<br>360° tur istiyor':'')+(a.wantsVip?'<br>⭐ VIP istiyor':'')+'</div><div class="application-actions">'+(String(a.status||"new")==="new"?'<button class="approve" data-approve-app="'+esc(a.id)+'">Onayla</button><button class="reject" data-reject-app="'+esc(a.id)+'">Reddet</button>':'<span class="status-pill">'+esc(a.status)+'</span>')+'</div></article>').join(""):'<div class="empty">Başvuru bulunamadı.</div>';
+  const list=applications.filter(a=>(!q||norm([a.name,a.contactName,a.accountEmail,a.city,a.district,a.phone].join(" ")).includes(q))&&(!filter||String(a.status||"new")===filter));
+  $("applicationList").innerHTML=list.length?list.map(a=>{
+    const status=String(a.status||"new");
+    const serviceTags=[
+      a.wantsCampaign?"Kampanya":"",
+      a.wants360Tour?"360° Tur":"",
+      a.wantsVip?"VIP":"",
+      a.wantsQrNfc?"QR/NFC":""
+    ].filter(Boolean);
+    return '<article class="application-card">'+
+      '<div><h3>'+esc(a.name||"İsimsiz firma")+'</h3><p>'+esc([categories[a.mainCategory]||a.mainCategory,a.city,a.district].filter(Boolean).join(" · "))+'</p>'+
+      (a.contactName?'<small class="application-submeta">Yetkili: '+esc(a.contactName)+'</small>':'')+'</div>'+
+      '<div class="application-meta">'+esc(a.phone||"")+
+      (a.accountEmail?'<br>'+esc(a.accountEmail):'')+
+      (serviceTags.length?'<div class="application-mini-tags">'+serviceTags.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>':'')+
+      '</div>'+
+      '<div class="application-actions">'+
+      '<button class="secondary" data-detail-app="'+esc(a.id)+'">Detay</button>'+
+      (status==="new"?'<button class="approve" data-approve-app="'+esc(a.id)+'">Onayla</button><button class="reject" data-reject-app="'+esc(a.id)+'">Reddet</button>':'<span class="status-pill">'+esc(status)+'</span>')+
+      '</div></article>';
+  }).join(""):'<div class="empty">Başvuru bulunamadı.</div>';
 }
 $("applicationSearch").addEventListener("input",renderApplications);$("applicationFilter").addEventListener("change",renderApplications);
 
@@ -238,6 +340,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const detailApp=e.target.closest("[data-detail-app]");if(detailApp)return openApplicationDetail(detailApp.dataset.detailApp);
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
   const edit=e.target.closest("[data-edit-firm]");if(edit)return openFirmModal(edit.dataset.editFirm);
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
@@ -257,7 +360,7 @@ document.addEventListener("click",async e=>{
         date:a.date||new Date().toISOString()
       },{merge:true});
     }
-    await Promise.all([loadFirms(),loadApplications()]);renderAll();return
+    await Promise.all([loadFirms(),loadApplications()]);renderAll();$("applicationDetailModal")?.classList.add("hidden");return
   }
-  const reject=e.target.closest("[data-reject-app]");if(reject){await db.collection("institutionApplications").doc(reject.dataset.rejectApp).set({status:"rejected",rejectedAt:new Date().toISOString()},{merge:true});await loadApplications();renderAll()}
+  const reject=e.target.closest("[data-reject-app]");if(reject){await db.collection("institutionApplications").doc(reject.dataset.rejectApp).set({status:"rejected",rejectedAt:new Date().toISOString()},{merge:true});await loadApplications();renderAll();$("applicationDetailModal")?.classList.add("hidden")}
 });
