@@ -122,7 +122,7 @@
 
             <label class="bilgi-check">
               <input id="bilgiBroadcast" type="checkbox">
-              <span><strong>Aynı sektördeki diğer firmalara da gönder</strong><small>Seçersen bu talep aynı sektördeki uygun kayıtlı firmalara da ulaşır.</small></span>
+              <span><strong id="bilgiBroadcastTitle">Aynı sektördeki diğer firmalara da gönder</strong><small id="bilgiBroadcastHelp">Seçersen bu talep aynı sektördeki uygun kayıtlı firmalara da ulaşır.</small></span>
             </label>
 
             <label class="bilgi-consent">
@@ -151,8 +151,17 @@
       city:btn.dataset.city||"",
       district:btn.dataset.district||""
     };
+    const firmName=current.institutionName||"Seçili firma";
     document.getElementById("bilgiFirmText").innerHTML=
-      '<strong>'+esc(current.institutionName||"Seçili firma")+'</strong> için bilgi talebi gönderiyorsun.';
+      '<strong>'+esc(firmName)+'</strong> için bilgi talebi gönderiyorsun.';
+    const broadcastTitle=document.getElementById("bilgiBroadcastTitle");
+    const broadcastHelp=document.getElementById("bilgiBroadcastHelp");
+    if(broadcastTitle){
+      broadcastTitle.textContent=firmName+" sayfasından geldiniz. Talebim aynı sektördeki diğer firmalara da gönderilsin.";
+    }
+    if(broadcastHelp){
+      broadcastHelp.textContent="Bu kutuyu işaretlersen talebin "+firmName+" ile birlikte aynı sektördeki uygun diğer kayıtlı firmalara da iletilir.";
+    }
     document.getElementById("bilgiMessage").className="bilgi-message hidden";
     document.getElementById("bilgiMessage").textContent="";
     document.getElementById("bilgiBroadcast").checked=false;
