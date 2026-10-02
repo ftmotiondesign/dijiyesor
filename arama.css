@@ -20,7 +20,7 @@ button,input,select{font:inherit}
 .add-link{font-size:14px;font-weight:800;color:#1677ff;padding:9px 12px;border-radius:9px}
 .add-link:hover{background:#f4f7fb}
 
-.page{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:26px 0 48px}
+.page{width:min(1040px,calc(100% - 32px));margin:0 auto;padding:24px 0 52px}
 
 .search-area{background:#fff}
 .search-line{
@@ -43,26 +43,26 @@ button,input,select{font:inherit}
 .clear-btn{cursor:pointer;background:#f6f8fb;font-weight:800;color:#68758a;padding:0 16px}
 
 .results-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:34px 0 18px}
-.results-head h1{margin:0 0 5px;font-size:28px;letter-spacing:-.4px}
+.results-head h1{margin:0 0 5px;font-size:26px;letter-spacing:-.35px}
 .results-head p{margin:0;color:#7a8596;font-size:14px}
 .count{background:#eef5ff;color:#1677ff;padding:8px 12px;border-radius:999px;font-weight:900;font-size:12px;white-space:nowrap}
 
-.results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.result-card{border:1px solid #e5eaf1;border-radius:18px;padding:18px;background:#fff;transition:.18s}
+.results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.result-card{border:1px solid #e6ebf2;border-radius:16px;padding:16px;background:#fff;transition:.18s}
 .result-card:hover{border-color:#d7dfe9;box-shadow:0 10px 28px rgba(35,52,81,.08);transform:translateY(-2px)}
-.result-card-top{display:flex;gap:13px;align-items:center}
-.result-logo{width:56px;height:56px;border-radius:14px;background:#eef4ff;color:#1677ff;display:grid;place-items:center;overflow:hidden;font-size:18px;font-weight:900;flex:0 0 auto}
+.result-card-top{display:flex;gap:11px;align-items:center}
+.result-logo{width:44px;height:44px;border-radius:11px;background:#eef4ff;color:#1677ff;display:grid;place-items:center;overflow:hidden;font-size:14px;font-weight:900;flex:0 0 auto}
 .result-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
 .result-card-copy{min-width:0;flex:1}
 .result-name-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.result-name-row h2{font-size:17px;line-height:1.25;margin:0}
-.result-location{margin-top:5px;color:#7a8597;font-size:12px}
-.result-category{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:999px;background:#f3f5f8;color:#5f6b7f;font-size:11px;font-weight:800}
+.result-name-row h2{font-size:16px;line-height:1.25;margin:0;font-weight:800}
+.result-location{margin-top:4px;color:#7a8597;font-size:11.5px}
+.result-category{display:inline-block;margin-top:6px;padding:4px 7px;border-radius:999px;background:#f3f5f8;color:#5f6b7f;font-size:10.5px;font-weight:800}
 .result-badge{display:inline-block;padding:4px 7px;border-radius:999px;background:#eef4ff;color:#1677ff;font-size:9px;font-weight:900}
 .result-badge.vip{background:#fff3d2;color:#966400}
-.result-desc{margin:14px 0 16px;color:#697589;font-size:13px;line-height:1.55;min-height:60px}
+.result-desc{margin:12px 0 14px;color:#697589;font-size:13px;line-height:1.5;min-height:58px}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.result-primary,.result-secondary{text-align:center;border-radius:10px;padding:10px 9px;font-size:13px;font-weight:900}
+.result-primary,.result-secondary{text-align:center;border-radius:9px;padding:9px 8px;font-size:12.5px;font-weight:900}
 .result-primary{background:#1677ff;color:#fff}
 .result-secondary{background:#eef4ff;color:#1677ff}
 
@@ -90,4 +90,15 @@ button,input,select{font:inherit}
   .search-icon{margin-left:14px}
   .filters{grid-template-columns:1fr}
   .filters select:nth-child(3),.clear-btn{grid-column:auto}
+}
+.result-card-copy{min-width:0;flex:1;overflow:hidden}
+.result-name-row h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.result-card:hover .result-name-row h2{color:#1677ff}
+.results-head{padding:0 2px}
+.search-area{max-width:900px;margin:0 auto}
+@media(max-width:760px){
+  .result-logo{width:40px;height:40px;border-radius:10px;font-size:13px}
+  .result-card{padding:14px}
+  .result-name-row h2{font-size:15px}
+  .result-actions{grid-template-columns:1fr 1fr}
 }
