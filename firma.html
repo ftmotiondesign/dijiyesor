@@ -75,6 +75,41 @@
       return String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim();
     }
 
+    function campaignActive(d){
+      const active=Boolean(d.campaignActive||d.hasCampaign);
+      const title=String(d.campaignTitle||d.promotionTitle||"").trim();
+      if(!active||!title)return false;
+      const end=d.campaignEnd||d.campaignEndDate||"";
+      if(end){
+        const date=new Date(end);
+        if(!Number.isNaN(date.getTime()) && date.getTime()<Date.now())return false;
+      }
+      return true;
+    }
+
+    function buildCampaignSection(d){
+      if(!campaignActive(d))return "";
+      const title=d.campaignTitle||d.promotionTitle||"";
+      const text=d.campaignText||d.campaignDescription||d.promotionText||"";
+      const badge=d.campaignBadge||d.promotionBadge||"Güncel Kampanya";
+      const end=d.campaignEnd||d.campaignEndDate||"";
+      const image=safeUrl(d.campaignImageUrl||d.promotionImageUrl||"");
+      const link=safeUrl(d.campaignUrl||d.promotionUrl||"");
+      return '<section class="section-card campaign-section" id="kampanya">'+
+        '<div class="campaign-kicker">GÜNCEL KAMPANYA</div>'+
+        '<div class="campaign-layout">'+
+          (image?'<img class="campaign-image" src="'+esc(image)+'" alt="'+esc(title)+'">':'')+
+          '<div class="campaign-content">'+
+            '<span class="campaign-pill">'+esc(badge)+'</span>'+
+            '<h2>'+esc(title)+'</h2>'+
+            (text?'<p>'+esc(text)+'</p>':'')+
+            (end?'<small>Son tarih: '+esc(new Date(end).toLocaleDateString("tr-TR"))+'</small>':'')+
+            (link?'<a href="'+esc(link)+'" target="_blank" rel="noopener">Kampanyayı İncele ↗</a>':'')+
+          '</div>'+
+        '</div>'+
+      '</section>';
+    }
+
     function buildTourSection(d){
       const raw=getTourUrl(d);
       if(!raw)return "";
@@ -195,6 +230,7 @@
                 '<h1>'+esc(d.name||"Firma")+'</h1>'+
                 (d.vip?'<span class="profile-badge">VIP</span>':'')+
                 (getTourUrl(d)?'<span class="profile-badge tour">360° TUR</span>':'')+
+                (campaignActive(d)?'<span class="profile-badge campaign">KAMPANYA</span>':'')+
               '</div>'+
               (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
@@ -213,6 +249,7 @@
                 '<p class="about-text">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p>'+
               '</section>'+
 
+              buildCampaignSection(d)+
               buildTourSection(d)+
               '<section class="section-card">'+
                 '<div class="section-title"><div><span>GALERİ</span><h2>Fotoğraf & Video</h2></div></div>'+
