@@ -3,6 +3,62 @@ if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const subcategoryMap={"egitim":{"kres":"Kreş / Anaokulu","dershane":"Dershane / Kurs Merkezi","surucu":"Sürücü Kursu","ozel_ders":"Özel Ders","dil_kursu":"Dil Kursu","etut":"Etüt Merkezi","ozel_okul":"Özel Okul","yurt":"Öğrenci Yurdu"},"otomotiv":{"oto_servis":"Oto Servis","kaporta_boya":"Kaporta & Boya","oto_elektrik":"Oto Elektrik","lastik_jant":"Lastik & Jant","oto_yikama":"Oto Yıkama","ekspertiz":"Ekspertiz","galeri":"Oto Galeri","rentacar":"Rent a Car","yedek_parca":"Yedek Parça","motosiklet":"Motosiklet"},"yemeicme":{"restoran":"Restoran","kafe":"Kafe","fastfood":"Fast Food","pastane":"Pastane","pizza":"Pizza","doner":"Döner","pide_lahmacun":"Pide & Lahmacun","catering":"Catering","ev_yemekleri":"Ev Yemekleri"},"saglikguzellik":{"dis_klinigi":"Diş Kliniği","klinik":"Klinik","psikolog":"Psikolog","diyetisyen":"Diyetisyen","fizyoterapi":"Fizyoterapi","guzellik":"Güzellik Merkezi","kuafor":"Kuaför","berber":"Berber","spor":"Spor Merkezi"},"evyapi":{"mobilya":"Mobilya","dekorasyon":"Dekorasyon","insaat":"İnşaat","elektrikci":"Elektrikçi","tesisatci":"Tesisatçı","teknik_servis":"Teknik Servis","klima":"Klima","cam_balkon":"Cam Balkon","temizlik":"Temizlik"},"emlak":{"emlak_ofisi":"Emlak Ofisi","konut":"Konut","arsa":"Arsa","ticari":"Ticari Gayrimenkul","gunluk_kiralik":"Günlük Kiralık"},"turizm":{"otel":"Otel","pansiyon":"Pansiyon","apart":"Apart","bungalov":"Bungalov","seyahat":"Seyahat Acentesi","kamp":"Kamp"},"organizasyonmedya":{"dugun_salonu":"Düğün Salonu","organizasyon":"Organizasyon","fotograf":"Fotoğrafçı","video":"Video Prodüksiyon","drone":"Drone Çekimi","gelinlik":"Gelinlik","cicekci":"Çiçekçi","reklam":"Reklam Ajansı"},"tasimacilik":{"nakliyat":"Nakliyat","kurye":"Kurye","sehirici":"Şehir İçi Taşımacılık","depolama":"Depolama"},"profesyonel":{"hukuk":"Hukuk","muhasebe":"Muhasebe","web":"Web Tasarım","sosyal_medya":"Sosyal Medya","teknoloji":"Teknoloji","bilgisayar":"Bilgisayar","danismanlik":"Danışmanlık","veteriner":"Veteriner","tarim":"Tarım"},"alisveris":{"giyim":"Giyim","ayakkabi":"Ayakkabı","market":"Market","elektronik":"Elektronik","kirtasiye":"Kırtasiye","petshop":"Pet Shop","zuccaciye":"Züccaciye","esnaf":"Yerel Esnaf"},"diger":{"diger":"Diğer"}};
 const categoryLabels={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
+const searchKeywords={
+  surucu:["sürücü kursu","surucu kursu","ehliyet","direksiyon","direksiyon dersi","b ehliyet","a ehliyet","a2 ehliyet","motor ehliyeti","motosiklet ehliyeti","otomobil ehliyeti","src","kurs ehliyet"],
+  kres:["kreş","kres","anaokulu","ana okulu","gündüz bakımevi","gunduz bakimevi","çocuk bakım","cocuk bakim"],
+  dershane:["dershane","kurs merkezi","lgs","tyt","ayt","yks","deneme kulübü","deneme kulubu","etüt","etut"],
+  dil_kursu:["ingilizce kursu","dil kursu","almanca kursu","yabancı dil","yabanci dil"],
+  yurt:["öğrenci yurdu","ogrenci yurdu","erkek yurdu","kız yurdu","kiz yurdu","yurt"],
+  oto_servis:["oto servis","araç bakım","arac bakim","tamirci","oto tamir","mekanik servis"],
+  kaporta_boya:["kaporta","boya","oto boya","göçük","gocuk"],
+  oto_elektrik:["oto elektrik","oto elektrikçi","oto elektrikci"],
+  ekspertiz:["ekspertiz","oto ekspertiz","araç ekspertiz","arac ekspertiz"],
+  rentacar:["rent a car","araç kiralama","arac kiralama","oto kiralama"],
+  restoran:["restoran","yemek","lokanta"],
+  kafe:["kafe","cafe","kahve"],
+  fastfood:["fast food","hamburger","burger"],
+  pizza:["pizza","pizzacı","pizzaci"],
+  doner:["döner","doner"],
+  dis_klinigi:["diş","dis","diş kliniği","dis klinigi","dişçi","disci"],
+  psikolog:["psikolog","psikoloji","terapi"],
+  diyetisyen:["diyetisyen","beslenme","diyet"],
+  guzellik:["güzellik merkezi","guzellik merkezi","cilt bakımı","cilt bakimi"],
+  kuafor:["kuaför","kuafor","saç","sac"],
+  berber:["berber","erkek kuaförü","erkek kuaforu"],
+  spor:["spor salonu","fitness","gym","pilates"],
+  mobilya:["mobilya","koltuk","yatak odası","yatak odasi"],
+  dekorasyon:["dekorasyon","iç mimari","ic mimari"],
+  insaat:["inşaat","insaat","müteahhit","muteahhit"],
+  elektrikci:["elektrikçi","elektrikci","elektrik ustası","elektrik ustasi"],
+  tesisatci:["tesisatçı","tesisatci","su tesisatı","su tesisati"],
+  klima:["klima","klima servis","klima montaj"],
+  emlak_ofisi:["emlak","emlakçı","emlakci","gayrimenkul"],
+  otel:["otel","hotel","konaklama"],
+  pansiyon:["pansiyon"],
+  apart:["apart","apart otel"],
+  bungalov:["bungalov","bungalow"],
+  fotograf:["fotoğrafçı","fotografci","fotoğraf çekimi","fotograf cekimi"],
+  video:["video çekimi","video cekimi","prodüksiyon","produksiyon"],
+  drone:["drone","drone çekimi","hava çekimi","hava cekimi"],
+  reklam:["reklam","ajans","reklam ajansı","reklam ajansi"],
+  nakliyat:["nakliyat","evden eve","taşımacılık","tasimacilik"],
+  kurye:["kurye","moto kurye","teslimat"],
+  hukuk:["avukat","hukuk","hukuk bürosu","hukuk burosu"],
+  muhasebe:["muhasebe","mali müşavir","mali musavir"],
+  web:["web sitesi","web tasarım","web tasarim","site yaptırma","site yaptirma"],
+  sosyal_medya:["sosyal medya","instagram yönetimi","instagram yonetimi","reels","reklam yönetimi","reklam yonetimi"],
+  veteriner:["veteriner","hayvan hastanesi","pet klinik"],
+  market:["market","bakkal","süpermarket","supermarket"],
+  petshop:["pet shop","petshop","evcil hayvan"]
+};
+
+function keywordTargets(query){
+  const q=norm(query);
+  if(!q)return [];
+  return Object.entries(searchKeywords)
+    .filter(([,words])=>words.some(word=>q.includes(norm(word)) || norm(word).includes(q)))
+    .map(([key])=>key);
+}
 const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -96,7 +152,7 @@ async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),subCategory=document.getElementById("subCategorySelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
   if(!search)return;
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
-  const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";render(companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.location,i.category,i.subCategory,i.mainCategory,(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));return(!q||h.includes(q))&&(!c||norm(i.city)===c)&&(!d||norm(i.district)===d)&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)}))};
+  const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"",targets=keywordTargets(q);render(companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const keywordMatch=targets.length&&targets.some(t=>i.subCategory===t||i.category===t);return(!q||h.includes(q)||keywordMatch)&&(!c||norm(i.city)===c)&&(!d||norm(i.district)===d)&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)}))};
   const params=new URLSearchParams(location.search);
   await loadProvinces(city,district);
   if(params.get("q"))search.value=params.get("q");
