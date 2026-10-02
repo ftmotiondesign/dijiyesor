@@ -248,6 +248,15 @@ document.addEventListener("click",async e=>{
     const data={name:a.name||"Firma",mainCategory:a.mainCategory||"diger",subCategory:a.subCategory||a.category||"",category:a.subCategory||a.category||a.mainCategory||"diger",city:a.city||"",district:a.district||"",address:a.address||"",phone:a.phone||"",whatsapp:a.whatsapp||"",website:a.website||"",instagram:a.instagram||"",description:a.description||"",status:"active",createdAt:new Date().toISOString(),vip:false,sponsored:false};
     const ref=await db.collection("institutions").add(data);
     await db.collection("institutionApplications").doc(a.id).set({status:"approved",approvedInstitutionId:ref.id,approvedAt:new Date().toISOString()},{merge:true});
+    if(a.authUid){
+      await db.collection("institutionUsers").doc(a.authUid).set({
+        email:a.accountEmail||"",
+        institutionId:ref.id,
+        institutionName:a.name||"Firma",
+        status:"approved",
+        date:a.date||new Date().toISOString()
+      },{merge:true});
+    }
     await Promise.all([loadFirms(),loadApplications()]);renderAll();return
   }
   const reject=e.target.closest("[data-reject-app]");if(reject){await db.collection("institutionApplications").doc(reject.dataset.rejectApp).set({status:"rejected",rejectedAt:new Date().toISOString()},{merge:true});await loadApplications();renderAll()}
