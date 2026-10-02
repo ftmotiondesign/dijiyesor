@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kampanya Demo | DijiyeSor</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f5f7fb;color:#172139}
+    .wrap{width:min(980px,calc(100% - 28px));margin:auto;padding:34px 0 56px}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.brand{font-weight:900}.brand b{display:inline-grid;place-items:center;width:34px;height:34px;background:#1677ff;color:#fff;border-radius:10px;margin-right:8px}
+    .back{font-size:12px;font-weight:800;color:#1677ff;text-decoration:none}
+    h1{font-size:32px;margin:0 0 8px}.lead{color:#748095;margin:0 0 28px}
+    .demo-label{font-size:10px;font-weight:900;letter-spacing:.12em;color:#1677ff;margin:28px 0 10px}
+    .search-card{background:#fff;border:1px solid #e3e8ef;border-radius:16px;padding:16px;margin-bottom:10px}
+    .sponsored{border:1px solid #efd9a8;background:linear-gradient(135deg,#fffdf7,#fff8e8);box-shadow:0 8px 24px rgba(170,120,20,.08)}
+    .row{display:flex;gap:13px;align-items:flex-start}.logo{width:48px;height:48px;border-radius:12px;background:#1677ff;color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;flex:0 0 auto}.copy{flex:1}.title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.title-row h2{font-size:18px;margin:0}.sponsor-tag{font-size:9px;font-weight:900;background:#fff1bf;color:#8f6600;border:1px solid #ead08b;border-radius:999px;padding:4px 7px}.loc{font-size:11px;color:#8490a2;margin-top:4px}.campaign-chip{display:inline-block;margin-top:11px;background:#e7f1ff;color:#1677ff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900}.campaign-title{font-size:21px;font-weight:900;margin:8px 0 5px}.campaign-text{font-size:12px;color:#657187;line-height:1.5}.actions{display:flex;gap:8px;margin-top:12px}.actions a{padding:9px 12px;border-radius:9px;text-decoration:none;font-size:11px;font-weight:900}.primary{background:#1677ff;color:#fff}.secondary{background:#fff;border:1px solid #dfe5ed;color:#526079}
+    .profile{background:#fff;border:1px solid #e2e7ef;border-radius:20px;overflow:hidden}.profile-head{padding:18px;display:flex;align-items:center;gap:12px}.profile-head .logo{width:54px;height:54px}.profile-head h2{margin:0 0 4px;font-size:20px}.profile-head small{color:#8a95a6}.profile-body{padding:18px}.campaign-box{border:1px solid #f1dfb9;background:linear-gradient(135deg,#fffdf7,#fff8e8);border-radius:15px;padding:18px}.campaign-box .kicker{font-size:10px;letter-spacing:.12em;font-weight:900;color:#a56d00}.campaign-box h3{font-size:25px;margin:8px 0 7px}.campaign-box p{color:#6f6657;font-size:13px;line-height:1.55;margin:0 0 9px}.campaign-box small{display:block;color:#968a76;margin-bottom:12px}.campaign-box a{display:inline-flex;background:#d99300;color:#fff;padding:10px 13px;border-radius:9px;text-decoration:none;font-size:11px;font-weight:900}
+    .note{margin-top:22px;background:#eef5ff;color:#46688f;border-radius:12px;padding:13px;font-size:12px;line-height:1.55}
+    @media(max-width:600px){h1{font-size:27px}.campaign-title{font-size:18px}.campaign-box h3{font-size:21px}.actions{flex-direction:column}.actions a{text-align:center}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div class="brand"><b>D</b>DijiyeSor</div><a class="back" href="admin.html">Yönetim Paneline Dön</a></div>
+  <h1>Sponsorlu Kampanya Demo</h1>
+  <p class="lead">Bir kampanyanın kullanıcı tarafında nasıl görüneceğini gösteren örnek.</p>
+
+  <div class="demo-label">ARAMA SONUÇLARINDA</div>
+  <article class="search-card sponsored">
+    <div class="row">
+      <div class="logo">A</div>
+      <div class="copy">
+        <div class="title-row"><h2>Abide Sürücü Kursu</h2><span class="sponsor-tag">Sponsor</span></div>
+        <div class="loc">📍 Çanakkale · Merkez</div>
+        <span class="campaign-chip">Büyük Kampanya</span>
+        <div class="campaign-title">Ekim kayıtlarında özel fırsat</div>
+        <div class="campaign-text">B sınıfı ehliyet kayıtlarında sınırlı süreli özel avantaj. Kontenjan dolmadan bilgi al.</div>
+        <div class="actions"><a class="primary" href="#">Kampanyayı Gör</a><a class="secondary" href="#">Bilgi Al</a></div>
+      </div>
+    </div>
+  </article>
+
+  <div class="demo-label">FİRMA PROFİLİNDE</div>
+  <section class="profile">
+    <div class="profile-head">
+      <div class="logo">A</div>
+      <div><h2>Abide Sürücü Kursu</h2><small>Çanakkale · Sürücü Kursu</small></div>
+    </div>
+    <div class="profile-body">
+      <div class="campaign-box">
+        <div class="kicker">GÜNCEL KAMPANYA</div>
+        <h3>Ekim kayıtlarında özel fırsat</h3>
+        <p>B sınıfı ehliyet kayıtlarında sınırlı süreli avantaj. Detaylı bilgi almak için kampanya bağlantısını inceleyebilirsin.</p>
+        <small>Son tarih: 10 Ekim 2026</small>
+        <a href="#">Kampanyayı İncele ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="note"><strong>Demo notu:</strong> Bu sayfa sadece görünümü gösterir. Gerçek kampanya, yönetim panelinden firma seçilip “Kampanyayı yayınla” seçeneği açıldığında arama sonuçları ve firma profilinde görünür.</div>
+</div>
+</body>
+</html>
