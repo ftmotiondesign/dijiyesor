@@ -34,7 +34,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -105,7 +105,7 @@ function renderFirms(){
   $("firmList").innerHTML=list.length?list.map(f=>{
     const sponsor=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
     const logo=f.logoUrl?'<img src="'+esc(f.logoUrl)+'">':esc(initials(f.name));
-    return '<div class="data-row"><div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div></div><span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span><span>'+esc(f.phone||"Telefon yok")+'</span><div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button class="danger" data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button></div></div>'
+    return '<div class="data-row"><div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div></div><span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span><span>'+esc(f.phone||"Telefon yok")+'</span><div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button class="danger" data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button></div></div>'
   }).join(""):'<div class="empty">Firma bulunamadı.</div>';
 }
 ["firmSearch","firmSector","firmStatus"].forEach(id=>$(id).addEventListener(id==="firmSearch"?"input":"change",renderFirms));
@@ -197,6 +197,20 @@ function renderApplications(){
 }
 $("applicationSearch").addEventListener("input",renderApplications);$("applicationFilter").addEventListener("change",renderApplications);
 
+function openQrForFirm(id){
+  const f=firms.find(x=>x.id===id);
+  const base="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html";
+  const url=f ? base+"?institutionId="+encodeURIComponent(f.id)+"&source=dijiyesor-admin" : base;
+  $("qrOrderFrame").src=url;
+  $("qrOpenExternal").href=url;
+  $("qrSelectedFirmName").textContent=f?.name||"Henüz firma seçilmedi";
+  $("qrSelectedFirmMeta").textContent=f
+    ? [f.city,f.district,f.phone].filter(Boolean).join(" · ")
+    : "Firmalar bölümünden QR/NFC butonuna basabilirsin.";
+  setView("qr");
+}
+$("qrClearFirm").addEventListener("click",()=>openQrForFirm(""));
+
 function renderMedia(){
   const list=applications.filter(a=>a.wantsPhoto||a.wantsVideo||a.wants360Tour||a.wantsVip);
   $("mediaList").innerHTML=list.length?list.map(a=>'<article class="media-card"><h3>'+esc(a.name)+'</h3><div class="media-tags">'+(a.wants360Tour?'<span>360° Tur</span>':'')+(a.wantsPhoto?'<span>Fotoğraf</span>':'')+(a.wantsVideo?'<span>Video</span>':'')+(a.wantsVip?'<span>VIP</span>':'')+'</div><p>'+esc([a.city,a.district].filter(Boolean).join(" · "))+'</p></article>').join(""):'<div class="empty">Medya hizmeti isteyen firma yok.</div>';
@@ -215,6 +229,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
+  const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
   const edit=e.target.closest("[data-edit-firm]");if(edit)return openFirmModal(edit.dataset.editFirm);
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
   const toggle=e.target.closest("[data-toggle-firm]");if(toggle){const f=firms.find(x=>x.id===toggle.dataset.toggleFirm);if(f){await db.collection("institutions").doc(f.id).update({status:String(f.status||"active")==="passive"?"active":"passive"});await loadFirms();renderAll()}return}
