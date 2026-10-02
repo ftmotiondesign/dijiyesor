@@ -43,10 +43,27 @@ function render(data){
   if(!data.length){grid.innerHTML='<div class="state"><strong>Uygun firma bulunamadı.</strong>Arama veya konum filtresini değiştirerek tekrar deneyin.</div>';return}
   grid.innerHTML=data.map(i=>{const logo=i.logoUrl?'<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">':esc(initials(i.name));const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";const desc=i.description||(i.highlights||[]).slice(0,2).join(" · ")||"Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin.";return '<article class="card"><div class="card-top"><div class="logo">'+logo+'</div><div><h3>'+esc(i.name)+'</h3><div class="meta">📍 '+esc(loc)+'</div></div></div><span class="tag">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span><p class="desc">'+esc(desc)+'</p><div class="card-actions"><a class="action-main" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a><a class="action-soft" href="firma.html?id='+encodeURIComponent(i.id)+'#iletisim">Bilgi Al</a></div></article>'}).join("");
 }
-function initHome(){
+async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
   if(!search)return;
   const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value;render(companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.location,i.category,i.subCategory,i.mainCategory,(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));return(!q||h.includes(q))&&(!c||norm(i.city)===c)&&(!d||norm(i.district)===d)&&(!s||i.mainCategory===s)}))};
-  loadProvinces(city,district);city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});district.addEventListener("change",filter);sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));filter()});search.addEventListener("input",filter);btn.addEventListener("click",filter);chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));loadCompanies();
+  const params=new URLSearchParams(location.search);
+  await loadProvinces(city,district);
+  if(params.get("q"))search.value=params.get("q");
+  if(params.get("city")){
+    city.value=params.get("city");
+    if(city.value){
+      await fillDistricts(city,district);
+      if(params.get("district"))district.value=params.get("district");
+    }
+  }
+  if(params.get("sector"))sector.value=params.get("sector");
+  city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});
+  district.addEventListener("change",filter);
+  sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));filter()});
+  search.addEventListener("input",filter);btn.addEventListener("click",filter);
+  chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
+  await loadCompanies();
+  filter();
 }
 document.addEventListener("DOMContentLoaded",initHome);
