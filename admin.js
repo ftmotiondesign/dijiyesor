@@ -134,15 +134,45 @@ $("firmForm").addEventListener("submit",async e=>{
 });
 
 function fillCampaignFirmSelect(){
-  $("campaignFirm").innerHTML='<option value="">Firma seçin</option>'+firms.map(f=>'<option value="'+esc(f.id)+'">'+esc(f.name)+'</option>').join("");
+  const search=$("campaignFirmSearch");
+  if(search && !$("campaignFirm").value)search.value="";
+  renderCampaignFirmResults("");
+}
+function renderCampaignFirmResults(query){
+  const host=$("campaignFirmResults");
+  if(!host)return;
+  const q=norm(query);
+  const list=firms.filter(f=>!q||norm([f.name,f.city,f.district].join(" ")).includes(q)).slice(0,20);
+  host.innerHTML=list.length
+    ? list.map(f=>'<button type="button" class="firm-picker-option" data-pick-campaign-firm="'+esc(f.id)+'"><strong>'+esc(f.name)+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></button>').join("")
+    : '<div class="firm-picker-empty">Firma bulunamadı.</div>';
 }
 function openCampaignModal(id){
   const f=firms.find(x=>x.id===id)||{};
-  $("campaignFirm").value=id||"";$("campaignBadge").value=f.campaignBadge||"Kampanya";$("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);$("campaignTitle").value=f.campaignTitle||"";$("campaignText").value=f.campaignText||"";$("campaignImageUrl").value=f.campaignImageUrl||"";$("campaignUrl").value=f.campaignUrl||"";$("campaignActive").checked=Boolean(f.campaignActive);$("campaignSponsored").checked=Boolean(f.sponsored);
+  $("campaignFirm").value=id||"";$("campaignFirmSearch").value=f.name||"";$("campaignFirmResults").classList.add("hidden");$("campaignBadge").value=f.campaignBadge||"Kampanya";$("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);$("campaignTitle").value=f.campaignTitle||"";$("campaignText").value=f.campaignText||"";$("campaignImageUrl").value=f.campaignImageUrl||"";$("campaignUrl").value=f.campaignUrl||"";$("campaignActive").checked=Boolean(f.campaignActive);$("campaignSponsored").checked=Boolean(f.sponsored);
   $("campaignFormMessage").className="message hidden";$("campaignModal").classList.remove("hidden");
 }
 $("newCampaignBtn").addEventListener("click",()=>openCampaignModal(""));
-$("campaignFirm").addEventListener("change",()=>{const f=firms.find(x=>x.id===$("campaignFirm").value);if(f){$("campaignBadge").value=f.campaignBadge||"Kampanya";$("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);$("campaignTitle").value=f.campaignTitle||"";$("campaignText").value=f.campaignText||"";$("campaignImageUrl").value=f.campaignImageUrl||"";$("campaignUrl").value=f.campaignUrl||"";$("campaignActive").checked=Boolean(f.campaignActive);$("campaignSponsored").checked=Boolean(f.sponsored)}});
+function loadCampaignFirmData(f){
+  if(!f)return;
+  $("campaignBadge").value=f.campaignBadge||"Kampanya";
+  $("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);
+  $("campaignTitle").value=f.campaignTitle||"";
+  $("campaignText").value=f.campaignText||"";
+  $("campaignImageUrl").value=f.campaignImageUrl||"";
+  $("campaignUrl").value=f.campaignUrl||"";
+  $("campaignActive").checked=Boolean(f.campaignActive);
+  $("campaignSponsored").checked=Boolean(f.sponsored);
+}
+$("campaignFirmSearch").addEventListener("focus",()=>{
+  renderCampaignFirmResults($("campaignFirmSearch").value);
+  $("campaignFirmResults").classList.remove("hidden");
+});
+$("campaignFirmSearch").addEventListener("input",()=>{
+  $("campaignFirm").value="";
+  renderCampaignFirmResults($("campaignFirmSearch").value);
+  $("campaignFirmResults").classList.remove("hidden");
+});
 
 $("campaignForm").addEventListener("submit",async e=>{
   e.preventDefault();const id=$("campaignFirm").value,msg=$("campaignFormMessage");if(!id)return;
@@ -173,6 +203,18 @@ function renderMedia(){
 }
 
 document.addEventListener("click",async e=>{
+  const pick=e.target.closest("[data-pick-campaign-firm]");
+  if(pick){
+    const f=firms.find(x=>x.id===pick.dataset.pickCampaignFirm);
+    if(f){
+      $("campaignFirm").value=f.id;
+      $("campaignFirmSearch").value=f.name||"";
+      $("campaignFirmResults").classList.add("hidden");
+      loadCampaignFirmData(f);
+    }
+    return;
+  }
+  if(!e.target.closest(".firm-picker"))$("campaignFirmResults")?.classList.add("hidden");
   const edit=e.target.closest("[data-edit-firm]");if(edit)return openFirmModal(edit.dataset.editFirm);
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
   const toggle=e.target.closest("[data-toggle-firm]");if(toggle){const f=firms.find(x=>x.id===toggle.dataset.toggleFirm);if(f){await db.collection("institutions").doc(f.id).update({status:String(f.status||"active")==="passive"?"active":"passive"});await loadFirms();renderAll()}return}
