@@ -197,6 +197,51 @@
             <label class="check"><input id="wantVip" type="checkbox"><span>VIP / öne çıkan profil</span></label>
           </div>
 
+          <div class="campaign-request">
+            <div class="campaign-request-head">
+              <div>
+                <span class="campaign-request-kicker">REKLAM & KAMPANYA</span>
+                <strong>İndirimim / kampanyam var</strong>
+                <p>Kampanyanı arama sonuçlarında sponsorlu kart ve firma profilinde Güncel Kampanya alanı olarak gösterebiliriz.</p>
+              </div>
+              <label class="campaign-toggle">
+                <input id="wantCampaign" type="checkbox">
+                <span>Eklemek istiyorum</span>
+              </label>
+            </div>
+
+            <div id="campaignFields" class="campaign-fields hidden">
+              <div class="form-grid two">
+                <label>Kampanya türü
+                  <select id="campaignType">
+                    <option value="">Seçin</option>
+                    <option value="indirim">İndirimim Var</option>
+                    <option value="buyuk_kampanya">Büyük Kampanya</option>
+                    <option value="erken_kayit">Erken Kayıt</option>
+                    <option value="yeni_hizmet">Yeni Hizmet / Ürün</option>
+                    <option value="ozel_firsat">Özel Fırsat</option>
+                  </select>
+                </label>
+                <label>Kampanya bitiş tarihi
+                  <input id="campaignEnd" type="date">
+                </label>
+              </div>
+              <label>Kampanya başlığı
+                <input id="campaignTitle" maxlength="90" placeholder="%20 indirim fırsatı / Son gün 10 Ekim">
+              </label>
+              <label>Kampanya açıklaması
+                <textarea id="campaignText" rows="3" maxlength="280" placeholder="Kampanyanın kısa açıklamasını yazın."></textarea>
+              </label>
+              <label>Kampanya bağlantısı <small>(opsiyonel)</small>
+                <input id="campaignUrl" placeholder="https://...">
+              </label>
+              <label class="check sponsor-check">
+                <input id="wantSponsoredCampaign" type="checkbox">
+                <span><strong>Arama sonuçlarında Sponsor olarak da öne çıksın</strong><small>Kampanya kartı normal sonuçlardan farklı renkte ve küçük Sponsor etiketiyle gösterilir.</small></span>
+              </label>
+            </div>
+          </div>
+
           <label class="consent">
             <input id="consent" type="checkbox" required>
             <span>Verdiğim firma bilgilerinin DijiyeSor üzerinde yayınlanmak üzere incelenmesini kabul ediyorum.</span>
@@ -226,6 +271,8 @@ const district=document.getElementById("district");
 const msg=document.getElementById("message");
 const mainCategory=document.getElementById("mainCategory");
 const subCategory=document.getElementById("subCategory");
+const wantCampaign=document.getElementById("wantCampaign");
+const campaignFields=document.getElementById("campaignFields");
 
 const subcategoryOptions={
 "egitim":[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],
@@ -252,6 +299,15 @@ function fillSubCategory(){
   subCategory.disabled=!mainCategory.value;
 }
 mainCategory.addEventListener("change",fillSubCategory);
+
+wantCampaign.addEventListener("change",()=>{
+  campaignFields.classList.toggle("hidden",!wantCampaign.checked);
+  const requiredIds=["campaignType","campaignTitle"];
+  requiredIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.required=wantCampaign.checked;
+  });
+});
 
 (async()=>{
   try{
@@ -298,6 +354,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     if(document.getElementById("wantVideo").checked)interests.push("tanitim_videosu");
     if(document.getElementById("want360").checked)interests.push("360_mekan_turu");
     if(document.getElementById("wantVip").checked)interests.push("vip_profil");
+    if(document.getElementById("wantCampaign").checked)interests.push("kampanya_reklami");
 
     await db.collection("institutionApplications").add({
       name:document.getElementById("name").value.trim(),
@@ -317,6 +374,17 @@ document.getElementById("form").addEventListener("submit",async e=>{
       wantsVideo:interests.includes("tanitim_videosu"),
       wants360Tour:interests.includes("360_mekan_turu"),
       wantsVip:interests.includes("vip_profil"),
+      wantsCampaign:document.getElementById("wantCampaign").checked,
+      wantsSponsoredCampaign:document.getElementById("wantSponsoredCampaign").checked,
+      campaignRequest:document.getElementById("wantCampaign").checked ? {
+        type:document.getElementById("campaignType").value,
+        title:document.getElementById("campaignTitle").value.trim(),
+        text:document.getElementById("campaignText").value.trim(),
+        end:document.getElementById("campaignEnd").value,
+        url:document.getElementById("campaignUrl").value.trim(),
+        sponsored:document.getElementById("wantSponsoredCampaign").checked,
+        status:"pending"
+      } : null,
       status:"new",
       date:new Date().toISOString(),
       source:"dijiyesor-firma-tanit"
@@ -329,6 +397,8 @@ document.getElementById("form").addEventListener("submit",async e=>{
     subCategory.innerHTML='<option value="">Önce sektör seçin</option>';
     district.disabled=true;
     district.innerHTML='<option value="">Önce il seçin</option>';
+    campaignFields.classList.add("hidden");
+    ["campaignType","campaignTitle"].forEach(id=>{const el=document.getElementById(id);if(el)el.required=false});
     msg.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
     console.error(err);
