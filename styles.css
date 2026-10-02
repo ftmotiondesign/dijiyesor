@@ -130,3 +130,16 @@ textarea.field{height:auto;min-height:120px;padding:14px;resize:vertical}
   .service-feature-grid{grid-template-columns:1fr}
   .service-hero h1{font-size:34px}
 }
+
+.google-mascot{
+  display:block;
+  width:190px;
+  max-width:42vw;
+  height:auto;
+  object-fit:contain;
+}
+.google-logo-wrap{margin-bottom:18px}
+@media(max-width:680px){
+  .google-mascot{width:150px;max-width:48vw}
+  .google-logo-wrap{margin-bottom:14px}
+}
