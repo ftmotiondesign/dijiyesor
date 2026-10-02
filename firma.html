@@ -71,6 +71,26 @@
 
     const asArray=value=>Array.isArray(value) ? value.filter(Boolean) : (value ? [value] : []);
 
+    function getTourUrl(d){
+      return String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim();
+    }
+
+    function buildTourSection(d){
+      const raw=getTourUrl(d);
+      if(!raw)return "";
+      const url=safeUrl(raw);
+      if(!url)return "";
+
+      return '<section class="section-card tour-section">'+
+        '<div class="section-title"><div><span>360° MEKAN TURU</span><h2>Mekanı sanal olarak gez</h2></div></div>'+
+        '<p class="tour-copy">Mekanı farklı noktalardan inceleyebilir, gelmeden önce ortamı keşfedebilirsin.</p>'+
+        '<div class="tour-preview">'+
+          '<iframe src="'+esc(url)+'" title="'+esc((d.name||"Firma")+' 360 derece mekan turu')+'" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'+
+        '</div>'+
+        '<a class="tour-open-btn" href="'+esc(url)+'" target="_blank" rel="noopener">360° Mekanı Gez ↗</a>'+
+      '</section>';
+    }
+
     function youtubeEmbed(url){
       const value=String(url||"");
       let match=value.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
@@ -174,6 +194,7 @@
               '<div class="profile-title-row">'+
                 '<h1>'+esc(d.name||"Firma")+'</h1>'+
                 (d.vip?'<span class="profile-badge">VIP</span>':'')+
+                (getTourUrl(d)?'<span class="profile-badge tour">360° TUR</span>':'')+
               '</div>'+
               (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
@@ -192,6 +213,7 @@
                 '<p class="about-text">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p>'+
               '</section>'+
 
+              buildTourSection(d)+
               '<section class="section-card">'+
                 '<div class="section-title"><div><span>GALERİ</span><h2>Fotoğraf & Video</h2></div></div>'+
                 buildGallery(d)+
