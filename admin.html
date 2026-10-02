@@ -186,7 +186,13 @@
   <div class="modal-card">
     <div class="modal-head"><div><span>KAMPANYA & REKLAM</span><h2>Kampanya Düzenle</h2></div><button class="modal-close" data-close="campaignModal">×</button></div>
     <form id="campaignForm">
-      <label>Firma<select id="campaignFirm" required></select></label>
+      <label>Firma
+        <div class="firm-picker">
+          <input id="campaignFirmSearch" type="text" placeholder="Firma adını yazın..." autocomplete="off">
+          <input id="campaignFirm" type="hidden" required>
+          <div id="campaignFirmResults" class="firm-picker-results hidden"></div>
+        </div>
+      </label>
       <div class="form-grid two">
         <label>Etiket<input id="campaignBadge" placeholder="İndirim / Erken Kayıt"></label>
         <label>Bitiş tarihi<input id="campaignEnd" type="date"></label>
