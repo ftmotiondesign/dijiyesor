@@ -90,9 +90,42 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",location:d.location||"",description:d.description||"",highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[]})});
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",location:d.location||"",description:d.description||"",highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+campaignActive:Boolean(d.campaignActive||d.hasCampaign),
+campaignTitle:d.campaignTitle||d.promotionTitle||"",
+campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
+campaignBadge:d.campaignBadge||d.promotionBadge||"Kampanya",
+campaignEnd:d.campaignEnd||d.campaignEndDate||"",
+campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
+campaignUrl:d.campaignUrl||d.promotionUrl||""
+})});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));render(companies);
   }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
+}
+function campaignIsActive(i){
+  if(!i?.campaignActive || !String(i.campaignTitle||"").trim())return false;
+  if(i.campaignEnd){
+    const end=new Date(i.campaignEnd);
+    if(!Number.isNaN(end.getTime()) && end.getTime()<Date.now())return false;
+  }
+  return true;
+}
+function campaignCard(i){
+  const link=i.campaignUrl||("firma.html?id="+encodeURIComponent(i.id)+"#kampanya");
+  const image=i.campaignImageUrl
+    ? '<img class="sponsored-image" src="'+esc(i.campaignImageUrl)+'" alt="'+esc(i.campaignTitle)+'">'
+    : '';
+  return '<article class="sponsored-card">'+
+    '<div class="sponsored-top"><span class="sponsored-label">SPONSORLU</span><span class="sponsored-brand">'+esc(i.name)+'</span></div>'+
+    image+
+    '<div class="sponsored-body">'+
+      '<span class="campaign-badge">'+esc(i.campaignBadge||"Kampanya")+'</span>'+
+      '<h3>'+esc(i.campaignTitle)+'</h3>'+
+      (i.campaignText?'<p>'+esc(i.campaignText)+'</p>':'')+
+      (i.campaignEnd?'<small>Son tarih: '+esc(new Date(i.campaignEnd).toLocaleDateString("tr-TR"))+'</small>':'')+
+      '<a href="'+esc(link)+'">Kampanyayı Gör</a>'+
+    '</div>'+
+  '</article>';
 }
 function render(data){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
@@ -119,7 +152,7 @@ function render(data){
     return;
   }
 
-  grid.innerHTML=data.map(i=>{
+  const normalCards=data.map(i=>{
     const logo=i.logoUrl
       ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
       : '<span>'+esc(initials(i.name))+'</span>';
@@ -146,7 +179,16 @@ function render(data){
         '<button type="button" class="result-secondary bilgi-al-open" data-bilgi-al data-institution-id="'+esc(i.id)+'" data-institution-name="'+esc(i.name||'')+'" data-main-category="'+esc(i.mainCategory||'')+'" data-sub-category="'+esc(i.subCategory||i.category||'')+'" data-city="'+esc(i.city||'')+'" data-district="'+esc(i.district||'')+'">Bilgi Al</button>'+
       '</div>'+
     '</article>';
-  }).join("");
+  });
+  const sponsored=data.filter(campaignIsActive).map(campaignCard);
+  const merged=[];
+  normalCards.forEach((card,index)=>{
+    merged.push(card);
+    if(index===1 && sponsored.length)merged.push(sponsored[0]);
+    if(index===5 && sponsored.length>1)merged.push(sponsored[1]);
+  });
+  if(!normalCards.length && sponsored.length)merged.push(...sponsored);
+  grid.innerHTML=merged.join("");
 }
 async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),subCategory=document.getElementById("subCategorySelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
