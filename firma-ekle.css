@@ -24,3 +24,19 @@
   .campaign-request-head{align-items:flex-start;flex-direction:column}
   .campaign-toggle{width:100%;justify-content:center}
 }
+
+.top-actions{display:flex;align-items:center;gap:8px}
+.login-link{background:#1677ff;color:#fff!important;padding:9px 12px;border-radius:9px}
+.muted-link{color:#6f7c90}
+.account-create-box{border:1px solid #cfe0f7;background:linear-gradient(135deg,#f8fbff,#eef5ff);border-radius:15px;padding:15px;display:grid;gap:13px}
+.account-create-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.account-create-head>div{display:grid;gap:3px}
+.account-create-head span{font-size:9px;font-weight:900;letter-spacing:.12em;color:#1677ff}
+.account-create-head strong{font-size:14px}
+.account-create-head p{margin:0;color:#728096;font-size:11px}
+.account-create-head a{font-size:10.5px;font-weight:900;color:#1677ff;white-space:nowrap}
+.notice a{color:inherit;text-decoration:underline;font-weight:900}
+@media(max-width:620px){
+  .top-actions .muted-link{display:none}
+  .account-create-head{flex-direction:column}
+}
