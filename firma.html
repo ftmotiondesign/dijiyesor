@@ -6,6 +6,7 @@
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
   <link rel="stylesheet" href="firma.css">
+  <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
   <header class="profile-topbar">
@@ -180,7 +181,7 @@
             '<div class="hero-actions">'+
               (phone?'<a class="hero-btn secondary" href="'+esc(phone)+'">Ara</a>':'')+
               (whatsapp?'<a class="hero-btn primary" href="'+esc(whatsapp)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+
-              '<a class="hero-btn info" href="bilgi-al.html?mainCategory='+encodeURIComponent(d.mainCategory||'')+'&subCategory='+encodeURIComponent(d.subCategory||d.category||'')+'&city='+encodeURIComponent(d.city||'')+'&district='+encodeURIComponent(d.district||'')+'&firma='+encodeURIComponent(d.name||'')+'">Bilgi Al</a>'+
+              '<button type="button" class="hero-btn info bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Bilgi Al</button>'+
             '</div>'+
           '</section>'+
 
@@ -251,5 +252,6 @@
 
     loadProfile();
   </script>
+  <script src="bilgi-modal.js"></script>
 </body>
 </html>
