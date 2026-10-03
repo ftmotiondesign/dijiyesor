@@ -135,3 +135,25 @@ button,input,select{font:inherit}
   .lead-modal-card{padding:22px 16px;border-radius:20px}
   .lead-form-grid{grid-template-columns:1fr}
 }
+
+
+.lead-form select{
+  width:100%;
+  height:44px;
+  border:1px solid #dce4ee;
+  border-radius:12px;
+  background:#fff;
+  color:#172139;
+  padding:0 12px;
+  outline:none;
+  font:inherit;
+  font-weight:500;
+}
+.lead-form select:focus{
+  border-color:#1677ff;
+  box-shadow:0 0 0 3px rgba(22,119,255,.08);
+}
+.lead-form select:disabled{
+  color:#9aa5b5;
+  background:#f6f8fb;
+}
