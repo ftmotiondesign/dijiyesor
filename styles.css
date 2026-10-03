@@ -382,3 +382,68 @@ button,input,select{font:inherit}
 @media(max-width:430px){
   .home-subcategory-panel{grid-template-columns:1fr}
 }
+
+
+/* Ana sayfa 360° vitrin */
+.top-actions{display:flex;align-items:center;gap:6px}
+.tour-link{background:#eef7ff;color:#096fdc}
+.home-main{
+  min-height:calc(100vh - 116px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:34px;
+  padding:20px 18px 70px;
+}
+.home-360-feature{
+  width:min(980px,100%);
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);
+  align-items:stretch;
+  gap:18px;
+  padding:18px;
+  border:1px solid #dfe9f5;
+  border-radius:26px;
+  background:linear-gradient(135deg,#f7fbff 0%,#eef6ff 55%,#f9fcff 100%);
+  box-shadow:0 14px 40px rgba(24,77,135,.08);
+}
+.home-360-copy{padding:20px 18px 20px 20px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;text-align:left}
+.home-360-kicker{font-size:11px;letter-spacing:.14em;font-weight:900;color:#1677ff;margin-bottom:8px}
+.home-360-copy h2{margin:0;font-size:32px;line-height:1.08;letter-spacing:-.7px;color:#172139}
+.home-360-copy p{margin:12px 0 18px;color:#65748b;line-height:1.6;font-size:14px;max-width:560px}
+.home-360-actions{display:flex;gap:10px;flex-wrap:wrap}
+.home-360-primary,.home-360-secondary{min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:13px;padding:0 16px;font-size:13px;font-weight:900;transition:.16s ease}
+.home-360-primary{background:#1677ff;color:#fff;box-shadow:0 8px 18px rgba(22,119,255,.18)}
+.home-360-primary:hover{background:#0869ea;transform:translateY(-1px)}
+.home-360-secondary{background:#fff;color:#31506f;border:1px solid #d6e2ef}
+.home-360-secondary:hover{border-color:#9fc2eb;color:#1677ff}
+.home-360-visual{
+  min-height:205px;
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  background:linear-gradient(145deg,#0e5fb7,#1e8cff);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.home-360-badge{position:absolute;top:16px;left:16px;z-index:3;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:#fff;color:#1677ff;font-weight:1000;font-size:19px;box-shadow:0 10px 24px rgba(5,48,98,.22)}
+.home-360-scene{position:absolute;inset:0;overflow:hidden}
+.scene-wall{position:absolute;top:20%;bottom:20%;width:42%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22)}
+.wall-a{left:8%;transform:skewY(-8deg);border-radius:16px 4px 4px 16px}
+.wall-b{right:8%;transform:skewY(8deg);border-radius:4px 16px 16px 4px}
+.scene-floor{position:absolute;left:8%;right:8%;bottom:-18%;height:52%;background:rgba(255,255,255,.11);clip-path:polygon(12% 0,88% 0,100% 100%,0 100%)}
+.scene-dot{position:absolute;width:12px;height:12px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 5px rgba(255,255,255,.14)}
+.dot-a{left:28%;top:52%}.dot-b{left:50%;top:38%}.dot-c{right:25%;top:57%}
+.home-360-hint{position:absolute;left:18px;right:18px;bottom:15px;color:#fff;font-size:12px;font-weight:900;letter-spacing:.01em}
+@media(max-width:760px){
+  .top-actions{gap:2px}
+  .tour-link{display:none}
+  .home-main{justify-content:flex-start;gap:22px;padding-top:8px}
+  .home-360-feature{grid-template-columns:1fr;padding:12px;border-radius:22px}
+  .home-360-copy{padding:14px 10px 4px}
+  .home-360-copy h2{font-size:26px}
+  .home-360-copy p{font-size:13px;margin:10px 0 15px}
+  .home-360-actions{width:100%;display:grid;grid-template-columns:1fr}
+  .home-360-primary,.home-360-secondary{width:100%}
+  .home-360-visual{min-height:180px}
+}
