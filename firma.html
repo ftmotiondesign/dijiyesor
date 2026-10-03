@@ -229,7 +229,7 @@
       d.phone=phone;
       const storedWa=String(d.whatsapp||"").trim();
       const waMatch=storedWa.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
-      d.whatsapp=waMatch?waMatch[0].trim():(phone||storedWa);
+      d.whatsapp=waMatch?waMatch[0].trim():"";
       d.address=address;
       return d;
     }
@@ -271,7 +271,7 @@
         const website=safeUrl(d.website);
         const instagram=d.instagram ? safeUrl(String(d.instagram).includes("instagram.com") ? d.instagram : "instagram.com/"+String(d.instagram).replace(/^@/,"")) : "";
         const phone=telUrl(d.phone);
-        const whatsapp=waUrl(d.whatsapp||d.phone);
+        const whatsapp=waUrl(d.whatsapp);
 
         root.innerHTML=
           cover+
@@ -313,7 +313,7 @@
               '<div class="section-title"><div><span>İLETİŞİM</span><h2>İletişim bilgileri</h2></div></div>'+
               '<div class="contact-list">'+
                 contactRow("☎","Telefon",d.phone,phone)+
-                contactRow("●","WhatsApp",d.whatsapp||d.phone,whatsapp)+
+                contactRow("●","WhatsApp",d.whatsapp,whatsapp)+
                 contactRow("⌖","Adres",d.address,"")+
                 contactRow("↗","Web sitesi",d.website,website)+
                 contactRow("◎","Instagram",d.instagram,instagram)+
