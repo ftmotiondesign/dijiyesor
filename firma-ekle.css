@@ -69,3 +69,13 @@
 .password-match-hint.error{color:#b42318}
 .password-match-hint.success{color:#15803d;font-weight:800}
 @media(max-width:620px){.password-create-title{flex-direction:column}.password-toggle{width:100%}}
+
+.simple-signup-form{display:grid;gap:14px}
+.simple-signup-head{padding-bottom:4px}
+.simple-signup-head span{display:block;font-size:9px;font-weight:900;letter-spacing:.12em;color:#1677ff}
+.simple-signup-head h3{margin:5px 0 4px;font-size:20px}
+.simple-signup-head p{margin:0;color:#728096;font-size:11px;line-height:1.5}
+.simple-password-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.simple-password-row button{border:1px solid #cfe0f7;background:#eef5ff;color:#155db8;border-radius:10px;padding:0 13px;font-size:10.5px;font-weight:900;cursor:pointer}
+.simple-signup-form>button[type="submit"]{margin-top:3px}
+@media(max-width:620px){.simple-password-row{grid-template-columns:1fr}.simple-password-row button{height:40px}}
