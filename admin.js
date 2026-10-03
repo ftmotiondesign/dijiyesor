@@ -11,6 +11,8 @@ const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",
 let firms=[],applications=[],members=[],campaignFilter="all";
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
+const selectedFirmIds=new Set();
+let visibleFirmIds=[];
 let googlePlaceResults=[];
 const selectedGooglePlaceIds=new Set();
 let googleMapsLoadPromise=null;
@@ -108,18 +110,39 @@ function renderFirmFilters(){
   const edit=$("editMainCategory");
   if(!edit.options.length)edit.innerHTML=Object.entries(categories).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join("");
 }
+function updateFirmBulkUi(){
+  const count=selectedFirmIds.size;
+  if($("firmSelectedCount"))$("firmSelectedCount").textContent=count+" seçili";
+  if($("firmSelectAll")){
+    const visibleSelected=visibleFirmIds.filter(id=>selectedFirmIds.has(id)).length;
+    $("firmSelectAll").checked=visibleFirmIds.length>0&&visibleSelected===visibleFirmIds.length;
+    $("firmSelectAll").indeterminate=visibleSelected>0&&visibleSelected<visibleFirmIds.length;
+  }
+  ["firmBulkActive","firmBulkPassive","firmBulkSponsorOn","firmBulkSponsorOff","firmBulkVipOn","firmBulkVipOff","firmBulkClear","firmBulkDelete"].forEach(id=>{
+    if($(id))$(id).disabled=count===0;
+  });
+}
 function renderFirms(){
   const q=norm($("firmSearch").value),sector=$("firmSector").value,status=$("firmStatus").value;
+  [...selectedFirmIds].forEach(id=>{if(!firms.some(x=>x.id===id))selectedFirmIds.delete(id)});
   const list=firms.filter(f=>{
     const sponsor=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
     const matchesStatus=!status||(status==="sponsored"?sponsor:String(f.status||"active")===status);
     return (!q||norm([f.name,f.city,f.district,f.phone].join(" ")).includes(q))&&(!sector||String(f.mainCategory||"")===sector)&&matchesStatus;
   });
+  visibleFirmIds=list.map(f=>f.id);
   $("firmList").innerHTML=list.length?list.map(f=>{
     const sponsor=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
     const logo=f.logoUrl?'<img src="'+esc(f.logoUrl)+'">':esc(initials(f.name));
-    return '<div class="data-row"><div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div></div><span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span><span>'+esc(f.phone||"Telefon yok")+'</span><div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button class="danger" data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button></div></div>'
+    return '<div class="data-row '+(selectedFirmIds.has(f.id)?'selected':'')+'">'+
+      '<label class="firm-row-check"><input type="checkbox" data-firm-select="'+esc(f.id)+'" '+(selectedFirmIds.has(f.id)?'checked':'')+'><span></span></label>'+
+      '<div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+(f.vip?'<span class="vip-dot">VIP</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div></div>'+
+      '<span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span>'+
+      '<span>'+esc(f.phone||"Telefon yok")+'</span>'+
+      '<div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button><button class="danger" data-delete-firm="'+esc(f.id)+'">Sil</button></div>'+
+    '</div>'
   }).join(""):'<div class="empty">Firma bulunamadı.</div>';
+  updateFirmBulkUi();
 }
 ["firmSearch","firmSector","firmStatus"].forEach(id=>$(id).addEventListener(id==="firmSearch"?"input":"change",renderFirms));
 
@@ -681,6 +704,26 @@ document.addEventListener("click",async e=>{
   const memberDetail=e.target.closest("[data-member-detail]");if(memberDetail){openMemberDetail(memberDetail.dataset.memberDetail);return}
   const legacyCreate=e.target.closest("#createLegacyInstitutionAccount");if(legacyCreate){await createLegacyInstitutionAccount(legacyCreate.dataset.appId);return}
   const detailApp=e.target.closest("[data-detail-app]");if(detailApp)return openApplicationDetail(detailApp.dataset.detailApp);
+  const firmSelect=e.target.closest("[data-firm-select]");if(firmSelect){
+    const id=firmSelect.dataset.firmSelect;
+    if(firmSelect.checked)selectedFirmIds.add(id);else selectedFirmIds.delete(id);
+    firmSelect.closest(".data-row")?.classList.toggle("selected",firmSelect.checked);
+    updateFirmBulkUi();
+    return;
+  }
+  const deleteFirm=e.target.closest("[data-delete-firm]");if(deleteFirm){
+    const f=firms.find(x=>x.id===deleteFirm.dataset.deleteFirm);if(!f)return;
+    if(!confirm((f.name||"Bu firma")+" kaydını silmek istiyor musunuz? Bu işlem firma profilini tamamen kaldırır."))return;
+    try{
+      await db.collection("institutions").doc(f.id).delete();
+      selectedFirmIds.delete(f.id);
+      await loadFirms();renderAll();
+      const m=$("firmBulkMessage");if(m){m.className="message success";m.textContent="Firma silindi."}
+    }catch(err){
+      alert("Firma silinemedi: "+(err.message||"Bilinmeyen hata"));
+    }
+    return;
+  }
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
   const edit=e.target.closest("[data-edit-firm]");if(edit)return openFirmModal(edit.dataset.editFirm);
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
@@ -971,3 +1014,45 @@ $("quickImportAddAll")?.addEventListener("click",async()=>{
     btn.disabled=false;btn.textContent="Tümünü DijiyeSor’a Ekle";
   }
 });
+
+
+async function runFirmBulkPatch(patch,label){
+  const rows=firms.filter(f=>selectedFirmIds.has(f.id));
+  if(!rows.length)return;
+  if(!confirm(rows.length+" firma için '"+label+"' işlemi uygulansın mı?"))return;
+  try{
+    for(const f of rows){
+      await db.collection("institutions").doc(f.id).set({...patch,updatedAt:new Date().toISOString()},{merge:true});
+    }
+    await loadFirms();selectedFirmIds.clear();renderAll();
+    const m=$("firmBulkMessage");m.className="message success";m.textContent=rows.length+" firma güncellendi: "+label+".";
+  }catch(err){
+    const m=$("firmBulkMessage");m.className="message error";m.textContent="Toplu işlem tamamlanamadı: "+(err.message||"Bilinmeyen hata");
+  }
+}
+async function runFirmBulkDelete(){
+  const rows=firms.filter(f=>selectedFirmIds.has(f.id));
+  if(!rows.length)return;
+  if(!confirm(rows.length+" firmayı tamamen silmek istiyor musunuz? Bu işlem geri alınamaz."))return;
+  try{
+    for(const f of rows)await db.collection("institutions").doc(f.id).delete();
+    selectedFirmIds.clear();await loadFirms();renderAll();
+    const m=$("firmBulkMessage");m.className="message success";m.textContent=rows.length+" firma silindi.";
+  }catch(err){
+    const m=$("firmBulkMessage");m.className="message error";m.textContent="Toplu silme tamamlanamadı: "+(err.message||"Bilinmeyen hata");
+  }
+}
+$("firmSelectAll")?.addEventListener("change",e=>{
+  if(e.target.checked)visibleFirmIds.forEach(id=>selectedFirmIds.add(id));
+  else visibleFirmIds.forEach(id=>selectedFirmIds.delete(id));
+  renderFirms();
+});
+$("firmBulkClear")?.addEventListener("click",()=>{selectedFirmIds.clear();renderFirms()});
+$("firmBulkActive")?.addEventListener("click",()=>runFirmBulkPatch({status:"active"},"Aktif Yap"));
+$("firmBulkPassive")?.addEventListener("click",()=>runFirmBulkPatch({status:"passive"},"Pasif Yap"));
+$("firmBulkSponsorOn")?.addEventListener("click",()=>runFirmBulkPatch({sponsored:true},"Sponsor Yap"));
+$("firmBulkSponsorOff")?.addEventListener("click",()=>runFirmBulkPatch({sponsored:false},"Sponsoru Kaldır"));
+$("firmBulkVipOn")?.addEventListener("click",()=>runFirmBulkPatch({vip:true},"VIP Yap"));
+$("firmBulkVipOff")?.addEventListener("click",()=>runFirmBulkPatch({vip:false},"VIP Kaldır"));
+$("firmBulkDelete")?.addEventListener("click",runFirmBulkDelete);
+updateFirmBulkUi();
