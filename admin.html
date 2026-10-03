@@ -192,6 +192,23 @@
             <option value="rejected">Reddedilen</option>
           </select>
         </div>
+
+        <div class="member-bulkbar">
+          <div class="member-bulk-select">
+            <label><input id="memberSelectAll" type="checkbox"><span>Görünenlerin tümünü seç</span></label>
+            <strong id="memberSelectedCount">0 seçili</strong>
+          </div>
+          <div class="member-bulk-actions">
+            <button id="memberBulkApprove" type="button">Aktif Yap</button>
+            <button id="memberBulkPending" type="button">Beklemeye Al</button>
+            <button id="memberBulkReject" type="button">Reddet</button>
+            <button id="memberBulkCopyEmails" type="button">E-postaları Kopyala</button>
+            <button id="memberBulkClear" type="button">Seçimi Kaldır</button>
+            <button id="memberBulkDelete" type="button" class="danger">Toplu Sil</button>
+          </div>
+        </div>
+
+        <div id="memberBulkMessage" class="message hidden"></div>
         <div id="memberList" class="member-list"></div>
       </section>
     </section>
