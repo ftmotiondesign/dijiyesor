@@ -29,7 +29,7 @@
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
-      <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">2</b></button>
+      <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">4</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
@@ -214,6 +214,26 @@ Gerçek mekanda hizmet"></textarea>
           <div class="revenue-arrow">›</div>
         </button>
 
+        <button type="button" class="revenue-card" data-go="menu-qr">
+          <div class="revenue-icon">☰</div>
+          <div class="revenue-copy">
+            <span>MENÜ QR</span>
+            <h3>Menü QR Siparişleri</h3>
+            <p>Menü QR siparişlerini ayrı ekranda takip et ve yönet.</p>
+          </div>
+          <div class="revenue-arrow">›</div>
+        </button>
+
+        <button type="button" class="revenue-card" data-go="google-qr">
+          <div class="revenue-icon">★</div>
+          <div class="revenue-copy">
+            <span>GOOGLE QR</span>
+            <h3>Google Yorum Kartı</h3>
+            <p>Google yorum kartı siparişlerini ayrı ekranda takip et ve yönet.</p>
+          </div>
+          <div class="revenue-arrow">›</div>
+        </button>
+
         <button type="button" class="revenue-card" data-go="media">
           <div class="revenue-icon">360°</div>
           <div class="revenue-copy">
@@ -288,6 +308,36 @@ Gerçek mekanda hizmet"></textarea>
           <button id="qrClearFirm" class="secondary" type="button">Seçimi Temizle</button>
         </section>
         <iframe id="qrOrderFrame" class="qr-tool-frame qr-order-frame" title="QR NFC Kart Siparişi" src="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"></iframe>
+      </section>
+    </section>
+
+    <section class="view qr-full-view" data-panel-view="menu-qr">
+      <button type="button" class="revenue-back" data-go="revenue">← Gelir Alanları</button>
+      <div class="qr-admin-head">
+        <div>
+          <span>MENÜ QR</span>
+          <h2>Menü QR siparişlerini yönet.</h2>
+          <p>Menü QR butonundan oluşturulan siparişler otomatik olarak yalnızca bu bölüme gelir.</p>
+        </div>
+        <a class="secondary" href="https://ftmotiondesign.github.io/dijiyer/menu-qr-admin.html" target="_blank" rel="noopener">Tam Sayfa Aç ↗</a>
+      </div>
+      <section class="qr-panel active">
+        <iframe class="qr-tool-frame qr-orders-frame" src="https://ftmotiondesign.github.io/dijiyer/menu-qr-admin.html?embed=1&v=2" title="Menü QR Siparişleri"></iframe>
+      </section>
+    </section>
+
+    <section class="view qr-full-view" data-panel-view="google-qr">
+      <button type="button" class="revenue-back" data-go="revenue">← Gelir Alanları</button>
+      <div class="qr-admin-head">
+        <div>
+          <span>GOOGLE QR</span>
+          <h2>Google Yorum Kartı siparişlerini yönet.</h2>
+          <p>Google Yorum Kart butonundan oluşturulan siparişler otomatik olarak yalnızca bu bölüme gelir.</p>
+        </div>
+        <a class="secondary" href="https://ftmotiondesign.github.io/dijiyer/google-qr-admin.html" target="_blank" rel="noopener">Tam Sayfa Aç ↗</a>
+      </div>
+      <section class="qr-panel active">
+        <iframe class="qr-tool-frame qr-orders-frame" src="https://ftmotiondesign.github.io/dijiyer/google-qr-admin.html?embed=1&v=1" title="Google QR Siparişleri"></iframe>
       </section>
     </section>
 
