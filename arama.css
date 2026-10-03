@@ -374,3 +374,29 @@ button,input,select{font:inherit}
   .filters{grid-template-columns:1fr 1fr}
   .active-filters{margin-top:8px}
 }
+
+/* Akıllı başlangıç alanı */
+.smart-start{padding:28px 20px 30px;background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%)}
+.smart-start-mascot{border:0;background:transparent;padding:0;display:block;margin:0 auto 4px;cursor:pointer}
+.smart-start-mascot img{display:block;width:116px;max-width:36vw;height:auto;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(32,78,140,.12));transition:.18s}
+.smart-start-mascot:hover img{transform:translateY(-3px) scale(1.02)}
+.smart-start strong{font-size:21px;margin-top:2px}
+.smart-start>span{font-size:13px;color:#7b8798}
+.smart-start-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}
+.smart-start-actions button{min-height:42px;border-radius:11px;padding:0 16px;font-size:12.5px;font-weight:900;cursor:pointer}
+.smart-start-primary{border:0;background:#1677ff;color:#fff;box-shadow:0 7px 16px rgba(22,119,255,.16)}
+.smart-start-secondary{border:1px solid #dce4ef;background:#fff;color:#40516b}
+.smart-start-quick{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:16px}
+.smart-start-quick button{border:1px solid #e0e7f0;background:#f8fafc;color:#546178;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer;transition:.15s}
+.smart-start-quick button:hover{border-color:#a9c8f7;background:#eef5ff;color:#1677ff}
+.location-select-btn{border:1px solid #bdd4f4;background:#fff;color:#1677ff;border-radius:9px;padding:7px 10px;font-size:10.5px;font-weight:900;cursor:pointer;white-space:nowrap}
+.location-select-btn:hover{background:#eef5ff}
+@media(max-width:620px){
+  .smart-start{padding:22px 14px 24px}
+  .smart-start-mascot img{width:98px}
+  .smart-start-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .smart-start-actions button{width:100%}
+  .smart-start-quick{justify-content:flex-start}
+  .location-notice{position:relative;padding-right:12px}
+  .location-select-btn{align-self:stretch;text-align:center}
+}
