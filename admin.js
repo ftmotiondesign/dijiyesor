@@ -846,6 +846,30 @@ updateMemberBulkUi();
 
 
 
+
+function inferQuickSubCategory(row,mainCategory){
+  const text=norm([row?.name,row?.address].join(" "));
+  if(mainCategory==="egitim"){
+    if(/sürücü kursu|surucu kursu|ehliyet|direksiyon/.test(text))return "surucu";
+    if(/anaokulu|ana okulu|kreş|kres/.test(text))return "kres";
+    if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(text))return "dershane";
+    if(/öğrenci yurdu|ogrenci yurdu|erkek yurdu|kız yurdu|kiz yurdu/.test(text))return "yurt";
+    if(/dil kursu|ingilizce kursu|almanca/.test(text))return "dil_kursu";
+  }
+  if(mainCategory==="otomotiv"){
+    if(/ekspertiz/.test(text))return "ekspertiz";
+    if(/rent a car|araç kiralama|arac kiralama/.test(text))return "rentacar";
+    if(/oto servis|tamir|mekanik/.test(text))return "oto_servis";
+  }
+  if(mainCategory==="yemeicme"){
+    if(/restoran|lokanta/.test(text))return "restoran";
+    if(/kafe|cafe/.test(text))return "kafe";
+    if(/pizza/.test(text))return "pizza";
+    if(/döner|doner/.test(text))return "doner";
+  }
+  return "diger";
+}
+
 function quickImportMessage(text,type=""){
   const el=$("quickImportMessage");if(!el)return;
   el.className="message"+(type?" "+type:"");
