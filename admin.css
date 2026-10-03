@@ -289,3 +289,6 @@
   .row-actions{grid-column:1/-1;justify-content:stretch}
   .row-actions button{flex:1}
 }
+
+.quick-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.quick-row-actions button{border:1px solid #dce4ed;background:#fff;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:850;color:#526079}
