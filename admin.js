@@ -678,6 +678,37 @@ function tourLeadWhatsapp(phone){
   if(!digits)return "";
   return digits.startsWith("0")?"90"+digits.slice(1):(digits.startsWith("90")?digits:"90"+digits);
 }
+function openTourLeadDetail(id){
+  const x=tourLeads.find(item=>String(item.id)===String(id));
+  if(!x)return;
+  const date=x.createdAt?new Date(x.createdAt).toLocaleString("tr-TR"):"-";
+  $("tourLeadDetailTitle").textContent=x.businessName||"360° Talep Detayı";
+  $("tourLeadDetailBody").innerHTML=
+    '<section class="tour-lead-detail-status"><div><span>DURUM</span><strong>'+esc(tourLeadStatusLabel(x.status))+'</strong></div><small>'+esc(date)+'</small></section>'+
+    '<div class="tour-lead-detail-grid">'+
+      '<div><span>İşletme</span><strong>'+esc(x.businessName||"-")+'</strong></div>'+
+      '<div><span>Yetkili</span><strong>'+esc(x.contactName||"-")+'</strong></div>'+
+      '<div><span>Telefon</span><strong>'+esc(x.phone||"-")+'</strong></div>'+
+      '<div><span>E-posta</span><strong>'+esc(x.email||"-")+'</strong></div>'+
+      '<div><span>İl</span><strong>'+esc(x.city||"-")+'</strong></div>'+
+      '<div><span>İlçe</span><strong>'+esc(x.district||"-")+'</strong></div>'+
+    '</div>'+
+    '<section class="tour-lead-note"><span>KISA NOT</span><p>'+esc(x.note||"Not eklenmemiş.")+'</p></section>'+
+    '<section class="tour-lead-source"><span>KAYNAK</span><strong>'+esc(x.source||x._source||"-")+'</strong></section>';
+
+  const phoneDigits=String(x.phone||"").replace(/\D/g,"");
+  const call=$("tourLeadDetailCall");
+  const wa=$("tourLeadDetailWhatsapp");
+  call.href=phoneDigits?("tel:"+String(x.phone||"")):"#";
+  call.style.display=phoneDigits?"":"none";
+  const waDigits=tourLeadWhatsapp(x.phone);
+  wa.href=waDigits?("https://wa.me/"+waDigits):"#";
+  wa.style.display=waDigits?"":"none";
+  $("tourLeadDetailDelete").dataset.deleteTourLead=x.id;
+  $("tourLeadDetailDelete").dataset.deleteTourLeadSource=x._source||"tourLeads";
+  $("tourLeadDetailModal").classList.remove("hidden");
+}
+
 function renderTourLeads(){
   const host=$("tourLeadList");
   if(!host)return;
@@ -699,7 +730,10 @@ function renderTourLeads(){
           '<option value="planned" '+(x.status==="planned"?"selected":"")+'>Planlandı</option>'+
           '<option value="completed" '+(x.status==="completed"?"selected":"")+'>Tamamlandı</option>'+
         '</select>'+
+        '<button type="button" class="tour-lead-detail-btn" data-tour-lead-detail="'+esc(x.id)+'">Detay</button>'+
+        (x.phone?'<a class="tour-lead-call" href="tel:'+esc(x.phone)+'">Ara</a>':'')+
         (wa?'<a class="tour-lead-wa" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a>':'')+
+        '<button type="button" class="tour-lead-delete-btn" data-delete-tour-lead="'+esc(x.id)+'" data-delete-tour-lead-source="'+esc(x._source||"tourLeads")+'">Sil</button>'+
       '</div>'+
     '</article>';
   }).join(""):'<div class="empty">Bu durumda 360° çekim talebi yok.</div>';
@@ -711,6 +745,26 @@ function renderMedia(){
 }
 
 document.addEventListener("click",async e=>{
+  const tourDetail=e.target.closest("[data-tour-lead-detail]");
+  if(tourDetail){openTourLeadDetail(tourDetail.dataset.tourLeadDetail);return}
+
+  const deleteTour=e.target.closest("[data-delete-tour-lead]");
+  if(deleteTour){
+    const id=deleteTour.dataset.deleteTourLead;
+    const source=deleteTour.dataset.deleteTourLeadSource||"tourLeads";
+    const x=tourLeads.find(item=>String(item.id)===String(id));
+    if(!confirm((x?.businessName||"Bu talep")+" silinsin mi?"))return;
+    try{
+      if(source==="institutionApplications")await db.collection("institutionApplications").doc(id).delete();
+      else await db.collection("tourLeads").doc(id).delete();
+      $("tourLeadDetailModal")?.classList.add("hidden");
+      await loadAll();
+    }catch(err){
+      alert("360° talep silinemedi: "+(err.message||"Bilinmeyen hata"));
+    }
+    return;
+  }
+
   const pick=e.target.closest("[data-pick-campaign-firm]");
   if(pick){
     const f=firms.find(x=>x.id===pick.dataset.pickCampaignFirm);
@@ -1015,4 +1069,14 @@ document.addEventListener("change",async e=>{
   }catch(err){
     alert("360° talep durumu güncellenemedi: "+(err.message||"Bilinmeyen hata"));
   }
+});
+
+$("tourLeadDetailDelete")?.addEventListener("click",e=>{
+  const btn=e.currentTarget;
+  const fake=document.createElement("button");
+  fake.dataset.deleteTourLead=btn.dataset.deleteTourLead||"";
+  fake.dataset.deleteTourLeadSource=btn.dataset.deleteTourLeadSource||"tourLeads";
+  document.body.appendChild(fake);
+  fake.click();
+  fake.remove();
 });
