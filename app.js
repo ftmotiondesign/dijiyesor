@@ -111,7 +111,7 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const addrLoc=locationFromAddress(d.address);const fixedCity=addrLoc?.city||d.city||"";const fixedDistrict=addrLoc?.district||d.district||"";companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const addrLoc=locationFromAddress(d.address);const fixedCity=addrLoc?.city||d.city||"";const fixedDistrict=addrLoc?.district||d.district||"";companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",cardImageUrl:d.cardImageUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
 campaignActive:Boolean(d.campaignActive||d.hasCampaign),
 campaignTitle:d.campaignTitle||d.promotionTitle||"",
 campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
@@ -181,7 +181,7 @@ function resultCardFallback(i){
   return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
 }
 function resultCardVisual(i){
-  const image=String(i.coverUrl||i.galleryUrls?.[0]||"").trim();
+  const image=String(i.cardImageUrl||i.coverUrl||i.galleryUrls?.[0]||"").trim();
   if(image){
     return '<div class="result-visual"><img src="'+esc(image)+'" alt="'+esc(i.name)+' görseli" loading="lazy">'+
       (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
