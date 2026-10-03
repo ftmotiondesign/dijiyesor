@@ -254,8 +254,14 @@ async function initHome(){
 
     const focusSearch=e.target.closest("[data-focus-search]");
     if(focusSearch){
-      search.focus();
+      const line=search.closest(".search-line");
       search.scrollIntoView({behavior:"smooth",block:"center"});
+      setTimeout(()=>{
+        search.focus();
+        search.select?.();
+        line?.classList.add("search-attention");
+        setTimeout(()=>line?.classList.remove("search-attention"),1100);
+      },260);
     }
 
     const quick=e.target.closest("[data-quick-sub]");
