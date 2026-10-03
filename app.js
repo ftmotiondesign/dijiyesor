@@ -171,9 +171,14 @@ function render(data){
   const locationNotice=document.getElementById("locationNotice");
   if(locationNotice){
     const hasCity=Boolean(city?.value);
-    const hasResults=data.length>0;
-    locationNotice.classList.toggle("hidden",hasCity || !hasResults);
-    if(!hasCity && hasResults && !locationNotice.querySelector("[data-focus-city]")){
+    locationNotice.classList.toggle("hidden",hasCity);
+    const noticeTitle=locationNotice.querySelector("strong");
+    const noticeText=locationNotice.querySelector(":scope > span");
+    if(noticeTitle)noticeTitle.textContent="Konum seçilmedi · Türkiye geneli sonuçlar gösteriliyor.";
+    if(noticeText)noticeText.textContent=data.length>0
+      ? "Daha yakın ve ilgili sonuçlar için il veya ilçe seçebilirsiniz."
+      : "Sonuç bulunamadı. Daha doğru sonuçlar için önce il veya ilçe seçebilirsiniz.";
+    if(!hasCity && !locationNotice.querySelector("[data-focus-city]")){
       const action=document.createElement("button");
       action.type="button";
       action.className="location-select-btn";
