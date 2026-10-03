@@ -63,9 +63,25 @@
     return /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]|merkez\s*\/|\/[a-zçğıöşü]+/.test(s);
   }
   function ratingFrom(lines){
-    for(const line of lines){
-      const m=String(line).match(/\b([1-5](?:[,.]\d)?)\b/);
-      if(m && /★|⭐|\(\d+\)/.test(line))return Number(m[1].replace(",","."));
+    for(let i=0;i<lines.length;i++){
+      const line=String(lines[i]||"").trim();
+
+      // Aynı satır: 4,8 ★ (409) veya 4,8 (409)
+      let m=line.match(/^([1-5](?:[,.]\d)?)\b/);
+      if(m && (/★|⭐|\(\d+\)/.test(line))){
+        return Number(m[1].replace(",","."));
+      }
+
+      // Ayrı satırlar: "4,5" ardından "(31)" / kategori
+      m=line.match(/^([1-5](?:[,.]\d)?)$/);
+      if(m){
+        const next=String(lines[i+1]||"").trim();
+        const after=String(lines[i+2]||"").trim();
+        if(/^\(\d[\d.]*\)$/.test(next) || /^\d+\s*(yorum|değerlendirme)/i.test(next) ||
+           /sürücü kursu|surucu kursu|eğitim|egitim|anaokulu|kreş|kres|dershane|restoran|kafe|cafe|otel|emlak|servis|klinik/i.test(next+" "+after)){
+          return Number(m[1].replace(",","."));
+        }
+      }
     }
     return null;
   }
