@@ -223,3 +223,8 @@ button,input,select{font:inherit}
 .new-search-popup-btn{margin-top:8px;border:0;background:transparent;color:#1677ff;font-weight:900;cursor:pointer;padding:7px 10px;border-radius:9px}
 .new-search-popup-btn:hover{background:#eef5ff}
 @media(max-width:560px){.no-result-mascot img{width:125px}}
+
+.location-notice{margin:-6px 0 18px;padding:12px 14px;border:1px solid #dbe8fb;border-radius:13px;background:#f6f9ff;color:#4c607d;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.location-notice strong{color:#2b456b;font-size:12.5px}
+.location-notice span{color:#74849a}
+@media(max-width:700px){.location-notice{align-items:flex-start;flex-direction:column;gap:4px}}
