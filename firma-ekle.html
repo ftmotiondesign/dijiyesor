@@ -429,7 +429,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
 
     await registrationAuth.signOut();
     msg.className="notice success";
-    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
+    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <a class='inline-login-button' href='firma-ekle.html?kurumgiris=1'>Kurum Girişi</a> yapabilirsiniz.";
     e.target.reset();
     district.disabled=true;district.innerHTML='<option value="">Önce il seçin</option>';
     setPasswordHint();
