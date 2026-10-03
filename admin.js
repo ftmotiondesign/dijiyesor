@@ -2,7 +2,6 @@ const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomai
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
-const storage=firebase.storage();
 const legacyAccountRegistrationApp=firebase.apps.find(a=>a.name==="legacyInstitutionRegistration")||firebase.initializeApp(firebaseConfig,"legacyInstitutionRegistration");
 const legacyAccountRegistrationAuth=legacyAccountRegistrationApp.auth();
 const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
@@ -256,26 +255,51 @@ $("editCoverFile")?.addEventListener("change",async e=>{
   if(!file.type.startsWith("image/")){
     msg.className="message error";msg.textContent="Lütfen bir görsel dosyası seçin.";return;
   }
-  if(file.size>8*1024*1024){
-    msg.className="message error";msg.textContent="Görsel en fazla 8 MB olabilir.";return;
+  if(file.size>12*1024*1024){
+    msg.className="message error";msg.textContent="Görsel en fazla 12 MB olabilir.";return;
   }
   try{
-    const user=auth.currentUser;
-    if(!user)throw new Error("Yönetici oturumu bulunamadı.");
-    msg.className="message";msg.textContent="Görsel yükleniyor...";
-    const currentId=$("firmId").value||("new-"+Date.now());
-    const safeName=String(file.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-");
-    const ref=storage.ref("demo-card/"+user.uid+"/firms/"+currentId+"/"+Date.now()+"-"+safeName);
-    await ref.put(file,{contentType:file.type});
-    const url=await ref.getDownloadURL();
-    $("editCoverUrl").value=url;
-    updateFirmImagePreview(url);
-    msg.className="message success";msg.textContent="Görsel yüklendi. Şimdi Kaydet butonuna basın.";
+    msg.className="message";msg.textContent="Görsel hazırlanıyor...";
+    const dataUrl=await compressFirmImage(file);
+    $("editCoverUrl").value=dataUrl;
+    updateFirmImagePreview(dataUrl);
+    msg.className="message success";msg.textContent="Görsel hazırlandı. Kaydet butonuna basın.";
   }catch(err){
     msg.className="message error";
-    msg.textContent="Görsel yüklenemedi: "+(err.message||"Bilinmeyen hata");
+    msg.textContent="Görsel hazırlanamadı: "+(err.message||"Bilinmeyen hata");
   }
 });
+
+function compressFirmImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Dosya okunamadı."));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Görsel açılamadı."));
+      img.onload=()=>{
+        const maxW=1000,maxH=700;
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+        const scale=Math.min(1,maxW/w,maxH/h);
+        w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        let quality=.78;
+        let out=canvas.toDataURL("image/jpeg",quality);
+        while(out.length>600000 && quality>.45){
+          quality-=.08;
+          out=canvas.toDataURL("image/jpeg",quality);
+        }
+        if(out.length>850000)reject(new Error("Görsel kaydetmek için hâlâ çok büyük. Daha küçük bir fotoğraf seçin."));
+        else resolve(out);
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 $("addFirmBtn").addEventListener("click",()=>openFirmModal());
 $("newFirmBtn").addEventListener("click",()=>openFirmModal());
