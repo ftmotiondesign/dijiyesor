@@ -82,6 +82,16 @@
 
     const asArray=value=>Array.isArray(value) ? value.filter(Boolean) : (value ? [value] : []);
 
+    function locationFromAddress(address){
+      const s=String(address||"").trim();
+      if(!s)return null;
+      const m=s.match(/([^,;\/]+)\s*\/\s*([^,;]+?)(?:\s*,?\s*(?:Türkiye|Turkey))?$/i);
+      if(!m)return null;
+      const district=String(m[1]||"").trim();
+      const city=String(m[2]||"").trim().replace(/\s+Türkiye$/i,"").trim();
+      return district&&city?{district,city}:null;
+    }
+
     function getTourUrl(d){
       return String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim();
     }
@@ -252,6 +262,11 @@
 
       d.name=name||d.name||"Firma";
       d.phone=phone;
+      const addrLoc=locationFromAddress(address);
+      if(addrLoc){
+        d.city=addrLoc.city;
+        d.district=addrLoc.district;
+      }
 
       const storedWa=String(d.whatsapp||"").trim();
       const waMatch=storedWa.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
