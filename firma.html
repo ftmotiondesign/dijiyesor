@@ -182,6 +182,53 @@
       return '<div class="media-grid">'+items.join("")+'</div>';
     }
 
+    function normalizeQuickProfileData(data){
+      const d={...data};
+      let name=String(d.name||"Firma").trim();
+      let phone=String(d.phone||"").trim();
+      let address=String(d.address||"").trim();
+
+      const phoneMatch=name.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
+      if(phoneMatch){
+        if(!phone)phone=phoneMatch[0].trim();
+        const parts=name.split(phoneMatch[0]);
+        name=(parts[0]||"").trim();
+        if(!address)address=(parts.slice(1).join(" ")||"").trim();
+      }
+
+      name=name
+        .replace(/\s+-\s+Ehliyet.*$/i,"")
+        .replace(/\s+\d{5,}.*$/,"")
+        .trim();
+
+      if(!d.description){
+        const sectorLabels={
+          egitim:"eğitim",
+          otomotiv:"otomotiv",
+          yemeicme:"yeme & içme",
+          saglikguzellik:"sağlık & güzellik",
+          evyapi:"ev & yapı",
+          emlak:"emlak",
+          turizm:"turizm & konaklama",
+          organizasyonmedya:"organizasyon & medya",
+          tasimacilik:"taşımacılık",
+          profesyonel:"profesyonel hizmet",
+          alisveris:"alışveriş & yerel esnaf",
+          diger:"yerel işletme"
+        };
+        const loc=[d.district,d.city].filter(Boolean).join(", ");
+        d.description=loc
+          ? name+"; "+loc+" bölgesinde hizmet veren "+(sectorLabels[d.mainCategory]||"yerel")+" işletmesidir."
+          : name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
+      }
+
+      d.name=name||d.name||"Firma";
+      d.phone=phone;
+      if(!d.whatsapp&&phone)d.whatsapp=phone;
+      d.address=address;
+      return d;
+    }
+
     function contactRow(icon,label,value,href){
       if(!value) return "";
       const content=href
@@ -204,7 +251,7 @@
         const snap=await db.collection("institutions").doc(id).get();
         if(!snap.exists) throw new Error("not-found");
 
-        const d=snap.data()||{};
+        const d=normalizeQuickProfileData(snap.data()||{});
         document.title=(d.name||"Firma")+" | DijiyeSor";
 
         const logo=d.logoUrl
@@ -265,6 +312,7 @@
                 contactRow("⌖","Adres",d.address,"")+
                 contactRow("↗","Web sitesi",d.website,website)+
                 contactRow("◎","Instagram",d.instagram,instagram)+
+                (!(d.phone||d.whatsapp||d.address||d.website||d.instagram)?'<div class="contact-empty">İletişim bilgileri henüz eklenmemiş.</div>':'')+
               '</div>'+
               ((phone||whatsapp)?'<div class="contact-actions">'+
                 (phone?'<a href="'+esc(phone)+'" class="contact-action secondary">Telefon Et</a>':'')+
