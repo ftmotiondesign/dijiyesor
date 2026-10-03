@@ -69,6 +69,17 @@
     })||"";
   }
 
+  function isDetailedAddressValue(v){
+    const s=String(v||"").trim();
+    return /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]|\b\d{5}\b/i.test(s);
+  }
+  function isCoarseAddressValue(v){
+    const s=String(v||"").trim();
+    if(!s)return true;
+    if(isDetailedAddressValue(s))return false;
+    return /\bmerkez\s*\/|^[^/]{2,}\s*\/\s*[^/]{2,}$/i.test(s) || s.length<28;
+  }
+
   function parseBlock(block){
     const lines=block.split(/\r?\n/).map(clean).filter(Boolean);
     if(!lines.length)return null;
@@ -82,7 +93,7 @@
     let address="";
     let location="";
     const detailedAddress=lines.find((x,i)=>i>0 &&
-      /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(x) &&
+      isDetailedAddressValue(x) &&
       !/\b[A-Z0-9]{4,}\+[A-Z0-9]{2,}\b/i.test(x)
     )||"";
     if(detailedAddress)address=detailedAddress;
@@ -293,7 +304,15 @@
         if(dup){
           const patch={updatedAt:now};
           if(row.phone && !String(dup.phone||"").trim())patch.phone=row.phone;
-          if(row.address && !String(dup.address||"").trim())patch.address=row.address;
+
+          const oldAddress=String(dup.address||"").trim();
+          const newAddress=String(row.address||"").trim();
+          if(newAddress && (
+            !oldAddress ||
+            isCoarseAddressValue(oldAddress) ||
+            (isDetailedAddressValue(newAddress) && newAddress.length>oldAddress.length+8)
+          ))patch.address=newAddress;
+
           if(row.location && !String(dup.location||"").trim())patch.location=row.location;
           if(row.website && !String(dup.website||"").trim())patch.website=row.website;
           if(row.rating && !dup.googleRating)patch.googleRating=row.rating;
