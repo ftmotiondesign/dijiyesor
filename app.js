@@ -326,7 +326,14 @@ async function initHome(){
         '</div>';
     }
   };
-  const filter=()=>{renderActiveFilters();const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360){showInitialState();return}document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!feature360||valid360Url(i.tour360Url))});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
+  const only360Btn=document.getElementById("only360Btn");
+  let only360Active=feature360;
+  const sync360Button=()=>{
+    if(!only360Btn)return;
+    only360Btn.classList.toggle("active",only360Active);
+    only360Btn.setAttribute("aria-pressed",String(only360Active));
+  };
+  const filter=()=>{renderActiveFilters();const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
 
   const renderActiveFilters=()=>{
     const host=document.getElementById("activeFilters");
@@ -337,6 +344,7 @@ async function initHome(){
     if(sector.value)items.push({key:"sector",label:categoryLabels[sector.value]||sector.options[sector.selectedIndex]?.text||sector.value});
     if(subCategory?.value)items.push({key:"subCategory",label:subcategoryMap[sector.value]?.[subCategory.value]||subCategory.options[subCategory.selectedIndex]?.text||subCategory.value});
     if(search.value.trim())items.push({key:"q",label:search.value.trim()});
+    if(only360Active&&!feature360)items.push({key:"only360",label:"360° Sanal Tur"});
 
     host.innerHTML=items.length
       ? items.map(x=>'<button type="button" data-remove-filter="'+x.key+'">'+esc(x.label)+' <span>×</span></button>').join("")
@@ -366,6 +374,10 @@ async function initHome(){
       chips.forEach(x=>x.classList.remove("active"));
     }
     if(key==="subCategory"&&subCategory)subCategory.value="";
+    if(key==="only360"&&!feature360){
+      only360Active=false;
+      sync360Button();
+    }
 
     filter();
     renderActiveFilters();
@@ -387,6 +399,13 @@ async function initHome(){
   if(params.get("sector"))sector.value=params.get("sector");
   fillSubcategories();
   if(params.get("subCategory")&&subCategory){subCategory.value=params.get("subCategory");}
+  sync360Button();
+  only360Btn?.addEventListener("click",()=>{
+    if(feature360)return;
+    only360Active=!only360Active;
+    sync360Button();
+    filter();
+  });
   renderActiveFilters();
   city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});
   district.addEventListener("change",filter);
