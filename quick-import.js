@@ -343,6 +343,9 @@
       out.add("kurs");
       if(sub==="surucu"||/sürücü|surucu|ehliyet|direksiyon/.test(text)){
         ["sürücü kursu","surucu kursu","ehliyet","direksiyon","ehliyet kursu"].forEach(x=>out.add(x));
+        if(/\bsrc\b/.test(text)){
+          ["src","src kursu","src1","src 1","src2","src 2","src3","src 3","src4","src 4","src belgesi","psikoteknik"].forEach(x=>out.add(x));
+        }
       }
       if(sub==="kres"||/anaokulu|ana okulu|kreş|kres/.test(text)){
         ["anaokulu","ana okulu","kreş","kres","okul öncesi"].forEach(x=>out.add(x));
@@ -373,16 +376,46 @@
     const loc=[district,city].filter(Boolean).join(", ");
     return loc?row.name+"; "+loc+" bölgesinde hizmet veren "+(labels[main]||"yerel")+" işletmesidir.":row.name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
   }
+  function normalizedPhone(v){
+    return String(v||"").replace(/\D/g,"").replace(/^90/,"0");
+  }
+  function normalizedBusinessName(v){
+    return norm(v)
+      .replace(/[^\p{L}\p{N}\s]/gu," ")
+      .replace(/\b(ltd|şti|sti|aş|as|ticaret|sanayi|özel|ozel)\b/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+  function sameBusiness(a,b){
+    const ap=normalizedPhone(a.phone),bp=normalizedPhone(b.phone);
+    if(ap && bp && ap===bp)return true;
+
+    const an=normalizedBusinessName(a.name),bn=normalizedBusinessName(b.name);
+    const sameName=an&&bn&&(an===bn||an.includes(bn)||bn.includes(an));
+    const sameCity=!a.city||!b.city||norm(a.city)===norm(b.city);
+    const sameDistrict=!a.district||!b.district||norm(a.district)===norm(b.district);
+    return sameName&&sameCity&&sameDistrict;
+  }
+  function quickDataWarnings(r){
+    const missing=[];
+    if(!String(r.phone||"").trim())missing.push("telefon");
+    if(!String(r.address||"").trim())missing.push("tam adres");
+    if(!String(r.website||"").trim()&&!String(r.instagram||"").trim())missing.push("web/Instagram");
+    return missing;
+  }
+
   function key(r){return [norm(r.name),norm(r.phone),norm(r.address),norm(r.city),norm(r.district)].join("|")}
   function render(){
     if(!queue.length){previewList.innerHTML='<div class="empty">Henüz firma listesi girilmedi.</div>';return}
     previewList.innerHTML=queue.map((r,i)=>'<article class="quick-import-row">'+
       '<div><strong>'+esc(r.name)+'</strong><small>'+esc(r.phone||"Telefon yok")+'</small></div>'+
-      '<div><span>'+esc(r.address||"Tam adres yok")+'</span><small>'+esc([r.city,r.district].filter(Boolean).join(" / ")||"Konum yok")+' · '+esc(r.website||"Web sitesi yok")+
+      '<div><span>'+esc(r.address||"Tam adres yok")+'</span><small>'+esc([r.city,r.district].filter(Boolean).join(" / ")||"Konum yok")+' · '+esc(r.website||r.instagram||"Web sitesi yok")+
       (r.rating?' · ⭐ '+esc(String(r.rating)):'')+
       (r.reviewCount?' ('+esc(String(r.reviewCount))+' yorum)':'')+
       (r.plusCode?' · '+esc(r.plusCode):'')+
-      '</small></div>'+
+      '</small>'+
+      (quickDataWarnings(r).length?'<small class="quick-data-warning">Eksik: '+esc(quickDataWarnings(r).join(", "))+'</small>':'<small class="quick-data-ok">Temel bilgiler tamam</small>')+
+      '</div>'+
       '<div class="quick-row-actions"><em>Hazır</em><button type="button" data-quick-remove="'+i+'">Kaldır</button></div>'+
     '</article>').join("");
   }
@@ -394,15 +427,13 @@
     if(!city){show("Önce ili yazın.","error");return}
     const rows=parseInput();
     if(!rows.length){show("Firma bilgileri okunamadı. Metni tekrar yapıştırın.","error");return}
-    const seen=new Set(queue.map(key));
     let added=0;
     rows.forEach(row=>{
       const item={...row,city,district,mainCategory:main,subCategory:inferSub(row,main)};
       item.description=desc(item,main,city,district);
       item.searchKeywords=autoKeywords(item,main,item.subCategory);
-      const k=key(item);
-      if(seen.has(k))return;
-      seen.add(k);queue.push(item);added++;
+      if(queue.some(x=>sameBusiness(x,item)))return;
+      queue.push(item);added++;
     });
     render();
     q.value="";
@@ -431,7 +462,7 @@
       const existing=snap.docs.map(d=>({id:d.id,...d.data()}));
       let updated=0;
       for(const row of queue){
-        const dup=existing.find(f=>norm(f.name)===norm(row.name)&&norm(f.city)===norm(row.city)&&norm(f.district)===norm(row.district));
+        const dup=existing.find(f=>sameBusiness(f,row));
         const now=new Date().toISOString();
 
         if(dup){
