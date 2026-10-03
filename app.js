@@ -253,8 +253,9 @@ async function initHome(){
       grid.innerHTML='<div class="initial-search-state"><strong>Aramaya başlayın</strong><span>Firma, kurum veya hizmet yazın; dilerseniz konum ya da sektör seçin.</span></div>';
     }
   };
-  const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc){showInitialState();return}document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);render(companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)}))};
+  const filter=()=>{const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360){showInitialState();return}document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!feature360||i.has360Tour)});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
   const params=new URLSearchParams(location.search);
+  const feature360=params.get("feature")==="360";
   await loadProvinces(city,district);
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
@@ -286,7 +287,7 @@ async function initHome(){
   });
   chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
   await loadCompanies();
-  const hasInitial=params.get("q")||params.get("city")||params.get("district")||params.get("sector")||params.get("subCategory");
+  const hasInitial=params.get("q")||params.get("city")||params.get("district")||params.get("sector")||params.get("subCategory")||feature360;
   if(hasInitial)filter();else showInitialState();
 }
 document.addEventListener("DOMContentLoaded",initHome);
