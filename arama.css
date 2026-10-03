@@ -275,3 +275,54 @@ button,input,select{font:inherit}
   70%{transform:translate(-50%,-50%) rotate(45deg) scale(1.9);opacity:0}
   100%{transform:translate(-50%,-50%) rotate(45deg) scale(1.9);opacity:0}
 }
+
+
+/* Sonuç kartı 360° tur */
+.result-360-btn{
+  width:100%;
+  min-height:42px;
+  margin:0 0 10px;
+  border:1px solid #b9d7ff;
+  border-radius:12px;
+  background:linear-gradient(135deg,#edf6ff,#f7fbff);
+  color:#0d6fe8;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:.16s ease;
+}
+.result-360-btn span{
+  display:grid;
+  place-items:center;
+  min-width:34px;
+  height:25px;
+  padding:0 6px;
+  border-radius:999px;
+  background:#1677ff;
+  color:#fff;
+  font-size:11px;
+}
+.result-360-btn:hover{border-color:#1677ff;background:#e7f2ff;transform:translateY(-1px)}
+
+.tour360-modal{position:fixed;inset:0;z-index:1500;display:grid;place-items:center;padding:18px}
+.tour360-modal.hidden{display:none!important}
+.tour360-backdrop{position:absolute;inset:0;background:rgba(9,20,38,.68);backdrop-filter:blur(5px)}
+.tour360-card{position:relative;width:min(1100px,100%);height:min(760px,calc(100vh - 36px));background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.35);display:grid;grid-template-rows:auto 1fr auto}
+.tour360-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:15px 18px;border-bottom:1px solid #e7edf5}
+.tour360-head span{display:block;color:#1677ff;font-size:10px;font-weight:900;letter-spacing:.13em;margin-bottom:3px}
+.tour360-head h2{margin:0;font-size:18px;color:#172139}
+.tour360-close{width:40px;height:40px;border:0;border-radius:12px;background:#f1f4f8;color:#526078;font-size:25px;cursor:pointer}
+.tour360-frame-wrap{min-height:0;background:#0e1726}
+.tour360-frame-wrap iframe{display:block;width:100%;height:100%;border:0;background:#0e1726}
+.tour360-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;border-top:1px solid #e7edf5}
+.tour360-foot small{color:#77849a;line-height:1.4}
+.tour360-foot a{white-space:nowrap;color:#1677ff;font-size:13px;font-weight:900}
+@media(max-width:700px){
+  .tour360-modal{padding:8px}
+  .tour360-card{height:calc(100vh - 16px);border-radius:17px}
+  .tour360-head{padding:12px}
+  .tour360-foot{padding:10px 12px;align-items:flex-start;flex-direction:column}
+}
