@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
-  <link rel="stylesheet" href="firma.css?v=20261003-17">
+  <link rel="stylesheet" href="firma.css?v=20261003-18">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -295,6 +295,46 @@
 
 
 
+    function categoryFallback(d){
+      const main=String(d.mainCategory||"diger").trim();
+      const sub=String(d.subCategory||d.category||"").trim();
+      const mainMap={
+        egitim:{icon:"🎓",label:"Eğitim",tone:"education"},
+        otomotiv:{icon:"🚗",label:"Otomotiv",tone:"automotive"},
+        yemeicme:{icon:"🍽️",label:"Yeme & İçme",tone:"food"},
+        saglikguzellik:{icon:"✚",label:"Sağlık & Güzellik",tone:"health"},
+        evyapi:{icon:"🏠",label:"Ev & Yapı",tone:"home"},
+        emlak:{icon:"🏢",label:"Emlak",tone:"estate"},
+        turizm:{icon:"🧳",label:"Turizm & Konaklama",tone:"tourism"},
+        organizasyonmedya:{icon:"🎬",label:"Organizasyon & Medya",tone:"media"},
+        tasimacilik:{icon:"🚚",label:"Taşımacılık",tone:"transport"},
+        profesyonel:{icon:"💼",label:"Profesyonel Hizmetler",tone:"professional"},
+        alisveris:{icon:"🛍️",label:"Yerel Esnaf",tone:"shopping"},
+        diger:{icon:"📍",label:"Yerel İşletme",tone:"other"}
+      };
+      const subMap={
+        surucu:{icon:"🚘",label:"Sürücü Kursu"},
+        kres:{icon:"🧸",label:"Kreş & Anaokulu"},
+        dershane:{icon:"📚",label:"Kurs Merkezi"},
+        yurt:{icon:"🛏️",label:"Öğrenci Yurdu"},
+        oto_servis:{icon:"🔧",label:"Oto Servis"},
+        ekspertiz:{icon:"🔎",label:"Oto Ekspertiz"},
+        restoran:{icon:"🍽️",label:"Restoran"},
+        kafe:{icon:"☕",label:"Kafe"}
+      };
+      const base=mainMap[main]||mainMap.diger;
+      const detail=subMap[sub]||{};
+      return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
+    }
+
+    function buildFallbackCover(d){
+      const c=categoryFallback(d);
+      return '<div class="profile-cover category-cover '+esc(c.tone)+'" aria-label="'+esc(c.label)+' kategori görseli">'+
+        '<div class="category-cover-orb orb-a"></div><div class="category-cover-orb orb-b"></div>'+
+        '<div class="category-cover-content"><span class="category-cover-icon">'+c.icon+'</span><div><small>DİJİYESOR</small><strong>'+esc(c.label)+'</strong><span>Firma görseli eklendiğinde bu alan otomatik değişir.</span></div></div>'+
+      '</div>';
+    }
+
     function mapsQueryFor(d){
       return String(d.address||d.googlePlusCode||d.location||[d.district,d.city].filter(Boolean).join(", ")||"").trim();
     }
@@ -338,7 +378,7 @@
 
         const cover=d.coverUrl
           ? '<div class="profile-cover"><img src="'+esc(d.coverUrl)+'" alt="'+esc(d.name||"Firma")+' kapak görseli"></div>'
-          : '';
+          : buildFallbackCover(d);
 
         const locationText=[d.city,d.district].filter(Boolean).join(" · ") || d.location || "";
         const website=safeUrl(d.website);
@@ -368,6 +408,7 @@
               (getTourUrl(d)?'<a class="hero-btn secondary" href="#mekan360">360° Mekânı Gez</a>':'')+
               (phone?'<a class="hero-btn secondary" href="'+esc(phone)+'">Ara</a>':'')+
               (whatsapp?'<a class="hero-btn primary" href="'+esc(whatsapp)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+
+              (instagram?'<a class="hero-btn instagram" href="'+esc(instagram)+'" target="_blank" rel="noopener">Instagram</a>':'')+
               '<button type="button" class="hero-btn info bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Bilgi Al</button>'+
             '</div>'+
           '</section>'+
@@ -398,9 +439,10 @@
                 contactRow("◎","Instagram",d.instagram,instagram)+
                 (!(d.phone||d.whatsapp||d.address||d.website||d.instagram)?'<div class="contact-empty">İletişim bilgileri henüz eklenmemiş.</div>':'')+
               '</div>'+
-              ((phone||whatsapp)?'<div class="contact-actions">'+
+              ((phone||whatsapp||instagram)?'<div class="contact-actions">'+
                 (phone?'<a href="'+esc(phone)+'" class="contact-action secondary">Telefon Et</a>':'')+
                 (whatsapp?'<a href="'+esc(whatsapp)+'" target="_blank" rel="noopener" class="contact-action primary">WhatsApp</a>':'')+
+                (instagram?'<a href="'+esc(instagram)+'" target="_blank" rel="noopener" class="contact-action instagram">Instagram</a>':'')+
               '</div>':'')+
             '</aside>'+
           '</div>'+
