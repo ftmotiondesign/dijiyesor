@@ -8,7 +8,7 @@ const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
 const ADMIN_EMAIL="ftmotiondesign@gmail.com";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
-let firms=[],applications=[],members=[],campaignFilter="all";
+let firms=[],applications=[],members=[],tourLeads=[],campaignFilter="all";
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
 const selectedFirmIds=new Set();
@@ -63,7 +63,7 @@ document.addEventListener("click",e=>{
 $("mobileMenuBtn").addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("open"));
 
 async function loadAll(){
-  await Promise.all([loadFirms(),loadApplications(),loadMembers()]);
+  await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads()]);
   renderAll();
 }
 async function loadFirms(){
@@ -77,6 +77,15 @@ async function loadApplications(){
 async function loadMembers(){
   const snap=await db.collection("institutionUsers").get();
   members=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.institutionName||a.email||"").localeCompare(String(b.institutionName||b.email||""),"tr"));
+}
+async function loadTourLeads(){
+  try{
+    const snap=await db.collection("tourLeads").get();
+    tourLeads=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  }catch(err){
+    console.error("360 talepleri yüklenemedi",err);
+    tourLeads=[];
+  }
 }
 function isCampaignActive(f){
   if(!(f.campaignActive||f.hasCampaign)||!String(f.campaignTitle||f.promotionTitle||"").trim())return false;
@@ -93,6 +102,9 @@ function renderAll(){
   $("statSponsors").textContent=sponsors.length;
   $("statCampaigns").textContent=campaigns.length;$("navCampaignCount").textContent=campaigns.length;
   $("statApplications").textContent=pending.length;$("navApplicationCount").textContent=pending.length;
+  const newTourLeads=tourLeads.filter(x=>String(x.status||"new")==="new");
+  if($("statTourLeads"))$("statTourLeads").textContent=newTourLeads.length;
+  if($("navTourLeadCount"))$("navTourLeadCount").textContent=newTourLeads.length;
   $("navMemberCount").textContent=getMemberRows().length;
   renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();
 }
