@@ -1,125 +1,162 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Kurum Paneli | DijiyeSor</title>
-  <meta name="description" content="DijiyeSor kurum paneli">
-  <style>
-    :root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--brand:#1769ff;--brand2:#0e52cc;--ok:#15803d;--warn:#a16207;--danger:#b91c1c}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-    button,input,textarea{font:inherit}.hidden{display:none!important}
-    .shell{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
-    .side{background:#0f172a;color:#fff;padding:22px 18px;display:flex;flex-direction:column;gap:20px}
-    .brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;color:#fff;text-decoration:none}.brand b{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;color:#0f172a}
-    .account{padding:14px;border-radius:16px;background:rgba(255,255,255,.08)}.account strong,.account small{display:block}.account small{margin-top:4px;color:#cbd5e1;word-break:break-word}
-    .nav{display:grid;gap:8px}.nav button{border:0;border-radius:12px;padding:12px 14px;text-align:left;background:transparent;color:#cbd5e1;cursor:pointer}.nav button.active,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
-    .side-foot{margin-top:auto;display:grid;gap:8px}.side-foot a,.side-foot button{border:1px solid rgba(255,255,255,.15);background:transparent;color:#fff;border-radius:12px;padding:11px 12px;text-decoration:none;cursor:pointer;text-align:center}
-    .main{padding:28px;max-width:1200px;width:100%;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.top h1{margin:0 0 6px;font-size:30px}.top p{margin:0;color:var(--muted)}
-    .status{padding:9px 12px;border-radius:999px;font-weight:700;font-size:13px;background:#dcfce7;color:var(--ok)}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.stat{padding:18px}.stat span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.stat strong{font-size:20px}
-    .card{padding:22px;margin-bottom:18px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.card-head h2{font-size:20px;margin:0}.card-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid.three{grid-template-columns:repeat(3,1fr)}label{display:grid;gap:7px;font-size:13px;font-weight:700;color:#344054}input,textarea{width:100%;border:1px solid #d7dce5;border-radius:11px;padding:11px 12px;background:#fff;color:var(--text)}textarea{resize:vertical}
-    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:700;cursor:pointer}.primary{background:var(--brand);color:white}.primary:hover{background:var(--brand2)}.secondary{background:#eef2f7;color:#243049}
-    .notice{padding:12px 14px;border-radius:12px;margin-top:12px;font-size:14px}.notice.success{background:#dcfce7;color:#166534}.notice.error{background:#fee2e2;color:#991b1b}
-    .view{display:none}.view.active{display:block}.empty{color:var(--muted);padding:20px 0}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.service{border:1px solid var(--line);border-radius:14px;padding:16px}.service strong,.service small{display:block}.service small{color:var(--muted);margin-top:5px}
-    .mobile-head{display:none}.login-block{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card{max-width:460px;width:100%;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}.login-card h1{margin:10px 0 8px}.login-card p{color:var(--muted)}
-    @media(max-width:850px){.shell{display:block}.side{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;background:#0f172a;color:#fff;padding:14px 16px}.mobile-head .brand b{width:32px;height:32px}.main{padding:18px}.grid,.form-grid,.form-grid.three,.service-grid{grid-template-columns:1fr}.top{align-items:center}.top h1{font-size:24px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kurum Paneli | DijiyeSor</title>
+<meta name="description" content="DijiyeSor kurum paneli">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--brand:#1769ff;--brand2:#0e52cc;--ok:#15803d;--warn:#a16207;--danger:#b91c1c;--nav:#0f172a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-decoration:none;color:inherit}
+.shell{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.side{background:var(--nav);color:#fff;padding:22px 18px;display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:850;color:#fff}.brand b{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--nav)}
+.account{padding:14px;border-radius:16px;background:rgba(255,255,255,.08)}.account strong,.account small{display:block}.account small{margin-top:4px;color:#cbd5e1;word-break:break-word}
+.nav{display:grid;gap:7px}.nav button{border:0;border-radius:12px;padding:12px 14px;text-align:left;background:transparent;color:#cbd5e1;cursor:pointer;font-weight:700}.nav button.active,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
+.side-foot{margin-top:auto;display:grid;gap:8px}.side-foot a,.side-foot button{border:1px solid rgba(255,255,255,.15);background:transparent;color:#fff;border-radius:12px;padding:11px 12px;cursor:pointer;text-align:center}
+.main{padding:28px;max-width:1200px;width:100%;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.top h1{margin:0 0 6px;font-size:30px}.top p{margin:0;color:var(--muted)}
+.status{padding:9px 12px;border-radius:999px;font-weight:800;font-size:13px;background:#dcfce7;color:var(--ok)}.status.pending{background:#fff7d6;color:#8a5a00}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.stat{padding:18px}.stat span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.stat strong{font-size:20px}
+.card{padding:22px;margin-bottom:18px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.card-head h2{font-size:20px;margin:0}.card-head p{margin:4px 0 0;color:var(--muted);font-size:14px}.kicker{font-size:10px;letter-spacing:.1em;font-weight:900;color:var(--brand)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid.three{grid-template-columns:repeat(3,1fr)}label{display:grid;gap:7px;font-size:13px;font-weight:750;color:#344054}input,textarea,select{width:100%;border:1px solid #d7dce5;border-radius:11px;padding:11px 12px;background:#fff;color:var(--text);outline:none}input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(23,105,255,.08)}textarea{resize:vertical}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:800;cursor:pointer}.primary{background:var(--brand);color:#fff}.primary:hover{background:var(--brand2)}.secondary{background:#eef2f7;color:#243049}.danger{background:#fee2e2;color:#991b1b}.btn:disabled{opacity:.6;cursor:not-allowed}
+.notice{padding:12px 14px;border-radius:12px;margin-top:12px;font-size:13px;background:#eef4ff;color:#355a89}.notice.success{background:#dcfce7;color:#166534}.notice.error{background:#fee2e2;color:#991b1b}.notice.warn{background:#fff7d6;color:#855d00}
+.view{display:none}.view.active{display:block}.empty{color:var(--muted);padding:20px 0}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.service{border:1px solid var(--line);border-radius:14px;padding:16px}.service strong,.service small{display:block}.service small{color:var(--muted);margin-top:5px;line-height:1.45}.service .mini-status{margin-top:10px;display:inline-block;padding:5px 8px;border-radius:999px;background:#eef4ff;color:#225fb6;font-size:10px;font-weight:850}
+.preview-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:16px}.upload-box{border:1px dashed #cbd5e1;border-radius:16px;padding:14px;background:#fafcff}.preview{height:150px;border-radius:13px;background:#eef2f7;display:grid;place-items:center;overflow:hidden;margin-bottom:12px;color:#8490a2;font-size:12px}.preview.cover{height:180px}.preview img{width:100%;height:100%;object-fit:cover}.preview.logo img{object-fit:contain;background:#fff}.file{display:none}.upload-actions{display:flex;gap:8px}.upload-actions .btn{flex:1}.upload-msg{font-size:11px;color:var(--muted);min-height:16px;margin-top:8px}
+.media-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:12px}.media-row .btn{height:43px}.media-preview{margin-top:8px;font-size:11px;color:var(--muted);word-break:break-all}
+.campaign-state{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;background:#fafcff}.campaign-state strong,.campaign-state small{display:block}.campaign-state small{color:var(--muted);margin-top:4px}
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.product{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer}.product input{width:17px;height:17px;margin:1px 0 0}.product b,.product small{display:block}.product small{color:var(--muted);font-size:10px;margin-top:3px}.product .price{margin-top:7px;font-size:12px;color:var(--brand);font-weight:900}
+.order-summary{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:8px}.order-summary div{display:flex;justify-content:space-between;gap:12px;font-size:12px}.order-summary span{color:var(--muted)}.order-list{display:grid;gap:8px}.order-row{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:1.1fr .8fr .6fr;gap:12px;align-items:center}.order-row strong,.order-row small{display:block}.order-row small{color:var(--muted);margin-top:3px}.order-pill{justify-self:end;padding:5px 8px;border-radius:999px;background:#eef4ff;color:#235fac;font-size:10px;font-weight:900}
+.mobile-head{display:none}.mobile-nav{display:none}.login-block{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card{max-width:460px;width:100%;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}.login-card h1{margin:10px 0 8px}.login-card p{color:var(--muted)}
+@media(max-width:850px){.shell{display:block}.side{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;background:var(--nav);color:#fff;padding:14px 16px}.mobile-head .brand b{width:32px;height:32px}.mobile-nav{display:flex;gap:7px;overflow:auto;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.mobile-nav button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 11px;font-size:11px;font-weight:800}.mobile-nav button.active{background:var(--brand);border-color:var(--brand);color:#fff}.main{padding:18px}.grid,.form-grid,.form-grid.three,.service-grid,.preview-grid,.product-grid{grid-template-columns:1fr}.top{align-items:center}.top h1{font-size:24px}.order-row{grid-template-columns:1fr}.order-pill{justify-self:start}.media-row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div id="loadingView" class="login-block"><div class="login-card"><div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div><h1>Kurum Paneli</h1><p>Hesabınız kontrol ediliyor...</p></div></div>
+<div id="loadingView" class="login-block"><div class="login-card"><div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div><h1>Kurum Paneli</h1><p>Hesabınız kontrol ediliyor...</p></div></div>
+<div id="deniedView" class="login-block hidden"><div class="login-card"><div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div><h1 id="deniedTitle">Kurum paneline erişilemiyor</h1><p id="deniedText">Hesabınızın durumunu kontrol edin.</p><a class="btn primary" style="display:inline-block;margin-top:10px" href="firma-ekle.html?kurumgiris=1">Kurum Girişine Dön</a></div></div>
 
-  <div id="deniedView" class="login-block hidden">
-    <div class="login-card">
-      <div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div>
-      <h1 id="deniedTitle">Kurum paneline erişilemiyor</h1>
-      <p id="deniedText">Hesabınızın durumunu kontrol edin.</p>
-      <a class="btn primary" style="display:inline-block;text-decoration:none;margin-top:10px" href="firma-ekle.html?kurumgiris=1">Kurum Girişine Dön</a>
-    </div>
+<div id="appView" class="hidden">
+  <div class="mobile-head"><a class="brand" href="index.html"><b>D</b><span>DijiyeSor</span></a><button id="mobileLogout" class="btn secondary">Çıkış</button></div>
+  <div class="mobile-nav">
+    <button class="active" data-view="overview">Genel</button><button data-view="profile">Firma</button><button data-view="visuals">Logo & Kapak</button><button data-view="campaign">Kampanya</button><button data-view="media">360° & Video</button><button data-view="qr">QR/NFC</button>
   </div>
-
-  <div id="appView" class="hidden">
-    <div class="mobile-head">
+  <div class="shell">
+    <aside class="side">
       <a class="brand" href="index.html"><b>D</b><span>DijiyeSor</span></a>
-      <button id="mobileLogout" class="btn secondary">Çıkış</button>
-    </div>
-    <div class="shell">
-      <aside class="side">
-        <a class="brand" href="index.html"><b>D</b><span>DijiyeSor</span></a>
-        <div class="account"><strong id="sideFirmName">Kurum</strong><small id="sideEmail"></small></div>
-        <nav class="nav">
-          <button class="active" data-view="overview">Genel Bakış</button>
-          <button data-view="profile">Firma Bilgileri</button>
-          <button data-view="services">Hizmetler</button>
-        </nav>
-        <div class="side-foot">
-          <a href="index.html">Siteyi Gör</a>
-          <button id="logoutBtn">Çıkış Yap</button>
-        </div>
-      </aside>
+      <div class="account"><strong id="sideFirmName">Kurum</strong><small id="sideEmail"></small></div>
+      <nav class="nav">
+        <button class="active" data-view="overview">Genel Bakış</button>
+        <button data-view="profile">Firma Bilgileri</button>
+        <button data-view="visuals">Logo & Kapak</button>
+        <button data-view="campaign">Kampanya</button>
+        <button data-view="media">360° & Video</button>
+        <button data-view="qr">QR / NFC Kart</button>
+      </nav>
+      <div class="side-foot"><a href="index.html">Siteyi Gör</a><button id="logoutBtn">Çıkış Yap</button></div>
+    </aside>
 
-      <main class="main">
-        <div class="top">
-          <div><h1 id="pageTitle">Genel Bakış</h1><p id="pageSubtitle">Kurum bilgilerinizi ve görünürlüğünüzü yönetin.</p></div>
-          <span class="status">Aktif Kurum</span>
-        </div>
+    <main class="main">
+      <div class="top"><div><h1 id="pageTitle">Genel Bakış</h1><p id="pageSubtitle">Kurum bilgilerinizi ve görünürlüğünüzü yönetin.</p></div><span id="accountStatus" class="status">Aktif Kurum</span></div>
 
-        <section class="view active" data-panel="overview">
-          <div class="grid">
-            <article class="stat"><span>Kurum Durumu</span><strong id="statStatus">Aktif</strong></article>
-            <article class="stat"><span>Konum</span><strong id="statLocation">-</strong></article>
-            <article class="stat"><span>Hesap</span><strong>Onaylandı</strong></article>
+      <section class="view active" data-panel="overview">
+        <div class="grid">
+          <article class="stat"><span>Kurum Durumu</span><strong id="statStatus">Aktif</strong></article>
+          <article class="stat"><span>Konum</span><strong id="statLocation">-</strong></article>
+          <article class="stat"><span>Kampanya</span><strong id="statCampaign">Yok</strong></article>
+        </div>
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">KURUM PANELİ</span><h2 id="welcomeTitle">Hoş geldiniz</h2><p>DijiyeSor üzerindeki kurum profiliniz bu hesaba bağlıdır.</p></div></div>
+          <div class="service-grid">
+            <article class="service"><strong>Firma Profili</strong><small>Telefon, WhatsApp, adres, web sitesi ve açıklama bilgilerinizi düzenleyin.</small><span id="profileMiniStatus" class="mini-status">Hazır</span></article>
+            <article class="service"><strong>Logo & Kapak</strong><small>Bilgisayarınızdan logo ve kapak görselinizi yükleyin.</small><span id="visualMiniStatus" class="mini-status">Eksik</span></article>
+            <article class="service"><strong>Kampanya</strong><small>Kampanyanızı gönderin. Yönetici onayından sonra yayına alınır.</small><span id="campaignMiniStatus" class="mini-status">Kampanya yok</span></article>
+            <article class="service"><strong>360° & Video</strong><small>Konum, tanıtım ve 360° mekan videolarınızı ekleyin.</small><span id="mediaMiniStatus" class="mini-status">Medya yok</span></article>
+            <article class="service"><strong>QR / NFC Kart</strong><small>Firma bilgileriniz hazır gelir; kart siparişinizi doğrudan oluşturun.</small><span id="qrMiniStatus" class="mini-status">Sipariş ver</span></article>
           </div>
-          <section class="card">
-            <div class="card-head"><div><h2 id="welcomeTitle">Hoş geldiniz</h2><p>DijiyeSor üzerindeki kurum profiliniz bu hesaba bağlıdır.</p></div></div>
-            <div class="service-grid">
-              <article class="service"><strong>Firma Profiliniz</strong><small>Telefon, adres, web sitesi, açıklama ve sosyal medya bilgilerinizi güncelleyin.</small></article>
-              <article class="service"><strong>QR / NFC</strong><small>Akıllı firma kartı ve QR/NFC özellikleri kurum hesabınıza bağlanabilir.</small></article>
-              <article class="service"><strong>Kampanya</strong><small>Kampanya ve sponsorlu görünürlük yönetimi sonraki adımda bu panele bağlanacak.</small></article>
-              <article class="service"><strong>360° & Video</strong><small>Konum videosu, tanıtım videosu ve 360° tur alanları kurum profilinize eklenebilir.</small></article>
-            </div>
-          </section>
         </section>
+      </section>
 
-        <section class="view" data-panel="profile">
-          <section class="card">
-            <div class="card-head"><div><h2>Firma Bilgileri</h2><p>Değişiklikler kaydedildiğinde DijiyeSor firma profilinize uygulanır.</p></div></div>
-            <form id="profileForm">
-              <div class="form-grid">
-                <label>Firma adı<input id="name" required></label>
-                <label>Telefon<input id="phone"></label>
-              </div>
-              <div class="form-grid">
-                <label>WhatsApp<input id="whatsapp"></label>
-                <label>Web sitesi<input id="website"></label>
-              </div>
-              <div class="form-grid">
-                <label>Instagram<input id="instagram"></label>
-                <label>İl / İlçe<input id="locationReadonly" readonly></label>
-              </div>
-              <label>Adres<input id="address"></label>
-              <label>Açıklama<textarea id="description" rows="5"></textarea></label>
-              <div id="profileMessage" class="notice hidden"></div>
-              <div class="actions"><button type="submit" class="btn primary">Değişiklikleri Kaydet</button></div>
-            </form>
-          </section>
+      <section class="view" data-panel="profile">
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">FİRMA PROFİLİ</span><h2>Firma Bilgileri</h2><p>Kaydettiğiniz bilgiler DijiyeSor firma profilinize uygulanır.</p></div></div>
+          <form id="profileForm">
+            <div class="form-grid"><label>Firma adı<input id="name" required></label><label>Telefon<input id="phone" placeholder="05xx xxx xx xx"></label></div>
+            <div class="form-grid"><label>WhatsApp<input id="whatsapp" placeholder="05xx xxx xx xx"></label><label>Web sitesi<input id="website" placeholder="https://..."></label></div>
+            <div class="form-grid"><label>Instagram<input id="instagram" placeholder="@firma"></label><label>İl / İlçe<input id="locationReadonly" readonly></label></div>
+            <label>Adres<input id="address"></label><label>Açıklama<textarea id="description" rows="5"></textarea></label>
+            <div id="profileMessage" class="notice hidden"></div>
+            <div class="actions"><button type="submit" class="btn primary">Değişiklikleri Kaydet</button></div>
+          </form>
         </section>
+      </section>
 
-        <section class="view" data-panel="services">
-          <section class="card">
-            <div class="card-head"><div><h2>Hizmetler</h2><p>Kurum hesabınıza bağlanacak DijiyeSor hizmetleri.</p></div></div>
-            <div class="service-grid">
-              <article class="service"><strong>QR / NFC Kart</strong><small>Akıllı kart siparişi ve kart aktivasyonu yönetim paneliyle eşleştirilebilir.</small></article>
-              <article class="service"><strong>Konum Videosu</strong><small>Firmanızın yol ve çevre tanıtım videosu profilinizde yayınlanabilir.</small></article>
-              <article class="service"><strong>360° Mekan Turu</strong><small>Mekan turu firma detay sayfasında gösterilebilir.</small></article>
-              <article class="service"><strong>Sponsor & Kampanya</strong><small>Arama sonuçlarında ve fırsatlar alanında öne çıkma seçenekleri.</small></article>
+      <section class="view" data-panel="visuals">
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">GÖRSEL KİMLİK</span><h2>Logo & Kapak</h2><p>Logo ve kapak görseli doğrudan kurum profilinize kaydedilir.</p></div></div>
+          <div class="preview-grid">
+            <div class="upload-box">
+              <div id="logoPreview" class="preview logo">Logo yok</div>
+              <input id="logoFile" class="file" type="file" accept="image/png,image/jpeg,image/webp">
+              <div class="upload-actions"><button class="btn primary" type="button" data-pick="logoFile">Logo Seç</button><button id="removeLogo" class="btn danger" type="button">Sil</button></div>
+              <div id="logoMsg" class="upload-msg">Önerilen: kare, PNG/JPG/WEBP, en fazla 10 MB.</div>
             </div>
-          </section>
+            <div class="upload-box">
+              <div id="coverPreview" class="preview cover">Kapak yok</div>
+              <input id="coverFile" class="file" type="file" accept="image/png,image/jpeg,image/webp">
+              <div class="upload-actions"><button class="btn primary" type="button" data-pick="coverFile">Kapak Seç</button><button id="removeCover" class="btn danger" type="button">Sil</button></div>
+              <div id="coverMsg" class="upload-msg">Önerilen: 1600×900, PNG/JPG/WEBP, en fazla 10 MB.</div>
+            </div>
+          </div>
+          <div id="visualMessage" class="notice hidden"></div>
         </section>
-      </main>
-    </div>
+      </section>
+
+      <section class="view" data-panel="campaign">
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">KAMPANYA & SPONSOR</span><h2>Kampanya Gönder</h2><p>Yeni veya değiştirilen kampanya, yönetici onayından sonra yayınlanır.</p></div></div>
+          <div id="campaignState" class="campaign-state"><strong>Aktif kampanya yok.</strong><small>Formu doldurarak yeni kampanya gönderebilirsiniz.</small></div>
+          <form id="campaignForm">
+            <div class="form-grid"><label>Etiket<input id="campaignBadge" placeholder="Erken Kayıt / İndirim"></label><label>Bitiş tarihi<input id="campaignEnd" type="date"></label></div>
+            <label>Kampanya başlığı<input id="campaignTitle" maxlength="100" placeholder="%20 indirim / Son gün 10 Ekim" required></label>
+            <label>Kampanya açıklaması<textarea id="campaignText" rows="4" maxlength="400"></textarea></label>
+            <label>Kampanya bağlantısı<input id="campaignUrl" placeholder="https://..."></label>
+            <label style="display:flex;grid-template-columns:auto 1fr;align-items:start;gap:9px;margin-top:12px"><input id="campaignSponsorRequest" type="checkbox" style="width:18px;height:18px;margin-top:2px"><span><strong>Sponsorlu görünürlük de istiyorum</strong><small style="display:block;color:var(--muted);margin-top:3px">Sponsor talebi yönetim paneline onay bekleyen olarak iletilir.</small></span></label>
+            <div id="campaignMessage" class="notice hidden"></div>
+            <div class="actions"><button id="campaignSubmit" type="submit" class="btn primary">Kampanyayı Onaya Gönder</button></div>
+          </form>
+        </section>
+      </section>
+
+      <section class="view" data-panel="media">
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">360° & MEDYA</span><h2>Video Alanları</h2><p>URL yapıştırabilir veya bilgisayarınızdan video yükleyebilirsiniz.</p></div></div>
+          <label>Konum Videosu URL</label><div class="media-row"><input id="routeVideoUrl" placeholder="https://..."><button class="btn secondary" type="button" data-pick="routeVideoFile">Video Yükle</button></div><input id="routeVideoFile" class="file" type="file" accept="video/*"><div id="routeVideoMsg" class="upload-msg"></div>
+          <label>Tanıtım Videosu URL</label><div class="media-row"><input id="promoVideoUrl" placeholder="https://..."><button class="btn secondary" type="button" data-pick="promoVideoFile">Video Yükle</button></div><input id="promoVideoFile" class="file" type="file" accept="video/*"><div id="promoVideoMsg" class="upload-msg"></div>
+          <label>360° Mekan Turu / Video URL</label><div class="media-row"><input id="tour360Url" placeholder="https://..."><button class="btn secondary" type="button" data-pick="tour360File">360° Yükle</button></div><input id="tour360File" class="file" type="file" accept="video/*"><div id="tour360Msg" class="upload-msg"></div>
+          <div id="mediaMessage" class="notice hidden"></div>
+          <div class="actions"><button id="saveMediaBtn" type="button" class="btn primary">Medya Bilgilerini Kaydet</button></div>
+        </section>
+      </section>
+
+      <section class="view" data-panel="qr">
+        <section class="card">
+          <div class="card-head"><div><span class="kicker">QR / NFC KART</span><h2>Kart Siparişi Oluştur</h2><p>Firma bilgileriniz otomatik kullanılır. Sipariş yönetim paneline düşer ve sen aktifleştirene kadar kart aktif olmaz.</p></div></div>
+          <div class="product-grid">
+            <label class="product"><input type="checkbox" name="qrProduct" value="qr_nfc_card" data-label="QR & NFC Kart" checked><span><b>QR & NFC Kart</b><small>Dijital firma ve yönlendirme kartı</small><span id="priceQr" class="price">499 TL</span></span></label>
+            <label class="product"><input type="checkbox" name="qrProduct" value="google_review_card" data-label="Google Yorum Kartı"><span><b>Google Yorum Kartı</b><small>Google yorum bağlantısına yönlendirir</small><span id="priceReview" class="price">349 TL</span></span></label>
+            <label class="product"><input type="checkbox" name="qrProduct" value="business_menu" data-label="İşletme Menü"><span><b>İşletme Menü</b><small>QR/NFC dijital menü veya fiyat listesi</small><span id="priceMenu" class="price">599 TL</span></span></label>
+          </div>
+          <div class="form-grid"><label>Yetkili / Sipariş veren<input id="qrCustomerName"></label><label>Telefon<input id="qrPhone"></label></div>
+          <label>Sipariş notu<textarea id="qrNote" rows="3" placeholder="Kartla ilgili özel notunuz varsa yazın."></textarea></label>
+          <div class="order-summary"><div><span>Firma</span><b id="qrSummaryFirm">-</b></div><div><span>Ürünler</span><b id="qrSummaryProducts">QR & NFC Kart</b></div><div><span>Toplam</span><b id="qrSummaryTotal">499 TL</b></div></div>
+          <div id="qrMessage" class="notice hidden"></div>
+          <div class="actions"><button id="createQrOrder" type="button" class="btn primary">Siparişi Oluştur</button></div>
+        </section>
+        <section class="card"><div class="card-head"><div><span class="kicker">SİPARİŞLERİM</span><h2>QR / NFC Siparişleri</h2><p>Bu kurum hesabından verilen son siparişler.</p></div></div><div id="qrOrders" class="order-list"><div class="empty">Siparişler yükleniyor...</div></div></section>
+      </section>
+    </main>
   </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -128,81 +165,152 @@
 const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const panelApp=firebase.apps.find(a=>a.name==="dijiyesorRegistration")||firebase.initializeApp(firebaseConfig,"dijiyesorRegistration");
-const auth=panelApp.auth();
-const db=panelApp.firestore();
-let account=null, institution=null, institutionId="";
-
-const $=id=>document.getElementById(id);
-const show=id=>$(id).classList.remove("hidden");
-const hide=id=>$(id).classList.add("hidden");
-
-function deny(title,text){
-  hide("loadingView");hide("appView");show("deniedView");
-  $("deniedTitle").textContent=title;$("deniedText").textContent=text;
+const auth=panelApp.auth(),db=panelApp.firestore();
+const CLOUDINARY_CLOUD_NAME="okefpzsy",CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
+let account=null,institution=null,institutionId="",orders=[];
+let PRICES={qr:499,review:349,menu:599};
+const $=id=>document.getElementById(id),show=id=>$(id)?.classList.remove("hidden"),hide=id=>$(id)?.classList.add("hidden");
+const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const now=()=>new Date().toISOString();
+function money(v){return new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(Number(v)||0)+" TL"}
+function deny(title,text){hide("loadingView");hide("appView");show("deniedView");$("deniedTitle").textContent=title;$("deniedText").textContent=text}
+function setNotice(id,text,type=""){const el=$(id);if(!el)return;el.className="notice"+(type?" "+type:"");el.textContent=text;el.classList.remove("hidden")}
+function renderImage(id,url,emptyText){$(id).innerHTML=url?'<img src="'+esc(url)+'" alt="">':esc(emptyText)}
+function campaignState(){
+ const state=String(institution?.campaignApprovalStatus||"");
+ if(state==="pending")return ["Onay bekliyor","Kampanyanız yönetici kontrolüne gönderildi.","pending"];
+ if(institution?.campaignActive)return ["Yayında",institution?.campaignTitle||"Aktif kampanya","active"];
+ if(institution?.campaignTitle)return ["Hazır / Kapalı",institution.campaignTitle,"draft"];
+ return ["Kampanya yok","Henüz kampanya oluşturulmadı.","none"];
 }
 function fill(){
-  $("sideFirmName").textContent=institution?.name||account?.institutionName||"Kurum";
-  $("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
-  $("welcomeTitle").textContent=(institution?.name||account?.institutionName||"Kurum")+" paneli";
-  $("statStatus").textContent=String(institution?.status||"active")==="passive"?"Pasif":"Aktif";
-  $("statLocation").textContent=[institution?.city,institution?.district].filter(Boolean).join(" / ")||"-";
-  $("name").value=institution?.name||account?.institutionName||"";
-  $("phone").value=institution?.phone||"";
-  $("whatsapp").value=institution?.whatsapp||"";
-  $("website").value=institution?.website||"";
-  $("instagram").value=institution?.instagram||"";
-  $("locationReadonly").value=[institution?.city,institution?.district].filter(Boolean).join(" / ");
-  $("address").value=institution?.address||"";
-  $("description").value=institution?.description||"";
+ const name=institution?.name||account?.institutionName||"Kurum";
+ $("sideFirmName").textContent=name;$("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
+ $("welcomeTitle").textContent=name+" paneli";$("statStatus").textContent=String(institution?.status||"active")==="passive"?"Pasif":"Aktif";$("statLocation").textContent=[institution?.city,institution?.district].filter(Boolean).join(" / ")||"-";
+ $("name").value=name;$("phone").value=institution?.phone||"";$("whatsapp").value=institution?.whatsapp||"";$("website").value=institution?.website||"";$("instagram").value=institution?.instagram||"";$("locationReadonly").value=[institution?.city,institution?.district].filter(Boolean).join(" / ");$("address").value=institution?.address||"";$("description").value=institution?.description||"";
+ renderImage("logoPreview",institution?.logoUrl,"Logo yok");renderImage("coverPreview",institution?.coverUrl,"Kapak yok");
+ $("visualMiniStatus").textContent=(institution?.logoUrl||institution?.coverUrl)?"Görseller hazır":"Eksik";
+ $("campaignBadge").value=institution?.campaignBadge||"Kampanya";$("campaignEnd").value=String(institution?.campaignEnd||"").slice(0,10);$("campaignTitle").value=institution?.campaignTitle||"";$("campaignText").value=institution?.campaignText||"";$("campaignUrl").value=institution?.campaignUrl||"";$("campaignSponsorRequest").checked=Boolean(institution?.campaignSponsorRequested);
+ const cs=campaignState();$("statCampaign").textContent=cs[0];$("campaignMiniStatus").textContent=cs[0];$("campaignState").innerHTML="<strong>"+esc(cs[0])+"</strong><small>"+esc(cs[1])+"</small>";
+ $("routeVideoUrl").value=institution?.routeVideoUrl||institution?.locationVideoUrl||"";$("promoVideoUrl").value=institution?.videoUrl||institution?.promoVideoUrl||"";$("tour360Url").value=institution?.tour360Url||institution?.virtualTourUrl||institution?.tour360||"";
+ $("mediaMiniStatus").textContent=($("routeVideoUrl").value||$("promoVideoUrl").value||$("tour360Url").value)?"Medya hazır":"Medya yok";
+ $("qrCustomerName").value=institution?.contactName||account?.contactName||name;$("qrPhone").value=institution?.phone||"";$("qrSummaryFirm").textContent=name;
+ updateQrSummary();
 }
-auth.onAuthStateChanged(async user=>{
-  if(!user){deny("Oturum bulunamadı","Kurum paneline girmek için kurum hesabınızla giriş yapın.");return}
-  try{
-    const accountDoc=await db.collection("institutionUsers").doc(user.uid).get();
-    if(!accountDoc.exists){await auth.signOut();deny("Kurum hesabı bulunamadı","Bu kullanıcıya bağlı bir kurum hesabı bulunamadı.");return}
-    account=accountDoc.data()||{};
-    if(account.status!=="approved"){
-      const message=account.status==="rejected"?"Kurum başvurunuz onaylanmadı.":"Kurum başvurunuz henüz yönetici onayında.";
-      await auth.signOut();deny("Kurum hesabı aktif değil",message);return;
-    }
-    institutionId=account.institutionId||"";
-    if(!institutionId){deny("Kurum bağlantısı eksik","Hesabınız onaylı ancak bağlı kurum kaydı bulunamadı.");return}
-    const instDoc=await db.collection("institutions").doc(institutionId).get();
-    if(!instDoc.exists){deny("Kurum profili bulunamadı","Hesabınıza bağlı firma profili bulunamadı.");return}
-    institution={id:instDoc.id,...instDoc.data()};
-    fill();hide("loadingView");hide("deniedView");show("appView");
-  }catch(err){
-    console.error(err);deny("Panel açılamadı",err.message||"Kurum bilgileri alınamadı.");
-  }
-});
+function setView(view){
+ document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===view));
+ document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x.dataset.panel===view));
+ const titles={overview:["Genel Bakış","Kurum bilgilerinizi ve görünürlüğünüzü yönetin."],profile:["Firma Bilgileri","DijiyeSor'da görünen temel bilgilerinizi güncelleyin."],visuals:["Logo & Kapak","Görsel kimliğinizi bilgisayarınızdan yükleyin."],campaign:["Kampanya","Kampanyanızı hazırlayın ve yönetici onayına gönderin."],media:["360° & Video","Konum, tanıtım ve 360° medya alanlarını yönetin."],qr:["QR / NFC Kart","Kart siparişinizi oluşturun ve durumunu takip edin."]};
+ $("pageTitle").textContent=titles[view]?.[0]||"Kurum Paneli";$("pageSubtitle").textContent=titles[view]?.[1]||"";
+ if(view==="qr")loadOrders();
+}
+document.querySelectorAll("[data-view]").forEach(btn=>btn.addEventListener("click",()=>setView(btn.dataset.view)));
+document.querySelectorAll("[data-pick]").forEach(btn=>btn.addEventListener("click",()=>$(btn.dataset.pick)?.click()));
 
-document.querySelectorAll("[data-view]").forEach(btn=>btn.addEventListener("click",()=>{
-  document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x===btn));
-  document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x.dataset.panel===btn.dataset.view));
-  const titles={overview:["Genel Bakış","Kurum bilgilerinizi ve görünürlüğünüzü yönetin."],profile:["Firma Bilgileri","DijiyeSor'da görünen bilgilerinizi güncelleyin."],services:["Hizmetler","QR/NFC, 360°, video ve sponsor seçenekleri."]};
-  $("pageTitle").textContent=titles[btn.dataset.view][0];$("pageSubtitle").textContent=titles[btn.dataset.view][1];
-}));
+async function uploadCloudinary(file,resourceType,msgId){
+ if(!file)return "";
+ const msg=$(msgId);if(msg)msg.textContent="Yükleniyor...";
+ const isVideo=resourceType==="video";
+ if(isVideo&&!file.type.startsWith("video/"))throw new Error("Video dosyası seçin.");
+ if(!isVideo&&!file.type.startsWith("image/"))throw new Error("Görsel dosyası seçin.");
+ if(file.size>(isVideo?100:10)*1024*1024)throw new Error(isVideo?"Video en fazla 100 MB olabilir.":"Görsel en fazla 10 MB olabilir.");
+ const fd=new FormData();fd.append("file",file);fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+ const res=await fetch("https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/"+resourceType+"/upload",{method:"POST",body:fd});
+ const data=await res.json();if(!res.ok||!data.secure_url)throw new Error(data?.error?.message||"Yükleme başarısız.");
+ if(msg)msg.textContent="Yüklendi ✓";return data.secure_url;
+}
+async function saveInstitution(data){await db.collection("institutions").doc(institutionId).set({...data,updatedAt:now()},{merge:true});institution={...institution,...data,updatedAt:now()};fill()}
+
+auth.onAuthStateChanged(async user=>{
+ if(!user){deny("Oturum bulunamadı","Kurum paneline girmek için kurum hesabınızla giriş yapın.");return}
+ try{
+  const accountDoc=await db.collection("institutionUsers").doc(user.uid).get();if(!accountDoc.exists){await auth.signOut();deny("Kurum hesabı bulunamadı","Bu kullanıcıya bağlı bir kurum hesabı bulunamadı.");return}
+  account=accountDoc.data()||{};if(account.status!=="approved"){const message=account.status==="rejected"?"Kurum başvurunuz onaylanmadı.":"Kurum başvurunuz henüz yönetici onayında.";await auth.signOut();deny("Kurum hesabı aktif değil",message);return}
+  institutionId=account.institutionId||"";if(!institutionId){deny("Kurum bağlantısı eksik","Hesabınız onaylı ancak bağlı kurum kaydı bulunamadı.");return}
+  const instDoc=await db.collection("institutions").doc(institutionId).get();if(!instDoc.exists){deny("Kurum profili bulunamadı","Hesabınıza bağlı firma profili bulunamadı.");return}
+  institution={id:instDoc.id,...instDoc.data()};await loadPrices();fill();hide("loadingView");hide("deniedView");show("appView");
+ }catch(err){console.error(err);deny("Panel açılamadı",err.message||"Kurum bilgileri alınamadı.")}
+});
 
 $("profileForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const msg=$("profileMessage");msg.className="notice";msg.textContent="Kaydediliyor...";
-  try{
-    const data={
-      name:$("name").value.trim(),
-      phone:$("phone").value.trim(),
-      whatsapp:$("whatsapp").value.trim(),
-      website:$("website").value.trim(),
-      instagram:$("instagram").value.trim(),
-      address:$("address").value.trim(),
-      description:$("description").value.trim(),
-      updatedAt:new Date().toISOString()
-    };
-    await db.collection("institutions").doc(institutionId).set(data,{merge:true});
-    await db.collection("institutionUsers").doc(auth.currentUser.uid).set({institutionName:data.name},{merge:true});
-    institution={...institution,...data};account={...account,institutionName:data.name};fill();
-    msg.className="notice success";msg.textContent="Kaydedildi. Firma bilgileriniz güncellendi.";
-  }catch(err){msg.className="notice error";msg.textContent=err.message||"Bilgiler kaydedilemedi."}
+ e.preventDefault();setNotice("profileMessage","Kaydediliyor...");
+ try{
+  const data={name:$("name").value.trim(),phone:$("phone").value.trim(),whatsapp:$("whatsapp").value.trim(),website:$("website").value.trim(),instagram:$("instagram").value.trim(),address:$("address").value.trim(),description:$("description").value.trim()};
+  await saveInstitution(data);await db.collection("institutionUsers").doc(auth.currentUser.uid).set({institutionName:data.name},{merge:true});account={...account,institutionName:data.name};setNotice("profileMessage","Kaydedildi. Firma bilgileriniz güncellendi.","success");
+ }catch(err){setNotice("profileMessage",err.message||"Bilgiler kaydedilemedi.","error")}
 });
+
+$("logoFile").addEventListener("change",async e=>{
+ const f=e.target.files?.[0];if(!f)return;
+ try{const url=await uploadCloudinary(f,"image","logoMsg");await saveInstitution({logoUrl:url});setNotice("visualMessage","Logo yüklendi ve firma profilinize kaydedildi.","success")}catch(err){$("logoMsg").textContent=err.message}
+ e.target.value="";
+});
+$("coverFile").addEventListener("change",async e=>{
+ const f=e.target.files?.[0];if(!f)return;
+ try{const url=await uploadCloudinary(f,"image","coverMsg");await saveInstitution({coverUrl:url});setNotice("visualMessage","Kapak görseli yüklendi ve firma profilinize kaydedildi.","success")}catch(err){$("coverMsg").textContent=err.message}
+ e.target.value="";
+});
+$("removeLogo").addEventListener("click",async()=>{try{await saveInstitution({logoUrl:""});setNotice("visualMessage","Logo kaldırıldı.","success")}catch(err){setNotice("visualMessage",err.message,"error")}});
+$("removeCover").addEventListener("click",async()=>{try{await saveInstitution({coverUrl:""});setNotice("visualMessage","Kapak görseli kaldırıldı.","success")}catch(err){setNotice("visualMessage",err.message,"error")}});
+
+$("campaignForm").addEventListener("submit",async e=>{
+ e.preventDefault();const title=$("campaignTitle").value.trim();if(!title)return;
+ setNotice("campaignMessage","Kampanya yönetici onayına gönderiliyor...");
+ try{
+  const data={campaignBadge:$("campaignBadge").value.trim()||"Kampanya",campaignEnd:$("campaignEnd").value,campaignTitle:title,campaignText:$("campaignText").value.trim(),campaignUrl:$("campaignUrl").value.trim(),campaignSponsorRequested:$("campaignSponsorRequest").checked,campaignApprovalStatus:"pending",campaignActive:false,campaignRequestedAt:now()};
+  await saveInstitution(data);setNotice("campaignMessage","Kampanyanız alındı. Yönetici onayından sonra yayına alınacak.","success");
+ }catch(err){setNotice("campaignMessage",err.message||"Kampanya gönderilemedi.","error")}
+});
+
+async function bindVideoUpload(inputId,urlId,msgId){
+ const el=$(inputId);el.addEventListener("change",async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  try{const url=await uploadCloudinary(f,"video",msgId);$(urlId).value=url;$(msgId).textContent="Yüklendi ✓ Kaydet butonuna basın."}catch(err){$(msgId).textContent=err.message}
+  e.target.value="";
+ });
+}
+bindVideoUpload("routeVideoFile","routeVideoUrl","routeVideoMsg");bindVideoUpload("promoVideoFile","promoVideoUrl","promoVideoMsg");bindVideoUpload("tour360File","tour360Url","tour360Msg");
+$("saveMediaBtn").addEventListener("click",async()=>{
+ setNotice("mediaMessage","Kaydediliyor...");
+ try{
+  const data={routeVideoUrl:$("routeVideoUrl").value.trim(),locationVideoUrl:$("routeVideoUrl").value.trim(),videoUrl:$("promoVideoUrl").value.trim(),promoVideoUrl:$("promoVideoUrl").value.trim(),tour360Url:$("tour360Url").value.trim(),virtualTourUrl:$("tour360Url").value.trim(),has360Tour:Boolean($("tour360Url").value.trim())};
+  await saveInstitution(data);setNotice("mediaMessage","360° ve video bilgileri kaydedildi.","success");
+ }catch(err){setNotice("mediaMessage",err.message||"Medya bilgileri kaydedilemedi.","error")}
+});
+
+async function loadPrices(){
+ try{const s=await db.collection("siteSettings").doc("home").get();const p=(s.data()||{}).qrOrderSettings?.prices||{};PRICES={...PRICES,...p}}catch(_){}
+ $("priceQr").textContent=money(PRICES.qr);$("priceReview").textContent=money(PRICES.review);$("priceMenu").textContent=money(PRICES.menu);updateQrSummary();
+}
+function selectedProducts(){return [...document.querySelectorAll('input[name="qrProduct"]:checked')].map(x=>({id:x.value,name:x.dataset.label}))}
+function qrTotal(){const p=selectedProducts();let t=0;if(p.some(x=>x.id==="qr_nfc_card"))t+=Number(PRICES.qr)||0;if(p.some(x=>x.id==="google_review_card"))t+=Number(PRICES.review)||0;if(p.some(x=>x.id==="business_menu"))t+=Number(PRICES.menu)||0;return t}
+function updateQrSummary(){const p=selectedProducts();$("qrSummaryProducts").textContent=p.length?p.map(x=>x.name).join(", "):"Seçim yapılmadı";$("qrSummaryTotal").textContent=money(qrTotal())}
+document.querySelectorAll('input[name="qrProduct"]').forEach(x=>x.addEventListener("change",updateQrSummary));
+function randomId(){return Array.from(crypto.getRandomValues(new Uint8Array(6))).map(b=>b.toString(36).padStart(2,"0")).join("").slice(0,10)}
+function slugify(v){return String(v||"").toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,45)||"kart"}
+function orderCode(){return "QR-"+new Date().toISOString().slice(0,10).replace(/-/g,"")+"-"+randomId().slice(0,5).toUpperCase()}
+$("createQrOrder").addEventListener("click",async()=>{
+ const products=selectedProducts();if(!products.length){setNotice("qrMessage","En az bir ürün seçin.","error");return}
+ const phone=$("qrPhone").value.trim()||institution?.phone||"";if(phone.replace(/\D/g,"").length<10){setNotice("qrMessage","Telefon numarasını kontrol edin.","error");return}
+ const btn=$("createQrOrder");btn.disabled=true;btn.textContent="Sipariş oluşturuluyor...";setNotice("qrMessage","Sipariş yönetim paneline gönderiliyor...");
+ try{
+  const code=orderCode(),cardId=slugify(institution?.name)+"-"+randomId().slice(0,8),permanentUrl="https://ftmotiondesign.github.io/dijiyer/customer-card.html?id="+encodeURIComponent(cardId);
+  const businessName=institution?.name||account?.institutionName||"Firma",whatsapp=institution?.whatsapp||phone;
+  const cardData={name:businessName,phone,whatsapp,address:institution?.address||"",instagram:institution?.instagram||"",website:institution?.website||"",description:institution?.description||"",logo:institution?.logoUrl||"",cover:institution?.coverUrl||"",productCategories:products.map(x=>x.id),productCategoryNames:products.map(x=>x.name),showContact:true,showInfoRequest:true};
+  const payload={orderCode:code,orderType:"qr_card",cardId,permanentUrl,status:"new",source:"institution_panel",institutionId,userUid:auth.currentUser.uid,accountEmail:auth.currentUser.email||"",customerName:$("qrCustomerName").value.trim()||businessName,customerPhone:phone,whatsappPhone:whatsapp,address:institution?.address||"",instagram:institution?.instagram||"",website:institution?.website||"",businessName,businessInfo:institution?.description||businessName,productCategories:products.map(x=>x.id),productCategoryNames:products.map(x=>x.name),totalPrice:qrTotal(),priceSnapshot:{...PRICES},quantity:1,cardType:"qr_nfc",cardData,note:$("qrNote").value.trim(),createdAt:now(),updatedAt:now()};
+  await db.collection("siparisler").doc(code).set(payload);setNotice("qrMessage","Siparişiniz alındı. Sipariş No: "+code,"success");$("qrNote").value="";await loadOrders();
+ }catch(err){setNotice("qrMessage","Sipariş gönderilemedi: "+(err.message||"Bilinmeyen hata"),"error")}
+ finally{btn.disabled=false;btn.textContent="Siparişi Oluştur"}
+});
+function orderStatus(v){return ({new:"Yeni",preparing:"Hazırlanıyor",active:"Aktif",completed:"Tamamlandı",cancelled:"İptal"})[String(v||"new")]||String(v||"Yeni")}
+async function loadOrders(){
+ if(!institutionId)return;$("qrOrders").innerHTML='<div class="empty">Siparişler yükleniyor...</div>';
+ try{
+  const snap=await db.collection("siparisler").where("institutionId","==",institutionId).get();orders=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.orderType==="qr_card").sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  $("qrMiniStatus").textContent=orders.length?orders.length+" sipariş":"Sipariş ver";
+  $("qrOrders").innerHTML=orders.length?orders.map(o=>'<article class="order-row"><div><strong>'+esc(o.orderCode||o.id)+'</strong><small>'+esc((o.productCategoryNames||[]).join(", ")||"QR / NFC Kart")+'</small></div><div><strong>'+money(o.totalPrice||0)+'</strong><small>'+esc(new Date(o.createdAt||Date.now()).toLocaleString("tr-TR"))+'</small></div><span class="order-pill">'+esc(orderStatus(o.status))+'</span></article>').join(""):'<div class="empty">Henüz QR / NFC siparişi yok.</div>';
+ }catch(err){$("qrOrders").innerHTML='<div class="notice warn">Sipariş geçmişi görüntülenemedi. Yeni sipariş oluşturabilirsiniz.</div>'}
+}
 async function logout(){try{await auth.signOut()}finally{window.location.href="firma-ekle.html?kurumgiris=1"}}
 $("logoutBtn").addEventListener("click",logout);$("mobileLogout").addEventListener("click",logout);
 </script>
