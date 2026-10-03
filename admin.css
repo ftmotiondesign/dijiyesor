@@ -292,3 +292,13 @@
 
 .quick-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
 .quick-row-actions button{border:1px solid #dce4ed;background:#fff;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:850;color:#526079}
+
+
+/* Firma veri kalitesi */
+.firm-quality{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}
+.firm-quality b{font-size:10px;padding:3px 6px;border-radius:999px}
+.firm-quality b.good{background:#e7f8ee;color:#168044}
+.firm-quality b.mid{background:#fff4d8;color:#9a6900}
+.firm-quality b.low{background:#ffe8e8;color:#b82c2c}
+.firm-quality small{font-size:9px!important;color:#8a94a5!important;max-width:330px}
+#firmCompleteness{min-width:160px}
