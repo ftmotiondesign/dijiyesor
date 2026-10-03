@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-4">
+  <link rel="stylesheet" href="admin.css?v=20261003-5">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -27,7 +27,7 @@
     <nav>
       <button class="nav-item active" data-view="overview">Genel Bakış</button>
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
-      <button class="nav-item" data-view="google-import">Google’dan Firma Ekle</button>
+      <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="qr">QR / NFC Kartlar</button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
@@ -98,29 +98,22 @@
     <section class="view" data-panel-view="google-import">
       <div class="google-import-head">
         <div>
-          <span>HIZLI FİRMA AKTARIMI</span>
-          <h2>Google’dan firmaları bul ve toplu ekle.</h2>
-          <p>Örnek: “Çanakkale sürücü kursları” veya “Manisa dershaneleri”. Sonuçları seçip tek seferde DijiyeSor’a aktar.</p>
+          <span>ÜCRETSİZ HIZLI KAYIT</span>
+          <h2>Google’da gördüğün firmaları hızlıca ekle.</h2>
+          <p>API anahtarı gerekmez. İl, ilçe ve sektörü bir kez seç; firmaları alt alta yapıştır ve toplu ekle.</p>
         </div>
       </div>
 
-      <section class="card google-api-card">
-        <div class="google-api-row">
-          <label>Google Maps API Anahtarı
-            <input id="googlePlacesApiKey" type="password" autocomplete="off" placeholder="AIza...">
+      <section class="card quick-import-card">
+        <div class="quick-import-grid">
+          <label>İl
+            <input id="quickImportCity" placeholder="Örn. Çanakkale">
           </label>
-          <button id="googleSaveApiKey" type="button" class="secondary">Anahtarı Kaydet</button>
-        </div>
-        <small>Anahtar yalnızca bu tarayıcıda saklanır. Google Cloud’da Maps JavaScript API ve Places API (New) etkin olmalı; anahtarı alan adı kısıtlamasıyla kullan.</small>
-      </section>
-
-      <section class="card">
-        <div class="google-search-grid">
-          <label>Google’da aranacak ifade
-            <input id="googlePlaceQuery" type="search" placeholder="Örn. Çanakkale sürücü kursları">
+          <label>İlçe
+            <input id="quickImportDistrict" placeholder="Örn. Merkez">
           </label>
-          <label>DijiyeSor sektörü
-            <select id="googleImportCategory">
+          <label>Sektör
+            <select id="quickImportCategory">
               <option value="diger">Diğer</option>
               <option value="egitim">Eğitim</option>
               <option value="otomotiv">Otomotiv</option>
@@ -135,19 +128,29 @@
               <option value="alisveris">Alışveriş & Yerel Esnaf</option>
             </select>
           </label>
-          <button id="googlePlaceSearchBtn" type="button" class="primary">Google’da Ara</button>
         </div>
 
-        <div id="googleImportMessage" class="message hidden"></div>
-
-        <div id="googleBulkBar" class="google-bulkbar hidden">
-          <label><input id="googleSelectAll" type="checkbox"><span>Tüm uygun sonuçları seç</span></label>
-          <strong id="googleSelectedCount">0 seçili</strong>
-          <button id="googleImportSelected" type="button" class="primary">Seçilenleri Toplu Ekle</button>
+        <div class="quick-import-help">
+          <strong>Her firma bir satır:</strong>
+          <span>Firma Adı | Telefon | Adres | Web Sitesi</span>
+          <small>Sadece firma adını yazman da yeterli. Diğer alanları boş bırakabilirsin.</small>
         </div>
 
-        <div id="googlePlaceResults" class="google-place-results">
-          <div class="empty">Henüz Google araması yapılmadı.</div>
+        <label>Firmaları buraya yapıştır
+          <textarea id="quickImportText" rows="10" placeholder="Örnek:
+Kale Truva Sürücü Kursu | 0286 000 00 00 | Atatürk Cd. No:1 | https://ornek.com
+Abide Sürücü Kursu | 0286 111 11 11 | İsmetpaşa Mah. | 
+Ata Sürücü Kursu"></textarea>
+        </label>
+
+        <div class="quick-import-actions">
+          <button id="quickImportPreview" type="button" class="secondary">Listeyi Kontrol Et</button>
+          <button id="quickImportAddAll" type="button" class="primary">Tümünü DijiyeSor’a Ekle</button>
+        </div>
+
+        <div id="quickImportMessage" class="message hidden"></div>
+        <div id="quickImportPreviewList" class="quick-import-preview">
+          <div class="empty">Henüz firma listesi girilmedi.</div>
         </div>
       </section>
     </section>
@@ -399,7 +402,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-4"></script>
+<script src="admin.js?v=20261003-5"></script>
 <!-- pages-redeploy -->
 </body>
 </html>
