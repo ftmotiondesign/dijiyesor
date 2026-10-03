@@ -9,6 +9,8 @@ const ADMIN_EMAIL="ftmotiondesign@gmail.com";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
 let firms=[],applications=[],members=[],campaignFilter="all";
+const selectedMemberIds=new Set();
+let visibleMemberIds=[];
 
 const $=id=>document.getElementById(id);
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -471,7 +473,7 @@ function getMemberRows(){
   });
 
   applications
-    .filter(a=>String(a.status||"")==="approved")
+    .filter(a=>String(a.status||"")==="approved" && !a.membershipRemoved)
     .forEach(a=>{
       if(seenApplicationIds.has(a.id))return;
       if(a.approvedInstitutionId && seenInstitutionIds.has(a.approvedInstitutionId))return;
@@ -493,16 +495,31 @@ function getMemberRows(){
   return rows.sort((a,b)=>String(a.institutionName||a.email||"").localeCompare(String(b.institutionName||b.email||""),"tr"));
 }
 
+function updateMemberBulkUi(){
+  const count=selectedMemberIds.size;
+  if($("memberSelectedCount"))$("memberSelectedCount").textContent=count+" seçili";
+  if($("memberSelectAll")){
+    const visibleSelected=visibleMemberIds.filter(id=>selectedMemberIds.has(id)).length;
+    $("memberSelectAll").checked=visibleMemberIds.length>0&&visibleSelected===visibleMemberIds.length;
+    $("memberSelectAll").indeterminate=visibleSelected>0&&visibleSelected<visibleMemberIds.length;
+  }
+  ["memberBulkApprove","memberBulkPending","memberBulkReject","memberBulkCopyEmails","memberBulkClear","memberBulkDelete"].forEach(id=>{
+    if($(id))$(id).disabled=count===0;
+  });
+}
 function renderMembers(){
   const q=norm($("memberSearch")?.value||"");
   const status=$("memberStatus")?.value||"";
   const allRows=getMemberRows();
+
+  [...selectedMemberIds].forEach(id=>{if(!allRows.some(x=>x.id===id))selectedMemberIds.delete(id)});
 
   const list=allRows.filter(m=>{
     const firm=firms.find(f=>f.id===m.institutionId);
     const hay=[m.institutionName,m.email,firm?.name,firm?.city,firm?.district].join(" ");
     return (!q||norm(hay).includes(q))&&(!status||String(m.status||"pending")===status);
   });
+  visibleMemberIds=list.map(x=>x.id);
 
   $("memberStatTotal").textContent=allRows.length;
   $("memberStatApproved").textContent=allRows.filter(m=>m.status==="approved").length;
@@ -516,7 +533,8 @@ function renderMembers(){
       ? '<span class="member-account-badge ready">Hesap Hazır</span>'
       : '<span class="member-account-badge missing">Hesap Yok</span>';
 
-    return '<article class="member-row">'+
+    return '<article class="member-row'+(selectedMemberIds.has(m.id)?' selected':'')+'">'+
+      '<label class="member-check"><input type="checkbox" data-member-select="'+esc(m.id)+'" '+(selectedMemberIds.has(m.id)?'checked':'')+'><span></span></label>'+
       '<div class="member-avatar">'+esc(initials(m.institutionName||m.email))+'</div>'+
       '<div class="member-main"><strong>'+esc(m.institutionName||firm?.name||"Kurum")+'</strong><small>'+esc(m.email||"E-posta yok")+'</small>'+accountBadge+'</div>'+
       '<div class="member-place">'+esc([firm?.city,firm?.district].filter(Boolean).join(" · ")||"Konum yok")+'</div>'+
@@ -524,6 +542,7 @@ function renderMembers(){
       '<div class="member-actions"><button data-member-detail="'+esc(m.id)+'">Detay</button>'+(firm?'<button data-edit-firm="'+esc(firm.id)+'">Firma</button>':'')+'<button class="danger" data-delete-member="'+esc(m.id)+'">Sil</button></div>'+
     '</article>';
   }).join(""):'<div class="empty">Üye bulunamadı.</div>';
+  updateMemberBulkUi();
 }
 function openMemberDetail(id){
   const m=getMemberRows().find(x=>x.id===id);
@@ -616,6 +635,13 @@ document.addEventListener("click",async e=>{
     }
     return;
   }
+  const memberSelect=e.target.closest("[data-member-select]");if(memberSelect){
+    const id=memberSelect.dataset.memberSelect;
+    if(memberSelect.checked)selectedMemberIds.add(id);else selectedMemberIds.delete(id);
+    memberSelect.closest(".member-row")?.classList.toggle("selected",memberSelect.checked);
+    updateMemberBulkUi();
+    return;
+  }
   const deleteMember=e.target.closest("[data-delete-member]");if(deleteMember){
     const row=getMemberRows().find(x=>x.id===deleteMember.dataset.deleteMember);
     if(!row)return;
@@ -629,9 +655,11 @@ document.addEventListener("click",async e=>{
         await db.collection("institutionApplications").doc(row.applicationId).set({
           authUid:"",
           accountEmail:"",
+          membershipRemoved:true,
           accountRemovedAt:new Date().toISOString()
         },{merge:true});
       }
+      selectedMemberIds.delete(row.id);
       await Promise.all([loadMembers(),loadApplications()]);
       renderAll();
       $("memberDetailModal")?.classList.add("hidden");
@@ -696,3 +724,74 @@ $("memberOpenFirm")?.addEventListener("click",()=>{
   setView("firms");
   openFirmModal(id);
 });
+
+
+async function runMemberBulkStatus(status){
+  const rows=getMemberRows().filter(x=>selectedMemberIds.has(x.id));
+  if(!rows.length)return;
+  const label={approved:"aktif",pending:"bekleyen",rejected:"reddedilen"}[status]||status;
+  if(!confirm(rows.length+" üyeyi "+label+" duruma almak istiyor musunuz?"))return;
+  let changed=0,skipped=0;
+  try{
+    for(const row of rows){
+      if(!row.memberId){skipped++;continue}
+      await db.collection("institutionUsers").doc(row.memberId).set({status,updatedAt:new Date().toISOString()},{merge:true});
+      if(row.applicationId){
+        await db.collection("institutionApplications").doc(row.applicationId).set({membershipStatus:status,membershipRemoved:false},{merge:true});
+      }
+      changed++;
+    }
+    await Promise.all([loadMembers(),loadApplications()]);
+    selectedMemberIds.clear();renderAll();
+    const detail=skipped?" "+skipped+" hesap kaydı olmayan üye atlandı.":"";
+    const m=$("memberBulkMessage");m.className="message success";m.textContent=changed+" üye güncellendi."+detail;
+  }catch(err){
+    const m=$("memberBulkMessage");m.className="message error";m.textContent="Toplu işlem tamamlanamadı: "+(err.message||"Bilinmeyen hata");
+  }
+}
+async function runMemberBulkDelete(){
+  const rows=getMemberRows().filter(x=>selectedMemberIds.has(x.id));
+  if(!rows.length)return;
+  if(!confirm(rows.length+" üyeliği toplu olarak silmek istiyor musunuz? Firma profilleri korunacak; kurum giriş yetkileri kaldırılacak."))return;
+  try{
+    for(const row of rows){
+      if(row.memberId)await db.collection("institutionUsers").doc(row.memberId).delete();
+      if(row.applicationId){
+        await db.collection("institutionApplications").doc(row.applicationId).set({
+          authUid:"",
+          accountEmail:"",
+          membershipRemoved:true,
+          accountRemovedAt:new Date().toISOString()
+        },{merge:true});
+      }
+    }
+    selectedMemberIds.clear();
+    await Promise.all([loadMembers(),loadApplications()]);
+    renderAll();
+    const m=$("memberBulkMessage");m.className="message success";m.textContent=rows.length+" üyelik silindi. Firma profilleri korundu.";
+  }catch(err){
+    const m=$("memberBulkMessage");m.className="message error";m.textContent="Toplu silme tamamlanamadı: "+(err.message||"Bilinmeyen hata");
+  }
+}
+$("memberSelectAll")?.addEventListener("change",e=>{
+  if(e.target.checked)visibleMemberIds.forEach(id=>selectedMemberIds.add(id));
+  else visibleMemberIds.forEach(id=>selectedMemberIds.delete(id));
+  renderMembers();
+});
+$("memberBulkClear")?.addEventListener("click",()=>{selectedMemberIds.clear();renderMembers()});
+$("memberBulkApprove")?.addEventListener("click",()=>runMemberBulkStatus("approved"));
+$("memberBulkPending")?.addEventListener("click",()=>runMemberBulkStatus("pending"));
+$("memberBulkReject")?.addEventListener("click",()=>runMemberBulkStatus("rejected"));
+$("memberBulkDelete")?.addEventListener("click",runMemberBulkDelete);
+$("memberBulkCopyEmails")?.addEventListener("click",async()=>{
+  const rows=getMemberRows().filter(x=>selectedMemberIds.has(x.id));
+  const emails=[...new Set(rows.map(x=>String(x.email||"").trim()).filter(Boolean))];
+  if(!emails.length){const m=$("memberBulkMessage");m.className="message error";m.textContent="Seçili üyelerde e-posta adresi bulunamadı.";return}
+  try{
+    await navigator.clipboard.writeText(emails.join(", "));
+    const m=$("memberBulkMessage");m.className="message success";m.textContent=emails.length+" e-posta adresi kopyalandı.";
+  }catch(_){
+    const m=$("memberBulkMessage");m.className="message error";m.textContent="E-postalar kopyalanamadı.";
+  }
+});
+updateMemberBulkUi();
