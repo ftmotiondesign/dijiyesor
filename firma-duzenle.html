@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firma Düzenle | DijiyeSor</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}button,input,select,textarea{font:inherit}.hidden{display:none!important}
+.top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e5e7eb}.topin{max-width:1450px;margin:auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}.left{display:flex;align-items:center;gap:12px}.back,.btn{border:1px solid #dbe1ea;background:#fff;border-radius:11px;padding:10px 13px;text-decoration:none;color:#172033;font-weight:700;cursor:pointer}.btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}.btn.soft{background:#eff6ff;color:#1d4ed8;border-color:#dbeafe}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;color:#2563eb}.title{margin:2px 0;font-size:21px}.meta{font-size:12px;color:#64748b}.layout{max-width:1450px;margin:20px auto;padding:0 20px 40px;display:grid;grid-template-columns:250px 1fr;gap:18px}.side{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px;height:max-content;position:sticky;top:86px}.tab{width:100%;text-align:left;border:0;background:transparent;border-radius:10px;padding:12px;font-weight:700;color:#475569;cursor:pointer}.tab.active{background:#eff6ff;color:#1d4ed8}.tab small{display:block;font-weight:400;color:#94a3b8;margin-top:2px}.panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:16px;overflow:hidden}.head{padding:18px 20px;border-bottom:1px solid #e5e7eb}.head h2{margin:3px 0 4px;font-size:18px}.head p{margin:0;color:#64748b;font-size:13px}.body{padding:20px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}label{display:block;font-size:13px;font-weight:700;color:#334155}input,select,textarea{width:100%;margin-top:7px;padding:11px 12px;border:1px solid #d8dee8;border-radius:10px;outline:none}textarea{resize:vertical}.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;gap:9px;padding:12px;border:1px solid #e5e7eb;border-radius:11px;background:#fafafa}.check input{width:auto;margin:2px 0}.check small{display:block;color:#64748b;font-weight:400;margin-top:3px}.media{display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:16px}.preview{height:170px;border:1px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94a3b8}.preview img{width:100%;height:100%;object-fit:cover}.message{margin-top:10px;padding:10px;border-radius:9px;background:#f8fafc;color:#475569;font-size:13px}.message.success{background:#ecfdf5;color:#166534}.message.error{background:#fef2f2;color:#b91c1c}.stat{border:1px solid #e5e7eb;border-radius:12px;padding:14px}.stat span{font-size:12px;color:#64748b}.stat strong{display:block;font-size:23px;margin-top:5px}.service{border:1px solid #e5e7eb;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.service h3{margin:0 0 4px;font-size:15px}.service p{margin:0;color:#64748b;font-size:12px}.savebar{position:sticky;bottom:10px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:11px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 30px #0002}.danger{color:#b91c1c}.actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.tab{min-width:150px}.g4{grid-template-columns:1fr 1fr}.media{grid-template-columns:1fr}}
+@media(max-width:650px){.topin{align-items:flex-start;flex-direction:column}.layout{padding:0 10px}.g2,.g3,.g4,.checks{grid-template-columns:1fr}.body,.head{padding:15px}.savebar{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin">
+<div class="left"><a class="back" href="admin.html#firms">← Firmalar</a><div><div class="eyebrow">FİRMA YÖNETİMİ</div><h1 id="pageName" class="title">Yükleniyor...</h1><div id="pageMeta" class="meta"></div></div></div>
+<div class="actions"><a id="viewFirm" class="btn soft" target="_blank">Firma Sayfasını Gör ↗</a><button id="topSave" class="btn primary">Kaydet</button></div>
+</div></header>
+
+<div class="layout">
+<aside class="side">
+<button class="tab active" data-tab="general">Genel Bilgiler<small>Firma, iletişim, adres</small></button>
+<button class="tab" data-tab="media">Görseller<small>Logo ve firma görseli</small></button>
+<button class="tab" data-tab="video">Video & 360°<small>Tur ve videolar</small></button>
+<button class="tab" data-tab="requests">Bilgi Al<small>Talep yönlendirme</small></button>
+<button class="tab" data-tab="sponsor">Sponsor & VIP<small>Öne çıkarma</small></button>
+<button class="tab" data-tab="qr">QR Hizmetleri<small>NFC, Menü, Google QR</small></button>
+<button class="tab" data-tab="stats">İstatistik<small>Etkileşimler</small></button>
+<button class="tab" data-tab="admin">Yönetici<small>İç notlar</small></button>
+</aside>
+
+<main>
+<section class="panel active" data-panel="general"><div class="card"><div class="head"><div class="eyebrow">TEMEL BİLGİLER</div><h2>Firma profili</h2><p>Arama ve firma detay sayfasında kullanılan bilgiler.</p></div><div class="body">
+<div class="g2"><label>Firma adı<input id="name"></label><label>Durum<select id="status"><option value="active">Aktif</option><option value="passive">Pasif</option></select></label><label>Ana sektör<select id="mainCategory"></select></label><label>Alt kategori<input id="subCategory"></label></div>
+<div class="g3" style="margin-top:14px"><label>İl<input id="city"></label><label>İlçe<input id="district"></label><label>Telefon<input id="phone"></label></div>
+<label style="margin-top:14px">Adres<input id="address"></label>
+<div class="g3" style="margin-top:14px"><label>WhatsApp<input id="whatsapp"></label><label>Web sitesi<input id="website"></label><label>Instagram<input id="instagram"></label></div>
+<label style="margin-top:14px">Açıklama<textarea id="description" rows="5"></textarea></label>
+</div></div></section>
+
+<section class="panel" data-panel="media"><div class="card"><div class="head"><div class="eyebrow">GÖRSELLER</div><h2>Logo ve firma görseli</h2><p>Firma kartındaki görseli buradan yönet.</p></div><div class="body">
+<div class="g2"><label>Logo URL<input id="logoUrl"></label><label>Firma görseli URL<input id="coverUrl"></label></div>
+<div class="media"><div id="preview" class="preview">Görsel yok</div><div><label>Bilgisayardan görsel seç<input id="coverFile" type="file" accept="image/*"></label><div class="actions" style="margin-top:10px"><button id="uploadCover" class="btn" type="button">Görseli Yükle</button><button id="clearCover" class="btn" type="button">Görseli Kaldır</button></div><div id="uploadMsg" class="message hidden"></div></div></div>
+</div></div></section>
+
+<section class="panel" data-panel="video"><div class="card"><div class="head"><div class="eyebrow">VİDEO & 360°</div><h2>Medya bağlantıları</h2><p>360° varsa öncelikli göster; yoksa harita devreye girsin.</p></div><div class="body">
+<div class="g2"><label>360° mekan / tur URL<input id="tour360Url"></label><label>Tanıtım video URL<input id="videoUrl"></label><label>Konum video URL<input id="locationVideoUrl"></label><label>Kampanya video URL<input id="campaignVideoUrl"></label></div>
+<div class="checks" style="margin-top:14px"><label class="check"><input id="prefer360" type="checkbox"><span><b>360° öncelikli</b><small>Harita alanında 360° içerik önce gelir.</small></span></label><label class="check"><input id="fallbackMap" type="checkbox"><span><b>360° yoksa harita</b><small>Bağlantı boşsa harita gösterilir.</small></span></label></div>
+</div></div></section>
+
+<section class="panel" data-panel="requests"><div class="card"><div class="head"><div class="eyebrow">BİLGİ AL</div><h2>Talep yönlendirme</h2><p>Bilgi Al butonunun çalışma biçimini belirle.</p></div><div class="body">
+<div class="checks"><label class="check"><input id="infoRequestEnabled" type="checkbox"><span><b>Bilgi Al aktif</b><small>Firma sayfasında buton görünür.</small></span></label><label class="check"><input id="infoNotifyPanel" type="checkbox"><span><b>Firma paneline bildir</b><small>Talep kurum hesabında da görünür.</small></span></label></div>
+<div class="g2" style="margin-top:14px"><label>Yönlendirme<select id="infoRequestTarget"><option value="panel">Firma paneli</option><option value="whatsapp">WhatsApp</option><option value="both">Panel + WhatsApp</option></select></label><label>WhatsApp numarası<input id="infoRequestPhone"></label></div>
+</div></div></section>
+
+<section class="panel" data-panel="sponsor"><div class="card"><div class="head"><div class="eyebrow">SPONSOR & VIP</div><h2>Görünürlük</h2><p>Firmanın hangi alanlarda öne çıkarılacağını seç.</p></div><div class="body">
+<div class="checks"><label class="check"><input id="vip" type="checkbox"><span><b>VIP Firma</b><small>VIP rozeti ve ayrıcalıklar.</small></span></label><label class="check"><input id="sponsored" type="checkbox"><span><b>Sponsor Firma</b><small>Sponsor etiketi ve öncelik.</small></span></label><label class="check"><input id="homeFeatured" type="checkbox"><span><b>Ana sayfada öne çıkar</b><small>Vitrin alanı.</small></span></label><label class="check"><input id="searchFeatured" type="checkbox"><span><b>Aramada öne çıkar</b><small>Arama sonuçlarında öncelik.</small></span></label><label class="check"><input id="opportunityFeatured" type="checkbox"><span><b>Fırsatlarda göster</b><small>Sponsor fırsat alanı.</small></span></label></div>
+<div class="g2" style="margin-top:14px"><label>Sponsor başlangıç<input id="sponsorStart" type="date"></label><label>Sponsor bitiş<input id="sponsorEnd" type="date"></label></div>
+</div></div></section>
+
+<section class="panel" data-panel="qr"><div class="card"><div class="head"><div class="eyebrow">QR HİZMETLERİ</div><h2>Firma hizmetleri</h2><p>Firma için ilgili sipariş ekranını aç.</p></div><div class="body">
+<div class="service"><div><h3>QR / NFC Firma Kartı</h3><p>Dijital kart ve NFC/QR siparişi.</p></div><a id="qrCardLink" class="btn soft" target="_blank">Aç ↗</a></div>
+<div class="service"><div><h3>Menü QR</h3><p>Menü QR şablon ve sipariş ekranı.</p></div><a id="menuQrLink" class="btn soft" target="_blank">Aç ↗</a></div>
+<div class="service"><div><h3>Google Yorum Kartı</h3><p>Google yorum QR kart siparişi.</p></div><a id="googleQrLink" class="btn soft" target="_blank">Aç ↗</a></div>
+</div></div></section>
+
+<section class="panel" data-panel="stats"><div class="card"><div class="head"><div class="eyebrow">İSTATİSTİK</div><h2>Firma etkileşimleri</h2><p>Mevcut sayaç değerleri.</p></div><div class="body"><div class="g4">
+<div class="stat"><span>Profil görüntülenme</span><strong id="statViews">0</strong></div><div class="stat"><span>WhatsApp</span><strong id="statWhatsapp">0</strong></div><div class="stat"><span>Bilgi talebi</span><strong id="statRequests">0</strong></div><div class="stat"><span>360° görüntülenme</span><strong id="statTour">0</strong></div><div class="stat"><span>Instagram</span><strong id="statInstagram">0</strong></div><div class="stat"><span>Yol tarifi</span><strong id="statDirections">0</strong></div>
+</div></div></div></section>
+
+<section class="panel" data-panel="admin"><div class="card"><div class="head"><div class="eyebrow">YÖNETİCİ</div><h2>İç notlar</h2><p>Müşteriye gösterilmez.</p></div><div class="body">
+<label>Yönetici notu<textarea id="adminNotes" rows="7"></textarea></label><div class="g2" style="margin-top:14px"><label>İç etiket<input id="internalTag"></label><label>Sonraki işlem tarihi<input id="nextActionDate" type="date"></label></div>
+<div style="margin-top:18px"><button id="toggleStatus" class="btn danger" type="button">Firmayı Pasife Al</button></div>
+</div></div></section>
+
+<div class="savebar"><div id="saveState" class="meta">Değişiklik yaptıktan sonra kaydet.</div><button id="saveBtn" class="btn primary">Değişiklikleri Kaydet</button></div>
+</main></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id),id=new URLSearchParams(location.search).get("id"),ADMIN_EMAIL="ftmotiondesign@gmail.com";
+const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
+let auth,db,storage,firm={};
+async function boot(){
+  const src=await fetch("admin.js?config=1").then(r=>r.text());
+  const m=src.match(/const firebaseConfig=({[\s\S]*?});/);
+  if(!m)throw new Error("Firebase yapılandırması bulunamadı.");
+  const cfg=Function('"use strict";return ('+m[1]+')')();
+  if(!firebase.apps.length)firebase.initializeApp(cfg);
+  auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();
+  auth.onAuthStateChanged(async u=>{if(!u||String(u.email||"").toLowerCase()!==ADMIN_EMAIL){location.href="admin.html#firms";return}await load()});
+}
+Object.entries(categories).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v;$("mainCategory").appendChild(o)});
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.dataset.panel===b.dataset.tab))});
+const val=x=>($(x)?.value||"").trim(),chk=x=>!!$(x)?.checked;
+function msg(t,type=""){$("saveState").textContent=t;$("saveState").style.color=type==="error"?"#b91c1c":type==="success"?"#166534":"#64748b"}
+function preview(url){$("preview").innerHTML=url?'<img src="'+String(url).replace(/"/g,"&quot;")+'">':"Görsel yok"}
+async function load(){
+ if(!id){location.href="admin.html#firms";return}
+ const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
+ firm={id:s.id,...s.data()};
+ ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","coverUrl","locationVideoUrl","campaignVideoUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
+ $("status").value=firm.status||"active";$("mainCategory").value=firm.mainCategory||"diger";$("subCategory").value=firm.subCategory||firm.category||"";$("tour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";$("videoUrl").value=firm.videoUrl||firm.youtubeUrl||"";
+ ["vip","homeFeatured","searchFeatured","opportunityFeatured"].forEach(k=>$(k).checked=!!firm[k]);$("sponsored").checked=!!(firm.sponsored||firm.isSponsored||firm.vipSponsored||firm.advertiser);$("prefer360").checked=firm.prefer360!==false;$("fallbackMap").checked=firm.fallbackMap!==false;$("infoRequestEnabled").checked=firm.infoRequestEnabled!==false;$("infoNotifyPanel").checked=firm.infoNotifyPanel!==false;$("infoRequestTarget").value=firm.infoRequestTarget||"both";$("infoRequestPhone").value=firm.infoRequestPhone||firm.whatsapp||firm.phone||"";
+ $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="firma.html?id="+encodeURIComponent(id);preview(firm.coverUrl||"");
+ const q="?firma="+encodeURIComponent(firm.name||"")+"&phone="+encodeURIComponent(firm.phone||"")+"&id="+encodeURIComponent(id);$("qrCardLink").href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"+q;$("menuQrLink").href="https://ftmotiondesign.github.io/dijiyer/menu-qr.html"+q;$("googleQrLink").href="https://ftmotiondesign.github.io/dijiyer/google-qr-siparis.html"+q;
+ $("statViews").textContent=Number(firm.profileViews||firm.views||0).toLocaleString("tr-TR");$("statWhatsapp").textContent=Number(firm.whatsappClicks||0).toLocaleString("tr-TR");$("statRequests").textContent=Number(firm.infoRequestCount||firm.requestCount||0).toLocaleString("tr-TR");$("statTour").textContent=Number(firm.tourViews||firm.tour360Views||0).toLocaleString("tr-TR");$("statInstagram").textContent=Number(firm.instagramClicks||0).toLocaleString("tr-TR");$("statDirections").textContent=Number(firm.directionsClicks||0).toLocaleString("tr-TR");$("toggleStatus").textContent=(firm.status||"active")==="passive"?"Firmayı Aktif Yap":"Firmayı Pasife Al";
+}
+function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),coverUrl:val("coverUrl"),tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
+async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
+$("saveBtn").onclick=save;$("topSave").onclick=save;$("coverUrl").oninput=()=>preview(val("coverUrl"));
+$("uploadCover").onclick=async()=>{const f=$("coverFile").files?.[0];if(!f)return;try{$("uploadMsg").className="message";$("uploadMsg").textContent="Yükleniyor...";const safe=String(f.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-"),r=storage.ref("demo-card/"+auth.currentUser.uid+"/firms/"+id+"/"+Date.now()+"-"+safe);await r.put(f,{contentType:f.type});const u=await r.getDownloadURL();$("coverUrl").value=u;preview(u);$("uploadMsg").className="message success";$("uploadMsg").textContent="Görsel yüklendi. Kaydet butonuna bas."}catch(e){$("uploadMsg").className="message error";$("uploadMsg").textContent="Yüklenemedi: "+(e.message||"")}};
+$("clearCover").onclick=()=>{$("coverUrl").value="";$("coverFile").value="";preview("")};
+$("toggleStatus").onclick=async()=>{$("status").value=val("status")==="passive"?"active":"passive";await save()};
+boot().catch(e=>{alert(e.message||"Sayfa başlatılamadı.");location.href="admin.html#firms"});
+</script>
+</body></html>
