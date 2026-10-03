@@ -90,7 +90,7 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim(),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
 campaignActive:Boolean(d.campaignActive||d.hasCampaign),
 campaignTitle:d.campaignTitle||d.promotionTitle||"",
 campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
@@ -180,6 +180,7 @@ function render(data){
         '</div>'+
       '</div>'+
       '<p class="result-desc">'+esc(desc)+'</p>'+
+      (i.has360Tour&&i.tour360Url?'<button type="button" class="result-360-btn" data-open-360 data-tour-url="'+esc(i.tour360Url)+'" data-tour-name="'+esc(i.name)+'"><span>360°</span> Mekânı Gez</button>':'')+
       '<div class="result-actions">'+
         '<a class="result-primary" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a>'+
         '<button type="button" class="result-secondary bilgi-al-open" data-bilgi-al data-institution-id="'+esc(i.id)+'" data-institution-name="'+esc(i.name||'')+'" data-main-category="'+esc(i.mainCategory||'')+'" data-sub-category="'+esc(i.subCategory||i.category||'')+'" data-city="'+esc(i.city||'')+'" data-district="'+esc(i.district||'')+'">Bilgi Al</button>'+
@@ -291,3 +292,35 @@ async function initHome(){
   if(hasInitial)filter();else showInitialState();
 }
 document.addEventListener("DOMContentLoaded",initHome);
+
+
+function init360Popup(){
+  const modal=document.getElementById("tour360Modal");
+  const frame=document.getElementById("tour360Frame");
+  const title=document.getElementById("tour360Title");
+  const external=document.getElementById("tour360External");
+  if(!modal||!frame)return;
+
+  const close=()=>{
+    modal.classList.add("hidden");
+    document.body.style.overflow="";
+    frame.src="about:blank";
+  };
+
+  document.addEventListener("click",e=>{
+    const btn=e.target.closest("[data-open-360]");
+    if(btn){
+      const url=String(btn.dataset.tourUrl||"").trim();
+      if(!url)return;
+      if(title)title.textContent=(btn.dataset.tourName||"Firma")+" · 360° Mekân Turu";
+      frame.src=url;
+      if(external)external.href=url;
+      modal.classList.remove("hidden");
+      document.body.style.overflow="hidden";
+      return;
+    }
+    if(e.target.closest("[data-close-360]"))close();
+  });
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
+}
+document.addEventListener("DOMContentLoaded",init360Popup);
