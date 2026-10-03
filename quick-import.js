@@ -160,7 +160,7 @@
     const text=String(raw||"").trim();
     if(!text)return [];
 
-    // En güvenilir biçim: Google/Markdown kopyasında her firma "# Firma Adı" ile başlar.
+    // 1) Markdown/Google başlıkları: "# Firma Adı"
     const headingMatches=[...text.matchAll(/^#{1,6}\s+.+$/gm)];
     if(headingMatches.length>=2){
       const chunks=[];
@@ -173,33 +173,87 @@
       return chunks;
     }
 
-    // Başlık işareti yoksa Google sonuç yapısından firma başlangıçlarını bul.
-    const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-    const starts=[];
+    const rawLines=text.split(/\r?\n/);
+    const lines=rawLines.map(x=>x.trim());
+
+    const categoryRe=/^(sürücü kursu|surucu kursu|eğitim|egitim|anaokulu|ana okulu|kreş|kres|dershane|öğrenci yurdu|ogrenci yurdu|restoran|lokanta|kafe|cafe|otel|pansiyon|emlak|oto servis|ekspertiz|kuaför|berber|klinik|diş kliniği|dis klinigi|spor salonu|kurs merkezi)$/i;
+
+    // 2) En güvenilir çoklu ayırma:
+    // Her kategori satırının üstünde firma adı bulunur.
+    const titleIndexes=[];
     for(let i=0;i<lines.length;i++){
-      const cur=clean(lines[i]);
-      if(!cur||isNoise(cur)||phoneFrom(cur)||webFrom(cur)||isAddress(cur))continue;
+      const cat=clean(lines[i]);
+      if(!categoryRe.test(cat))continue;
 
-      const letters=(cur.match(/[A-Za-zÇĞİÖŞÜçğıöşü]/g)||[]).length;
-      if(letters<3)continue;
-      if(/^\(?\d+\)?$/.test(cur)||/^[1-5](?:[,.]\d)?/.test(cur))continue;
+      let titleIndex=-1;
+      for(let j=i-1;j>=Math.max(0,i-5);j--){
+        const candidate=clean(lines[j]);
+        if(!candidate)continue;
+        if(isNoise(candidate)||phoneFrom(candidate)||webFrom(candidate)||isAddress(candidate))continue;
+        if(/^\(?\d[\d.]*\)?$/.test(candidate))continue;
+        if(/^[1-5](?:[,.]\d)?(?:\s*[★⭐].*)?$/.test(candidate))continue;
+        if(categoryRe.test(candidate))continue;
 
-      const look=lines.slice(i+1,i+5).map(clean);
-      const hasReview=look.some(x=>/^\(?\d[\d.]*\)?$/.test(x)||/^[1-5](?:[,.]\d)?/.test(x));
-      const hasCategory=look.some(x=>/sürücü kursu|surucu kursu|eğitim|egitim|anaokulu|kreş|kres|dershane|yurt|restoran|kafe|cafe|otel|emlak|oto servis|ekspertiz|kuaför|berber|klinik|kursu/i.test(x));
+        const letters=(candidate.match(/[A-Za-zÇĞİÖŞÜçğıöşü]/g)||[]).length;
+        if(letters<3)continue;
+        titleIndex=j;
+        break;
+      }
 
-      if(hasReview&&hasCategory)starts.push(i);
+      if(titleIndex>=0 && !titleIndexes.includes(titleIndex))titleIndexes.push(titleIndex);
     }
 
-    if(starts.length>=2){
+    titleIndexes.sort((a,b)=>a-b);
+
+    if(titleIndexes.length>=2){
       const chunks=[];
-      for(let n=0;n<starts.length;n++){
-        const from=starts[n];
-        const to=n+1<starts.length?starts[n+1]:lines.length;
+      for(let i=0;i<titleIndexes.length;i++){
+        const from=titleIndexes[i];
+        const to=i+1<titleIndexes.length?titleIndexes[i+1]:lines.length;
         const chunk=lines.slice(from,to).join("\n").trim();
         if(chunk)chunks.push(chunk);
       }
       return chunks;
+    }
+
+    // 3) Telefonlardan da çoklu kayıt tespiti yap.
+    const phoneIndexes=[];
+    for(let i=0;i<lines.length;i++){
+      if(phoneFrom(lines[i]))phoneIndexes.push(i);
+    }
+
+    if(phoneIndexes.length>=2){
+      const starts=[];
+      for(const pi of phoneIndexes){
+        let found=-1;
+        for(let j=pi-1;j>=Math.max(0,pi-12);j--){
+          const candidate=clean(lines[j]);
+          if(!candidate)continue;
+          if(categoryRe.test(candidate)){
+            for(let k=j-1;k>=Math.max(0,j-4);k--){
+              const title=clean(lines[k]);
+              if(!title||isNoise(title)||phoneFrom(title)||webFrom(title)||isAddress(title))continue;
+              if(/^\(?\d[\d.]*\)?$/.test(title)||/^[1-5](?:[,.]\d)?/.test(title))continue;
+              found=k;
+              break;
+            }
+            break;
+          }
+        }
+        if(found>=0 && !starts.includes(found))starts.push(found);
+      }
+
+      starts.sort((a,b)=>a-b);
+      if(starts.length>=2){
+        const chunks=[];
+        for(let i=0;i<starts.length;i++){
+          const from=starts[i];
+          const to=i+1<starts.length?starts[i+1]:lines.length;
+          const chunk=lines.slice(from,to).join("\n").trim();
+          if(chunk)chunks.push(chunk);
+        }
+        return chunks;
+      }
     }
 
     return [];
