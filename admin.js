@@ -11,6 +11,9 @@ const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",
 let firms=[],applications=[],members=[],campaignFilter="all";
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
+let googlePlaceResults=[];
+const selectedGooglePlaceIds=new Set();
+let googleMapsLoadPromise=null;
 
 const $=id=>document.getElementById(id);
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -39,7 +42,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Google’dan Firma Ekle","Google Places sonuçlarını hızlıca DijiyeSor’a aktar"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -795,3 +798,194 @@ $("memberBulkCopyEmails")?.addEventListener("click",async()=>{
   }
 });
 updateMemberBulkUi();
+
+
+function googleSetMessage(text,type=""){
+  const el=$("googleImportMessage");if(!el)return;
+  el.className="message"+(type?" "+type:"");el.textContent=text;el.classList.remove("hidden");
+}
+function googleApiKey(){
+  return String($("googlePlacesApiKey")?.value||localStorage.getItem("dijiyesorGooglePlacesApiKey")||"").trim();
+}
+function loadGoogleMapsPlaces(){
+  if(window.google?.maps?.importLibrary)return Promise.resolve();
+  if(googleMapsLoadPromise)return googleMapsLoadPromise;
+  const key=googleApiKey();
+  if(!key)return Promise.reject(new Error("Önce Google Maps API anahtarını yazın."));
+  googleMapsLoadPromise=new Promise((resolve,reject)=>{
+    const callback="__dijiyesorGoogleReady"+Date.now();
+    window[callback]=()=>{delete window[callback];resolve()};
+    const s=document.createElement("script");
+    s.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(key)+"&v=weekly&loading=async&callback="+callback;
+    s.async=true;s.defer=true;
+    s.onerror=()=>{delete window[callback];googleMapsLoadPromise=null;reject(new Error("Google Maps API yüklenemedi. API anahtarını ve Google Cloud ayarlarını kontrol edin."))};
+    document.head.appendChild(s);
+  });
+  return googleMapsLoadPromise;
+}
+function placeComponent(place,types){
+  const comps=place.addressComponents||[];
+  for(const t of types){
+    const hit=comps.find(x=>(x.types||[]).includes(t));
+    if(hit)return hit.longText||hit.shortText||"";
+  }
+  return "";
+}
+function mapGooglePlace(place){
+  const cityName=placeComponent(place,["administrative_area_level_1"]);
+  const districtName=placeComponent(place,["administrative_area_level_2","locality","sublocality_level_1"]);
+  return {
+    placeId:place.id||"",
+    name:place.displayName||"",
+    address:place.formattedAddress||"",
+    phone:place.nationalPhoneNumber||"",
+    website:place.websiteURI||"",
+    mapsUrl:place.googleMapsURI||"",
+    rating:place.rating||null,
+    ratingCount:place.userRatingCount||null,
+    primaryType:place.primaryType||"",
+    city:cityName,
+    district:districtName,
+    location:place.location?{lat:place.location.lat(),lng:place.location.lng()}:null
+  };
+}
+function googlePlaceIsDuplicate(p){
+  return firms.some(f=>
+    (p.placeId&&String(f.googlePlaceId||"")===String(p.placeId)) ||
+    (norm(f.name)===norm(p.name)&&norm(f.city)===norm(p.city)&&norm(f.district)===norm(p.district))
+  );
+}
+function renderGooglePlaceResults(){
+  const box=$("googlePlaceResults");if(!box)return;
+  if(!googlePlaceResults.length){
+    box.innerHTML='<div class="empty">Aramaya uygun firma bulunamadı.</div>';
+    $("googleBulkBar")?.classList.add("hidden");return;
+  }
+  $("googleBulkBar")?.classList.remove("hidden");
+  box.innerHTML=googlePlaceResults.map((p,i)=>{
+    const dup=googlePlaceIsDuplicate(p);
+    const selected=selectedGooglePlaceIds.has(p.placeId);
+    return '<article class="google-place-row '+(dup?'duplicate':'')+'">'+
+      '<label class="google-place-check"><input type="checkbox" data-google-place-select="'+esc(p.placeId)+'" '+(selected?'checked ':'')+(dup?'disabled':'')+'><span></span></label>'+
+      '<div class="google-place-main"><strong>'+esc(p.name||"İsimsiz firma")+'</strong><small>'+esc(p.address||[p.city,p.district].filter(Boolean).join(" · ")||"Adres yok")+'</small>'+
+      '<div class="google-place-meta">'+
+        (p.phone?'<span>☎ '+esc(p.phone)+'</span>':'')+
+        (p.rating?'<span>★ '+esc(p.rating)+' ('+esc(p.ratingCount||0)+')</span>':'')+
+        (p.website?'<span>Web sitesi var</span>':'')+
+      '</div></div>'+
+      '<div class="google-place-location"><b>'+esc(p.city||"-")+'</b><small>'+esc(p.district||"-")+'</small></div>'+
+      '<div class="google-place-actions">'+
+        (dup?'<span class="google-duplicate">Zaten kayıtlı</span>':'<button type="button" data-google-import-one="'+i+'">Ekle</button>')+
+        (p.mapsUrl?'<a href="'+esc(p.mapsUrl)+'" target="_blank" rel="noopener">Google ↗</a>':'')+
+      '</div>'+
+    '</article>';
+  }).join("");
+  updateGoogleBulkUi();
+}
+function updateGoogleBulkUi(){
+  const eligible=googlePlaceResults.filter(p=>!googlePlaceIsDuplicate(p));
+  const selected=eligible.filter(p=>selectedGooglePlaceIds.has(p.placeId));
+  if($("googleSelectedCount"))$("googleSelectedCount").textContent=selected.length+" seçili";
+  if($("googleSelectAll")){
+    $("googleSelectAll").checked=eligible.length>0&&selected.length===eligible.length;
+    $("googleSelectAll").indeterminate=selected.length>0&&selected.length<eligible.length;
+  }
+  if($("googleImportSelected"))$("googleImportSelected").disabled=selected.length===0;
+}
+async function importGooglePlaces(items){
+  if(!items.length)return;
+  const category=$("googleImportCategory")?.value||"diger";
+  let added=0,skipped=0;
+  googleSetMessage(items.length+" firma DijiyeSor’a aktarılıyor...");
+  for(const p of items){
+    if(googlePlaceIsDuplicate(p)){skipped++;continue}
+    const nowIso=new Date().toISOString();
+    await db.collection("institutions").add({
+      name:p.name||"Firma",
+      mainCategory:category,
+      subCategory:"diger",
+      category,
+      city:p.city||"",
+      district:p.district||"",
+      address:p.address||"",
+      phone:p.phone||"",
+      whatsapp:p.phone||"",
+      website:p.website||"",
+      instagram:"",
+      description:"",
+      status:"active",
+      vip:false,
+      sponsored:false,
+      source:"google_places_import",
+      googlePlaceId:p.placeId||"",
+      googleMapsUrl:p.mapsUrl||"",
+      googleRating:p.rating||null,
+      googleRatingCount:p.ratingCount||null,
+      googlePrimaryType:p.primaryType||"",
+      googleImportedAt:nowIso,
+      location:p.location||null,
+      createdAt:nowIso,
+      updatedAt:nowIso
+    });
+    added++;
+  }
+  await loadFirms();renderAll();
+  selectedGooglePlaceIds.clear();renderGooglePlaceResults();
+  googleSetMessage(added+" firma eklendi."+(skipped?" "+skipped+" firma zaten kayıtlı olduğu için atlandı.":""),"success");
+}
+$("googleSaveApiKey")?.addEventListener("click",()=>{
+  const key=String($("googlePlacesApiKey")?.value||"").trim();
+  if(!key){localStorage.removeItem("dijiyesorGooglePlacesApiKey");googleSetMessage("API anahtarı temizlendi.","success");return}
+  localStorage.setItem("dijiyesorGooglePlacesApiKey",key);
+  googleSetMessage("API anahtarı bu tarayıcıya kaydedildi.","success");
+});
+if($("googlePlacesApiKey"))$("googlePlacesApiKey").value=localStorage.getItem("dijiyesorGooglePlacesApiKey")||"";
+$("googlePlaceSearchBtn")?.addEventListener("click",async()=>{
+  const query=String($("googlePlaceQuery")?.value||"").trim();
+  if(!query){googleSetMessage("Önce aranacak ifadeyi yazın.","error");return}
+  const btn=$("googlePlaceSearchBtn");btn.disabled=true;btn.textContent="Aranıyor...";
+  selectedGooglePlaceIds.clear();googleSetMessage("Google Places üzerinde aranıyor...");
+  try{
+    await loadGoogleMapsPlaces();
+    const {Place}=await google.maps.importLibrary("places");
+    const {places}=await Place.searchByText({
+      textQuery:query,
+      fields:["id","displayName","formattedAddress","addressComponents","nationalPhoneNumber","websiteURI","googleMapsURI","rating","userRatingCount","primaryType","location"],
+      language:"tr",
+      region:"TR",
+      maxResultCount:20
+    });
+    googlePlaceResults=(places||[]).map(mapGooglePlace);
+    renderGooglePlaceResults();
+    const available=googlePlaceResults.filter(p=>!googlePlaceIsDuplicate(p)).length;
+    googleSetMessage(googlePlaceResults.length+" sonuç bulundu. "+available+" tanesi eklenebilir.","success");
+  }catch(err){
+    console.error(err);
+    googlePlaceResults=[];renderGooglePlaceResults();
+    googleSetMessage(err.message||"Google araması yapılamadı.","error");
+  }finally{btn.disabled=false;btn.textContent="Google’da Ara"}
+});
+$("googlePlaceQuery")?.addEventListener("keydown",e=>{if(e.key==="Enter"){$("googlePlaceSearchBtn")?.click()}});
+$("googleSelectAll")?.addEventListener("change",e=>{
+  googlePlaceResults.filter(p=>!googlePlaceIsDuplicate(p)).forEach(p=>{
+    if(e.target.checked)selectedGooglePlaceIds.add(p.placeId);else selectedGooglePlaceIds.delete(p.placeId);
+  });
+  renderGooglePlaceResults();
+});
+$("googleImportSelected")?.addEventListener("click",async()=>{
+  const items=googlePlaceResults.filter(p=>selectedGooglePlaceIds.has(p.placeId)&&!googlePlaceIsDuplicate(p));
+  if(!items.length)return;
+  if(!confirm(items.length+" firmayı DijiyeSor’a toplu eklemek istiyor musunuz?"))return;
+  try{await importGooglePlaces(items)}catch(err){googleSetMessage("Firmalar eklenemedi: "+(err.message||"Bilinmeyen hata"),"error")}
+});
+document.addEventListener("change",e=>{
+  const check=e.target.closest("[data-google-place-select]");if(!check)return;
+  if(check.checked)selectedGooglePlaceIds.add(check.dataset.googlePlaceSelect);else selectedGooglePlaceIds.delete(check.dataset.googlePlaceSelect);
+  updateGoogleBulkUi();
+});
+document.addEventListener("click",async e=>{
+  const one=e.target.closest("[data-google-import-one]");if(!one)return;
+  const p=googlePlaceResults[Number(one.dataset.googleImportOne)];if(!p||googlePlaceIsDuplicate(p))return;
+  one.disabled=true;one.textContent="Ekleniyor...";
+  try{await importGooglePlaces([p])}catch(err){googleSetMessage("Firma eklenemedi: "+(err.message||"Bilinmeyen hata"),"error")}
+});
