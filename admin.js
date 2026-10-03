@@ -430,7 +430,7 @@ function openQrForFirm(id){
   const base="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html";
   const url=f ? base+"?institutionId="+encodeURIComponent(f.id)+"&source=dijiyesor-admin" : base;
   $("qrOrderFrame").src=url;
-  $("qrOpenExternal").href=url;
+  $("qrOpenFull").href=url;
   $("qrSelectedFirmName").textContent=f?.name||"Henüz firma seçilmedi";
   $("qrSelectedFirmMeta").textContent=f
     ? [f.city,f.district,f.phone].filter(Boolean).join(" · ")
