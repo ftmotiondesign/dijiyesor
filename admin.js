@@ -650,7 +650,41 @@ function openMemberDetail(id){
   $("memberDetailModal").classList.remove("hidden");
 }
 
+function tourLeadStatusLabel(status){
+  return {new:"Yeni",called:"Arandı",planned:"Planlandı",completed:"Tamamlandı"}[String(status||"new")]||"Yeni";
+}
+function tourLeadWhatsapp(phone){
+  const digits=String(phone||"").replace(/\D/g,"");
+  if(!digits)return "";
+  return digits.startsWith("0")?"90"+digits.slice(1):(digits.startsWith("90")?digits:"90"+digits);
+}
+function renderTourLeads(){
+  const host=$("tourLeadList");
+  if(!host)return;
+  const filter=$("tourLeadFilter")?.value||"";
+  const list=tourLeads.filter(x=>!filter||String(x.status||"new")===filter);
+  host.innerHTML=list.length?list.map(x=>{
+    const wa=tourLeadWhatsapp(x.phone);
+    const date=x.createdAt?new Date(x.createdAt).toLocaleString("tr-TR"):"";
+    return '<article class="tour-lead-row">'+
+      '<div class="tour-lead-main"><div class="tour-lead-title"><strong>'+esc(x.businessName||"İşletme")+'</strong><span class="tour-lead-status '+esc(String(x.status||"new"))+'">'+esc(tourLeadStatusLabel(x.status))+'</span></div>'+
+      '<small>'+esc([x.city,x.contactName,x.phone].filter(Boolean).join(" · "))+'</small>'+
+      (x.note?'<p>'+esc(x.note)+'</p>':'')+
+      '<em>'+esc(date)+'</em></div>'+
+      '<div class="tour-lead-actions">'+
+        '<select data-tour-lead-status="'+esc(x.id)+'">'+
+          '<option value="new" '+(String(x.status||"new")==="new"?"selected":"")+'>Yeni</option>'+
+          '<option value="called" '+(x.status==="called"?"selected":"")+'>Arandı</option>'+
+          '<option value="planned" '+(x.status==="planned"?"selected":"")+'>Planlandı</option>'+
+          '<option value="completed" '+(x.status==="completed"?"selected":"")+'>Tamamlandı</option>'+
+        '</select>'+
+        (wa?'<a class="tour-lead-wa" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a>':'')+
+      '</div>'+
+    '</article>';
+  }).join(""):'<div class="empty">Bu durumda 360° çekim talebi yok.</div>';
+}
 function renderMedia(){
+  renderTourLeads();
   const list=applications.filter(a=>a.wantsPhoto||a.wantsVideo||a.wants360Tour||a.wantsVip);
   $("mediaList").innerHTML=list.length?list.map(a=>'<article class="media-card"><h3>'+esc(a.name)+'</h3><div class="media-tags">'+(a.wants360Tour?'<span>360° Tur</span>':'')+(a.wantsPhoto?'<span>Fotoğraf</span>':'')+(a.wantsVideo?'<span>Video</span>':'')+(a.wantsVip?'<span>VIP</span>':'')+'</div><p>'+esc([a.city,a.district].filter(Boolean).join(" · "))+'</p></article>').join(""):'<div class="empty">Medya hizmeti isteyen firma yok.</div>';
 }
@@ -937,3 +971,19 @@ $("firmBulkVipOn")?.addEventListener("click",()=>runFirmBulkPatch({vip:true},"VI
 $("firmBulkVipOff")?.addEventListener("click",()=>runFirmBulkPatch({vip:false},"VIP Kaldır"));
 $("firmBulkDelete")?.addEventListener("click",runFirmBulkDelete);
 updateFirmBulkUi();
+
+$("tourLeadFilter")?.addEventListener("change",renderTourLeads);
+document.addEventListener("change",async e=>{
+  const select=e.target.closest("[data-tour-lead-status]");
+  if(!select)return;
+  try{
+    await db.collection("tourLeads").doc(select.dataset.tourLeadStatus).set({
+      status:select.value,
+      updatedAt:new Date().toISOString()
+    },{merge:true});
+    await loadTourLeads();
+    renderAll();
+  }catch(err){
+    alert("360° talep durumu güncellenemedi: "+(err.message||"Bilinmeyen hata"));
+  }
+});
