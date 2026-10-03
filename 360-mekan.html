@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>360° Mekan Çekimi | DijiyeSor</title>
   <meta name="description" content="İşletmeler için 360° mekan çekimi, sanal tur ve DijiyeSor profil entegrasyonu.">
-  <link rel="stylesheet" href="360-mekan.css?v=20261003-1">
+  <link rel="stylesheet" href="360-mekan.css?v=20261003-2">
 </head>
 <body>
   <header class="topbar">
@@ -30,7 +30,7 @@
           <h1>Mekanını, müşterilerin gelmeden önce gezsin.</h1>
           <p class="hero-text">İşletmeni 360° sanal tur ile dijital ortamda gezilebilir hale getir. Web sitende, QR kartında ve DijiyeSor firma profilinde tek bağlantıyla kullan.</p>
           <div class="hero-actions">
-            <a class="btn primary" href="#bilgi-al">Çekim Talebi Oluştur</a>
+            <button class="btn primary" type="button" data-open-tour-lead>Çekim Talebi Oluştur</button>
             <a class="btn secondary" href="#nasil">Nasıl Çalışır?</a>
           </div>
           <div class="trust-row">
@@ -67,8 +67,8 @@
           <p>Firmanı tanıt sayfasından kaydını oluştur. Çekim talebini ve mekan bilgilerini birlikte netleştirelim.</p>
         </div>
         <div class="cta-actions">
-          <a class="btn white" href="firma-ekle.html#basvuru">Bilgi Al</a>
-          <a class="btn glass" href="firma-ekle.html">Firmanı Tanıt</a>
+          <button class="btn white" type="button" data-open-tour-lead>Bilgi Al</button>
+          <a class="btn glass" href="arama.html?feature=360">360° Mekânları Keşfet</a>
         </div>
       </div>
     </section>
@@ -169,11 +169,70 @@
 
   </main>
 
+  <div id="tourLeadModal" class="lead-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tourLeadTitle">
+    <div class="lead-modal-backdrop" data-close-tour-lead></div>
+    <div class="lead-modal-card">
+      <button class="lead-modal-close" type="button" data-close-tour-lead aria-label="Kapat">×</button>
+      <span class="lead-modal-kicker">360° ÇEKİM TALEBİ</span>
+      <h2 id="tourLeadTitle">Mekânınız için bilgi alalım.</h2>
+      <p>Temel bilgileri bırakın. Sonraki adımda başvurunuzu tamamlayabilirsiniz.</p>
+
+      <form id="tourLeadForm" class="lead-form">
+        <label>İşletme / kurum adı
+          <input id="tourLeadBusiness" required maxlength="120" placeholder="Örn. ABC Sürücü Kursu">
+        </label>
+        <label>Yetkili adı
+          <input id="tourLeadContact" required maxlength="100" placeholder="Ad Soyad">
+        </label>
+        <div class="lead-form-grid">
+          <label>Telefon
+            <input id="tourLeadPhone" required inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx">
+          </label>
+          <label>İl
+            <input id="tourLeadCity" maxlength="60" placeholder="Örn. Çanakkale">
+          </label>
+        </div>
+        <label>Kısa not
+          <textarea id="tourLeadNote" maxlength="500" rows="3" placeholder="Mekân türü, yaklaşık büyüklük veya çekimle ilgili notunuz..."></textarea>
+        </label>
+        <button class="lead-submit" type="submit">Talebi Devam Ettir</button>
+        <small>Bilgileriniz üyelik başvuru formuna aktarılır ve 360° çekim talebi olarak işaretlenir.</small>
+      </form>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container footer-inner">
       <span>© 2026 DijiyeSor</span>
       <a href="index.html">Ana Sayfa</a>
     </div>
   </footer>
+  <script>
+    (()=>{
+      const modal=document.getElementById("tourLeadModal");
+      const form=document.getElementById("tourLeadForm");
+      const open=()=>{modal.classList.remove("hidden");document.body.style.overflow="hidden";setTimeout(()=>document.getElementById("tourLeadBusiness")?.focus(),50)};
+      const close=()=>{modal.classList.add("hidden");document.body.style.overflow=""};
+
+      document.querySelectorAll("[data-open-tour-lead]").forEach(btn=>btn.addEventListener("click",open));
+      document.querySelectorAll("[data-close-tour-lead]").forEach(el=>el.addEventListener("click",close));
+      document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
+
+      form?.addEventListener("submit",e=>{
+        e.preventDefault();
+        const payload={
+          businessName:document.getElementById("tourLeadBusiness").value.trim(),
+          contactName:document.getElementById("tourLeadContact").value.trim(),
+          phone:document.getElementById("tourLeadPhone").value.trim(),
+          city:document.getElementById("tourLeadCity").value.trim(),
+          note:document.getElementById("tourLeadNote").value.trim(),
+          source:"360-mekan",
+          createdAt:new Date().toISOString()
+        };
+        sessionStorage.setItem("dijiyesor360Lead",JSON.stringify(payload));
+        window.location.href="firma-ekle.html?service=360#basvuru";
+      });
+    })();
+  </script>
 </body>
 </html>
