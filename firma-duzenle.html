@@ -38,7 +38,12 @@
 </div></div></section>
 
 <section class="panel" data-panel="media"><div class="card"><div class="head"><div class="eyebrow">GÖRSELLER</div><h2>Logo ve firma görseli</h2><p>Firma kartındaki görseli buradan yönet.</p></div><div class="body">
-<div class="g2"><label>Logo URL<input id="logoUrl"></label><label>Firma görseli URL<input id="coverUrl"></label></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+  <div class="stat"><span>Küçük firma logosu</span><strong style="font-size:18px">500 × 500 px</strong><small>1:1 kare • sitede 52×52, firma sayfasında 68×68 görünür</small></div>
+  <div class="stat"><span>Ana sayfa / arama kartı</span><strong style="font-size:18px">1200 × 900 px</strong><small>4:3 oran • sağ taraftaki firma görseli</small></div>
+  <div class="stat"><span>Firma detay sayfası kapağı</span><strong style="font-size:18px">1600 × 400 px</strong><small>4:1 oran • geniş yatay kapak</small></div>
+</div>
+<div class="g2"><label>Logo URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 500 × 500 px, kare PNG/JPG</span><input id="logoUrl"></label><label>Firma görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Kart: 1200 × 900 px • Detay kapağı: 1600 × 400 px</span><input id="coverUrl"></label></div>
 <div class="media"><div id="preview" class="preview">Görsel yok</div><div><p style="margin:0 0 10px;color:#64748b;font-size:13px;line-height:1.5">Görseli ücretsiz bir görsel barındırma servisine yükleyip doğrudan görsel bağlantısını yukarıdaki <b>Firma görseli URL</b> alanına yapıştır.</p><div class="message">Şimdilik bilgisayardan doğrudan yükleme kapalı. Firebase Storage etkinleştirildiğinde tekrar açabiliriz.</div></div></div>
 </div></div></section>
 
