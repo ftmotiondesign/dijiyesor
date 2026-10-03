@@ -382,3 +382,24 @@
 .revenue-back:hover{border-color:#b9c9dd;background:#f6f9fc}
 @media(max-width:800px){.revenue-grid{grid-template-columns:1fr}.revenue-card{min-height:125px}}
 @media(max-width:520px){.revenue-card{grid-template-columns:48px 1fr;padding:14px}.revenue-icon{width:46px;height:46px}.revenue-arrow{display:none}.revenue-badge{position:static;grid-column:2;justify-self:start;margin-top:4px}}
+
+
+/* Firma görseli yükleme alanı */
+.firm-image-upload{
+  display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;align-items:center;
+  margin:14px 0;padding:14px;border:1px solid #e3e9f1;border-radius:14px;background:#f9fbfe
+}
+.firm-image-preview{
+  width:180px;height:112px;border-radius:12px;overflow:hidden;border:1px solid #dce4ee;
+  background:#eef3f8;display:grid;place-items:center;color:#8a96a8;font-size:11px;font-weight:800
+}
+.firm-image-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.firm-image-upload-copy strong{display:block;font-size:13px;color:#26344b;margin-bottom:4px}
+.firm-image-upload-copy small{display:block;color:#7c899c;font-size:10.5px;line-height:1.5;margin-bottom:10px}
+#editCoverFile{display:none}
+.firm-image-upload-actions{display:flex;gap:8px;flex-wrap:wrap}
+.firm-image-upload-actions button{min-height:38px}
+@media(max-width:650px){
+  .firm-image-upload{grid-template-columns:1fr}
+  .firm-image-preview{width:100%;height:150px}
+}
