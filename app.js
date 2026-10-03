@@ -150,7 +150,8 @@ function render(data){
   const locationNotice=document.getElementById("locationNotice");
   if(locationNotice){
     const hasCity=Boolean(city?.value);
-    locationNotice.classList.toggle("hidden",hasCity);
+    const hasResults=data.length>0;
+    locationNotice.classList.toggle("hidden",hasCity || !hasResults);
   }
 
   if(!data.length){
