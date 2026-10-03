@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor | Firma Ara</title>
   <meta name="description" content="DijiyeSor ile firma, kurum, sektör veya hizmet ara.">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261003-22">
 </head>
 <body>
   <header class="topbar">
@@ -49,6 +49,17 @@
       </div>
     </section>
   </main>
+
+  <div id="homeCategoryModal" class="home-category-modal hidden" role="dialog" aria-modal="true" aria-labelledby="homeCategoryTitle">
+    <div class="home-category-backdrop" data-close-home-category></div>
+    <div class="home-category-card">
+      <button type="button" class="home-category-close" data-close-home-category aria-label="Kapat">×</button>
+      <span class="home-category-kicker">DİJİYESOR</span>
+      <h2 id="homeCategoryTitle">Ne arıyorsunuz?</h2>
+      <p>Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.</p>
+      <div id="homeCategoryGrid" class="home-category-grid"></div>
+    </div>
+  </div>
 
   <footer class="home-footer">
     <span>© 2026 DijiyeSor</span>
@@ -124,9 +135,60 @@
       }
     }
 
+    const homeCategoryModal = document.getElementById('homeCategoryModal');
+    const homeCategoryGrid = document.getElementById('homeCategoryGrid');
+
+    const homeCategories = [
+      ['egitim','Eğitim','Kurs, sürücü kursu, anaokulu, yurt'],
+      ['otomotiv','Otomotiv','Servis, ekspertiz, galeri, kiralama'],
+      ['yemeicme','Yeme & İçme','Restoran, kafe, pizza, döner'],
+      ['saglikguzellik','Sağlık & Güzellik','Diş, psikolog, kuaför, spor'],
+      ['evyapi','Ev & Yapı','Mobilya, dekorasyon, teknik servis'],
+      ['emlak','Emlak','Konut, arsa, emlak ofisi'],
+      ['turizm','Turizm & Konaklama','Otel, pansiyon, apart'],
+      ['organizasyonmedya','Organizasyon & Medya','Fotoğraf, video, organizasyon'],
+      ['tasimacilik','Taşımacılık','Nakliyat, kurye, teslimat'],
+      ['profesyonel','Profesyonel Hizmetler','Hukuk, muhasebe, web, danışmanlık'],
+      ['alisveris','Yerel Esnaf','Market, giyim, elektronik, pet shop'],
+      ['diger','Diğer','Diğer kurum ve hizmetler']
+    ];
+
+    homeCategoryGrid.innerHTML = homeCategories.map(([key,title,desc]) =>
+      '<button type="button" class="home-category-pick" data-home-sector="'+key+'"><strong>'+title+'</strong><span>'+desc+'</span></button>'
+    ).join('');
+
+    function openHomeCategoryModal(){
+      homeCategoryModal.classList.remove('hidden');
+      document.body.style.overflow='hidden';
+    }
+
+    function closeHomeCategoryModal(){
+      homeCategoryModal.classList.add('hidden');
+      document.body.style.overflow='';
+    }
+
+    document.querySelectorAll('[data-close-home-category]').forEach(el=>el.addEventListener('click',closeHomeCategoryModal));
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHomeCategoryModal(); });
+
+    homeCategoryGrid.querySelectorAll('[data-home-sector]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const params=new URLSearchParams();
+        params.set('sector',btn.dataset.homeSector);
+        if(citySelect.value) params.set('city',citySelect.value);
+        if(districtSelect.value) params.set('district',districtSelect.value);
+        window.location.href='arama.html?'+params.toString();
+      });
+    });
+
     function goSearch() {
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
+
+      if (!query && !citySelect.value && !districtSelect.value) {
+        openHomeCategoryModal();
+        return;
+      }
+
       if (query) params.set('q', query);
       if (citySelect.value) params.set('city', citySelect.value);
       if (districtSelect.value) params.set('district', districtSelect.value);
