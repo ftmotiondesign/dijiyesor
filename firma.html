@@ -421,8 +421,7 @@
               '</section>'+
 
               buildCampaignSection(d)+
-              buildTourSection(d)+
-              buildMapSection(d)+
+              (getTourUrl(d)?buildTourSection(d):buildMapSection(d))+
               '<section class="section-card">'+
                 '<div class="section-title"><div><span>GALERİ</span><h2>Fotoğraf & Video</h2></div></div>'+
                 buildGallery(d)+
