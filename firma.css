@@ -218,3 +218,31 @@ button{font:inherit}
   .map-meta{align-items:stretch;flex-direction:column}
   .map-meta a{text-align:center}
 }
+
+
+/* Google puan yıldızları + yorum popup */
+.google-rating{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rating-stars,.review-stars,.review-mini-stars{display:inline-flex;gap:1px}
+.rating-stars span,.review-stars span,.review-mini-stars span{color:#d9dee7;font-size:14px}
+.rating-stars span.filled,.review-stars span.filled,.review-mini-stars span.filled{color:#f5a623}
+.google-rating>strong{font-size:12px;color:#5f6b7c;background:none;padding:0}
+.google-review-open{border:0;background:transparent;color:#1677ff;padding:0;font-size:11px;font-weight:800;cursor:pointer;text-decoration:underline}
+.google-review-open:hover{color:#0c63d6}
+
+.review-modal{position:fixed;inset:0;background:rgba(12,20,33,.62);z-index:120;display:grid;place-items:center;padding:20px}
+.review-modal[hidden]{display:none}
+.review-modal-card{position:relative;width:min(620px,94vw);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.25);padding:22px}
+.review-modal-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:0;border-radius:50%;background:#f2f5f9;font-size:24px;cursor:pointer}
+.review-modal-head>span{font-size:10px;letter-spacing:.12em;color:#1677ff;font-weight:900}
+.review-modal-head h2{margin:5px 42px 10px 0;font-size:22px}
+.review-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.review-summary strong{font-size:13px}
+.review-summary>span{font-size:12px;color:#7b8698}
+.review-modal-body{display:grid;gap:10px}
+.review-item{border:1px solid #e6ebf2;border-radius:12px;padding:12px}
+.review-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.review-item p{margin:8px 0 0;color:#4e5a6c;font-size:13px;line-height:1.55}
+.review-item small{display:block;margin-top:8px;color:#98a1af;font-size:10px}
+.review-empty{border:1px dashed #ccd6e2;border-radius:12px;padding:20px;text-align:center;background:#f8fafc}
+.review-empty strong{display:block;font-size:15px;color:#27344a}
+.review-empty span{display:block;margin-top:5px;font-size:12px;color:#7f8a9c}
