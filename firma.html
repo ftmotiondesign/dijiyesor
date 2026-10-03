@@ -334,7 +334,10 @@
                 (campaignActive(d)?'<span class="profile-badge campaign">KAMPANYA</span>':'')+
               '</div>'+
               (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
-              (d.googleRating?'<div class="google-rating"><strong>★ '+esc(String(d.googleRating))+'</strong>'+(d.googleReviewCount?'<span>'+esc(String(d.googleReviewCount))+' Google yorumu</span>':'')+'</div>':'')+
+              ((d.googleRating||d.googleReviewCount)?'<div class="google-rating">'+
+                (d.googleRating?'<strong>★ '+esc(String(d.googleRating))+'</strong>':'')+
+                (d.googleReviewCount?'<span>'+esc(String(d.googleReviewCount))+' Google yorumu</span>':'')+
+              '</div>':'')+
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
             '</div>'+
             '<div class="hero-actions">'+
