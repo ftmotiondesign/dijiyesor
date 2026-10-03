@@ -48,7 +48,24 @@
 <label>Kart Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1200 × 900 px • 4:3</span><input id="cardImageUrl"></label>
 <label>Kapak Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1600 × 400 px • 4:1</span><input id="coverUrl"></label>
 </div>
-<div class="media"><div id="preview" class="preview">Görsel yok</div><div><p style="margin:0 0 10px;color:#64748b;font-size:13px;line-height:1.5">Görseli ücretsiz bir görsel barındırma servisine yükleyip doğrudan görsel bağlantısını yukarıdaki <b>Firma görseli URL</b> alanına yapıştır.</p><div class="message">Şimdilik bilgisayardan doğrudan yükleme kapalı. Firebase Storage etkinleştirildiğinde tekrar açabiliriz.</div></div></div>
+<div class="media" style="grid-template-columns:repeat(3,1fr)">
+  <div>
+    <div id="logoPreview" class="preview" style="height:170px;flex-direction:column;gap:6px;text-align:center">
+      <strong>Logo</strong><span>500 × 500 px</span>
+    </div>
+  </div>
+  <div>
+    <div id="cardPreview" class="preview" style="height:170px;flex-direction:column;gap:6px;text-align:center">
+      <strong>Kart Görseli</strong><span>1200 × 900 px</span>
+    </div>
+  </div>
+  <div>
+    <div id="coverPreview" class="preview" style="height:170px;flex-direction:column;gap:6px;text-align:center">
+      <strong>Kapak Görseli</strong><span>1600 × 400 px</span>
+    </div>
+  </div>
+</div>
+<div class="message" style="margin-top:14px">Şimdilik bilgisayardan doğrudan yükleme kapalı. Görsel URL'sini ilgili alana yapıştır.</div>
 </div></div></section>
 
 <section class="panel" data-panel="video"><div class="card"><div class="head"><div class="eyebrow">VİDEO & 360°</div><h2>Medya bağlantıları</h2><p>360° varsa öncelikli göster; yoksa harita devreye girsin.</p></div><div class="body">
@@ -105,7 +122,18 @@ Object.entries(categories).forEach(([k,v])=>{const o=document.createElement("opt
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.dataset.panel===b.dataset.tab))});
 const val=x=>($(x)?.value||"").trim(),chk=x=>!!$(x)?.checked;
 function msg(t,type=""){$("saveState").textContent=t;$("saveState").style.color=type==="error"?"#b91c1c":type==="success"?"#166534":"#64748b"}
-function preview(url){$("preview").innerHTML=url?'<img src="'+String(url).replace(/"/g,"&quot;")+'">':"Görsel yok"}
+function setPreview(id,url,title,size,fit="cover"){
+  const el=$(id);
+  if(!el)return;
+  el.innerHTML=url
+    ? '<img src="'+String(url).replace(/"/g,"&quot;")+'" style="width:100%;height:100%;object-fit:'+fit+';display:block">'
+    : '<strong>'+title+'</strong><span>'+size+'</span>';
+}
+function refreshPreviews(){
+  setPreview("logoPreview",val("logoUrl"),"Logo","500 × 500 px","contain");
+  setPreview("cardPreview",val("cardImageUrl")||val("coverUrl"),"Kart Görseli","1200 × 900 px","cover");
+  setPreview("coverPreview",val("coverUrl"),"Kapak Görseli","1600 × 400 px","cover");
+}
 async function load(){
  if(!id){location.href="admin.html#firms";return}
  const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
@@ -113,13 +141,13 @@ async function load(){
  ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","cardImageUrl","coverUrl","locationVideoUrl","campaignVideoUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
  $("status").value=firm.status||"active";$("mainCategory").value=firm.mainCategory||"diger";$("subCategory").value=firm.subCategory||firm.category||"";$("tour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";$("videoUrl").value=firm.videoUrl||firm.youtubeUrl||"";
  ["vip","homeFeatured","searchFeatured","opportunityFeatured"].forEach(k=>$(k).checked=!!firm[k]);$("sponsored").checked=!!(firm.sponsored||firm.isSponsored||firm.vipSponsored||firm.advertiser);$("prefer360").checked=firm.prefer360!==false;$("fallbackMap").checked=firm.fallbackMap!==false;$("infoRequestEnabled").checked=firm.infoRequestEnabled!==false;$("infoNotifyPanel").checked=firm.infoNotifyPanel!==false;$("infoRequestTarget").value=firm.infoRequestTarget||"both";$("infoRequestPhone").value=firm.infoRequestPhone||firm.whatsapp||firm.phone||"";
- $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="firma.html?id="+encodeURIComponent(id);preview(firm.cardImageUrl||firm.coverUrl||"");
+ $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="firma.html?id="+encodeURIComponent(id);refreshPreviews();
  const q="?firma="+encodeURIComponent(firm.name||"")+"&phone="+encodeURIComponent(firm.phone||"")+"&id="+encodeURIComponent(id);$("qrCardLink").href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"+q;$("menuQrLink").href="https://ftmotiondesign.github.io/dijiyer/menu-qr.html"+q;$("googleQrLink").href="https://ftmotiondesign.github.io/dijiyer/google-qr.html"+q;
  $("statViews").textContent=Number(firm.profileViews||firm.views||0).toLocaleString("tr-TR");$("statWhatsapp").textContent=Number(firm.whatsappClicks||0).toLocaleString("tr-TR");$("statRequests").textContent=Number(firm.infoRequestCount||firm.requestCount||0).toLocaleString("tr-TR");$("statTour").textContent=Number(firm.tourViews||firm.tour360Views||0).toLocaleString("tr-TR");$("statInstagram").textContent=Number(firm.instagramClicks||0).toLocaleString("tr-TR");$("statDirections").textContent=Number(firm.directionsClicks||0).toLocaleString("tr-TR");$("toggleStatus").textContent=(firm.status||"active")==="passive"?"Firmayı Aktif Yap":"Firmayı Pasife Al";
 }
 function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:val("cardImageUrl"),coverUrl:val("coverUrl"),tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
 async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
-$("saveBtn").onclick=save;$("topSave").onclick=save;$("cardImageUrl").oninput=()=>preview(val("cardImageUrl")||val("coverUrl"));$("coverUrl").oninput=()=>{if(!val("cardImageUrl"))preview(val("coverUrl"))};
+$("saveBtn").onclick=save;$("topSave").onclick=save;$("logoUrl").oninput=refreshPreviews;$("cardImageUrl").oninput=refreshPreviews;$("coverUrl").oninput=refreshPreviews;
 async function uploadSelectedCover(){
   const file=$("coverFile").files?.[0],box=$("uploadMsg");
   if(!file){box.className="message error";box.textContent="Önce bilgisayardan bir görsel seç.";return}
