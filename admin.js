@@ -45,7 +45,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],media:["360° & Medya","Medya hizmeti fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -125,6 +125,7 @@ function renderAll(){
   const newTourLeads=tourLeads.filter(x=>String(x.status||"new")==="new");
   if($("statTourLeads"))$("statTourLeads").textContent=newTourLeads.length;
   if($("navTourLeadCount"))$("navTourLeadCount").textContent=newTourLeads.length;
+  if($("revenueTourBadge"))$("revenueTourBadge").textContent=newTourLeads.length+" yeni";
   $("navMemberCount").textContent=getMemberRows().length;
   renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();
 }
