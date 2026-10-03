@@ -6,6 +6,8 @@ const legacyAccountRegistrationApp=firebase.apps.find(a=>a.name==="legacyInstitu
 const legacyAccountRegistrationAuth=legacyAccountRegistrationApp.auth();
 const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
 const ADMIN_EMAIL="ftmotiondesign@gmail.com";
+const CLOUDINARY_CLOUD_NAME="okefpzsy";
+const CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
 let firms=[],applications=[],members=[],tourLeads=[],campaignFilter="all";
@@ -248,58 +250,57 @@ $("clearCoverImageBtn")?.addEventListener("click",()=>{
   const msg=$("coverUploadMessage");
   if(msg){msg.className="message success";msg.textContent="Görsel kaldırıldı. Kaydet butonuna basınca işlem tamamlanır."}
 });
+function uploadFirmImage(file){
+  return new Promise((resolve,reject)=>{
+    if(!file)return resolve("");
+    if(!auth.currentUser)return reject(new Error("Oturum bulunamadı."));
+    if(!file.type.startsWith("image/"))return reject(new Error("Sadece görsel dosyası yükleyebilirsiniz."));
+    if(file.size>10*1024*1024)return reject(new Error("Görsel en fazla 10 MB olabilir."));
+    const msg=$("coverUploadMessage");
+    const fd=new FormData();
+    fd.append("file",file);
+    fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+    const xhr=new XMLHttpRequest();
+    xhr.open("POST","https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/image/upload",true);
+    xhr.timeout=30000;
+    xhr.onload=()=>{
+      let data={};
+      try{data=JSON.parse(xhr.responseText||"{}")}catch(_){}
+      if(xhr.status>=200&&xhr.status<300&&data.secure_url){
+        resolve(data.secure_url);
+      }else{
+        const detail=data?.error?.message||("HTTP "+xhr.status);
+        reject(new Error(detail));
+      }
+    };
+    xhr.onerror=()=>reject(new Error("Cloudinary bağlantısı kurulamadı."));
+    xhr.ontimeout=()=>reject(new Error("Yükleme zaman aşımına uğradı."));
+    xhr.upload.onprogress=e=>{
+      if(e.lengthComputable){
+        msg.className="message";
+        msg.textContent="%"+Math.round(e.loaded/e.total*100)+" yükleniyor...";
+      }
+    };
+    xhr.send(fd);
+  });
+}
+
 $("editCoverFile")?.addEventListener("change",async e=>{
   const file=e.target.files?.[0];
   if(!file)return;
   const msg=$("coverUploadMessage");
-  if(!file.type.startsWith("image/")){
-    msg.className="message error";msg.textContent="Lütfen bir görsel dosyası seçin.";return;
-  }
-  if(file.size>12*1024*1024){
-    msg.className="message error";msg.textContent="Görsel en fazla 12 MB olabilir.";return;
-  }
   try{
-    msg.className="message";msg.textContent="Görsel hazırlanıyor...";
-    const dataUrl=await compressFirmImage(file);
-    $("editCoverUrl").value=dataUrl;
-    updateFirmImagePreview(dataUrl);
-    msg.className="message success";msg.textContent="Görsel hazırlandı. Kaydet butonuna basın.";
+    msg.className="message";msg.textContent="Görsel yükleniyor...";
+    const url=await uploadFirmImage(file);
+    $("editCoverUrl").value=url;
+    updateFirmImagePreview(url);
+    msg.className="message success";
+    msg.textContent="Görsel yüklendi ✓ Şimdi Kaydet butonuna basın.";
   }catch(err){
     msg.className="message error";
-    msg.textContent="Görsel hazırlanamadı: "+(err.message||"Bilinmeyen hata");
+    msg.textContent="Görsel yüklenemedi: "+(err.message||"Bilinmeyen hata");
   }
-});
-
-function compressFirmImage(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onerror=()=>reject(new Error("Dosya okunamadı."));
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error("Görsel açılamadı."));
-      img.onload=()=>{
-        const maxW=1000,maxH=700;
-        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
-        const scale=Math.min(1,maxW/w,maxH/h);
-        w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));
-        const canvas=document.createElement("canvas");
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext("2d");
-        ctx.drawImage(img,0,0,w,h);
-        let quality=.78;
-        let out=canvas.toDataURL("image/jpeg",quality);
-        while(out.length>600000 && quality>.45){
-          quality-=.08;
-          out=canvas.toDataURL("image/jpeg",quality);
-        }
-        if(out.length>850000)reject(new Error("Görsel kaydetmek için hâlâ çok büyük. Daha küçük bir fotoğraf seçin."));
-        else resolve(out);
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+})
 
 $("addFirmBtn").addEventListener("click",()=>openFirmModal());
 $("newFirmBtn").addEventListener("click",()=>openFirmModal());
