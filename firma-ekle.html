@@ -227,6 +227,7 @@ const signupEmail=document.getElementById("accountEmail");
 const msg=document.getElementById("message");
 const signupPassword=document.getElementById("accountPassword");
 const signupPasswordToggle=document.getElementById("toggleSignupPassword");
+const is360Service=new URLSearchParams(location.search).get("service")==="360";
 const tourLeadRaw=sessionStorage.getItem("dijiyesor360Lead");
 let tourLead=null;
 try{tourLead=tourLeadRaw?JSON.parse(tourLeadRaw):null}catch(_){tourLead=null}
@@ -237,6 +238,13 @@ if(tourLead){
   if(contactEl&&!contactEl.value)contactEl.value=tourLead.contactName||"";
   msg.className="notice";
   msg.innerHTML="<strong>360° çekim talebi bilgilerin aktarıldı.</strong><br>Hesabını oluşturduğunda telefon, şehir ve not bilgilerin de başvuruya eklenecek.";
+}
+if(is360Service){
+  document.body.classList.add("service-360-flow");
+  setTimeout(()=>{
+    document.getElementById("basvuru")?.scrollIntoView({behavior:"instant",block:"start"});
+    document.getElementById("name")?.focus({preventScroll:true});
+  },50);
 }
 const passwordHint=document.getElementById("passwordHint");
 
