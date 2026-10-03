@@ -1040,6 +1040,29 @@ $("quickImportPreview")?.addEventListener("click",()=>{
   const newCount=rows.filter(r=>!isQuickDuplicate(r,cityName,districtName)).length;
   quickImportMessage(rows.length+" satır okundu. "+newCount+" firma eklenebilir.","success");
 });
+
+function inferQuickSubCategory(row,mainCategory){
+  const text=norm([row.name,row.address].join(" "));
+  if(mainCategory==="egitim"){
+    if(/sürücü kursu|surucu kursu|ehliyet|direksiyon/.test(text))return "surucu";
+    if(/anaokulu|ana okulu|kreş|kres/.test(text))return "kres";
+    if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(text))return "dershane";
+    if(/öğrenci yurdu|ogrenci yurdu|erkek yurdu|kız yurdu|kiz yurdu/.test(text))return "yurt";
+    if(/dil kursu|ingilizce kursu|almanca/.test(text))return "dil_kursu";
+  }
+  if(mainCategory==="otomotiv"){
+    if(/ekspertiz/.test(text))return "ekspertiz";
+    if(/rent a car|araç kiralama|arac kiralama/.test(text))return "rentacar";
+    if(/oto servis|tamir|mekanik/.test(text))return "oto_servis";
+  }
+  if(mainCategory==="yemeicme"){
+    if(/restoran|lokanta/.test(text))return "restoran";
+    if(/kafe|cafe/.test(text))return "kafe";
+    if(/pizza/.test(text))return "pizza";
+    if(/döner|doner/.test(text))return "doner";
+  }
+  return "diger";
+}
 $("quickImportAddAll")?.addEventListener("click",async()=>{
   const cityName=String($("quickImportCity")?.value||"").trim();
   const districtName=String($("quickImportDistrict")?.value||"").trim();
@@ -1059,8 +1082,8 @@ $("quickImportAddAll")?.addEventListener("click",async()=>{
       await db.collection("institutions").add({
         name:row.name,
         mainCategory:category,
-        subCategory:"diger",
-        category,
+        subCategory:inferQuickSubCategory(row,category),
+        category:inferQuickSubCategory(row,category)=== "diger" ? category : inferQuickSubCategory(row,category),
         city:cityName,
         district:districtName,
         address:row.address||"",
