@@ -292,6 +292,9 @@
         const website=safeUrl(d.website);
         const instagram=d.instagram ? safeUrl(String(d.instagram).includes("instagram.com") ? d.instagram : "instagram.com/"+String(d.instagram).replace(/^@/,"")) : "";
         const phone=telUrl(d.phone);
+        const phoneDigits=String(d.phone||"").replace(/\D/g,"").replace(/^90/,"0");
+        const isMobilePhone=/^05\d{9}$/.test(phoneDigits);
+        const mobileWhatsapp=isMobilePhone?waUrl(d.phone):"";
         const whatsapp=waUrl(d.whatsapp);
 
         root.innerHTML=
@@ -333,7 +336,7 @@
             '<aside id="iletisim" class="contact-card">'+
               '<div class="section-title"><div><span>İLETİŞİM</span><h2>İletişim bilgileri</h2></div></div>'+
               '<div class="contact-list">'+
-                contactRow("☎","Telefon",d.phone,phone)+
+                contactRow("☎",isMobilePhone?"Cep Telefonu":"Telefon",d.phone,isMobilePhone?mobileWhatsapp:phone)+
                 contactRow("●","WhatsApp",d.whatsapp,whatsapp)+
                 contactRow("⌖","Adres",d.address,"")+
                 contactRow("↗","Web sitesi",d.website,website)+
