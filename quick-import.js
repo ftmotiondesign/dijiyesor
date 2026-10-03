@@ -48,18 +48,23 @@
     let phone=phoneFrom(joined);
     let website=webFrom(joined);
     let address="";
+    let location="";
     const detailedAddress=lines.find((x,i)=>i>0 && /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(x))||"";
-    if(detailedAddress){
-      address=detailedAddress;
-    }else{
-      for(const line of lines){
-        if(line.includes("·")){
-          const parts=line.split("·").map(clean).filter(Boolean);
-          const tail=parts[parts.length-1]||"";
-          if(isAddress(tail)){address=tail;break}
+    if(detailedAddress)address=detailedAddress;
+
+    // "Çanakkale Merkez/Çanakkale" gibi kısa bilgi gerçek adres değil, konumdur.
+    for(const line of lines){
+      if(line.includes("·")){
+        const parts=line.split("·").map(clean).filter(Boolean);
+        const tail=parts[parts.length-1]||"";
+        if(/\bmerkez\s*\//i.test(tail)||/^[^/]{2,}\s*\/\s*[^/]{2,}$/i.test(tail)){
+          location=tail;
+          break;
         }
       }
-      if(!address)address=lines.find((x,i)=>i>0&&isAddress(x))||"";
+    }
+    if(!location){
+      location=lines.find((x,i)=>i>0 && (/\bmerkez\s*\//i.test(x)||/^[^/]{2,}\s*\/\s*[^/]{2,}$/i.test(x)))||"";
     }
 
     let useful=lines.filter(x=>!isNoise(x) && !phoneFrom(x) && !webFrom(x));
@@ -78,7 +83,7 @@
       .replace(/\s+\d{5,}.*$/,"")
       .trim();
 
-    return {name,phone,address,website};
+    return {name,phone,address,location,website};
   }
   function parseInput(){
     const raw=String(q.value||"").trim();
@@ -232,6 +237,7 @@
           city:row.city,
           district:row.district,
           address:row.address||"",
+          location:row.location||"",
           phone:row.phone||"",
           whatsapp:"",
           website:row.website||"",
