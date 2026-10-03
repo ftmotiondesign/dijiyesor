@@ -48,7 +48,7 @@ button,input,select{font:inherit}
 .count{background:#eef5ff;color:#1677ff;padding:8px 12px;border-radius:999px;font-weight:900;font-size:12px;white-space:nowrap}
 
 .results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.result-card{border:1px solid #e6ebf2;border-radius:16px;padding:16px;background:#fff;transition:.18s}
+.result-card{border:1px solid #e6ebf2;border-radius:16px;padding:0;background:#fff;transition:.18s;overflow:hidden}
 .result-card:hover{border-color:#d7dfe9;box-shadow:0 10px 28px rgba(35,52,81,.08);transform:translateY(-2px)}
 .result-card-top{display:flex;gap:11px;align-items:center}
 .result-logo{width:44px;height:44px;border-radius:11px;background:#eef4ff;color:#1677ff;display:grid;place-items:center;overflow:hidden;font-size:14px;font-weight:900;flex:0 0 auto}
@@ -98,7 +98,7 @@ button,input,select{font:inherit}
 .search-area{max-width:900px;margin:0 auto}
 @media(max-width:760px){
   .result-logo{width:40px;height:40px;border-radius:10px;font-size:13px}
-  .result-card{padding:14px}
+  .result-card{padding:0}
   .result-name-row h2{font-size:15px}
   .result-actions{grid-template-columns:1fr 1fr}
 }
@@ -433,4 +433,46 @@ button,input,select{font:inherit}
   .special-filter-row{width:100%}
   .only360-btn{width:100%}
   .only360-copy{flex:1}
+}
+
+
+/* Firma kartı görsel alanı */
+.result-visual{
+  position:relative;height:142px;background:#edf2f8;overflow:hidden
+}
+.result-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
+.result-card:hover .result-visual img{transform:scale(1.025)}
+.result-card-body{padding:15px 16px 16px}
+.result-visual-badge,.result-visual-sponsor{
+  position:absolute;top:10px;padding:6px 9px;border-radius:999px;font-size:9px;font-weight:900;
+  box-shadow:0 4px 14px rgba(15,23,42,.12);backdrop-filter:blur(6px)
+}
+.result-visual-badge{left:10px;background:rgba(255,255,255,.94);color:#1677ff}
+.result-visual-sponsor{right:10px;background:rgba(255,244,214,.96);color:#946200}
+.result-visual-fallback{
+  display:flex;align-items:center;gap:13px;padding:18px;color:#fff;
+  background:linear-gradient(135deg,#1677ff,#0f5fc9)
+}
+.result-visual-fallback::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;right:-35px;top:-45px;background:rgba(255,255,255,.12)}
+.result-visual-fallback-icon{
+  position:relative;z-index:1;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  font-size:29px;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.25)
+}
+.result-visual-fallback>div:nth-child(2){position:relative;z-index:1}
+.result-visual-fallback small{display:block;font-size:9px;font-weight:900;letter-spacing:.12em;opacity:.75;margin-bottom:4px}
+.result-visual-fallback strong{display:block;font-size:18px;line-height:1.1}
+.result-visual-fallback.automotive{background:linear-gradient(135deg,#20384f,#2d6ea6)}
+.result-visual-fallback.food{background:linear-gradient(135deg,#974024,#d86f38)}
+.result-visual-fallback.health{background:linear-gradient(135deg,#0f766e,#2aa89e)}
+.result-visual-fallback.home{background:linear-gradient(135deg,#66503d,#b2885c)}
+.result-visual-fallback.estate{background:linear-gradient(135deg,#334e68,#6d8cab)}
+.result-visual-fallback.tourism{background:linear-gradient(135deg,#087a8a,#31a8b8)}
+.result-visual-fallback.media{background:linear-gradient(135deg,#5b2a70,#9b4db7)}
+.result-visual-fallback.transport{background:linear-gradient(135deg,#374151,#64748b)}
+.result-visual-fallback.professional{background:linear-gradient(135deg,#20375a,#456fa7)}
+.result-visual-fallback.shopping{background:linear-gradient(135deg,#8c4167,#c86d99)}
+.result-visual-fallback.other{background:linear-gradient(135deg,#49576a,#78879b)}
+@media(max-width:760px){
+  .result-visual{height:135px}
+  .result-card-body{padding:14px}
 }
