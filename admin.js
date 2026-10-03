@@ -550,7 +550,7 @@ function openMemberDetail(id){
 
   $("memberOpenFirm").dataset.firmId=firm?.id||"";
   $("memberOpenFirm").disabled=!firm;
-  $("memberCopyLogin").dataset.loginUrl="https://dijiyesor.com/firma-ekle.html?kurumgiris=1";
+  $("memberCopyLogin").dataset.loginUrl="https://ftmotiondesign.github.io/dijiyesor/firma-ekle.html?kurumgiris=1";
   $("memberCopyLogin").disabled=!m.hasAccount;
   $("memberDetailModal").classList.remove("hidden");
 }
@@ -656,7 +656,7 @@ document.addEventListener("click",async e=>{
 });
 
 $("memberCopyLogin")?.addEventListener("click",async()=>{
-  const url=$("memberCopyLogin").dataset.loginUrl||"https://dijiyesor.com/firma-ekle.html?kurumgiris=1";
+  const url=$("memberCopyLogin").dataset.loginUrl||"https://ftmotiondesign.github.io/dijiyesor/firma-ekle.html?kurumgiris=1";
   try{
     await navigator.clipboard.writeText(url);
     const old=$("memberCopyLogin").textContent;
