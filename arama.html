@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Arama Sonuçları | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma arama sonuçları.">
-  <link rel="stylesheet" href="arama.css?v=20261003-23">
+  <link rel="stylesheet" href="arama.css?v=20261003-24">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -55,6 +55,10 @@
       </div>
       <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
     </section>
+    <div id="locationNotice" class="location-notice hidden">
+      <strong>Konum seçilmedi · Türkiye geneli sonuçlar gösteriliyor.</strong>
+      <span>Daha yakın ve ilgili sonuçlar için il veya ilçe seçebilirsiniz.</span>
+    </div>
 
     <section id="companyGrid" class="results-grid">
       <div class="results-state">
@@ -79,7 +83,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261003-23"></script>
+  <script src="app.js?v=20261003-24"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
