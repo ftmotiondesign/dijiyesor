@@ -48,16 +48,18 @@
     let phone=phoneFrom(joined);
     let website=webFrom(joined);
     let address="";
-
-    for(const line of lines){
-      if(line.includes("·")){
-        const parts=line.split("·").map(clean).filter(Boolean);
-        const tail=parts[parts.length-1]||"";
-        if(isAddress(tail)){address=tail;break}
+    const detailedAddress=lines.find((x,i)=>i>0 && /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(x))||"";
+    if(detailedAddress){
+      address=detailedAddress;
+    }else{
+      for(const line of lines){
+        if(line.includes("·")){
+          const parts=line.split("·").map(clean).filter(Boolean);
+          const tail=parts[parts.length-1]||"";
+          if(isAddress(tail)){address=tail;break}
+        }
       }
-    }
-    if(!address){
-      address=lines.find((x,i)=>i>0&&isAddress(x))||"";
+      if(!address)address=lines.find((x,i)=>i>0&&isAddress(x))||"";
     }
 
     let useful=lines.filter(x=>!isNoise(x) && !phoneFrom(x) && !webFrom(x));
