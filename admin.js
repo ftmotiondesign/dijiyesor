@@ -170,7 +170,7 @@ function loadCampaignFirmData(f){
   $("campaignImageUrl").value=f.campaignImageUrl||"";
   $("campaignUrl").value=f.campaignUrl||"";
   $("campaignActive").checked=Boolean(f.campaignActive);
-  $("campaignSponsored").checked=Boolean(f.sponsored);
+  $("campaignSponsored").checked=Boolean(f.sponsored||f.campaignSponsorRequested);
 }
 $("campaignFirmSearch").addEventListener("focus",()=>{
   renderCampaignFirmResults($("campaignFirmSearch").value);
