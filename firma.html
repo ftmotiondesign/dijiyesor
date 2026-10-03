@@ -189,11 +189,11 @@
       let address=String(d.address||"").trim();
       let location=String(d.location||"").trim();
 
-      const isDetailedAddress=v=>/mah\\.?|mahalle|cad\\.?|caddesi|sok\\.?|sokak|bulvar|blv\\.?|no[:\\s]|kat[:\\s]/i.test(String(v||""));
-      const isCoarseLocation=v=>/\\bmerkez\\s*\\//i.test(String(v||""))||/^[^/]{2,}\\s*\\/\\s*[^/]{2,}$/i.test(String(v||""));
+      const isDetailedAddress=v=>/mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(String(v||""));
+      const isCoarseLocation=v=>/\bmerkez\s*\//i.test(String(v||""))||/^[^/]{2,}\s*\/\s*[^/]{2,}$/i.test(String(v||""));
       const isMobileNumber=v=>{
-        const digits=String(v||"").replace(/\\D/g,"").replace(/^90/,"0");
-        return /^05\\d{9}$/.test(digits);
+        const digits=String(v||"").replace(/\D/g,"").replace(/^90/,"0");
+        return /^05\d{9}$/.test(digits);
       };
 
       const storedPhoneMatch=phone.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
