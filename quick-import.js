@@ -21,14 +21,33 @@
     message.textContent=text;
     message.classList.remove("hidden");
   }
-  function clean(v){return String(v||"").replace(/\s+/g," ").replace(/^[•·\-–—]\s*/,"").trim()}
+  function clean(v){
+    let s=String(v||"").trim();
+
+    // Markdown link: [instagram.com](https://...)
+    const mdLink=s.match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/i);
+    if(mdLink)s=mdLink[2];
+
+    s=s
+      .replace(/^#{1,6}\s*/,"")
+      .replace(/^\*\*(.*?)\*\*$/,"$1")
+      .replace(/^__(.*?)__$/,"$1")
+      .replace(/\s+/g," ")
+      .replace(/^[•·\-–—]\s*/,"")
+      .trim();
+
+    return s;
+  }
   function phoneFrom(text){
     const m=String(text||"").match(/(?:\+?90\s*)?(?:\(?0?\d{3}\)?)[\s.-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
     return m?m[0].trim():"";
   }
   function webFrom(text){
-    const m=String(text||"").match(/https?:\/\/\S+|www\.\S+/i);
-    return m?m[0].trim():"";
+    const raw=String(text||"");
+    const md=raw.match(/\[[^\]]+\]\((https?:\/\/[^)]+)\)/i);
+    if(md)return md[1].replace(/\\&/g,"&").trim();
+    const m=raw.match(/https?:\/\/[^\s)]+|www\.[^\s)]+/i);
+    return m?m[0].replace(/\\&/g,"&").trim():"";
   }
   function isNoise(line){
     const s=norm(line);
@@ -88,8 +107,9 @@
     const reviewCount=reviewCountFrom(lines);
     const plusCode=plusCodeFrom(lines);
     const googleCategory=googleCategoryFrom(lines);
+    const instagramUrl=(lines.map(webFrom).find(x=>/instagram\.com/i.test(x))||"");
     let phone=phoneFrom(joined);
-    let website=webFrom(joined);
+    let website=(lines.map(webFrom).find(x=>x&&!/instagram\.com/i.test(x))||"");
     let address="";
     let location="";
     const detailedAddress=lines.find((x,i)=>i>0 &&
@@ -134,7 +154,7 @@
       .replace(/\s+\d{5,}.*$/,"")
       .trim();
 
-    return {name,phone,address,location,website,rating,reviewCount,plusCode,googleCategory};
+    return {name,phone,address,location,website,instagram:instagramUrl,rating,reviewCount,plusCode,googleCategory};
   }
   function parseInput(){
     const raw=String(q.value||"").trim();
@@ -315,6 +335,7 @@
 
           if(row.location && !String(dup.location||"").trim())patch.location=row.location;
           if(row.website && !String(dup.website||"").trim())patch.website=row.website;
+          if(row.instagram && !String(dup.instagram||"").trim())patch.instagram=row.instagram;
           if(row.rating && !dup.googleRating)patch.googleRating=row.rating;
           if(row.reviewCount && !dup.googleReviewCount)patch.googleReviewCount=Number(row.reviewCount||0);
           if(row.plusCode && !String(dup.googlePlusCode||"").trim())patch.googlePlusCode=row.plusCode;
@@ -346,7 +367,7 @@
           googleReviewCount:Number(row.reviewCount||0),
           googlePlusCode:row.plusCode||"",
           googleCategory:row.googleCategory||"",
-          instagram:"",
+          instagram:row.instagram||"",
           description:row.description||"",
           searchKeywords:Array.isArray(row.searchKeywords)?row.searchKeywords:[],
           status:"active",
