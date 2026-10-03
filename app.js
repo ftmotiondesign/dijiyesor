@@ -147,6 +147,11 @@ function render(data){
     const loc=[city?.value,district?.value].filter(Boolean).join(" / ");
     context.textContent=loc ? loc+" bölgesindeki uygun işletmeler." : "Aramana uygun işletmeler listeleniyor.";
   }
+  const locationNotice=document.getElementById("locationNotice");
+  if(locationNotice){
+    const hasCity=Boolean(city?.value);
+    locationNotice.classList.toggle("hidden",hasCity);
+  }
 
   if(!data.length){
     grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
