@@ -39,7 +39,7 @@
 
 <section class="panel" data-panel="media"><div class="card"><div class="head"><div class="eyebrow">GÖRSELLER</div><h2>Logo ve firma görseli</h2><p>Firma kartındaki görseli buradan yönet.</p></div><div class="body">
 <div class="g2"><label>Logo URL<input id="logoUrl"></label><label>Firma görseli URL<input id="coverUrl"></label></div>
-<div class="media"><div id="preview" class="preview">Görsel yok</div><div><label>Bilgisayardan görsel seç<input id="coverFile" type="file" accept="image/*"></label><div class="actions" style="margin-top:10px"><button id="uploadCover" class="btn" type="button">Görseli Yükle</button><button id="clearCover" class="btn" type="button">Görseli Kaldır</button></div><div id="uploadMsg" class="message hidden"></div></div></div>
+<div class="media"><div id="preview" class="preview">Görsel yok</div><div><label>Bilgisayardan görsel seç<input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp"></label><div class="actions" style="margin-top:10px"><button id="uploadCover" class="btn" type="button">Görsel Seç / Yükle</button><button id="clearCover" class="btn" type="button">Görseli Kaldır</button></div><div id="uploadMsg" class="message">JPG, PNG veya WEBP • en fazla 8 MB</div></div></div>
 </div></div></section>
 
 <section class="panel" data-panel="video"><div class="card"><div class="head"><div class="eyebrow">VİDEO & 360°</div><h2>Medya bağlantıları</h2><p>360° varsa öncelikli göster; yoksa harita devreye girsin.</p></div><div class="body">
@@ -111,7 +111,32 @@ async function load(){
 function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),coverUrl:val("coverUrl"),tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
 async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
 $("saveBtn").onclick=save;$("topSave").onclick=save;$("coverUrl").oninput=()=>preview(val("coverUrl"));
-$("uploadCover").onclick=async()=>{const f=$("coverFile").files?.[0];if(!f)return;try{$("uploadMsg").className="message";$("uploadMsg").textContent="Yükleniyor...";const safe=String(f.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-"),r=storage.ref("demo-card/"+auth.currentUser.uid+"/firms/"+id+"/"+Date.now()+"-"+safe);await r.put(f,{contentType:f.type});const u=await r.getDownloadURL();$("coverUrl").value=u;preview(u);$("uploadMsg").className="message success";$("uploadMsg").textContent="Görsel yüklendi. Kaydet butonuna bas."}catch(e){$("uploadMsg").className="message error";$("uploadMsg").textContent="Yüklenemedi: "+(e.message||"")}};
+async function uploadSelectedCover(){
+  const file=$("coverFile").files?.[0],box=$("uploadMsg");
+  if(!file){box.className="message error";box.textContent="Önce bilgisayardan bir görsel seç.";return}
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)){box.className="message error";box.textContent="Sadece JPG, PNG veya WEBP yükleyebilirsin.";return}
+  if(file.size>8*1024*1024){box.className="message error";box.textContent="Görsel en fazla 8 MB olabilir.";return}
+  const user=auth.currentUser;
+  if(!user){box.className="message error";box.textContent="Yönetici oturumu bulunamadı. Panelden tekrar giriş yap.";return}
+  try{
+    box.className="message";box.textContent="Görsel yükleniyor...";
+    const safe=String(file.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-");
+    const ref=storage.ref("demo-card/"+user.uid+"/firms/"+id+"/"+Date.now()+"-"+safe);
+    const task=await ref.put(file,{contentType:file.type});
+    const url=await task.ref.getDownloadURL();
+    $("coverUrl").value=url;preview(url);
+    await db.collection("institutions").doc(id).set({coverUrl:url,updatedAt:new Date().toISOString()},{merge:true});
+    firm.coverUrl=url;
+    box.className="message success";box.textContent="Görsel yüklendi ve firma kaydına eklendi ✓";
+  }catch(e){
+    console.error("Firma görseli yükleme hatası",e);
+    box.className="message error";
+    const code=e?.code?(" ["+e.code+"]"):"";
+    box.textContent="Görsel yüklenemedi"+code+": "+(e?.message||"Bilinmeyen hata");
+  }
+}
+$("coverFile").onchange=uploadSelectedCover;
+$("uploadCover").onclick=()=>{if(!$("coverFile").files?.[0])$("coverFile").click();else uploadSelectedCover()};
 $("clearCover").onclick=()=>{$("coverUrl").value="";$("coverFile").value="";preview("")};
 $("toggleStatus").onclick=async()=>{$("status").value=val("status")==="passive"?"active":"passive";await save()};
 boot().catch(e=>{alert(e.message||"Sayfa başlatılamadı.");location.href="admin.html#firms"});
