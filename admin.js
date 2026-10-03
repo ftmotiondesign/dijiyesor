@@ -876,7 +876,11 @@ function looksLikeNoise(line){
 }
 function looksLikeAddress(line){
   const s=norm(line);
-  return /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]|merkez\/|\/(?:canakkale|çanakkale|manisa|istanbul|ankara|izmir|bursa|balikesir|balıkesir|edirne|kirklareli|kırklareli|tekirdag|tekirdağ|mugla|muğla|sakarya)\b/.test(s);
+  if(/mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/.test(s))return true;
+  if(/\bmerkez\s*\//.test(s))return true;
+  if(/\b[a-zçğıöşü]+\s+merkez\s*\/\s*[a-zçğıöşü]+\b/.test(s))return true;
+  if(/\/[a-zçğıöşü]+\b/.test(s)&&!looksLikeWebsite(line))return true;
+  return false;
 }
 function parseGoogleBlock(block){
   let lines=block.split(/\r?\n/).map(cleanGoogleLine).filter(Boolean);
@@ -891,6 +895,12 @@ function parseGoogleBlock(block){
 
   if(!address&&useful.length>1){
     address=useful.slice(1).find(x=>x.length>8&&!/sürücü kursu|kursu|restoran|kafe|otel|anaokulu|dershane/i.test(x))||"";
+  }
+  if(address){
+    address=address
+      .replace(/^.*?·\s*/,"")
+      .replace(/^\d+\s*(yıldan|yildan)\s+daha\s+uzun\s+süre\s+önce\s+açıldı\s*[-·]?\s*/i,"")
+      .trim();
   }
 
   name=name.replace(/\s+-\s+Ehliyet.*$/i,"").replace(/\s+-\s+.*$/,"").trim();
