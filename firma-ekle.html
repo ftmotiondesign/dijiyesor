@@ -157,9 +157,16 @@
               <label>Yetkili adı soyadı<input id="contactName" required maxlength="100" placeholder="Ad Soyad"></label>
               <label>E-posta<input id="accountEmail" type="email" required autocomplete="email" placeholder="ornek@firma.com"></label>
             </div>
-            <div class="form-grid two">
-              <label>Şifre<input id="accountPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="En az 8 karakter"></label>
-              <label>Şifre tekrar<input id="accountPasswordAgain" type="password" required minlength="8" autocomplete="new-password" placeholder="Şifreyi tekrar yaz"></label>
+            <div class="password-create-block">
+              <div class="password-create-title">
+                <div><span>GİRİŞ ŞİFRENİZ</span><strong>Kurum paneli şifrenizi oluşturun</strong><small>Onaydan sonra bu e-posta ve şifre ile Kurum Girişi yapacaksınız.</small></div>
+                <button id="toggleSignupPasswords" type="button" class="password-toggle">Şifreyi Göster</button>
+              </div>
+              <div class="form-grid two">
+                <label>Şifre *<input id="accountPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="En az 8 karakter"></label>
+                <label>Şifre tekrar *<input id="accountPasswordAgain" type="password" required minlength="8" autocomplete="new-password" placeholder="Şifreyi tekrar yaz"></label>
+              </div>
+              <div id="passwordMatchHint" class="password-match-hint">En az 8 karakter kullanın.</div>
             </div>
           </div>
 
@@ -326,6 +333,26 @@ const mainCategory=document.getElementById("mainCategory");
 const subCategory=document.getElementById("subCategory");
 const wantCampaign=document.getElementById("wantCampaign");
 const campaignFields=document.getElementById("campaignFields");
+const signupPassword=document.getElementById("accountPassword");
+const signupPasswordAgain=document.getElementById("accountPasswordAgain");
+const signupPasswordToggle=document.getElementById("toggleSignupPasswords");
+const passwordMatchHint=document.getElementById("passwordMatchHint");
+function updatePasswordHint(){
+  const a=signupPassword.value,b=signupPasswordAgain.value;
+  if(!a&&!b){passwordMatchHint.textContent="En az 8 karakter kullanın.";passwordMatchHint.className="password-match-hint";return}
+  if(a.length<8){passwordMatchHint.textContent="Şifre en az 8 karakter olmalı.";passwordMatchHint.className="password-match-hint error";return}
+  if(b&&a!==b){passwordMatchHint.textContent="Şifreler eşleşmiyor.";passwordMatchHint.className="password-match-hint error";return}
+  if(a&&b&&a===b){passwordMatchHint.textContent="Şifreler eşleşiyor ✓";passwordMatchHint.className="password-match-hint success";return}
+  passwordMatchHint.textContent="Şifreyi tekrar yazın.";passwordMatchHint.className="password-match-hint";
+}
+signupPassword.addEventListener("input",updatePasswordHint);
+signupPasswordAgain.addEventListener("input",updatePasswordHint);
+signupPasswordToggle.addEventListener("click",()=>{
+  const show=signupPassword.type==="password";
+  signupPassword.type=show?"text":"password";
+  signupPasswordAgain.type=show?"text":"password";
+  signupPasswordToggle.textContent=show?"Şifreyi Gizle":"Şifreyi Göster";
+});
 
 const subcategoryOptions={
 "egitim":[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],
