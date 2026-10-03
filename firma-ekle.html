@@ -234,225 +234,156 @@ const registrationApp=firebase.apps.find(a=>a.name==="dijiyesorRegistration")||f
 const registrationAuth=registrationApp.auth();
 const registrationDb=registrationApp.firestore();
 
+
 const city=document.getElementById("city");
 const district=document.getElementById("district");
+const loginCity=document.getElementById("institutionLoginCity");
+const loginDistrict=document.getElementById("institutionLoginDistrict");
 const msg=document.getElementById("message");
-const mainCategory=document.getElementById("mainCategory");
-const subCategory=document.getElementById("subCategory");
-const wantCampaign=document.getElementById("wantCampaign");
-const campaignFields=document.getElementById("campaignFields");
 const signupPassword=document.getElementById("accountPassword");
-const signupPasswordAgain=document.getElementById("accountPasswordAgain");
-const signupPasswordToggle=document.getElementById("toggleSignupPasswords");
-const passwordMatchHint=document.getElementById("passwordMatchHint");
-function updatePasswordHint(){
-  const a=signupPassword.value,b=signupPasswordAgain.value;
-  if(!a&&!b){passwordMatchHint.textContent="En az 8 karakter kullanın.";passwordMatchHint.className="password-match-hint";return}
-  if(a.length<8){passwordMatchHint.textContent="Şifre en az 8 karakter olmalı.";passwordMatchHint.className="password-match-hint error";return}
-  if(b&&a!==b){passwordMatchHint.textContent="Şifreler eşleşmiyor.";passwordMatchHint.className="password-match-hint error";return}
-  if(a&&b&&a===b){passwordMatchHint.textContent="Şifreler eşleşiyor ✓";passwordMatchHint.className="password-match-hint success";return}
-  passwordMatchHint.textContent="Şifreyi tekrar yazın.";passwordMatchHint.className="password-match-hint";
+const signupPasswordToggle=document.getElementById("toggleSignupPassword");
+const passwordHint=document.getElementById("passwordHint");
+
+function normalizeIdentity(v){
+  return String(v||"").trim().toLocaleLowerCase("tr-TR")
+    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
 }
-signupPassword.addEventListener("input",updatePasswordHint);
-signupPasswordAgain.addEventListener("input",updatePasswordHint);
+function identityEmail(name,contact,cityName,districtName){
+  const raw=[name,contact,cityName,districtName].map(normalizeIdentity).join("|");
+  let h1=2166136261,h2=5381;
+  for(let i=0;i<raw.length;i++){
+    const code=raw.charCodeAt(i);
+    h1^=code;h1=Math.imul(h1,16777619);
+    h2=((h2<<5)+h2)^code;
+  }
+  const a=(h1>>>0).toString(36),b=(h2>>>0).toString(36);
+  return "u-"+a+b+"@dijiyesor.app";
+}
+function setPasswordHint(){
+  const v=signupPassword.value;
+  if(!v){passwordHint.textContent="En az 8 karakter kullanın.";passwordHint.className="password-match-hint";return}
+  if(v.length<8){passwordHint.textContent="Şifre en az 8 karakter olmalı.";passwordHint.className="password-match-hint error";return}
+  passwordHint.textContent="Şifre uygun ✓";passwordHint.className="password-match-hint success";
+}
+signupPassword.addEventListener("input",setPasswordHint);
 signupPasswordToggle.addEventListener("click",()=>{
   const show=signupPassword.type==="password";
   signupPassword.type=show?"text":"password";
-  signupPasswordAgain.type=show?"text":"password";
-  signupPasswordToggle.textContent=show?"Şifreyi Gizle":"Şifreyi Göster";
+  signupPasswordToggle.textContent=show?"Gizle":"Göster";
 });
 
-const subcategoryOptions={
-"egitim":[["kres","Kreş / Anaokulu"],["dershane","Dershane / Kurs Merkezi"],["surucu","Sürücü Kursu"],["ozel_ders","Özel Ders"],["dil_kursu","Dil Kursu"],["etut","Etüt Merkezi"],["ozel_okul","Özel Okul"],["yurt","Öğrenci Yurdu"]],
-"otomotiv":[["oto_servis","Oto Servis"],["kaporta_boya","Kaporta & Boya"],["oto_elektrik","Oto Elektrik"],["lastik_jant","Lastik & Jant"],["oto_yikama","Oto Yıkama"],["ekspertiz","Ekspertiz"],["galeri","Oto Galeri"],["rentacar","Rent a Car"],["yedek_parca","Yedek Parça"],["motosiklet","Motosiklet"]],
-"yemeicme":[["restoran","Restoran"],["kafe","Kafe"],["fastfood","Fast Food"],["pastane","Pastane"],["pizza","Pizza"],["doner","Döner"],["pide_lahmacun","Pide & Lahmacun"],["catering","Catering"],["ev_yemekleri","Ev Yemekleri"]],
-"saglikguzellik":[["dis_klinigi","Diş Kliniği"],["klinik","Klinik"],["psikolog","Psikolog"],["diyetisyen","Diyetisyen"],["fizyoterapi","Fizyoterapi"],["guzellik","Güzellik Merkezi"],["kuafor","Kuaför"],["berber","Berber"],["spor","Spor Merkezi"]],
-"evyapi":[["mobilya","Mobilya"],["dekorasyon","Dekorasyon"],["insaat","İnşaat"],["elektrikci","Elektrikçi"],["tesisatci","Tesisatçı"],["teknik_servis","Teknik Servis"],["klima","Klima"],["cam_balkon","Cam Balkon"],["temizlik","Temizlik"]],
-"emlak":[["emlak_ofisi","Emlak Ofisi"],["konut","Konut"],["arsa","Arsa"],["ticari","Ticari Gayrimenkul"],["gunluk_kiralik","Günlük Kiralık"]],
-"turizm":[["otel","Otel"],["pansiyon","Pansiyon"],["apart","Apart"],["bungalov","Bungalov"],["seyahat","Seyahat Acentesi"],["kamp","Kamp"]],
-"organizasyonmedya":[["dugun_salonu","Düğün Salonu"],["organizasyon","Organizasyon"],["fotograf","Fotoğrafçı"],["video","Video Prodüksiyon"],["drone","Drone Çekimi"],["gelinlik","Gelinlik"],["cicekci","Çiçekçi"],["reklam","Reklam Ajansı"]],
-"tasimacilik":[["nakliyat","Nakliyat"],["kurye","Kurye"],["sehirici","Şehir İçi Taşımacılık"],["depolama","Depolama"]],
-"profesyonel":[["hukuk","Hukuk"],["muhasebe","Muhasebe"],["web","Web Tasarım"],["sosyal_medya","Sosyal Medya"],["teknoloji","Teknoloji"],["bilgisayar","Bilgisayar"],["danismanlik","Danışmanlık"],["veteriner","Veteriner"],["tarim","Tarım"]],
-"alisveris":[["giyim","Giyim"],["ayakkabi","Ayakkabı"],["market","Market"],["elektronik","Elektronik"],["kirtasiye","Kırtasiye"],["petshop","Pet Shop"],["zuccaciye","Züccaciye"],["esnaf","Yerel Esnaf"]],
-"diger":[["diger","Diğer"]]
-};
-
-function fillSubCategory(){
-  const list=subcategoryOptions[mainCategory.value]||[];
-  subCategory.innerHTML='<option value="">Alt kategori seçin</option>';
-  list.forEach(([value,label])=>{
-    const o=document.createElement("option");
-    o.value=value;o.textContent=label;subCategory.appendChild(o);
-  });
-  subCategory.disabled=!mainCategory.value;
-}
-mainCategory.addEventListener("change",fillSubCategory);
-
-wantCampaign.addEventListener("change",()=>{
-  campaignFields.classList.toggle("hidden",!wantCampaign.checked);
-  const requiredIds=["campaignType","campaignTitle"];
-  requiredIds.forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.required=wantCampaign.checked;
-  });
-});
-
-(async()=>{
+async function loadProvinces(select){
   try{
     const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
     const j=await r.json();
-    city.innerHTML='<option value="">İl seçin</option>';
-    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{
+    select.innerHTML='<option value="">İl seçin</option>';
+    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(item=>{
       const o=document.createElement("option");
-      o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;city.appendChild(o);
+      o.value=item.name;o.textContent=item.name;o.dataset.id=item.id;select.appendChild(o);
     });
-  }catch(_){}
-})();
-
-city.addEventListener("change",async()=>{
-  district.disabled=true;
-  district.innerHTML='<option>İlçeler yükleniyor...</option>';
-  const id=city.options[city.selectedIndex]?.dataset?.id;
-  if(!id){district.innerHTML='<option value="">Önce il seçin</option>';return}
+  }catch(_){select.innerHTML='<option value="">İller alınamadı</option>'}
+}
+async function loadDistricts(citySelect,districtSelect){
+  districtSelect.disabled=true;
+  districtSelect.innerHTML='<option value="">İlçeler yükleniyor...</option>';
+  const id=citySelect.options[citySelect.selectedIndex]?.dataset?.id;
+  if(!id){districtSelect.innerHTML='<option value="">Önce il seçin</option>';return}
   try{
     const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");
     const j=await r.json();
-    district.innerHTML='<option value="">İlçe seçin</option>';
-    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{
-      const o=document.createElement("option");
-      o.value=d.name;o.textContent=d.name;district.appendChild(o);
+    districtSelect.innerHTML='<option value="">İlçe seçin</option>';
+    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(item=>{
+      const o=document.createElement("option");o.value=item.name;o.textContent=item.name;districtSelect.appendChild(o);
     });
-    district.disabled=false;
-  }catch(_){
-    district.innerHTML='<option value="">İlçeler alınamadı</option>';
-  }
-});
+    districtSelect.disabled=false;
+  }catch(_){districtSelect.innerHTML='<option value="">İlçeler alınamadı</option>'}
+}
+loadProvinces(city);
+loadProvinces(loginCity);
+city.addEventListener("change",()=>loadDistricts(city,district));
+loginCity.addEventListener("change",()=>loadDistricts(loginCity,loginDistrict));
 
 function openInstitutionLoginModal(){
   document.getElementById("institutionLoginModal").classList.remove("hidden");
-  setTimeout(()=>document.getElementById("institutionLoginEmail")?.focus(),50);
+  setTimeout(()=>document.getElementById("institutionLoginName")?.focus(),50);
 }
 function closeInstitutionLoginModal(){
   document.getElementById("institutionLoginModal").classList.add("hidden");
   document.getElementById("institutionLoginMessage").textContent="";
 }
-document.querySelectorAll("[data-open-login]").forEach(btn=>btn.addEventListener("click",openInstitutionLoginModal));
-document.querySelectorAll("[data-close-login]").forEach(btn=>btn.addEventListener("click",closeInstitutionLoginModal));
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-open-login]"))openInstitutionLoginModal();
+  if(e.target.closest("[data-close-login]"))closeInstitutionLoginModal();
+});
 document.getElementById("institutionLoginModal").addEventListener("click",e=>{
   if(e.target.id==="institutionLoginModal")closeInstitutionLoginModal();
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeInstitutionLoginModal()});
-if(new URLSearchParams(window.location.search).get("kurumgiris")==="1"){
-  openInstitutionLoginModal();
-}
+if(new URLSearchParams(window.location.search).get("kurumgiris")==="1")openInstitutionLoginModal();
 
 document.getElementById("institutionLoginForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const email=document.getElementById("institutionLoginEmail").value.trim();
+  const name=document.getElementById("institutionLoginName").value.trim();
+  const contact=document.getElementById("institutionLoginContact").value.trim();
+  const cityName=loginCity.value;
+  const districtName=loginDistrict.value;
   const password=document.getElementById("institutionLoginPassword").value;
   const remember=document.getElementById("institutionRememberMe").checked;
   const message=document.getElementById("institutionLoginMessage");
   const submit=document.getElementById("institutionLoginSubmit");
+  const email=identityEmail(name,contact,cityName,districtName);
 
-  submit.disabled=true;
-  submit.textContent="Giriş yapılıyor...";
-  message.className="login-message";
-  message.textContent="Hesap kontrol ediliyor...";
-
+  submit.disabled=true;submit.textContent="Giriş yapılıyor...";
+  message.className="login-message";message.textContent="Hesap kontrol ediliyor...";
   try{
-    await registrationAuth.setPersistence(
-      remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION
-    );
+    await registrationAuth.setPersistence(remember?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION);
     const cred=await registrationAuth.signInWithEmailAndPassword(email,password);
     const accountDoc=await registrationDb.collection("institutionUsers").doc(cred.user.uid).get();
-
-    if(!accountDoc.exists){
-      await registrationAuth.signOut();
-      throw new Error("Bu kullanıcıya bağlı kurum hesabı bulunamadı.");
-    }
-
+    if(!accountDoc.exists){await registrationAuth.signOut();throw new Error("Bu bilgilere bağlı kurum hesabı bulunamadı.")}
     const account=accountDoc.data()||{};
     if(account.status!=="approved"){
       await registrationAuth.signOut();
       if(account.status==="rejected")throw new Error("Kurum hesabı başvurunuz onaylanmadı.");
       throw new Error("Kurum hesabınız henüz yönetici onayında.");
     }
-
-    message.className="login-message success";
-    message.textContent="Giriş başarılı. Kurum paneli açılıyor...";
+    message.className="login-message success";message.textContent="Giriş başarılı. Kurum paneli açılıyor...";
     window.location.href="institution.html";
   }catch(err){
     const map={
-      "auth/invalid-credential":"E-posta veya şifre doğru değil.",
+      "auth/invalid-credential":"Firma bilgileri veya şifre doğru değil.",
       "auth/wrong-password":"Şifre doğru değil.",
-      "auth/user-not-found":"Bu e-posta ile kayıtlı hesap bulunamadı.",
-      "auth/invalid-email":"Geçerli bir e-posta adresi yazın.",
+      "auth/user-not-found":"Bu bilgilerle kayıtlı hesap bulunamadı.",
       "auth/too-many-requests":"Çok fazla giriş denemesi yapıldı. Bir süre sonra tekrar deneyin."
     };
     message.className="login-message error";
     message.textContent=map[err.code]||err.message||"Giriş yapılamadı.";
   }finally{
-    submit.disabled=false;
-    submit.textContent="Giriş Yap";
-  }
-});
-
-document.getElementById("institutionForgotPassword").addEventListener("click",async()=>{
-  const email=document.getElementById("institutionLoginEmail").value.trim();
-  const message=document.getElementById("institutionLoginMessage");
-  if(!email){
-    message.className="login-message error";
-    message.textContent="Önce e-posta adresinizi yazın.";
-    return;
-  }
-  try{
-    await registrationAuth.sendPasswordResetEmail(email);
-    message.className="login-message success";
-    message.textContent="Şifre yenileme bağlantısı e-posta adresinize gönderildi.";
-  }catch(err){
-    message.className="login-message error";
-    message.textContent="Şifre yenileme bağlantısı gönderilemedi.";
+    submit.disabled=false;submit.textContent="Giriş Yap";
   }
 });
 
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault();
   const btn=document.getElementById("submitBtn");
-  btn.disabled=true;
-  btn.textContent="Gönderiliyor...";
-  msg.className="notice";
-  msg.textContent="Başvurunuz gönderiliyor...";
+  const institutionName=document.getElementById("name").value.trim();
+  const contactName=document.getElementById("contactName").value.trim();
+  const cityName=city.value;
+  const districtName=district.value;
+  const password=signupPassword.value;
+  const email=identityEmail(institutionName,contactName,cityName,districtName);
 
+  btn.disabled=true;btn.textContent="Oluşturuluyor...";
+  msg.className="notice";msg.textContent="Üyelik başvurunuz oluşturuluyor...";
   let createdUser=null;
-  let applicationRef=null;
-
   try{
-    const password=document.getElementById("accountPassword").value;
-    const passwordAgain=document.getElementById("accountPasswordAgain").value;
-    const email=document.getElementById("accountEmail").value.trim();
-    const contactName=document.getElementById("contactName").value.trim();
-
-    if(password!==passwordAgain)throw new Error("Şifreler birbiriyle aynı değil.");
     if(password.length<8)throw new Error("Şifre en az 8 karakter olmalı.");
-
-    if(registrationAuth.currentUser){
-      await registrationAuth.signOut();
-    }
+    if(registrationAuth.currentUser)await registrationAuth.signOut();
 
     const credential=await registrationAuth.createUserWithEmailAndPassword(email,password);
     createdUser=credential.user;
-
-    applicationRef=registrationDb.collection("institutionApplications").doc();
-
-    const interests=[];
-    if(document.getElementById("wantPhoto").checked)interests.push("mekan_fotografi");
-    if(document.getElementById("wantVideo").checked)interests.push("tanitim_videosu");
-    if(document.getElementById("want360").checked)interests.push("360_mekan_turu");
-    if(document.getElementById("wantVip").checked)interests.push("vip_profil");
-    if(document.getElementById("wantQrNfc").checked)interests.push("qr_nfc_kart");
-    if(document.getElementById("wantCampaign").checked)interests.push("kampanya_reklami");
-
-    const institutionName=document.getElementById("name").value.trim();
+    const applicationRef=registrationDb.collection("institutionApplications").doc();
+    const date=new Date().toISOString();
 
     await applicationRef.set({
       name:institutionName,
@@ -460,74 +391,60 @@ document.getElementById("form").addEventListener("submit",async e=>{
       accountEmail:email,
       authUid:createdUser.uid,
       requestedInstitutionId:applicationRef.id,
-      mainCategory:mainCategory.value,
-      subCategory:subCategory.value,
-      category:subCategory.value||mainCategory.value,
-      city:city.value,
-      district:district.value,
-      address:document.getElementById("address").value.trim(),
-      phone:document.getElementById("phone").value.trim(),
-      whatsapp:document.getElementById("whatsapp").value.trim(),
-      website:document.getElementById("website").value.trim(),
-      instagram:document.getElementById("instagram").value.trim(),
-      description:document.getElementById("description").value.trim(),
-      promotionInterests:interests,
-      wantsPhoto:interests.includes("mekan_fotografi"),
-      wantsVideo:interests.includes("tanitim_videosu"),
-      wants360Tour:interests.includes("360_mekan_turu"),
-      wantsVip:interests.includes("vip_profil"),
-      wantsQrNfc:interests.includes("qr_nfc_kart"),
-      wantsCampaign:document.getElementById("wantCampaign").checked,
-      wantsSponsoredCampaign:document.getElementById("wantSponsoredCampaign").checked,
-      campaignRequest:document.getElementById("wantCampaign").checked ? {
-        type:document.getElementById("campaignType").value,
-        title:document.getElementById("campaignTitle").value.trim(),
-        text:document.getElementById("campaignText").value.trim(),
-        end:document.getElementById("campaignEnd").value,
-        url:document.getElementById("campaignUrl").value.trim(),
-        sponsored:document.getElementById("wantSponsoredCampaign").checked,
-        status:"pending"
-      } : null,
+      mainCategory:"diger",
+      subCategory:"diger",
+      category:"diger",
+      city:cityName,
+      district:districtName,
+      address:"",
+      phone:"",
+      whatsapp:"",
+      website:"",
+      instagram:"",
+      description:"",
+      promotionInterests:[],
+      wantsPhoto:false,
+      wantsVideo:false,
+      wants360Tour:false,
+      wantsVip:false,
+      wantsQrNfc:false,
+      wantsCampaign:false,
+      wantsSponsoredCampaign:false,
+      campaignRequest:null,
       status:"new",
-      date:new Date().toISOString(),
-      source:"dijiyesor-firma-tanit-kayit"
+      date,
+      source:"dijiyesor-simple-membership"
     });
 
     await registrationDb.collection("institutionUsers").doc(createdUser.uid).set({
       email,
       institutionId:applicationRef.id,
       institutionName,
+      contactName,
+      city:cityName,
+      district:districtName,
       status:"pending",
-      date:new Date().toISOString()
+      date
     });
 
     await registrationAuth.signOut();
-
     msg.className="notice success";
-    msg.innerHTML="<strong>Hesabınız ve firma başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> üzerinden panelinize giriş yapabilirsiniz.";
+    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
     e.target.reset();
-    subCategory.disabled=true;
-    subCategory.innerHTML='<option value="">Önce sektör seçin</option>';
-    district.disabled=true;
-    district.innerHTML='<option value="">Önce il seçin</option>';
-    campaignFields.classList.add("hidden");
-    ["campaignType","campaignTitle"].forEach(id=>{const el=document.getElementById(id);if(el)el.required=false});
+    district.disabled=true;district.innerHTML='<option value="">Önce il seçin</option>';
+    setPasswordHint();
     msg.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
     console.error(err);
-    if(createdUser){
-      try{await createdUser.delete();}catch(_){}
-    }
+    if(createdUser){try{await createdUser.delete()}catch(_){}}
     msg.className="notice error";
-    const authMessages={
-      "auth/email-already-in-use":"Bu e-posta ile daha önce hesap oluşturulmuş. Kurum Girişi'ni kullanabilirsiniz.",
-      "auth/invalid-email":"Geçerli bir e-posta adresi yazın.",
-      "auth/weak-password":"Şifre yeterince güçlü değil. En az 8 karakter kullanın."
+    const map={
+      "auth/email-already-in-use":"Bu firma ve yetkili bilgileriyle daha önce hesap oluşturulmuş. Kurum Girişi'ni kullanabilirsiniz.",
+      "auth/weak-password":"Şifre en az 8 karakter olmalı."
     };
-    msg.textContent=authMessages[err.code]||err.message||"Başvuru gönderilemedi. Lütfen tekrar deneyin.";
+    msg.textContent=map[err.code]||err.message||"Üyelik oluşturulamadı. Lütfen tekrar deneyin.";
   }finally{
-    btn.disabled=false;
-    btn.textContent="Hesap Oluştur ve Başvuruyu Gönder";
+    btn.disabled=false;btn.textContent="Üyelik Başvurusu Oluştur";
   }
 });
 </script>
