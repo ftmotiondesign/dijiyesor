@@ -163,6 +163,14 @@ function render(data){
     const hasCity=Boolean(city?.value);
     const hasResults=data.length>0;
     locationNotice.classList.toggle("hidden",hasCity || !hasResults);
+    if(!hasCity && hasResults && !locationNotice.querySelector("[data-focus-city]")){
+      const action=document.createElement("button");
+      action.type="button";
+      action.className="location-select-btn";
+      action.dataset.focusCity="";
+      action.textContent="İl Seç";
+      locationNotice.appendChild(action);
+    }
   }
 
   if(!data.length){
@@ -243,6 +251,26 @@ async function initHome(){
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCategoryModal()});
   document.addEventListener("click",e=>{
     if(e.target.closest("[data-open-category-search]"))openCategoryModal();
+
+    const focusSearch=e.target.closest("[data-focus-search]");
+    if(focusSearch){
+      search.focus();
+      search.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+
+    const quick=e.target.closest("[data-quick-sub]");
+    if(quick){
+      sector.value=quick.dataset.quickSector||"";
+      fillSubcategories();
+      if(subCategory)subCategory.value=quick.dataset.quickSub||"";
+      filter();
+    }
+
+    const focusCity=e.target.closest("[data-focus-city]");
+    if(focusCity){
+      city.focus();
+      city.scrollIntoView({behavior:"smooth",block:"center"});
+    }
   });
   categoryGrid?.querySelectorAll("[data-toggle-picker-sector]").forEach(btn=>btn.addEventListener("click",()=>{
     const item=btn.closest(".category-picker-item"),panel=item?.querySelector(".category-subpanel");
@@ -264,7 +292,24 @@ async function initHome(){
     const grid=document.getElementById("companyGrid");
     document.getElementById("resultsHead")?.classList.add("hidden");
     if(grid){
-      grid.innerHTML='<div class="initial-search-state"><strong>Aramaya başlayın</strong><span>Firma, kurum veya hizmet yazın; dilerseniz konum ya da sektör seçin.</span></div>';
+      grid.innerHTML=
+        '<div class="initial-search-state smart-start">'+
+          '<button type="button" class="smart-start-mascot" data-open-category-search aria-label="Kategori seç"><img src="./assets/diji-mascot-search.png" alt="Diji arama maskotu"></button>'+
+          '<strong>Ne arıyorsunuz?</strong>'+
+          '<span>Bir kategori seçin veya firma / hizmet adını yazarak arayın.</span>'+
+          '<div class="smart-start-actions">'+
+            '<button type="button" class="smart-start-primary" data-open-category-search>Kategori Seç</button>'+
+            '<button type="button" class="smart-start-secondary" data-focus-search>Firma / Hizmet Ara</button>'+
+          '</div>'+
+          '<div class="smart-start-quick">'+
+            '<button type="button" data-quick-sub="surucu" data-quick-sector="egitim">Sürücü Kursu</button>'+
+            '<button type="button" data-quick-sub="kres" data-quick-sector="egitim">Kreş / Anaokulu</button>'+
+            '<button type="button" data-quick-sub="dershane" data-quick-sector="egitim">Kurs Merkezi</button>'+
+            '<button type="button" data-quick-sub="yurt" data-quick-sector="egitim">Öğrenci Yurdu</button>'+
+            '<button type="button" data-quick-sub="oto_servis" data-quick-sector="otomotiv">Oto Servis</button>'+
+            '<button type="button" data-quick-sub="restoran" data-quick-sector="yemeicme">Restoran</button>'+
+          '</div>'+
+        '</div>';
     }
   };
   const filter=()=>{renderActiveFilters();const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360){showInitialState();return}document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!feature360||i.has360Tour)});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
