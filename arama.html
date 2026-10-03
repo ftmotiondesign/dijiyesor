@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Arama Sonuçları | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma arama sonuçları.">
-  <link rel="stylesheet" href="arama.css">
+  <link rel="stylesheet" href="arama.css?v=20261003-21">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -48,22 +48,6 @@
       </div>
     </section>
 
-    <section id="discoverSection" class="discover-section hidden">
-      <div class="discover-head">
-        <div>
-          <span class="discover-kicker">KEŞFET</span>
-          <h1>Ne arıyorsunuz?</h1>
-          <p>Kategori seçerek başlayabilir veya yukarıdaki arama kutusuna firma, kurum ya da hizmet yazabilirsiniz.</p>
-        </div>
-      </div>
-      <div id="discoverCategories" class="discover-categories"></div>
-      <div class="discover-subhead">
-        <h2>Öne çıkan kurumlar</h2>
-        <span>Profilini tamamlayan ve öne çıkan işletmeler</span>
-      </div>
-      <div id="discoverFeatured" class="discover-featured"></div>
-    </section>
-
     <section id="resultsHead" class="results-head">
       <div>
         <h1 id="resultsTitle">Arama sonuçları</h1>
@@ -80,11 +64,22 @@
     </section>
   </main>
 
+  <div id="categoryPickerModal" class="category-modal hidden" role="dialog" aria-modal="true" aria-labelledby="categoryPickerTitle">
+    <div class="category-modal-backdrop" data-close-category-modal></div>
+    <div class="category-modal-card">
+      <button class="category-modal-close" type="button" data-close-category-modal aria-label="Kapat">×</button>
+      <span class="category-modal-kicker">DİJİYESOR</span>
+      <h2 id="categoryPickerTitle">Ne arıyorsunuz?</h2>
+      <p>Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.</p>
+      <div id="categoryPickerGrid" class="category-picker-grid"></div>
+    </div>
+  </div>
+
   <footer class="footer">© 2026 DijiyeSor</footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261003-20"></script>
+  <script src="app.js?v=20261003-21"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
