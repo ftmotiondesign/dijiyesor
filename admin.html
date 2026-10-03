@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-5">
+  <link rel="stylesheet" href="admin.css?v=20261003-7">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -91,6 +91,24 @@
           <select id="firmStatus"><option value="">Tüm durumlar</option><option value="active">Aktif</option><option value="passive">Pasif</option><option value="sponsored">Sponsor</option></select>
           <button id="newFirmBtn" class="primary">+ Firma Ekle</button>
         </div>
+
+        <div class="firm-bulkbar">
+          <div class="firm-bulk-select">
+            <label><input id="firmSelectAll" type="checkbox"><span>Görünenlerin tümünü seç</span></label>
+            <strong id="firmSelectedCount">0 seçili</strong>
+          </div>
+          <div class="firm-bulk-actions">
+            <button id="firmBulkActive" type="button">Aktif Yap</button>
+            <button id="firmBulkPassive" type="button">Pasif Yap</button>
+            <button id="firmBulkSponsorOn" type="button">Sponsor Yap</button>
+            <button id="firmBulkSponsorOff" type="button">Sponsoru Kaldır</button>
+            <button id="firmBulkVipOn" type="button">VIP Yap</button>
+            <button id="firmBulkVipOff" type="button">VIP Kaldır</button>
+            <button id="firmBulkClear" type="button">Seçimi Kaldır</button>
+            <button id="firmBulkDelete" type="button" class="danger">Toplu Sil</button>
+          </div>
+        </div>
+        <div id="firmBulkMessage" class="message hidden"></div>
         <div id="firmList" class="data-list"></div>
       </section>
     </section>
@@ -404,7 +422,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-6"></script>
+<script src="admin.js?v=20261003-7"></script>
 <!-- pages-redeploy -->
 </body>
 </html>
