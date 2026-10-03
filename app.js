@@ -254,14 +254,13 @@ async function initHome(){
 
     const focusSearch=e.target.closest("[data-focus-search]");
     if(focusSearch){
+      e.preventDefault();
       const line=search.closest(".search-line");
+      search.focus({preventScroll:true});
+      if(search.value)search.select?.();
       search.scrollIntoView({behavior:"smooth",block:"center"});
-      setTimeout(()=>{
-        search.focus();
-        search.select?.();
-        line?.classList.add("search-attention");
-        setTimeout(()=>line?.classList.remove("search-attention"),1100);
-      },260);
+      line?.classList.add("search-attention");
+      setTimeout(()=>line?.classList.remove("search-attention"),1100);
     }
 
     const quick=e.target.closest("[data-quick-sub]");
