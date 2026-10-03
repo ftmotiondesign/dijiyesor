@@ -148,9 +148,9 @@
         <div id="message" class="notice hidden"></div>
         <form id="form" class="simple-signup-form">
           <div class="simple-signup-head">
-            <span>KURUM ÜYELİĞİ</span>
-            <h3>5 bilgiyle hesabını oluştur</h3>
-            <p>Onaydan sonra aynı bilgilerle kurum paneline giriş yapacaksın.</p>
+            <span>YENİ KAYIT</span>
+            <h3>Kurum hesabını hızlıca oluştur</h3>
+            <p>Sadece temel bilgilerini gir. Diğer kurum bilgilerini daha sonra panelden tamamlayabilirsin.</p>
           </div>
 
           <label>Firma adı
@@ -161,14 +161,9 @@
             <input id="contactName" required maxlength="100" placeholder="Ad Soyad" autocomplete="name">
           </label>
 
-          <div class="form-grid two">
-            <label>İl
-              <select id="city" required><option value="">İl seçin</option></select>
-            </label>
-            <label>İlçe
-              <select id="district" required disabled><option value="">Önce il seçin</option></select>
-            </label>
-          </div>
+          <label>E-posta
+            <input id="accountEmail" type="email" required maxlength="160" placeholder="ornek@firma.com" autocomplete="email">
+          </label>
 
           <label>Şifre
             <div class="simple-password-row">
@@ -192,23 +187,12 @@
     <div class="login-modal-brand"><span>D</span><strong>DijiyeSor</strong></div>
     <span class="login-modal-kicker">KURUM PANELİ</span>
     <h2 id="institutionLoginTitle">Kurum Girişi</h2>
-    <p>Firma bilgilerin ve şifrenle giriş yap.</p>
+    <p>E-posta adresin ve şifrenle giriş yap.</p>
 
     <form id="institutionLoginForm">
-      <label>Firma adı
-        <input id="institutionLoginName" required autocomplete="organization" placeholder="Firma adı">
+      <label>E-posta
+        <input id="institutionLoginEmail" type="email" required autocomplete="email" placeholder="ornek@firma.com">
       </label>
-      <label>Yetkili adı
-        <input id="institutionLoginContact" required autocomplete="name" placeholder="Ad Soyad">
-      </label>
-      <div class="form-grid two">
-        <label>İl
-          <select id="institutionLoginCity" required><option value="">İl seçin</option></select>
-        </label>
-        <label>İlçe
-          <select id="institutionLoginDistrict" required disabled><option value="">Önce il seçin</option></select>
-        </label>
-      </div>
       <label>Şifre
         <input id="institutionLoginPassword" type="password" required autocomplete="current-password" placeholder="Şifreniz">
       </label>
@@ -238,31 +222,12 @@ const registrationAuth=registrationApp.auth();
 const registrationDb=registrationApp.firestore();
 
 
-const city=document.getElementById("city");
-const district=document.getElementById("district");
-const loginCity=document.getElementById("institutionLoginCity");
-const loginDistrict=document.getElementById("institutionLoginDistrict");
+const signupEmail=document.getElementById("accountEmail");
 const msg=document.getElementById("message");
 const signupPassword=document.getElementById("accountPassword");
 const signupPasswordToggle=document.getElementById("toggleSignupPassword");
 const passwordHint=document.getElementById("passwordHint");
 
-function normalizeIdentity(v){
-  return String(v||"").trim().toLocaleLowerCase("tr-TR")
-    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
-}
-function identityEmail(name,contact,cityName,districtName){
-  const raw=[name,contact,cityName,districtName].map(normalizeIdentity).join("|");
-  let h1=2166136261,h2=5381;
-  for(let i=0;i<raw.length;i++){
-    const code=raw.charCodeAt(i);
-    h1^=code;h1=Math.imul(h1,16777619);
-    h2=((h2<<5)+h2)^code;
-  }
-  const a=(h1>>>0).toString(36),b=(h2>>>0).toString(36);
-  return "u-"+a+b+"@dijiyesor.app";
-}
 function setPasswordHint(){
   const v=signupPassword.value;
   if(!v){passwordHint.textContent="En az 8 karakter kullanın.";passwordHint.className="password-match-hint";return}
@@ -276,40 +241,9 @@ signupPasswordToggle.addEventListener("click",()=>{
   signupPasswordToggle.textContent=show?"Gizle":"Göster";
 });
 
-async function loadProvinces(select){
-  try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
-    const j=await r.json();
-    select.innerHTML='<option value="">İl seçin</option>';
-    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(item=>{
-      const o=document.createElement("option");
-      o.value=item.name;o.textContent=item.name;o.dataset.id=item.id;select.appendChild(o);
-    });
-  }catch(_){select.innerHTML='<option value="">İller alınamadı</option>'}
-}
-async function loadDistricts(citySelect,districtSelect){
-  districtSelect.disabled=true;
-  districtSelect.innerHTML='<option value="">İlçeler yükleniyor...</option>';
-  const id=citySelect.options[citySelect.selectedIndex]?.dataset?.id;
-  if(!id){districtSelect.innerHTML='<option value="">Önce il seçin</option>';return}
-  try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+id+"/districts?fields=id,name&limit=100");
-    const j=await r.json();
-    districtSelect.innerHTML='<option value="">İlçe seçin</option>';
-    j.data.sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(item=>{
-      const o=document.createElement("option");o.value=item.name;o.textContent=item.name;districtSelect.appendChild(o);
-    });
-    districtSelect.disabled=false;
-  }catch(_){districtSelect.innerHTML='<option value="">İlçeler alınamadı</option>'}
-}
-loadProvinces(city);
-loadProvinces(loginCity);
-city.addEventListener("change",()=>loadDistricts(city,district));
-loginCity.addEventListener("change",()=>loadDistricts(loginCity,loginDistrict));
-
 function openInstitutionLoginModal(){
   document.getElementById("institutionLoginModal").classList.remove("hidden");
-  setTimeout(()=>document.getElementById("institutionLoginName")?.focus(),50);
+  setTimeout(()=>document.getElementById("institutionLoginEmail")?.focus(),50);
 }
 function closeInstitutionLoginModal(){
   document.getElementById("institutionLoginModal").classList.add("hidden");
@@ -327,15 +261,11 @@ if(new URLSearchParams(window.location.search).get("kurumgiris")==="1")setTimeou
 
 document.getElementById("institutionLoginForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const name=document.getElementById("institutionLoginName").value.trim();
-  const contact=document.getElementById("institutionLoginContact").value.trim();
-  const cityName=loginCity.value;
-  const districtName=loginDistrict.value;
+  const email=document.getElementById("institutionLoginEmail").value.trim().toLowerCase();
   const password=document.getElementById("institutionLoginPassword").value;
   const remember=document.getElementById("institutionRememberMe").checked;
   const message=document.getElementById("institutionLoginMessage");
   const submit=document.getElementById("institutionLoginSubmit");
-  const email=identityEmail(name,contact,cityName,districtName);
 
   submit.disabled=true;submit.textContent="Giriş yapılıyor...";
   message.className="login-message";message.textContent="Hesap kontrol ediliyor...";
@@ -354,7 +284,7 @@ document.getElementById("institutionLoginForm").addEventListener("submit",async 
     window.location.href="institution.html";
   }catch(err){
     const map={
-      "auth/invalid-credential":"Firma bilgileri veya şifre doğru değil.",
+      "auth/invalid-credential":"E-posta veya şifre doğru değil.",
       "auth/wrong-password":"Şifre doğru değil.",
       "auth/user-not-found":"Bu bilgilerle kayıtlı hesap bulunamadı.",
       "auth/too-many-requests":"Çok fazla giriş denemesi yapıldı. Bir süre sonra tekrar deneyin."
@@ -371,10 +301,8 @@ document.getElementById("form").addEventListener("submit",async e=>{
   const btn=document.getElementById("submitBtn");
   const institutionName=document.getElementById("name").value.trim();
   const contactName=document.getElementById("contactName").value.trim();
-  const cityName=city.value;
-  const districtName=district.value;
+  const email=signupEmail.value.trim().toLowerCase();
   const password=signupPassword.value;
-  const email=identityEmail(institutionName,contactName,cityName,districtName);
 
   btn.disabled=true;btn.textContent="Oluşturuluyor...";
   msg.className="notice";msg.textContent="Üyelik başvurunuz oluşturuluyor...";
@@ -397,8 +325,8 @@ document.getElementById("form").addEventListener("submit",async e=>{
       mainCategory:"diger",
       subCategory:"diger",
       category:"diger",
-      city:cityName,
-      district:districtName,
+      city:"",
+      district:"",
       address:"",
       phone:"",
       whatsapp:"",
@@ -424,17 +352,16 @@ document.getElementById("form").addEventListener("submit",async e=>{
       institutionId:applicationRef.id,
       institutionName,
       contactName,
-      city:cityName,
-      district:districtName,
+      city:"",
+      district:"",
       status:"pending",
       date
     });
 
     await registrationAuth.signOut();
     msg.className="notice success";
-    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
+    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra e-posta ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
     e.target.reset();
-    district.disabled=true;district.innerHTML='<option value="">Önce il seçin</option>';
     setPasswordHint();
     msg.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
@@ -442,7 +369,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     if(createdUser){try{await createdUser.delete()}catch(_){}}
     msg.className="notice error";
     const map={
-      "auth/email-already-in-use":"Bu firma ve yetkili bilgileriyle daha önce hesap oluşturulmuş. Kurum Girişi'ni kullanabilirsiniz.",
+      "auth/email-already-in-use":"Bu e-posta adresiyle daha önce hesap oluşturulmuş. Kurum Girişi'ni kullanabilirsiniz.",
       "auth/weak-password":"Şifre en az 8 karakter olmalı."
     };
     msg.textContent=map[err.code]||err.message||"Üyelik oluşturulamadı. Lütfen tekrar deneyin.";
