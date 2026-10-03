@@ -149,7 +149,7 @@ function render(data){
   }
 
   if(!data.length){
-    grid.innerHTML='<div class="results-state"><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><a href="index.html">Yeni arama yap</a></div>';
+    grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
     return;
   }
 
@@ -222,6 +222,9 @@ async function initHome(){
   const closeCategoryModal=()=>{modal?.classList.add("hidden");document.body.style.overflow=""};
   document.querySelectorAll("[data-close-category-modal]").forEach(el=>el.addEventListener("click",closeCategoryModal));
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCategoryModal()});
+  document.addEventListener("click",e=>{
+    if(e.target.closest("[data-open-category-search]"))openCategoryModal();
+  });
   categoryGrid?.querySelectorAll("[data-toggle-picker-sector]").forEach(btn=>btn.addEventListener("click",()=>{
     const item=btn.closest(".category-picker-item"),panel=item?.querySelector(".category-subpanel");
     if(!item||!panel)return;
