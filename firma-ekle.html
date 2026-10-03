@@ -407,6 +407,9 @@ document.getElementById("institutionLoginModal").addEventListener("click",e=>{
   if(e.target.id==="institutionLoginModal")closeInstitutionLoginModal();
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeInstitutionLoginModal()});
+if(new URLSearchParams(window.location.search).get("kurumgiris")==="1"){
+  openInstitutionLoginModal();
+}
 
 document.getElementById("institutionLoginForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -442,7 +445,7 @@ document.getElementById("institutionLoginForm").addEventListener("submit",async 
 
     message.className="login-message success";
     message.textContent="Giriş başarılı. Kurum paneli açılıyor...";
-    window.location.href="https://ftmotiondesign.github.io/dijiyer/institution.html";
+    window.location.href="institution.html";
   }catch(err){
     const map={
       "auth/invalid-credential":"E-posta veya şifre doğru değil.",
