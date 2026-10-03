@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-30">
+  <link rel="stylesheet" href="admin.css?v=20261003-31">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -460,7 +460,20 @@ Gerçek mekanda hizmet"></textarea>
       <label>Açıklama<textarea id="editDescription" rows="4"></textarea></label>
       <div class="form-grid two">
         <label>Logo URL<input id="editLogoUrl"></label>
-        <label>Kapak URL<input id="editCoverUrl"></label>
+        <label>Firma Görseli URL<input id="editCoverUrl" placeholder="https://..."></label>
+      </div>
+      <div class="firm-image-upload">
+        <div class="firm-image-preview" id="firmImagePreview"><span>Görsel yok</span></div>
+        <div class="firm-image-upload-copy">
+          <strong>Firma Görseli</strong>
+          <small>Bilgisayardan bir fotoğraf seç. Kaydedildiğinde arama kartının sağında ve firma sayfasında kullanılır.</small>
+          <input id="editCoverFile" type="file" accept="image/*">
+          <div class="firm-image-upload-actions">
+            <button id="chooseCoverFileBtn" class="secondary" type="button">Bilgisayardan Resim Seç</button>
+            <button id="clearCoverImageBtn" class="secondary" type="button">Görseli Kaldır</button>
+          </div>
+          <div id="coverUploadMessage" class="message hidden"></div>
+        </div>
       </div>
       <div class="form-grid two">
         <label>360° Tur URL<input id="editTourUrl"></label>
@@ -558,7 +571,8 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-31"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script src="admin.js?v=20261003-32"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
