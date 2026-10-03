@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Arama Sonuçları | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma arama sonuçları.">
-  <link rel="stylesheet" href="arama.css?v=20261003-27">
+  <link rel="stylesheet" href="arama.css?v=20261003-28">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -44,9 +44,8 @@
           <option value="diger">Diğer</option>
         </select>
         <select id="subCategorySelect" disabled><option value="">Tüm Alt Kategoriler</option></select>
-        <button id="filterSearchBtn" class="filter-search-btn" type="button">Ara</button>
-        <button id="clearFiltersBtn" class="clear-btn" type="button">Temizle</button>
       </div>
+      <div id="activeFilters" class="active-filters"></div>
     </section>
 
     <section id="resultsHead" class="results-head">
@@ -107,7 +106,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261003-25"></script>
+  <script src="app.js?v=20261003-26"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
