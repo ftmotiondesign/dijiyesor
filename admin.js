@@ -123,21 +123,58 @@ function updateFirmBulkUi(){
     if($(id))$(id).disabled=count===0;
   });
 }
+
+function firmQualityInfo(f){
+  const hasPhoto=Array.isArray(f.galleryUrls)&&f.galleryUrls.length>0;
+  const has360=Boolean(f.has360Tour||f.tour360Url||f.virtualTourUrl||f.tour360);
+  const checks=[
+    ["Adres",Boolean(String(f.address||"").trim())],
+    ["Telefon",Boolean(String(f.phone||"").trim())],
+    ["WhatsApp",Boolean(String(f.whatsapp||"").trim())],
+    ["Logo",Boolean(String(f.logoUrl||"").trim())],
+    ["Fotoğraf",hasPhoto],
+    ["360°",has360],
+    ["Web",Boolean(String(f.website||"").trim())],
+    ["Açıklama",Boolean(String(f.description||"").trim())]
+  ];
+  const done=checks.filter(x=>x[1]).length;
+  return {
+    percent:Math.round(done/checks.length*100),
+    missing:checks.filter(x=>!x[1]).map(x=>x[0]),
+    hasPhoto,has360
+  };
+}
+function firmMatchesCompleteness(f,filter){
+  if(!filter)return true;
+  const q=firmQualityInfo(f);
+  if(filter==="missing-address")return !String(f.address||"").trim();
+  if(filter==="missing-phone")return !String(f.phone||"").trim();
+  if(filter==="missing-logo")return !String(f.logoUrl||"").trim();
+  if(filter==="missing-photo")return !q.hasPhoto;
+  if(filter==="missing-360")return !q.has360;
+  if(filter==="missing-whatsapp")return !String(f.whatsapp||"").trim();
+  if(filter==="low-quality")return q.percent<50;
+  return true;
+}
+
 function renderFirms(){
-  const q=norm($("firmSearch").value),sector=$("firmSector").value,status=$("firmStatus").value;
+  const q=norm($("firmSearch").value),sector=$("firmSector").value,status=$("firmStatus").value,completeness=$("firmCompleteness")?.value||"";
   [...selectedFirmIds].forEach(id=>{if(!firms.some(x=>x.id===id))selectedFirmIds.delete(id)});
   const list=firms.filter(f=>{
     const sponsor=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
     const matchesStatus=!status||(status==="sponsored"?sponsor:String(f.status||"active")===status);
-    return (!q||norm([f.name,f.city,f.district,f.phone].join(" ")).includes(q))&&(!sector||String(f.mainCategory||"")===sector)&&matchesStatus;
+    return (!q||norm([f.name,f.city,f.district,f.phone,f.address].join(" ")).includes(q))&&(!sector||String(f.mainCategory||"")===sector)&&matchesStatus&&firmMatchesCompleteness(f,completeness);
   });
   visibleFirmIds=list.map(f=>f.id);
   $("firmList").innerHTML=list.length?list.map(f=>{
     const sponsor=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
     const logo=f.logoUrl?'<img src="'+esc(f.logoUrl)+'">':esc(initials(f.name));
+    const quality=firmQualityInfo(f);
+    const qualityClass=quality.percent>=75?"good":quality.percent>=50?"mid":"low";
+    const qualityHtml='<div class="firm-quality"><b class="'+qualityClass+'">%'+quality.percent+'</b><small>'+(quality.missing.length?'Eksik: '+esc(quality.missing.slice(0,4).join(", ")):'Bilgiler tamam')+'</small></div>';
     return '<div class="data-row '+(selectedFirmIds.has(f.id)?'selected':'')+'">'+
       '<label class="firm-row-check"><input type="checkbox" data-firm-select="'+esc(f.id)+'" '+(selectedFirmIds.has(f.id)?'checked':'')+'><span></span></label>'+
-      '<div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+(f.vip?'<span class="vip-dot">VIP</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div></div>'+
+      '<div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+(f.vip?'<span class="vip-dot">VIP</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small>'+qualityHtml+'</div></div>'+
       '<span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span>'+
       '<span>'+esc(f.phone||"Telefon yok")+'</span>'+
       '<div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button><button class="danger" data-delete-firm="'+esc(f.id)+'">Sil</button></div>'+
@@ -145,7 +182,7 @@ function renderFirms(){
   }).join(""):'<div class="empty">Firma bulunamadı.</div>';
   updateFirmBulkUi();
 }
-["firmSearch","firmSector","firmStatus"].forEach(id=>$(id).addEventListener(id==="firmSearch"?"input":"change",renderFirms));
+["firmSearch","firmSector","firmStatus","firmCompleteness"].forEach(id=>$(id)?.addEventListener(id==="firmSearch"?"input":"change",renderFirms));
 
 function openFirmModal(id){
   const f=firms.find(x=>x.id===id)||{};
