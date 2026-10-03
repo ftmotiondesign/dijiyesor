@@ -888,10 +888,24 @@ function parseGoogleBlock(block){
 
   const phoneLine=lines.find(looksLikePhone)||"";
   const websiteLine=lines.find(looksLikeWebsite)||"";
+
+  // Google sonuçlarında adres çoğu zaman "açıldı · İlçe/İl" biçiminde aynı satırda gelir.
+  let forcedAddress="";
+  for(const line of lines){
+    if(line.includes("·")){
+      const parts=line.split("·").map(cleanGoogleLine).filter(Boolean);
+      const tail=parts[parts.length-1]||"";
+      if(looksLikeAddress(tail)){
+        forcedAddress=tail;
+        break;
+      }
+    }
+  }
+
   const useful=lines.filter(x=>x!==phoneLine&&x!==websiteLine&&!looksLikeNoise(x));
 
   let name=useful[0]||lines[0]||"";
-  let address=useful.find((x,i)=>i>0&&looksLikeAddress(x))||"";
+  let address=forcedAddress||useful.find((x,i)=>i>0&&looksLikeAddress(x))||"";
 
   if(!address&&useful.length>1){
     address=useful.slice(1).find(x=>x.length>8&&!/sürücü kursu|kursu|restoran|kafe|otel|anaokulu|dershane/i.test(x))||"";
