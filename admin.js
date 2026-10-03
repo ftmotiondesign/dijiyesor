@@ -808,18 +808,88 @@ function quickImportMessage(text,type=""){
   el.textContent=text;
   el.classList.remove("hidden");
 }
+function cleanGoogleLine(v){
+  return String(v||"")
+    .replace(/\s+/g," ")
+    .replace(/^[•·\-–—]\s*/,"")
+    .trim();
+}
+function looksLikePhone(line){
+  const digits=String(line||"").replace(/\D/g,"");
+  return /(?:\+?90\s*)?(?:\(?0?\d{3}\)?[\s.-]*)\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/.test(line)||digits.length>=10&&digits.length<=12;
+}
+function looksLikeWebsite(line){
+  return /https?:\/\/|www\.|[a-z0-9-]+\.(com|net|org|com\.tr|net\.tr|org\.tr|edu\.tr)(?:\/|$)/i.test(line);
+}
+function looksLikeNoise(line){
+  const s=norm(line);
+  if(!s)return true;
+  if(/^(\d(?:[,.]\d)?\s*)?[★☆]?\s*\(\d+\)/.test(line))return true;
+  if(/^\d(?:[,.]\d)?\s*[★☆]/.test(line))return true;
+  if(/^\(?\d+\)?\s*(yorum|değerlendirme|review)/i.test(line))return true;
+  if(/gercek mekanda hizmet|gerçek mekanda hizmet|acik|açık|kapali|kapalı/.test(s))return true;
+  if(/^\d+\s*(yildan|yıldan)\s+daha\s+uzun/.test(s))return true;
+  return false;
+}
+function looksLikeAddress(line){
+  const s=norm(line);
+  return /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]|merkez\/|\/(?:canakkale|çanakkale|manisa|istanbul|ankara|izmir|bursa|balikesir|balıkesir|edirne|kirklareli|kırklareli|tekirdag|tekirdağ|mugla|muğla|sakarya)\b/.test(s);
+}
+function parseGoogleBlock(block){
+  let lines=block.split(/\r?\n/).map(cleanGoogleLine).filter(Boolean);
+  if(!lines.length)return null;
+
+  const phoneLine=lines.find(looksLikePhone)||"";
+  const websiteLine=lines.find(looksLikeWebsite)||"";
+  const useful=lines.filter(x=>x!==phoneLine&&x!==websiteLine&&!looksLikeNoise(x));
+
+  let name=useful[0]||lines[0]||"";
+  let address=useful.find((x,i)=>i>0&&looksLikeAddress(x))||"";
+
+  if(!address&&useful.length>1){
+    address=useful.slice(1).find(x=>x.length>8&&!/sürücü kursu|kursu|restoran|kafe|otel|anaokulu|dershane/i.test(x))||"";
+  }
+
+  name=name.replace(/\s+-\s+Ehliyet.*$/i,"").replace(/\s+-\s+.*$/,"").trim();
+
+  return {
+    name,
+    phone:phoneLine,
+    address,
+    website:websiteLine
+  };
+}
 function parseQuickImportRows(){
   const raw=String($("quickImportText")?.value||"").trim();
   if(!raw)return [];
-  return raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
-    const parts=line.split("|").map(x=>x.trim());
-    return {
-      name:parts[0]||"",
-      phone:parts[1]||"",
-      address:parts[2]||"",
-      website:parts[3]||""
-    };
-  }).filter(x=>x.name);
+
+  // Eski hızlı format: Firma | Telefon | Adres | Web
+  if(raw.includes("|")){
+    return raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
+      const parts=line.split("|").map(x=>x.trim());
+      return {name:parts[0]||"",phone:parts[1]||"",address:parts[2]||"",website:parts[3]||""};
+    }).filter(x=>x.name);
+  }
+
+  // Google arama sonucundan kopyalanan bloklar: boş satırlarla ayır.
+  let blocks=raw.split(/\n\s*\n+/).map(x=>x.trim()).filter(Boolean);
+
+  // Tek blokta çok sayıda firma varsa telefon satırlarını sınır kabul etmeye çalış.
+  if(blocks.length===1){
+    const lines=raw.split(/\r?\n/).map(cleanGoogleLine).filter(Boolean);
+    const phoneIndexes=lines.map((x,i)=>looksLikePhone(x)?i:-1).filter(i=>i>=0);
+    if(phoneIndexes.length>1){
+      const auto=[];let start=0;
+      phoneIndexes.forEach((pi,idx)=>{
+        const next=idx+1<phoneIndexes.length?phoneIndexes[idx+1]-1:lines.length;
+        auto.push(lines.slice(start,next).join("\n"));
+        start=next;
+      });
+      blocks=auto.filter(Boolean);
+    }
+  }
+
+  return blocks.map(parseGoogleBlock).filter(x=>x&&x.name);
 }
 function isQuickDuplicate(row,cityName,districtName){
   return firms.some(f=>
