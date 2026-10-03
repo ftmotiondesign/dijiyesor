@@ -35,21 +35,56 @@
     return !s ||
       /^(\d(?:[,.]\d)?\s*)?[★☆]?\s*\(?\d+\)?/.test(line) ||
       /gerçek mekanda hizmet|gercek mekanda hizmet/.test(s) ||
-      /^\d+\s*(yıldan|yildan)\s+daha\s+uzun/.test(s);
+      /^\d+\s*(yıldan|yildan)\s+daha\s+uzun/.test(s) ||
+      /^(genel bakış|genel bakis|yorumlar|yol tarifi|kaydet|yakınında|yakininda|telefona gönder|telefona gonder|paylaş|paylas|google haritalar geçmişiniz|google haritalar gecmisiniz|etiket ekleyin|düzenleme önerin|duzenleme onerın|duzenleme onerın)$/i.test(s) ||
+      /^(kapalı|kapali|açık|acik)\b/.test(s);
   }
   function isAddress(line){
     const s=norm(line);
     return /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]|merkez\s*\/|\/[a-zçğıöşü]+/.test(s);
   }
+  function ratingFrom(lines){
+    for(const line of lines){
+      const m=String(line).match(/\b([1-5](?:[,.]\d)?)\b/);
+      if(m && /★|⭐|\(\d+\)/.test(line))return Number(m[1].replace(",","."));
+    }
+    return null;
+  }
+  function reviewCountFrom(lines){
+    for(const line of lines){
+      const m=String(line).match(/\((\d[\d.]*)\)/);
+      if(m)return Number(m[1].replace(/\./g,""))||0;
+    }
+    return 0;
+  }
+  function plusCodeFrom(lines){
+    const line=lines.find(x=>/\b[A-Z0-9]{4,}\+[A-Z0-9]{2,}\b/i.test(x));
+    return line||"";
+  }
+  function googleCategoryFrom(lines){
+    return lines.find(x=>{
+      const s=norm(x);
+      return /sürücü kursu|surucu kursu|eğitim|egitim|anaokulu|kreş|kres|dershane|öğrenci yurdu|ogrenci yurdu|restoran|kafe|cafe|otel|emlak|oto servis|ekspertiz|kuaför|berber|klinik/.test(s)
+        && !/genel bakış|yorumlar/.test(s);
+    })||"";
+  }
+
   function parseBlock(block){
     const lines=block.split(/\r?\n/).map(clean).filter(Boolean);
     if(!lines.length)return null;
     const joined=lines.join(" ");
+    const rating=ratingFrom(lines);
+    const reviewCount=reviewCountFrom(lines);
+    const plusCode=plusCodeFrom(lines);
+    const googleCategory=googleCategoryFrom(lines);
     let phone=phoneFrom(joined);
     let website=webFrom(joined);
     let address="";
     let location="";
-    const detailedAddress=lines.find((x,i)=>i>0 && /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(x))||"";
+    const detailedAddress=lines.find((x,i)=>i>0 &&
+      /mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]|kat[:\s]/i.test(x) &&
+      !/\b[A-Z0-9]{4,}\+[A-Z0-9]{2,}\b/i.test(x)
+    )||"";
     if(detailedAddress)address=detailedAddress;
 
     // "Çanakkale Merkez/Çanakkale" gibi kısa bilgi gerçek adres değil, konumdur.
@@ -83,7 +118,7 @@
       .replace(/\s+\d{5,}.*$/,"")
       .trim();
 
-    return {name,phone,address,location,website};
+    return {name,phone,address,location,website,rating,reviewCount,plusCode,googleCategory};
   }
   function parseInput(){
     const raw=String(q.value||"").trim();
@@ -183,7 +218,11 @@
     if(!queue.length){previewList.innerHTML='<div class="empty">Henüz firma listesi girilmedi.</div>';return}
     previewList.innerHTML=queue.map((r,i)=>'<article class="quick-import-row">'+
       '<div><strong>'+esc(r.name)+'</strong><small>'+esc(r.phone||"Telefon yok")+'</small></div>'+
-      '<div><span>'+esc(r.address||"Adres yok")+'</span><small>'+esc([r.city,r.district].filter(Boolean).join(" / ")||"Konum yok")+' · '+esc(r.website||"Web sitesi yok")+'</small></div>'+
+      '<div><span>'+esc(r.address||"Tam adres yok")+'</span><small>'+esc([r.city,r.district].filter(Boolean).join(" / ")||"Konum yok")+' · '+esc(r.website||"Web sitesi yok")+
+      (r.rating?' · ⭐ '+esc(String(r.rating)):'')+
+      (r.reviewCount?' ('+esc(String(r.reviewCount))+' yorum)':'')+
+      (r.plusCode?' · '+esc(r.plusCode):'')+
+      '</small></div>'+
       '<div class="quick-row-actions"><em>Hazır</em><button type="button" data-quick-remove="'+i+'">Kaldır</button></div>'+
     '</article>').join("");
   }
@@ -241,6 +280,10 @@
           phone:row.phone||"",
           whatsapp:"",
           website:row.website||"",
+          googleRating:row.rating||null,
+          googleReviewCount:Number(row.reviewCount||0),
+          googlePlusCode:row.plusCode||"",
+          googleCategory:row.googleCategory||"",
           instagram:"",
           description:row.description||"",
           searchKeywords:Array.isArray(row.searchKeywords)?row.searchKeywords:[],
