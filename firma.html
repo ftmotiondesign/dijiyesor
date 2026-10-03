@@ -127,7 +127,7 @@
       const url=safeUrl(raw);
       if(!url)return "";
 
-      return '<section class="section-card tour-section">'+
+      return '<section class="section-card tour-section" id="mekan360">'+
         '<div class="section-title"><div><span>360° MEKAN TURU</span><h2>Mekanı sanal olarak gez</h2></div></div>'+
         '<p class="tour-copy">Mekanı farklı noktalardan inceleyebilir, gelmeden önce ortamı keşfedebilirsin.</p>'+
         '<div class="tour-preview">'+
@@ -350,6 +350,7 @@
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
             '</div>'+
             '<div class="hero-actions">'+
+              (getTourUrl(d)?'<a class="hero-btn secondary" href="#mekan360">360° Mekânı Gez</a>':'')+
               (phone?'<a class="hero-btn secondary" href="'+esc(phone)+'">Ara</a>':'')+
               (whatsapp?'<a class="hero-btn primary" href="'+esc(whatsapp)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+
               '<button type="button" class="hero-btn info bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Bilgi Al</button>'+
