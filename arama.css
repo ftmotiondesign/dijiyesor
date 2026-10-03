@@ -326,3 +326,31 @@ button,input,select{font:inherit}
   .tour360-head{padding:12px}
   .tour360-foot{padding:10px 12px;align-items:flex-start;flex-direction:column}
 }
+
+
+/* Konum uyarısında hareketli Diji maskotu */
+.location-pin,
+.location-pin::before,
+.location-pin::after{display:none!important}
+.location-mascot{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 9px rgba(22,119,255,.18));
+  transform-origin:50% 90%;
+  animation:dijiSearchMove 2.4s ease-in-out infinite;
+  will-change:transform;
+}
+@keyframes dijiSearchMove{
+  0%,100%{transform:translateY(0) rotate(0deg) scale(1)}
+  20%{transform:translateY(-2px) rotate(-3deg) scale(1.02)}
+  45%{transform:translateY(-4px) rotate(2deg) scale(1.04)}
+  70%{transform:translateY(-1px) rotate(-2deg) scale(1.01)}
+}
+@media(max-width:700px){
+  .location-mascot{width:34px;height:34px;flex-basis:34px}
+}
+@media(prefers-reduced-motion:reduce){
+  .location-mascot{animation:none}
+}
