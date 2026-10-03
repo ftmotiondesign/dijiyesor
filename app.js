@@ -64,6 +64,17 @@ const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const mainCategory=d=>d.mainCategory||legacyMain[d.subCategory||d.category]||"diger";
 const initials=n=>String(n||"Firma").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
+
+function locationFromAddress(address){
+  const s=String(address||"").trim();
+  if(!s)return null;
+  const m=s.match(/([^,;\/]+)\s*\/\s*([^,;]+?)(?:\s*,?\s*(?:Türkiye|Turkey))?$/i);
+  if(!m)return null;
+  const district=String(m[1]||"").trim();
+  const city=String(m[2]||"").trim().replace(/\s+Türkiye$/i,"").trim();
+  if(!district||!city)return null;
+  return {district,city};
+}
 let companies=[];
 
 async function loadProvinces(select,district){
@@ -90,7 +101,7 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:d.city||"",district:d.district||"",address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim(),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const addrLoc=locationFromAddress(d.address);const fixedCity=addrLoc?.city||d.city||"";const fixedDistrict=addrLoc?.district||d.district||"";companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:Boolean(d.has360Tour||d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim(),galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
 campaignActive:Boolean(d.campaignActive||d.hasCampaign),
 campaignTitle:d.campaignTitle||d.promotionTitle||"",
 campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
@@ -164,7 +175,8 @@ function render(data){
       ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
-    const desc=i.description||(i.highlights||[]).slice(0,2).join(" · ")||"Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin.";
+    const storedDesc=String(i.description||"");
+    const desc=(storedDesc && (!i.city || norm(storedDesc).includes(norm(i.city)))) ? storedDesc : ((i.highlights||[]).slice(0,2).join(" · ")||([i.district,i.city].filter(Boolean).join(", ") ? i.name+"; "+[i.district,i.city].filter(Boolean).join(", ")+" bölgesinde hizmet veren işletmedir." : "Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin."));
     const badges=[
       i.vip?'<span class="result-badge vip">VIP</span>':'',
       i.has360Tour?'<span class="result-badge">360° Tur</span>':'',
