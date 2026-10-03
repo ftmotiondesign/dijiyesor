@@ -486,7 +486,7 @@ function getMemberRows(){
         institutionId:a.approvedInstitutionId||a.requestedInstitutionId||"",
         institutionName:a.name||"",
         email:a.accountEmail||"",
-        status:"approved",
+        status:a.membershipStatus||"approved",
         date:a.approvedAt||a.date||"",
         hasAccount:Boolean(a.authUid)
       });
