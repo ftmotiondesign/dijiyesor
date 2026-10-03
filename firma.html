@@ -187,6 +187,14 @@
       let name=String(d.name||"Firma").trim();
       let phone=String(d.phone||"").trim();
       let address=String(d.address||"").trim();
+      let location=String(d.location||"").trim();
+
+      const isDetailedAddress=v=>/mah\\.?|mahalle|cad\\.?|caddesi|sok\\.?|sokak|bulvar|blv\\.?|no[:\\s]|kat[:\\s]/i.test(String(v||""));
+      const isCoarseLocation=v=>/\\bmerkez\\s*\\//i.test(String(v||""))||/^[^/]{2,}\\s*\\/\\s*[^/]{2,}$/i.test(String(v||""));
+      const isMobileNumber=v=>{
+        const digits=String(v||"").replace(/\\D/g,"").replace(/^90/,"0");
+        return /^05\\d{9}$/.test(digits);
+      };
 
       const storedPhoneMatch=phone.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
       if(storedPhoneMatch)phone=storedPhoneMatch[0].trim();
@@ -225,12 +233,25 @@
           : name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
       }
 
+      // Eski hızlı kayıtlarda kısa konum yanlışlıkla adres alanına yazılmış olabilir.
+      if(address && !isDetailedAddress(address) && isCoarseLocation(address)){
+        if(!location)location=address;
+        address="";
+      }
+
       d.name=name||d.name||"Firma";
       d.phone=phone;
+
       const storedWa=String(d.whatsapp||"").trim();
       const waMatch=storedWa.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
-      d.whatsapp=waMatch?waMatch[0].trim():"";
+      const cleanWa=waMatch?waMatch[0].trim():"";
+
+      // Eski kayıtlarda normal telefon otomatik WhatsApp'a kopyalanmışsa sabit hatta göstermeyelim.
+      const sameAsPhone=cleanWa && String(cleanWa).replace(/\D/g,"")===String(phone).replace(/\D/g,"");
+      d.whatsapp=(cleanWa && (!sameAsPhone || isMobileNumber(cleanWa))) ? cleanWa : "";
+
       d.address=address;
+      d.location=location;
       return d;
     }
 
