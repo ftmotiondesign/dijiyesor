@@ -129,6 +129,12 @@
         return {name:p[0]||"",phone:p[1]||"",address:p[2]||"",website:p[3]||""};
       }).filter(x=>x.name);
     }
+    const looksLikeMapsDetail=/genel bakış|genel bakis|yorumlar|yol tarifi|telefona gönder|telefona gonder|google haritalar/i.test(raw)
+      && (phoneFrom(raw)||/mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]/i.test(raw));
+    if(looksLikeMapsDetail){
+      return [parseBlock(raw)].filter(x=>x&&x.name);
+    }
+
     const blocks=raw.split(/\n\s*\n+/).map(x=>x.trim()).filter(Boolean);
     if(blocks.length>1)return blocks.map(parseBlock).filter(x=>x&&x.name);
 
@@ -264,10 +270,32 @@
     try{
       const snap=await db.collection("institutions").get();
       const existing=snap.docs.map(d=>({id:d.id,...d.data()}));
+      let updated=0;
       for(const row of queue){
-        const dup=existing.some(f=>norm(f.name)===norm(row.name)&&norm(f.city)===norm(row.city)&&norm(f.district)===norm(row.district));
-        if(dup){skipped++;continue}
+        const dup=existing.find(f=>norm(f.name)===norm(row.name)&&norm(f.city)===norm(row.city)&&norm(f.district)===norm(row.district));
         const now=new Date().toISOString();
+
+        if(dup){
+          const patch={updatedAt:now};
+          if(row.phone && !String(dup.phone||"").trim())patch.phone=row.phone;
+          if(row.address && !String(dup.address||"").trim())patch.address=row.address;
+          if(row.location && !String(dup.location||"").trim())patch.location=row.location;
+          if(row.website && !String(dup.website||"").trim())patch.website=row.website;
+          if(row.rating && !dup.googleRating)patch.googleRating=row.rating;
+          if(row.reviewCount && !dup.googleReviewCount)patch.googleReviewCount=Number(row.reviewCount||0);
+          if(row.plusCode && !String(dup.googlePlusCode||"").trim())patch.googlePlusCode=row.plusCode;
+          if(row.googleCategory && !String(dup.googleCategory||"").trim())patch.googleCategory=row.googleCategory;
+          if(Array.isArray(row.searchKeywords) && row.searchKeywords.length && !(Array.isArray(dup.searchKeywords)&&dup.searchKeywords.length))patch.searchKeywords=row.searchKeywords;
+
+          if(Object.keys(patch).length>1){
+            await db.collection("institutions").doc(dup.id).set(patch,{merge:true});
+            updated++;
+          }else{
+            skipped++;
+          }
+          continue;
+        }
+
         await db.collection("institutions").add({
           name:row.name,
           mainCategory:row.mainCategory,
@@ -297,7 +325,12 @@
         added++;
       }
       queue=[];render();
-      show(added+" firma eklendi."+(skipped?" "+skipped+" firma zaten kayıtlıydı.":""),"success");
+      show(
+        added+" yeni firma eklendi."+
+        (updated?" "+updated+" mevcut firmanın eksik bilgileri tamamlandı.":"")+
+        (skipped?" "+skipped+" firma zaten günceldi.":""),
+        "success"
+      );
       if(typeof loadFirms==="function"&&typeof renderAll==="function"){await loadFirms();renderAll()}
     }catch(err){
       show("Firmalar eklenemedi: "+(err.message||"Bilinmeyen hata"),"error");
