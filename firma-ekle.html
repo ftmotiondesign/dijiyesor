@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Firmanı Tanıt | DijiyeSor</title>
   <meta name="description" content="Firmanı DijiyeSor'a ekle, müşteriler seni bulsun. Fotoğraf, video, 360° tur ve VIP profil seçenekleriyle öne çık.">
   <link rel="stylesheet" href="firma-ekle.css?v=20261003-3">
@@ -320,7 +323,7 @@ document.getElementById("institutionLoginModal").addEventListener("click",e=>{
   if(e.target.id==="institutionLoginModal")closeInstitutionLoginModal();
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeInstitutionLoginModal()});
-if(new URLSearchParams(window.location.search).get("kurumgiris")==="1")openInstitutionLoginModal();
+if(new URLSearchParams(window.location.search).get("kurumgiris")==="1")setTimeout(openInstitutionLoginModal,50);
 
 document.getElementById("institutionLoginForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -429,7 +432,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
 
     await registrationAuth.signOut();
     msg.className="notice success";
-    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <a class='inline-login-button' href='firma-ekle.html?kurumgiris=1'>Kurum Girişi</a> yapabilirsiniz.";
+    msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra aynı firma bilgileri ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
     e.target.reset();
     district.disabled=true;district.innerHTML='<option value="">Önce il seçin</option>';
     setPasswordHint();
