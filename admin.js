@@ -13,6 +13,7 @@ const selectedMemberIds=new Set();
 let visibleMemberIds=[];
 const selectedFirmIds=new Set();
 let visibleFirmIds=[];
+let quickImportQueue=[];
 let googlePlaceResults=[];
 const selectedGooglePlaceIds=new Set();
 let googleMapsLoadPromise=null;
@@ -1013,79 +1014,106 @@ function isQuickDuplicate(row,cityName,districtName){
     (!districtName||norm(f.district)===norm(districtName))
   );
 }
+function quickQueueKey(row){
+  return [
+    norm(row.name),
+    norm(row.phone),
+    norm(row.address),
+    norm(row.city),
+    norm(row.district)
+  ].join("|");
+}
 function renderQuickImportPreview(){
-  const cityName=String($("quickImportCity")?.value||"").trim();
-  const districtName=String($("quickImportDistrict")?.value||"").trim();
-  const rows=parseQuickImportRows();
   const box=$("quickImportPreviewList");
-  if(!rows.length){
+  if(!quickImportQueue.length){
     box.innerHTML='<div class="empty">Henüz firma listesi girilmedi.</div>';
     return [];
   }
-  box.innerHTML=rows.map((r,i)=>{
-    const dup=isQuickDuplicate(r,cityName,districtName);
+  box.innerHTML=quickImportQueue.map((r,i)=>{
+    const dup=isQuickDuplicate(r,r.city,r.district);
     return '<article class="quick-import-row '+(dup?'duplicate':'')+'">'+
       '<div><strong>'+esc(r.name)+'</strong><small>'+esc(r.phone||"Telefon yok")+'</small></div>'+
-      '<div><span>'+esc(r.address||"Adres yok")+'</span><small>'+esc(r.website||"Web sitesi yok")+'</small></div>'+
-      '<div>'+(dup?'<b>Zaten kayıtlı</b>':'<em>Hazır</em>')+'</div>'+
+      '<div><span>'+esc(r.address||"Adres yok")+'</span><small>'+esc([r.city,r.district].filter(Boolean).join(" / ")||"Konum yok")+' · '+esc(r.website||"Web sitesi yok")+'</small></div>'+
+      '<div class="quick-row-actions">'+
+        (dup?'<b>Zaten kayıtlı</b>':'<em>Hazır</em>')+
+        '<button type="button" data-quick-remove="'+i+'">Kaldır</button>'+
+      '</div>'+
     '</article>';
   }).join("");
-  return rows;
+  return quickImportQueue;
 }
-$("quickImportPreview")?.addEventListener("click",()=>{
-  const rows=renderQuickImportPreview();
-  if(!rows.length){quickImportMessage("Önce en az bir firma yazın.","error");return}
-  const cityName=String($("quickImportCity")?.value||"").trim();
-  const districtName=String($("quickImportDistrict")?.value||"").trim();
-  const newCount=rows.filter(r=>!isQuickDuplicate(r,cityName,districtName)).length;
-  quickImportMessage(rows.length+" satır okundu. "+newCount+" firma eklenebilir.","success");
-});
 
-function inferQuickSubCategory(row,mainCategory){
-  const text=norm([row.name,row.address].join(" "));
-  if(mainCategory==="egitim"){
-    if(/sürücü kursu|surucu kursu|ehliyet|direksiyon/.test(text))return "surucu";
-    if(/anaokulu|ana okulu|kreş|kres/.test(text))return "kres";
-    if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(text))return "dershane";
-    if(/öğrenci yurdu|ogrenci yurdu|erkek yurdu|kız yurdu|kiz yurdu/.test(text))return "yurt";
-    if(/dil kursu|ingilizce kursu|almanca/.test(text))return "dil_kursu";
-  }
-  if(mainCategory==="otomotiv"){
-    if(/ekspertiz/.test(text))return "ekspertiz";
-    if(/rent a car|araç kiralama|arac kiralama/.test(text))return "rentacar";
-    if(/oto servis|tamir|mekanik/.test(text))return "oto_servis";
-  }
-  if(mainCategory==="yemeicme"){
-    if(/restoran|lokanta/.test(text))return "restoran";
-    if(/kafe|cafe/.test(text))return "kafe";
-    if(/pizza/.test(text))return "pizza";
-    if(/döner|doner/.test(text))return "doner";
-  }
-  return "diger";
-}
-$("quickImportAddAll")?.addEventListener("click",async()=>{
+$("quickImportPreview")?.addEventListener("click",()=>{
+  const parsed=parseQuickImportRows();
+  if(!parsed.length){quickImportMessage("Önce en az bir firma yapıştırın.","error");return}
+
   const cityName=String($("quickImportCity")?.value||"").trim();
   const districtName=String($("quickImportDistrict")?.value||"").trim();
   const category=$("quickImportCategory")?.value||"diger";
-  const rows=renderQuickImportPreview();
+
   if(!cityName){quickImportMessage("Önce ili yazın.","error");return}
-  if(!rows.length){quickImportMessage("Önce firma listesini yazın.","error");return}
-  const addRows=rows.filter(r=>!isQuickDuplicate(r,cityName,districtName));
+
+  const existingKeys=new Set(quickImportQueue.map(quickQueueKey));
+  let addedToQueue=0, skipped=0;
+
+  parsed.forEach(row=>{
+    const item={
+      ...row,
+      city:cityName,
+      district:districtName,
+      mainCategory:category,
+      subCategory:inferQuickSubCategory(row,category)
+    };
+    const key=quickQueueKey(item);
+    if(existingKeys.has(key)){skipped++;return}
+    existingKeys.add(key);
+    quickImportQueue.push(item);
+    addedToQueue++;
+  });
+
+  renderQuickImportPreview();
+  $("quickImportText").value="";
+
+  const ready=quickImportQueue.filter(r=>!isQuickDuplicate(r,r.city,r.district)).length;
+  quickImportMessage(
+    addedToQueue+" firma listeye eklendi. Toplam "+quickImportQueue.length+" firma var; "+ready+" tanesi DijiyeSor’a eklenebilir."+
+    (skipped?" "+skipped+" tekrar kayıt listeye alınmadı.":""),
+    "success"
+  );
+});
+
+document.addEventListener("click",e=>{
+  const remove=e.target.closest("[data-quick-remove]");
+  if(!remove)return;
+  const index=Number(remove.dataset.quickRemove);
+  if(Number.isNaN(index)||!quickImportQueue[index])return;
+  quickImportQueue.splice(index,1);
+  renderQuickImportPreview();
+  const ready=quickImportQueue.filter(r=>!isQuickDuplicate(r,r.city,r.district)).length;
+  quickImportMessage("Listede "+quickImportQueue.length+" firma kaldı. "+ready+" tanesi eklenebilir.","success");
+});
+
+$("quickImportAddAll")?.addEventListener("click",async()=>{
+  const rows=renderQuickImportPreview();
+  if(!rows.length){quickImportMessage("Önce firmaları Listeyi Kontrol Et ile listeye ekleyin.","error");return}
+
+  const addRows=rows.filter(r=>!isQuickDuplicate(r,r.city,r.district));
   if(!addRows.length){quickImportMessage("Listedeki firmaların tamamı zaten kayıtlı.","error");return}
-  if(!confirm(addRows.length+" firmayı DijiyeSor’a eklemek istiyor musunuz?"))return;
+  if(!confirm(addRows.length+" firmayı DijiyeSor’a ayrı ayrı eklemek istiyor musunuz?"))return;
 
   const btn=$("quickImportAddAll");btn.disabled=true;btn.textContent="Ekleniyor...";
   let added=0;
   try{
     for(const row of addRows){
       const nowIso=new Date().toISOString();
+      const sub=String(row.subCategory||inferQuickSubCategory(row,row.mainCategory||"diger"));
       await db.collection("institutions").add({
         name:row.name,
-        mainCategory:category,
-        subCategory:inferQuickSubCategory(row,category),
-        category:inferQuickSubCategory(row,category)=== "diger" ? category : inferQuickSubCategory(row,category),
-        city:cityName,
-        district:districtName,
+        mainCategory:row.mainCategory||"diger",
+        subCategory:sub,
+        category:sub==="diger"?(row.mainCategory||"diger"):sub,
+        city:row.city||"",
+        district:row.district||"",
         address:row.address||"",
         phone:row.phone||"",
         whatsapp:row.phone||"",
@@ -1101,15 +1129,21 @@ $("quickImportAddAll")?.addEventListener("click",async()=>{
       });
       added++;
     }
-    await loadFirms();renderAll();renderQuickImportPreview();
-    quickImportMessage(added+" firma başarıyla eklendi.","success");
+
+    await loadFirms();
+    renderAll();
+
+    // Başarıyla eklenenleri kuyruktan çıkar; zaten kayıtlı olanları da temizle.
+    quickImportQueue=quickImportQueue.filter(r=>!addRows.includes(r) && !isQuickDuplicate(r,r.city,r.district));
+    renderQuickImportPreview();
+
+    quickImportMessage(added+" firma ayrı ayrı başarıyla eklendi.","success");
   }catch(err){
     quickImportMessage("Firmalar eklenemedi: "+(err.message||"Bilinmeyen hata"),"error");
   }finally{
     btn.disabled=false;btn.textContent="Tümünü DijiyeSor’a Ekle";
   }
 });
-
 
 async function runFirmBulkPatch(patch,label){
   const rows=firms.filter(f=>selectedFirmIds.has(f.id));
