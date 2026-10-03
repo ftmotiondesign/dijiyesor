@@ -65,6 +65,17 @@
       return digits ? "https://wa.me/90"+digits : "";
     };
 
+    const formatPhoneDisplay=value=>{
+      const raw=String(value||"").trim();
+      let digits=raw.replace(/\D/g,"");
+      if(digits.startsWith("90") && digits.length===12) digits="0"+digits.slice(2);
+      if(digits.length===10 && !digits.startsWith("0")) digits="0"+digits;
+      if(/^0\d{10}$/.test(digits)){
+        return "("+digits.slice(0,4)+") "+digits.slice(4,7)+" "+digits.slice(7,9)+" "+digits.slice(9,11);
+      }
+      return raw.replace(/^(0\d{3})\)/,"($1)");
+    };
+
     const initials=name=>String(name||"Firma")
       .split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("")
       .toLocaleUpperCase("tr-TR");
@@ -364,7 +375,7 @@
             '<aside id="iletisim" class="contact-card">'+
               '<div class="section-title"><div><span>İLETİŞİM</span><h2>İletişim bilgileri</h2></div></div>'+
               '<div class="contact-list">'+
-                contactRow("☎",isMobilePhone?"Cep Telefonu":"Telefon",d.phone,isMobilePhone?mobileWhatsapp:phone)+
+                contactRow("☎",isMobilePhone?"Cep Telefonu":"Telefon",formatPhoneDisplay(d.phone),isMobilePhone?mobileWhatsapp:phone)+
                 contactRow("●","WhatsApp",d.whatsapp,whatsapp)+
                 contactRow("⌖","Adres",d.address,"")+
                 contactRow("↗","Web sitesi",d.website,website)+
