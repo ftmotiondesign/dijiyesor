@@ -149,6 +149,54 @@ function campaignCard(i){
     '</div>'+
   '</article>';
 }
+function resultCardFallback(i){
+  const main=String(i.mainCategory||"diger");
+  const sub=String(i.subCategory||i.category||"");
+  const mainMap={
+    egitim:{icon:"🎓",label:"Eğitim",tone:"education"},
+    otomotiv:{icon:"🚗",label:"Otomotiv",tone:"automotive"},
+    yemeicme:{icon:"🍽️",label:"Yeme & İçme",tone:"food"},
+    saglikguzellik:{icon:"✚",label:"Sağlık & Güzellik",tone:"health"},
+    evyapi:{icon:"🏠",label:"Ev & Yapı",tone:"home"},
+    emlak:{icon:"🏢",label:"Emlak",tone:"estate"},
+    turizm:{icon:"🧳",label:"Turizm & Konaklama",tone:"tourism"},
+    organizasyonmedya:{icon:"🎬",label:"Organizasyon & Medya",tone:"media"},
+    tasimacilik:{icon:"🚚",label:"Taşımacılık",tone:"transport"},
+    profesyonel:{icon:"💼",label:"Profesyonel Hizmetler",tone:"professional"},
+    alisveris:{icon:"🛍️",label:"Yerel Esnaf",tone:"shopping"},
+    diger:{icon:"📍",label:"Yerel İşletme",tone:"other"}
+  };
+  const subMap={
+    surucu:{icon:"🚘",label:"Sürücü Kursu"},
+    kres:{icon:"🧸",label:"Kreş & Anaokulu"},
+    dershane:{icon:"📚",label:"Kurs Merkezi"},
+    yurt:{icon:"🛏️",label:"Öğrenci Yurdu"},
+    oto_servis:{icon:"🔧",label:"Oto Servis"},
+    ekspertiz:{icon:"🔎",label:"Oto Ekspertiz"},
+    restoran:{icon:"🍽️",label:"Restoran"},
+    kafe:{icon:"☕",label:"Kafe"}
+  };
+  const base=mainMap[main]||mainMap.diger;
+  const detail=subMap[sub]||{};
+  return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
+}
+function resultCardVisual(i){
+  const image=String(i.coverUrl||i.galleryUrls?.[0]||"").trim();
+  if(image){
+    return '<div class="result-visual"><img src="'+esc(image)+'" alt="'+esc(i.name)+' görseli" loading="lazy">'+
+      (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
+      (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'')+
+    '</div>';
+  }
+  const c=resultCardFallback(i);
+  return '<div class="result-visual result-visual-fallback '+esc(c.tone)+'">'+
+    '<div class="result-visual-fallback-icon">'+c.icon+'</div>'+
+    '<div><small>DİJİYESOR</small><strong>'+esc(c.label)+'</strong></div>'+
+    (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
+    (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'')+
+  '</div>';
+}
+
 function render(data){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   if(!grid||!sum)return;
@@ -207,6 +255,8 @@ function render(data){
     ].filter(Boolean).join("");
 
     return '<article class="result-card'+(i.sponsored?' is-sponsored':'')+'">'+
+      resultCardVisual(i)+
+      '<div class="result-card-body">'+
       '<div class="result-card-top">'+
         '<div class="result-logo">'+logo+'</div>'+
         '<div class="result-card-copy">'+
@@ -220,6 +270,7 @@ function render(data){
       '<div class="result-actions">'+
         '<a class="result-primary" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a>'+
         '<button type="button" class="result-secondary bilgi-al-open" data-bilgi-al data-institution-id="'+esc(i.id)+'" data-institution-name="'+esc(i.name||'')+'" data-main-category="'+esc(i.mainCategory||'')+'" data-sub-category="'+esc(i.subCategory||i.category||'')+'" data-city="'+esc(i.city||'')+'" data-district="'+esc(i.district||'')+'">Bilgi Al</button>'+
+      '</div>'+
       '</div>'+
     '</article>';
   });
