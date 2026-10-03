@@ -82,6 +82,26 @@
     </div>
   </div>
 
+  <div id="tour360Modal" class="tour360-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tour360Title">
+    <div class="tour360-backdrop" data-close-360></div>
+    <div class="tour360-card">
+      <div class="tour360-head">
+        <div>
+          <span>360° SANAL TUR</span>
+          <h2 id="tour360Title">Mekânı Gez</h2>
+        </div>
+        <button type="button" class="tour360-close" data-close-360 aria-label="Kapat">×</button>
+      </div>
+      <div class="tour360-frame-wrap">
+        <iframe id="tour360Frame" src="about:blank" title="360 derece mekan turu" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="tour360-foot">
+        <small>Fareyle sürükleyerek veya telefonda parmağınızla hareket ederek mekânı gezebilirsiniz.</small>
+        <a id="tour360External" href="#" target="_blank" rel="noopener">Tam ekranda aç ↗</a>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">© 2026 DijiyeSor</footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
