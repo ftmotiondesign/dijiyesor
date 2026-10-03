@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>360° Mekânlar | DijiyeSor</title>
+  <meta name="description" content="DijiyeSor'da 360° sanal turu bulunan işletmeleri keşfet.">
+  <link rel="stylesheet" href="arama.css?v=20261003-27">
+  <link rel="stylesheet" href="bilgi-modal.css">
+  <style>
+    .tour-directory-hero{
+      background:linear-gradient(135deg,#f4f9ff,#eaf4ff);
+      border-bottom:1px solid #deebf8;
+      padding:34px 0 26px;
+    }
+    .tour-directory-hero .inner{
+      width:min(1180px,calc(100% - 36px));
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+    .tour-directory-hero .copy span{
+      display:block;
+      color:#1677ff;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.14em;
+      margin-bottom:8px;
+    }
+    .tour-directory-hero h1{
+      margin:0;
+      font-size:34px;
+      letter-spacing:-.6px;
+      color:#172139;
+    }
+    .tour-directory-hero p{
+      margin:10px 0 0;
+      color:#69778d;
+      line-height:1.55;
+      max-width:720px;
+    }
+    .tour-directory-hero .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .tour-directory-hero .actions a{
+      min-height:42px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 15px;
+      border-radius:12px;
+      font-size:13px;
+      font-weight:900;
+    }
+    .tour-directory-hero .primary{background:#1677ff;color:#fff}
+    .tour-directory-hero .secondary{background:#fff;color:#31506f;border:1px solid #d7e4f1}
+    .tour-directory-note{
+      width:min(1180px,calc(100% - 36px));
+      margin:18px auto 0;
+      padding:12px 14px;
+      border:1px solid #dbe8fb;
+      border-radius:13px;
+      background:#f7faff;
+      color:#52647e;
+      font-size:12px;
+    }
+    @media(max-width:700px){
+      .tour-directory-hero .inner{flex-direction:column;align-items:flex-start}
+      .tour-directory-hero h1{font-size:28px}
+      .tour-directory-hero .actions{width:100%;display:grid;grid-template-columns:1fr}
+      .tour-directory-hero .actions a{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">D</span>
+      <span>DijiyeSor</span>
+    </a>
+    <a href="360-mekan.html" class="add-link">360° Çekim İstiyorum</a>
+  </header>
+
+  <section class="tour-directory-hero">
+    <div class="inner">
+      <div class="copy">
+        <span>DİJİYESOR · 360° MEKÂNLAR</span>
+        <h1>Gitmeden önce mekânı gez.</h1>
+        <p>360° sanal turu bulunan işletmeleri incele, mekânın içini önceden gör ve daha bilinçli karar ver.</p>
+      </div>
+      <div class="actions">
+        <a class="primary" href="360-mekan.html">İşletmeme 360° Çekim İstiyorum</a>
+        <a class="secondary" href="index.html">Ana Sayfaya Dön</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="page">
+    <section class="search-area">
+      <div class="search-line">
+        <span class="search-icon">⌕</span>
+        <input id="searchInput" type="search" autocomplete="off" placeholder="360° mekânı olan firma ara...">
+        <button id="searchBtn" type="button">Ara</button>
+      </div>
+
+      <div class="filters">
+        <select id="citySelect"><option value="">Tüm İller</option></select>
+        <select id="districtSelect" disabled><option value="">Tüm İlçeler</option></select>
+        <select id="sectorSelect">
+          <option value="">Tüm Sektörler</option>
+          <option value="egitim">Eğitim</option>
+          <option value="otomotiv">Otomotiv</option>
+          <option value="yemeicme">Yeme & İçme</option>
+          <option value="saglikguzellik">Sağlık & Güzellik</option>
+          <option value="evyapi">Ev & Yapı</option>
+          <option value="emlak">Emlak</option>
+          <option value="turizm">Turizm & Konaklama</option>
+          <option value="organizasyonmedya">Organizasyon & Medya</option>
+          <option value="tasimacilik">Taşımacılık & Teslimat</option>
+          <option value="profesyonel">Profesyonel Hizmetler</option>
+          <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+          <option value="diger">Diğer</option>
+        </select>
+        <select id="subCategorySelect" disabled><option value="">Tüm Alt Kategoriler</option></select>
+        <button id="clearFiltersBtn" class="clear-btn" type="button">Temizle</button>
+      </div>
+    </section>
+
+    <div class="tour-directory-note">Bu sayfada yalnızca 360° sanal turu bulunan işletmeler listelenir.</div>
+
+    <section id="resultsHead" class="results-head">
+      <div>
+        <h1 id="resultsTitle">360° Mekânlar</h1>
+        <p id="resultsContext">Sanal tur ile gezebileceğiniz işletmeler listeleniyor.</p>
+      </div>
+      <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
+    </section>
+
+    <div id="locationNotice" class="location-notice hidden">
+      <div class="location-notice-left">
+        <img class="location-mascot" src="./assets/diji-mascot-search.png" alt="Diji büyüteçle arıyor">
+        <strong>Konum seçilmedi · Türkiye geneli sonuçlar gösteriliyor.</strong>
+      </div>
+      <span>Daha yakın ve ilgili sonuçlar için il veya ilçe seçebilirsiniz.</span>
+    </div>
+
+    <section id="companyGrid" class="results-grid">
+      <div class="results-state">
+        <strong>360° mekânlar yükleniyor</strong>
+        <span>Lütfen kısa bir süre bekleyin.</span>
+      </div>
+    </section>
+  </main>
+
+  <div id="categoryPickerModal" class="category-modal hidden" role="dialog" aria-modal="true" aria-labelledby="categoryPickerTitle">
+    <div class="category-modal-backdrop" data-close-category-modal></div>
+    <div class="category-modal-card">
+      <button class="category-modal-close" type="button" data-close-category-modal aria-label="Kapat">×</button>
+      <span class="category-modal-kicker">DİJİYESOR</span>
+      <h2 id="categoryPickerTitle">Ne arıyorsunuz?</h2>
+      <p>Bir kategori seçin. Size sadece o alandaki 360° işletmeleri gösterelim.</p>
+      <div id="categoryPickerGrid" class="category-picker-grid"></div>
+    </div>
+  </div>
+
+  <div id="tour360Modal" class="tour360-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tour360Title">
+    <div class="tour360-backdrop" data-close-360></div>
+    <div class="tour360-card">
+      <div class="tour360-head">
+        <div>
+          <span>360° SANAL TUR</span>
+          <h2 id="tour360Title">Mekânı Gez</h2>
+        </div>
+        <button type="button" class="tour360-close" data-close-360 aria-label="Kapat">×</button>
+      </div>
+      <div class="tour360-frame-wrap">
+        <iframe id="tour360Frame" src="about:blank" title="360 derece mekan turu" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="tour360-foot">
+        <small>Fareyle sürükleyerek veya telefonda parmağınızla hareket ederek mekânı gezebilirsiniz.</small>
+        <a id="tour360External" href="#" target="_blank" rel="noopener">Tam ekranda aç ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 DijiyeSor</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script>
+    const DJS_FORCE_360_ONLY = true;
+  </script>
+  <script src="app.js?v=20261003-25"></script>
+  <script src="bilgi-modal.js"></script>
+</body>
+</html>
