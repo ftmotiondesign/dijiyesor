@@ -290,7 +290,8 @@ async function initHome(){
   search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
   btn.addEventListener("click",openCategoryModal);
   search.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();openCategoryModal()}});
-  document.getElementById("clearFiltersBtn")?.addEventListener("click",async()=>{
+  document.getElementById("filterSearchBtn")?.addEventListener("click",filter);
+    document.getElementById("clearFiltersBtn")?.addEventListener("click",async()=>{
     search.value="";
     city.value="";
     sector.value="";
