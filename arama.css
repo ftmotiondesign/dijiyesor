@@ -400,3 +400,9 @@ button,input,select{font:inherit}
   .location-notice{position:relative;padding-right:12px}
   .location-select-btn{align-self:stretch;text-align:center}
 }
+
+.search-line.search-attention{
+  box-shadow:0 0 0 4px rgba(22,119,255,.12),0 10px 28px rgba(22,119,255,.12);
+  border-color:#1677ff;
+  transition:.2s ease;
+}
