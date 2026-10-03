@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>360° Mekan Çekimi | DijiyeSor</title>
   <meta name="description" content="İşletmeler için 360° mekan çekimi, sanal tur ve DijiyeSor profil entegrasyonu.">
-  <link rel="stylesheet" href="360-mekan.css?v=20261003-2230">
+  <link rel="stylesheet" href="360-mekan.css?v=20261003-2246">
 </head>
 <body>
   <header class="topbar">
@@ -192,9 +192,16 @@
             <input id="tourLeadPhone" required inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx">
           </label>
           <label>İl
-            <input id="tourLeadCity" maxlength="60" placeholder="Örn. Çanakkale">
+            <select id="tourLeadCity" required>
+              <option value="">İl seçin</option>
+            </select>
           </label>
         </div>
+        <label>İlçe
+          <select id="tourLeadDistrict" required disabled>
+            <option value="">Önce il seçin</option>
+          </select>
+        </label>
         <label>E-posta
           <input id="tourLeadEmail" type="email" maxlength="160" placeholder="ornek@firma.com" autocomplete="email">
         </label>
@@ -223,6 +230,8 @@
       const db=firebase.firestore();
       const modal=document.getElementById("tourLeadModal");
       const form=document.getElementById("tourLeadForm");
+      const citySelect=document.getElementById("tourLeadCity");
+      const districtSelect=document.getElementById("tourLeadDistrict");
       const message=document.getElementById("tourLeadMessage");
       const open=()=>{modal.classList.remove("hidden");document.body.style.overflow="hidden";setTimeout(()=>document.getElementById("tourLeadBusiness")?.focus(),50)};
       const close=()=>{modal.classList.add("hidden");document.body.style.overflow=""};
@@ -231,13 +240,55 @@
       document.querySelectorAll("[data-close-tour-lead]").forEach(el=>el.addEventListener("click",close));
       document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
 
+      async function loadLeadCities(){
+        try{
+          const res=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+          const json=await res.json();
+          citySelect.innerHTML='<option value="">İl seçin</option>';
+          (json.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{
+            const o=document.createElement("option");
+            o.value=c.name;
+            o.textContent=c.name;
+            o.dataset.id=c.id;
+            citySelect.appendChild(o);
+          });
+        }catch(_){
+          citySelect.innerHTML='<option value="">İller yüklenemedi</option>';
+        }
+      }
+
+      async function loadLeadDistricts(){
+        const opt=citySelect.options[citySelect.selectedIndex];
+        const provinceId=opt?.dataset?.id;
+        districtSelect.disabled=true;
+        districtSelect.innerHTML='<option value="">İlçe seçin</option>';
+        if(!provinceId)return;
+        try{
+          const res=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+provinceId+"/districts?fields=id,name&limit=100");
+          const json=await res.json();
+          (json.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{
+            const o=document.createElement("option");
+            o.value=d.name;
+            o.textContent=d.name;
+            districtSelect.appendChild(o);
+          });
+          districtSelect.disabled=false;
+        }catch(_){
+          districtSelect.disabled=false;
+        }
+      }
+
+      citySelect?.addEventListener("change",loadLeadDistricts);
+      loadLeadCities();
+
       form?.addEventListener("submit",async e=>{
         e.preventDefault();
         const submit=form.querySelector(".lead-submit");
         const businessName=document.getElementById("tourLeadBusiness").value.trim();
         const contactName=document.getElementById("tourLeadContact").value.trim();
         const phone=document.getElementById("tourLeadPhone").value.trim();
-        const city=document.getElementById("tourLeadCity").value.trim();
+        const city=citySelect.value.trim();
+        const district=districtSelect.value.trim();
         const email=document.getElementById("tourLeadEmail").value.trim().toLowerCase();
         const note=document.getElementById("tourLeadNote").value.trim();
 
@@ -261,7 +312,7 @@
             subCategory:"diger",
             category:"diger",
             city,
-            district:"",
+            district,
             address:"",
             phone,
             whatsapp:"",
