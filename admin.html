@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-18">
+  <link rel="stylesheet" href="admin.css?v=20261003-2255">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -388,6 +388,22 @@ Gerçek mekanda hizmet"></textarea>
   </div>
 </div>
 
+<div id="tourLeadDetailModal" class="modal hidden">
+  <div class="modal-card modal-large tour-lead-detail-modal">
+    <div class="modal-head">
+      <div><span>360° ÇEKİM TALEBİ</span><h2 id="tourLeadDetailTitle">Talep Detayı</h2></div>
+      <button class="modal-close" data-close="tourLeadDetailModal">×</button>
+    </div>
+    <div id="tourLeadDetailBody" class="tour-lead-detail-body"></div>
+    <div class="modal-actions">
+      <a id="tourLeadDetailCall" class="secondary" href="#">Ara</a>
+      <a id="tourLeadDetailWhatsapp" class="secondary" target="_blank" rel="noopener" href="#">WhatsApp</a>
+      <button type="button" class="danger" id="tourLeadDetailDelete">Sil</button>
+      <button type="button" class="primary" data-close="tourLeadDetailModal">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <div id="applicationDetailModal" class="modal hidden">
   <div class="modal-card modal-large application-detail-modal">
     <div class="modal-head">
@@ -439,7 +455,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-2240"></script>
+<script src="admin.js?v=20261003-2255"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
