@@ -238,17 +238,9 @@
           updatedAt:new Date().toISOString()
         };
         sessionStorage.setItem("dijiyesor360Lead",JSON.stringify(payload));
-        try{
-          submit.disabled=true;
-          submit.textContent="Talep gönderiliyor...";
-          await db.collection("tourLeads").add(payload);
-          window.location.href="firma-ekle.html?service=360#basvuru";
-        }catch(err){
-          console.error(err);
-          alert("Talep yönetim paneline kaydedilemedi: "+(err.message||"Bilinmeyen hata"));
-          submit.disabled=false;
-          submit.textContent="Talebi Devam Ettir";
-        }
+        submit.disabled=true;
+        submit.textContent="Devam ediliyor...";
+        window.location.href="firma-ekle.html?service=360#basvuru";
       });
     })();
   </script>
