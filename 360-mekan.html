@@ -1,31 +1,177 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>360° Mekan Çekimi | DijiyeSor</title><meta name="description" content="İşletmeler için 360° mekan çekimi ve sanal tur hizmeti.">
-<link rel="stylesheet" href="styles.css"></head>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>360° Mekan Çekimi | DijiyeSor</title>
+  <meta name="description" content="İşletmeler için 360° mekan çekimi, sanal tur ve DijiyeSor profil entegrasyonu.">
+  <link rel="stylesheet" href="360-mekan.css?v=20261003-1">
+</head>
 <body>
-<header class="topbar"><div class="container"><a class="brand" href="index.html"><span class="brand-mark">D</span><span class="brand-name">DijiyeSor</span></a><nav class="nav"><a class="btn btn-soft" href="index.html">Ana Sayfa</a><a class="btn btn-primary" href="firma-ekle.html">Firmanı Ekle</a></nav></div></header>
-<section class="service-hero"><div class="container">
-<div class="eyebrow">DİJİYESOR · 360° MEKAN ÇEKİMİ</div>
-<h1>Mekanını müşterilerin gelmeden önce gezsin.</h1>
-<p>360° mekan çekimi ile işletmeni dijital ortamda gezilebilir hale getir. Sanal tur bağlantını web sitende, QR kartında ve DijiyeSor firma profilinde kullan.</p>
-</div></section>
-<main class="container"><div class="service-layout">
-<section class="panel">
-<h2>Neler sunuyoruz?</h2>
-<div class="service-feature-grid">
-<div class="service-feature"><strong>360° İç Mekan</strong><span>Mekanın farklı noktalarından gezilebilir panoramik çekimler.</span></div>
-<div class="service-feature"><strong>Sanal Tur Bağlantısı</strong><span>Müşterilerin telefondan veya bilgisayardan açabileceği tek bağlantı.</span></div>
-<div class="service-feature"><strong>QR Kullanımı</strong><span>Kart, afiş veya masa üstü materyallerinde sanal tura yönlendirme.</span></div>
-<div class="service-feature"><strong>DijiyeSor Profili</strong><span>Firma detay sayfasında 360° tur alanı ile daha güçlü tanıtım.</span></div>
-</div>
-<h2 style="margin-top:28px">Kimler için uygun?</h2>
-<p class="desc" style="min-height:0">Anaokulları, kurslar, yurtlar, restoranlar, kafeler, oteller, emlak ofisleri, sağlık ve güzellik merkezleri, showroomlar ve fiziksel mekana sahip tüm işletmeler.</p>
-</section>
-<aside class="service-cta-box">
-<h2>360° çekim yaptırmak ister misin?</h2>
-<p>İşletmenin konumunu ve mekan türünü paylaş. Çekim kapsamını birlikte belirleyelim.</p>
-<a class="btn btn-white" href="firma-ekle.html">Bilgi Al</a>
-</aside>
-</div></main>
-<footer class="footer"><div class="container">© 2026 DijiyeSor · 360° Mekan Çekimi</div></footer>
-</body></html>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D</span>
+        <span>DijiyeSor</span>
+      </a>
+      <nav class="top-actions">
+        <a class="ghost-link" href="index.html">Firma Ara</a>
+        <a class="primary-link" href="firma-ekle.html">Firmanı Tanıt</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">DİJİYESOR · 360° MEKAN ÇEKİMİ</span>
+          <h1>Mekanını, müşterilerin gelmeden önce gezsin.</h1>
+          <p class="hero-text">İşletmeni 360° sanal tur ile dijital ortamda gezilebilir hale getir. Web sitende, QR kartında ve DijiyeSor firma profilinde tek bağlantıyla kullan.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#bilgi-al">Çekim Talebi Oluştur</a>
+            <a class="btn secondary" href="#nasil">Nasıl Çalışır?</a>
+          </div>
+          <div class="trust-row">
+            <span>✓ Mobil uyumlu</span>
+            <span>✓ Tek linkle paylaşım</span>
+            <span>✓ QR / NFC ile kullanım</span>
+          </div>
+        </div>
+
+        <div class="tour-preview" aria-label="360 derece sanal tur önizlemesi">
+          <div class="tour-top">
+            <span class="live-dot"></span>
+            <span>Sanal Tur Önizlemesi</span>
+            <b>360°</b>
+          </div>
+          <div class="tour-scene">
+            <div class="wall wall-left"></div>
+            <div class="wall wall-right"></div>
+            <div class="floor"></div>
+            <span class="hotspot hotspot-a">+</span>
+            <span class="hotspot hotspot-b">+</span>
+            <span class="hotspot hotspot-c">+</span>
+            <div class="tour-hint">Sürükleyerek etrafı incele</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="nasil">
+      <div class="container">
+        <div class="section-head">
+          <span>NASIL ÇALIŞIR?</span>
+          <h2>3 adımda sanal turun hazır.</h2>
+          <p>İşletmenin bilgilerini gönder, çekim planını netleştirelim ve turunu yayına alalım.</p>
+        </div>
+
+        <div class="steps-grid">
+          <article>
+            <b>1</b>
+            <h3>Talebini Gönder</h3>
+            <p>İşletmenin konumunu, mekan türünü ve yaklaşık büyüklüğünü paylaş.</p>
+          </article>
+          <article>
+            <b>2</b>
+            <h3>Çekim Planı</h3>
+            <p>Uygun çekim noktalarını ve kapsamı birlikte belirleyelim.</p>
+          </article>
+          <article>
+            <b>3</b>
+            <h3>Yayınla & Paylaş</h3>
+            <p>Sanal tur bağlantını web sitesi, QR/NFC kart ve DijiyeSor profilinde kullan.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft">
+      <div class="container">
+        <div class="section-head">
+          <span>NELER DAHİL?</span>
+          <h2>Tek çekimden daha fazlası.</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article>
+            <div class="feature-icon">360°</div>
+            <h3>Gezilebilir İç Mekan</h3>
+            <p>Mekanın farklı noktalarından birbirine bağlı panoramik görüntüler.</p>
+          </article>
+          <article>
+            <div class="feature-icon">↗</div>
+            <h3>Tek Sanal Tur Linki</h3>
+            <p>Müşterilerin telefondan veya bilgisayardan kolayca açabileceği paylaşılabilir bağlantı.</p>
+          </article>
+          <article>
+            <div class="feature-icon">QR</div>
+            <h3>QR / NFC Kullanımı</h3>
+            <p>Kart, masa üstü materyal, afiş ve NFC kart üzerinden doğrudan tura yönlendirme.</p>
+          </article>
+          <article>
+            <div class="feature-icon">D</div>
+            <h3>DijiyeSor Entegrasyonu</h3>
+            <p>Firma profilinde 360° alanı ile müşteriye daha güçlü ve güven veren bir tanıtım.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container use-layout">
+        <div>
+          <div class="section-head compact">
+            <span>KİMLER İÇİN?</span>
+            <h2>Fiziksel mekanı olan işletmeler için.</h2>
+            <p>Özellikle müşterinin gelmeden önce ortamı görmek istediği sektörlerde etkili.</p>
+          </div>
+          <div class="tag-list">
+            <span>Anaokulu & Kreş</span>
+            <span>Kurs Merkezi</span>
+            <span>Sürücü Kursu</span>
+            <span>Öğrenci Yurdu</span>
+            <span>Restoran & Kafe</span>
+            <span>Otel & Pansiyon</span>
+            <span>Emlak Ofisi</span>
+            <span>Güzellik Merkezi</span>
+            <span>Showroom</span>
+          </div>
+        </div>
+
+        <aside class="why-card">
+          <span class="why-kicker">NEDEN 360°?</span>
+          <h3>Müşteri gelmeden önce ortamı görür.</h3>
+          <ul>
+            <li>Mekanı daha şeffaf ve anlaşılır gösterir.</li>
+            <li>Konum ve mekan hakkında önceden fikir verir.</li>
+            <li>Firma profilini sıradan liste görünümünden ayırır.</li>
+            <li>QR ve NFC ile fiziksel materyallere bağlanabilir.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="cta-section" id="bilgi-al">
+      <div class="container cta-card">
+        <div>
+          <span class="eyebrow light">360° ÇEKİM TALEBİ</span>
+          <h2>İşletmen için 360° çekim planlayalım.</h2>
+          <p>Firmanı tanıt sayfasından kaydını oluştur. Çekim talebini ve mekan bilgilerini birlikte netleştirelim.</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn white" href="firma-ekle.html#basvuru">Bilgi Al</a>
+          <a class="btn glass" href="firma-ekle.html">Firmanı Tanıt</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>© 2026 DijiyeSor</span>
+      <a href="index.html">Ana Sayfa</a>
+    </div>
+  </footer>
+</body>
+</html>
