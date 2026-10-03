@@ -157,7 +157,7 @@ function renderCampaignFirmResults(query){
 }
 function openCampaignModal(id){
   const f=firms.find(x=>x.id===id)||{};
-  $("campaignFirm").value=id||"";$("campaignFirmSearch").value=f.name||"";$("campaignFirmResults").classList.add("hidden");$("campaignBadge").value=f.campaignBadge||"Kampanya";$("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);$("campaignTitle").value=f.campaignTitle||"";$("campaignText").value=f.campaignText||"";$("campaignImageUrl").value=f.campaignImageUrl||"";$("campaignUrl").value=f.campaignUrl||"";$("campaignActive").checked=Boolean(f.campaignActive);$("campaignSponsored").checked=Boolean(f.sponsored);
+  $("campaignFirm").value=id||"";$("campaignFirmSearch").value=f.name||"";$("campaignFirmResults").classList.add("hidden");$("campaignBadge").value=f.campaignBadge||"Kampanya";$("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);$("campaignTitle").value=f.campaignTitle||"";$("campaignText").value=f.campaignText||"";$("campaignImageUrl").value=f.campaignImageUrl||"";$("campaignUrl").value=f.campaignUrl||"";$("campaignActive").checked=Boolean(f.campaignActive);$("campaignSponsored").checked=Boolean(f.sponsored||f.campaignSponsorRequested);
   $("campaignFormMessage").className="message hidden";$("campaignModal").classList.remove("hidden");
 }
 $("newCampaignBtn").addEventListener("click",()=>openCampaignModal(""));
@@ -185,7 +185,7 @@ $("campaignFirmSearch").addEventListener("input",()=>{
 $("campaignForm").addEventListener("submit",async e=>{
   e.preventDefault();const id=$("campaignFirm").value,msg=$("campaignFormMessage");if(!id)return;
   try{
-    await db.collection("institutions").doc(id).set({campaignActive:$("campaignActive").checked,campaignBadge:$("campaignBadge").value.trim()||"Kampanya",campaignEnd:$("campaignEnd").value,campaignTitle:$("campaignTitle").value.trim(),campaignText:$("campaignText").value.trim(),campaignImageUrl:$("campaignImageUrl").value.trim(),campaignUrl:$("campaignUrl").value.trim(),sponsored:$("campaignSponsored").checked,campaignUpdatedAt:new Date().toISOString()},{merge:true});
+    await db.collection("institutions").doc(id).set({campaignActive:$("campaignActive").checked,campaignBadge:$("campaignBadge").value.trim()||"Kampanya",campaignEnd:$("campaignEnd").value,campaignTitle:$("campaignTitle").value.trim(),campaignText:$("campaignText").value.trim(),campaignImageUrl:$("campaignImageUrl").value.trim(),campaignUrl:$("campaignUrl").value.trim(),sponsored:$("campaignSponsored").checked,campaignSponsorRequested:false,campaignApprovalStatus:"approved",campaignApprovedAt:new Date().toISOString(),campaignUpdatedAt:new Date().toISOString()},{merge:true});
     msg.className="message success";msg.textContent="Kampanya kaydedildi.";await loadFirms();renderAll();setTimeout(()=>$("campaignModal").classList.add("hidden"),600);
   }catch(err){msg.className="message error";msg.textContent=err.message||"Kaydedilemedi."}
 });
@@ -194,7 +194,7 @@ function renderCampaigns(){
   if(campaignFilter==="active")list=list.filter(isCampaignActive);
   if(campaignFilter==="sponsored")list=list.filter(f=>f.sponsored);
   if(campaignFilter==="expired")list=list.filter(f=>f.campaignActive&&f.campaignEnd&&new Date(f.campaignEnd)<new Date());
-  $("campaignList").innerHTML=list.length?list.map(f=>'<article class="campaign-card '+(f.sponsored?"sponsored":"")+'"><div class="campaign-card-head"><span>'+(f.sponsored?"SPONSOR":"KAMPANYA")+'</span><span class="status-pill">'+(isCampaignActive(f)?"Yayında":"Kapalı")+'</span></div><h3>'+esc(f.name)+'</h3><p>'+esc(f.campaignTitle||"Sponsorlu firma profili")+'</p><small>'+esc(f.campaignEnd?("Bitiş: "+f.campaignEnd):"Bitiş tarihi yok")+'</small><div class="campaign-actions"><button data-campaign-firm="'+esc(f.id)+'">Düzenle</button><button data-stop-campaign="'+esc(f.id)+'">Yayından Kaldır</button></div></article>').join(""):'<div class="empty">Bu filtrede kampanya yok.</div>';
+  $("campaignList").innerHTML=list.length?list.map(f=>{const pending=String(f.campaignApprovalStatus||"")==="pending";const sponsor=Boolean(f.sponsored||f.campaignSponsorRequested);return '<article class="campaign-card '+(sponsor?"sponsored":"")+'"><div class="campaign-card-head"><span>'+(pending?(f.campaignSponsorRequested?"SPONSOR TALEBİ":"ONAY BEKLİYOR"):(f.sponsored?"SPONSOR":"KAMPANYA"))+'</span><span class="status-pill">'+(pending?"Onay Bekliyor":(isCampaignActive(f)?"Yayında":"Kapalı"))+'</span></div><h3>'+esc(f.name)+'</h3><p>'+esc(f.campaignTitle||"Sponsorlu firma profili")+'</p><small>'+esc(f.campaignEnd?("Bitiş: "+f.campaignEnd):"Bitiş tarihi yok")+'</small><div class="campaign-actions"><button data-campaign-firm="'+esc(f.id)+'">'+(pending?"İncele & Onayla":"Düzenle")+'</button><button data-stop-campaign="'+esc(f.id)+'">Yayından Kaldır</button></div></article>'}).join(""):'<div class="empty">Bu filtrede kampanya yok.</div>';
 }
 document.querySelectorAll("[data-campaign-filter]").forEach(b=>b.addEventListener("click",()=>{campaignFilter=b.dataset.campaignFilter;document.querySelectorAll("[data-campaign-filter]").forEach(x=>x.classList.toggle("active",x===b));renderCampaigns()}));
 
