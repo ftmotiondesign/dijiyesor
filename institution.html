@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kurum Paneli | DijiyeSor</title>
+  <meta name="description" content="DijiyeSor kurum paneli">
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--brand:#1769ff;--brand2:#0e52cc;--ok:#15803d;--warn:#a16207;--danger:#b91c1c}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    button,input,textarea{font:inherit}.hidden{display:none!important}
+    .shell{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+    .side{background:#0f172a;color:#fff;padding:22px 18px;display:flex;flex-direction:column;gap:20px}
+    .brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;color:#fff;text-decoration:none}.brand b{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;color:#0f172a}
+    .account{padding:14px;border-radius:16px;background:rgba(255,255,255,.08)}.account strong,.account small{display:block}.account small{margin-top:4px;color:#cbd5e1;word-break:break-word}
+    .nav{display:grid;gap:8px}.nav button{border:0;border-radius:12px;padding:12px 14px;text-align:left;background:transparent;color:#cbd5e1;cursor:pointer}.nav button.active,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
+    .side-foot{margin-top:auto;display:grid;gap:8px}.side-foot a,.side-foot button{border:1px solid rgba(255,255,255,.15);background:transparent;color:#fff;border-radius:12px;padding:11px 12px;text-decoration:none;cursor:pointer;text-align:center}
+    .main{padding:28px;max-width:1200px;width:100%;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.top h1{margin:0 0 6px;font-size:30px}.top p{margin:0;color:var(--muted)}
+    .status{padding:9px 12px;border-radius:999px;font-weight:700;font-size:13px;background:#dcfce7;color:var(--ok)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.stat{padding:18px}.stat span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}.stat strong{font-size:20px}
+    .card{padding:22px;margin-bottom:18px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.card-head h2{font-size:20px;margin:0}.card-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid.three{grid-template-columns:repeat(3,1fr)}label{display:grid;gap:7px;font-size:13px;font-weight:700;color:#344054}input,textarea{width:100%;border:1px solid #d7dce5;border-radius:11px;padding:11px 12px;background:#fff;color:var(--text)}textarea{resize:vertical}
+    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:700;cursor:pointer}.primary{background:var(--brand);color:white}.primary:hover{background:var(--brand2)}.secondary{background:#eef2f7;color:#243049}
+    .notice{padding:12px 14px;border-radius:12px;margin-top:12px;font-size:14px}.notice.success{background:#dcfce7;color:#166534}.notice.error{background:#fee2e2;color:#991b1b}
+    .view{display:none}.view.active{display:block}.empty{color:var(--muted);padding:20px 0}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.service{border:1px solid var(--line);border-radius:14px;padding:16px}.service strong,.service small{display:block}.service small{color:var(--muted);margin-top:5px}
+    .mobile-head{display:none}.login-block{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card{max-width:460px;width:100%;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}.login-card h1{margin:10px 0 8px}.login-card p{color:var(--muted)}
+    @media(max-width:850px){.shell{display:block}.side{display:none}.mobile-head{display:flex;align-items:center;justify-content:space-between;background:#0f172a;color:#fff;padding:14px 16px}.mobile-head .brand b{width:32px;height:32px}.main{padding:18px}.grid,.form-grid,.form-grid.three,.service-grid{grid-template-columns:1fr}.top{align-items:center}.top h1{font-size:24px}}
+  </style>
+</head>
+<body>
+  <div id="loadingView" class="login-block"><div class="login-card"><div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div><h1>Kurum Paneli</h1><p>Hesabınız kontrol ediliyor...</p></div></div>
+
+  <div id="deniedView" class="login-block hidden">
+    <div class="login-card">
+      <div class="brand" style="justify-content:center;color:#172033"><b style="background:#172033;color:#fff">D</b><span>DijiyeSor</span></div>
+      <h1 id="deniedTitle">Kurum paneline erişilemiyor</h1>
+      <p id="deniedText">Hesabınızın durumunu kontrol edin.</p>
+      <a class="btn primary" style="display:inline-block;text-decoration:none;margin-top:10px" href="firma-ekle.html?kurumgiris=1">Kurum Girişine Dön</a>
+    </div>
+  </div>
+
+  <div id="appView" class="hidden">
+    <div class="mobile-head">
+      <a class="brand" href="index.html"><b>D</b><span>DijiyeSor</span></a>
+      <button id="mobileLogout" class="btn secondary">Çıkış</button>
+    </div>
+    <div class="shell">
+      <aside class="side">
+        <a class="brand" href="index.html"><b>D</b><span>DijiyeSor</span></a>
+        <div class="account"><strong id="sideFirmName">Kurum</strong><small id="sideEmail"></small></div>
+        <nav class="nav">
+          <button class="active" data-view="overview">Genel Bakış</button>
+          <button data-view="profile">Firma Bilgileri</button>
+          <button data-view="services">Hizmetler</button>
+        </nav>
+        <div class="side-foot">
+          <a href="index.html">Siteyi Gör</a>
+          <button id="logoutBtn">Çıkış Yap</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="top">
+          <div><h1 id="pageTitle">Genel Bakış</h1><p id="pageSubtitle">Kurum bilgilerinizi ve görünürlüğünüzü yönetin.</p></div>
+          <span class="status">Aktif Kurum</span>
+        </div>
+
+        <section class="view active" data-panel="overview">
+          <div class="grid">
+            <article class="stat"><span>Kurum Durumu</span><strong id="statStatus">Aktif</strong></article>
+            <article class="stat"><span>Konum</span><strong id="statLocation">-</strong></article>
+            <article class="stat"><span>Hesap</span><strong>Onaylandı</strong></article>
+          </div>
+          <section class="card">
+            <div class="card-head"><div><h2 id="welcomeTitle">Hoş geldiniz</h2><p>DijiyeSor üzerindeki kurum profiliniz bu hesaba bağlıdır.</p></div></div>
+            <div class="service-grid">
+              <article class="service"><strong>Firma Profiliniz</strong><small>Telefon, adres, web sitesi, açıklama ve sosyal medya bilgilerinizi güncelleyin.</small></article>
+              <article class="service"><strong>QR / NFC</strong><small>Akıllı firma kartı ve QR/NFC özellikleri kurum hesabınıza bağlanabilir.</small></article>
+              <article class="service"><strong>Kampanya</strong><small>Kampanya ve sponsorlu görünürlük yönetimi sonraki adımda bu panele bağlanacak.</small></article>
+              <article class="service"><strong>360° & Video</strong><small>Konum videosu, tanıtım videosu ve 360° tur alanları kurum profilinize eklenebilir.</small></article>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-panel="profile">
+          <section class="card">
+            <div class="card-head"><div><h2>Firma Bilgileri</h2><p>Değişiklikler kaydedildiğinde DijiyeSor firma profilinize uygulanır.</p></div></div>
+            <form id="profileForm">
+              <div class="form-grid">
+                <label>Firma adı<input id="name" required></label>
+                <label>Telefon<input id="phone"></label>
+              </div>
+              <div class="form-grid">
+                <label>WhatsApp<input id="whatsapp"></label>
+                <label>Web sitesi<input id="website"></label>
+              </div>
+              <div class="form-grid">
+                <label>Instagram<input id="instagram"></label>
+                <label>İl / İlçe<input id="locationReadonly" readonly></label>
+              </div>
+              <label>Adres<input id="address"></label>
+              <label>Açıklama<textarea id="description" rows="5"></textarea></label>
+              <div id="profileMessage" class="notice hidden"></div>
+              <div class="actions"><button type="submit" class="btn primary">Değişiklikleri Kaydet</button></div>
+            </form>
+          </section>
+        </section>
+
+        <section class="view" data-panel="services">
+          <section class="card">
+            <div class="card-head"><div><h2>Hizmetler</h2><p>Kurum hesabınıza bağlanacak DijiyeSor hizmetleri.</p></div></div>
+            <div class="service-grid">
+              <article class="service"><strong>QR / NFC Kart</strong><small>Akıllı kart siparişi ve kart aktivasyonu yönetim paneliyle eşleştirilebilir.</small></article>
+              <article class="service"><strong>Konum Videosu</strong><small>Firmanızın yol ve çevre tanıtım videosu profilinizde yayınlanabilir.</small></article>
+              <article class="service"><strong>360° Mekan Turu</strong><small>Mekan turu firma detay sayfasında gösterilebilir.</small></article>
+              <article class="service"><strong>Sponsor & Kampanya</strong><small>Arama sonuçlarında ve fırsatlar alanında öne çıkma seçenekleri.</small></article>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const panelApp=firebase.apps.find(a=>a.name==="dijiyesorRegistration")||firebase.initializeApp(firebaseConfig,"dijiyesorRegistration");
+const auth=panelApp.auth();
+const db=panelApp.firestore();
+let account=null, institution=null, institutionId="";
+
+const $=id=>document.getElementById(id);
+const show=id=>$(id).classList.remove("hidden");
+const hide=id=>$(id).classList.add("hidden");
+
+function deny(title,text){
+  hide("loadingView");hide("appView");show("deniedView");
+  $("deniedTitle").textContent=title;$("deniedText").textContent=text;
+}
+function fill(){
+  $("sideFirmName").textContent=institution?.name||account?.institutionName||"Kurum";
+  $("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
+  $("welcomeTitle").textContent=(institution?.name||account?.institutionName||"Kurum")+" paneli";
+  $("statStatus").textContent=String(institution?.status||"active")==="passive"?"Pasif":"Aktif";
+  $("statLocation").textContent=[institution?.city,institution?.district].filter(Boolean).join(" / ")||"-";
+  $("name").value=institution?.name||account?.institutionName||"";
+  $("phone").value=institution?.phone||"";
+  $("whatsapp").value=institution?.whatsapp||"";
+  $("website").value=institution?.website||"";
+  $("instagram").value=institution?.instagram||"";
+  $("locationReadonly").value=[institution?.city,institution?.district].filter(Boolean).join(" / ");
+  $("address").value=institution?.address||"";
+  $("description").value=institution?.description||"";
+}
+auth.onAuthStateChanged(async user=>{
+  if(!user){deny("Oturum bulunamadı","Kurum paneline girmek için kurum hesabınızla giriş yapın.");return}
+  try{
+    const accountDoc=await db.collection("institutionUsers").doc(user.uid).get();
+    if(!accountDoc.exists){await auth.signOut();deny("Kurum hesabı bulunamadı","Bu kullanıcıya bağlı bir kurum hesabı bulunamadı.");return}
+    account=accountDoc.data()||{};
+    if(account.status!=="approved"){
+      const message=account.status==="rejected"?"Kurum başvurunuz onaylanmadı.":"Kurum başvurunuz henüz yönetici onayında.";
+      await auth.signOut();deny("Kurum hesabı aktif değil",message);return;
+    }
+    institutionId=account.institutionId||"";
+    if(!institutionId){deny("Kurum bağlantısı eksik","Hesabınız onaylı ancak bağlı kurum kaydı bulunamadı.");return}
+    const instDoc=await db.collection("institutions").doc(institutionId).get();
+    if(!instDoc.exists){deny("Kurum profili bulunamadı","Hesabınıza bağlı firma profili bulunamadı.");return}
+    institution={id:instDoc.id,...instDoc.data()};
+    fill();hide("loadingView");hide("deniedView");show("appView");
+  }catch(err){
+    console.error(err);deny("Panel açılamadı",err.message||"Kurum bilgileri alınamadı.");
+  }
+});
+
+document.querySelectorAll("[data-view]").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x===btn));
+  document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x.dataset.panel===btn.dataset.view));
+  const titles={overview:["Genel Bakış","Kurum bilgilerinizi ve görünürlüğünüzü yönetin."],profile:["Firma Bilgileri","DijiyeSor'da görünen bilgilerinizi güncelleyin."],services:["Hizmetler","QR/NFC, 360°, video ve sponsor seçenekleri."]};
+  $("pageTitle").textContent=titles[btn.dataset.view][0];$("pageSubtitle").textContent=titles[btn.dataset.view][1];
+}));
+
+$("profileForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=$("profileMessage");msg.className="notice";msg.textContent="Kaydediliyor...";
+  try{
+    const data={
+      name:$("name").value.trim(),
+      phone:$("phone").value.trim(),
+      whatsapp:$("whatsapp").value.trim(),
+      website:$("website").value.trim(),
+      instagram:$("instagram").value.trim(),
+      address:$("address").value.trim(),
+      description:$("description").value.trim(),
+      updatedAt:new Date().toISOString()
+    };
+    await db.collection("institutions").doc(institutionId).set(data,{merge:true});
+    await db.collection("institutionUsers").doc(auth.currentUser.uid).set({institutionName:data.name},{merge:true});
+    institution={...institution,...data};account={...account,institutionName:data.name};fill();
+    msg.className="notice success";msg.textContent="Kaydedildi. Firma bilgileriniz güncellendi.";
+  }catch(err){msg.className="notice error";msg.textContent=err.message||"Bilgiler kaydedilemedi."}
+});
+async function logout(){try{await auth.signOut()}finally{window.location.href="firma-ekle.html?kurumgiris=1"}}
+$("logoutBtn").addEventListener("click",logout);$("mobileLogout").addEventListener("click",logout);
+</script>
+</body>
+</html>
