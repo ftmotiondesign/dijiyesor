@@ -175,7 +175,7 @@
       <button class="lead-modal-close" type="button" data-close-tour-lead aria-label="Kapat">×</button>
       <span class="lead-modal-kicker">360° ÇEKİM TALEBİ</span>
       <h2 id="tourLeadTitle">Mekânınız için bilgi alalım.</h2>
-      <p>Temel bilgileri bırakın. Sonraki adımda başvurunuzu tamamlayabilirsiniz.</p>
+      <p>Bilgileri doldurun. Talebiniz doğrudan yönetim paneline düşsün.</p>
 
       <form id="tourLeadForm" class="lead-form">
         <label>İşletme / kurum adı
@@ -192,11 +192,20 @@
             <input id="tourLeadCity" maxlength="60" placeholder="Örn. Çanakkale">
           </label>
         </div>
+        <div class="lead-form-grid">
+          <label>E-posta
+            <input id="tourLeadEmail" type="email" required maxlength="160" placeholder="ornek@firma.com" autocomplete="email">
+          </label>
+          <label>Şifre
+            <input id="tourLeadPassword" type="password" required minlength="8" placeholder="En az 8 karakter" autocomplete="new-password">
+          </label>
+        </div>
         <label>Kısa not
           <textarea id="tourLeadNote" maxlength="500" rows="3" placeholder="Mekân türü, yaklaşık büyüklük veya çekimle ilgili notunuz..."></textarea>
         </label>
-        <button class="lead-submit" type="submit">Talebi Devam Ettir</button>
-        <small>Bilgileriniz üyelik başvuru formuna aktarılır ve 360° çekim talebi olarak işaretlenir.</small>
+        <div id="tourLeadMessage" class="lead-message hidden"></div>
+        <button class="lead-submit" type="submit">360° Çekim Talebi Gönder</button>
+        <small>Talebiniz yönetim paneline kaydedilir. Oluşturduğunuz e-posta ve şifre daha sonra kurum girişinde kullanılabilir.</small>
       </form>
     </div>
   </div>
@@ -208,14 +217,19 @@
     </div>
   </footer>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
     (()=>{
       const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
       if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
       const db=firebase.firestore();
+      const registrationApp=firebase.apps.find(a=>a.name==="dijiyesor360Registration")||firebase.initializeApp(firebaseConfig,"dijiyesor360Registration");
+      const registrationAuth=registrationApp.auth();
+      const registrationDb=registrationApp.firestore();
       const modal=document.getElementById("tourLeadModal");
       const form=document.getElementById("tourLeadForm");
+      const message=document.getElementById("tourLeadMessage");
       const open=()=>{modal.classList.remove("hidden");document.body.style.overflow="hidden";setTimeout(()=>document.getElementById("tourLeadBusiness")?.focus(),50)};
       const close=()=>{modal.classList.add("hidden");document.body.style.overflow=""};
 
@@ -226,21 +240,97 @@
       form?.addEventListener("submit",async e=>{
         e.preventDefault();
         const submit=form.querySelector(".lead-submit");
-        const payload={
-          businessName:document.getElementById("tourLeadBusiness").value.trim(),
-          contactName:document.getElementById("tourLeadContact").value.trim(),
-          phone:document.getElementById("tourLeadPhone").value.trim(),
-          city:document.getElementById("tourLeadCity").value.trim(),
-          note:document.getElementById("tourLeadNote").value.trim(),
-          source:"360-mekan",
-          status:"new",
-          createdAt:new Date().toISOString(),
-          updatedAt:new Date().toISOString()
-        };
-        sessionStorage.setItem("dijiyesor360Lead",JSON.stringify(payload));
+        const businessName=document.getElementById("tourLeadBusiness").value.trim();
+        const contactName=document.getElementById("tourLeadContact").value.trim();
+        const phone=document.getElementById("tourLeadPhone").value.trim();
+        const city=document.getElementById("tourLeadCity").value.trim();
+        const email=document.getElementById("tourLeadEmail").value.trim().toLowerCase();
+        const password=document.getElementById("tourLeadPassword").value;
+        const note=document.getElementById("tourLeadNote").value.trim();
+
+        if(password.length<8){
+          message.className="lead-message error";
+          message.textContent="Şifre en az 8 karakter olmalı.";
+          return;
+        }
+
         submit.disabled=true;
-        submit.textContent="Devam ediliyor...";
-        window.location.href="firma-ekle.html?service=360#basvuru";
+        submit.textContent="Gönderiliyor...";
+        message.className="lead-message";
+        message.textContent="Talebiniz kaydediliyor...";
+
+        let createdUser=null;
+        try{
+          if(registrationAuth.currentUser)await registrationAuth.signOut();
+          const credential=await registrationAuth.createUserWithEmailAndPassword(email,password);
+          createdUser=credential.user;
+
+          const applicationRef=registrationDb.collection("institutionApplications").doc();
+          const date=new Date().toISOString();
+
+          await applicationRef.set({
+            name:businessName,
+            contactName,
+            accountEmail:email,
+            authUid:createdUser.uid,
+            requestedInstitutionId:applicationRef.id,
+            mainCategory:"diger",
+            subCategory:"diger",
+            category:"diger",
+            city,
+            district:"",
+            address:"",
+            phone,
+            whatsapp:"",
+            website:"",
+            instagram:"",
+            description:"",
+            promotionInterests:["360_mekan_cekimi"],
+            wantsPhoto:false,
+            wantsVideo:false,
+            wants360Tour:true,
+            wantsVip:false,
+            wantsQrNfc:false,
+            wantsCampaign:false,
+            wantsSponsoredCampaign:false,
+            campaignRequest:null,
+            requestNote:note,
+            status:"new",
+            date,
+            source:"dijiyesor-360-popup"
+          });
+
+          await registrationDb.collection("institutionUsers").doc(createdUser.uid).set({
+            email,
+            institutionId:applicationRef.id,
+            institutionName:businessName,
+            contactName,
+            city,
+            district:"",
+            status:"pending",
+            date
+          });
+
+          await registrationAuth.signOut();
+          sessionStorage.removeItem("dijiyesor360Lead");
+          form.reset();
+          message.className="lead-message success";
+          message.innerHTML="<strong>360° çekim talebiniz alındı.</strong><br>Talebiniz yönetim paneline düştü. Sizinle iletişime geçilecek.";
+          submit.textContent="Talep Alındı";
+          setTimeout(()=>{submit.disabled=false;submit.textContent="360° Çekim Talebi Gönder"},2500);
+        }catch(err){
+          console.error(err);
+          if(createdUser){try{await createdUser.delete()}catch(_){}}
+          const map={
+            "auth/email-already-in-use":"Bu e-posta ile daha önce hesap oluşturulmuş. Farklı bir e-posta kullanın veya kurum girişini kullanın.",
+            "auth/invalid-email":"E-posta adresini kontrol edin.",
+            "auth/weak-password":"Şifre en az 8 karakter olmalı."
+          };
+          message.className="lead-message error";
+          message.textContent=map[err.code]||("Talep kaydedilemedi: "+(err.message||"Bilinmeyen hata"));
+          submit.disabled=false;
+          submit.textContent="360° Çekim Talebi Gönder";
+        }
       });
     })();
   </script>
