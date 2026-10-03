@@ -447,3 +447,81 @@ button,input,select{font:inherit}
   .home-360-primary,.home-360-secondary{width:100%}
   .home-360-visual{min-height:180px}
 }
+
+
+/* Ana sayfa 360° alanı - kompakt sürüm */
+.home-main{gap:18px;padding-bottom:72px}
+.home-360-feature{display:none!important}
+.home-360-strip{
+  width:min(820px,100%);
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px 12px;
+  border:1px solid #e1e8f1;
+  border-radius:18px;
+  background:#fbfdff;
+  box-shadow:0 6px 20px rgba(28,67,110,.05);
+}
+.home-360-strip-icon{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:#1677ff;
+  color:#fff;
+  font-size:12px;
+  font-weight:1000;
+  box-shadow:0 6px 14px rgba(22,119,255,.18);
+}
+.home-360-strip-copy{
+  min-width:0;
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  gap:2px;
+  text-align:left;
+}
+.home-360-strip-copy strong{font-size:14px;color:#1d2a40}
+.home-360-strip-copy span{font-size:11px;color:#7a879a}
+.home-360-strip-primary,
+.home-360-strip-secondary{
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:11px;
+  padding:0 13px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.home-360-strip-primary{background:#1677ff;color:#fff}
+.home-360-strip-secondary{background:#f1f6fc;color:#31506f}
+.home-360-strip-primary:hover{background:#0869ea}
+.home-360-strip-secondary:hover{background:#eaf2fb;color:#1677ff}
+
+@media(max-width:760px){
+  .home-360-strip{
+    width:100%;
+    display:grid;
+    grid-template-columns:44px 1fr;
+    gap:10px;
+    padding:10px;
+  }
+  .home-360-strip-primary{
+    grid-column:1/-1;
+    width:100%;
+  }
+  .home-360-strip-secondary{
+    grid-column:1/-1;
+    min-height:auto;
+    padding:4px 0 2px;
+    background:transparent;
+    justify-content:flex-start;
+    color:#6c7b90;
+  }
+}
