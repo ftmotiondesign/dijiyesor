@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor | Firma Ara</title>
   <meta name="description" content="DijiyeSor ile firma, kurum, sektör veya hizmet ara.">
-  <link rel="stylesheet" href="styles.css?v=20261003-22">
+  <link rel="stylesheet" href="styles.css?v=20261003-23">
 </head>
 <body>
   <header class="topbar">
@@ -153,9 +153,58 @@
       ['diger','Diğer','Diğer kurum ve hizmetler']
     ];
 
-    homeCategoryGrid.innerHTML = homeCategories.map(([key,title,desc]) =>
-      '<button type="button" class="home-category-pick" data-home-sector="'+key+'"><strong>'+title+'</strong><span>'+desc+'</span></button>'
-    ).join('');
+    const homeSubcategories = {
+      egitim:[
+        ['kres','Kreş / Anaokulu'],
+        ['dershane','Dershane / Kurs Merkezi'],
+        ['surucu','Sürücü Kursu'],
+        ['ozel_ders','Özel Ders'],
+        ['dil_kursu','Dil Kursu'],
+        ['etut','Etüt Merkezi'],
+        ['ozel_okul','Özel Okul'],
+        ['yurt','Öğrenci Yurdu']
+      ],
+      otomotiv:[
+        ['oto_servis','Oto Servis'],['kaporta_boya','Kaporta & Boya'],['oto_elektrik','Oto Elektrik'],
+        ['lastik_jant','Lastik & Jant'],['oto_yikama','Oto Yıkama'],['ekspertiz','Ekspertiz'],
+        ['galeri','Oto Galeri'],['rentacar','Rent a Car'],['yedek_parca','Yedek Parça'],['motosiklet','Motosiklet']
+      ],
+      yemeicme:[
+        ['restoran','Restoran'],['kafe','Kafe'],['fastfood','Fast Food'],['pastane','Pastane'],
+        ['pizza','Pizza'],['doner','Döner'],['pide_lahmacun','Pide & Lahmacun'],['catering','Catering'],['ev_yemekleri','Ev Yemekleri']
+      ],
+      saglikguzellik:[
+        ['dis_klinigi','Diş Kliniği'],['klinik','Klinik'],['psikolog','Psikolog'],['diyetisyen','Diyetisyen'],
+        ['fizyoterapi','Fizyoterapi'],['guzellik','Güzellik Merkezi'],['kuafor','Kuaför'],['berber','Berber'],['spor','Spor Merkezi']
+      ],
+      evyapi:[
+        ['mobilya','Mobilya'],['dekorasyon','Dekorasyon'],['insaat','İnşaat'],['elektrikci','Elektrikçi'],
+        ['tesisatci','Tesisatçı'],['teknik_servis','Teknik Servis'],['klima','Klima'],['cam_balkon','Cam Balkon'],['temizlik','Temizlik']
+      ],
+      emlak:[['emlak_ofisi','Emlak Ofisi'],['konut','Konut'],['arsa','Arsa'],['ticari','Ticari Gayrimenkul'],['gunluk_kiralik','Günlük Kiralık']],
+      turizm:[['otel','Otel'],['pansiyon','Pansiyon'],['apart','Apart'],['bungalov','Bungalov'],['seyahat','Seyahat Acentesi'],['kamp','Kamp']],
+      organizasyonmedya:[['dugun_salonu','Düğün Salonu'],['organizasyon','Organizasyon'],['fotograf','Fotoğrafçı'],['video','Video Prodüksiyon'],['drone','Drone Çekimi'],['gelinlik','Gelinlik'],['cicekci','Çiçekçi'],['reklam','Reklam Ajansı']],
+      tasimacilik:[['nakliyat','Nakliyat'],['kurye','Kurye'],['sehirici','Şehir İçi Taşımacılık'],['depolama','Depolama']],
+      profesyonel:[['hukuk','Hukuk'],['muhasebe','Muhasebe'],['web','Web Tasarım'],['sosyal_medya','Sosyal Medya'],['teknoloji','Teknoloji'],['bilgisayar','Bilgisayar'],['danismanlik','Danışmanlık'],['veteriner','Veteriner'],['tarim','Tarım']],
+      alisveris:[['giyim','Giyim'],['ayakkabi','Ayakkabı'],['market','Market'],['elektronik','Elektronik'],['kirtasiye','Kırtasiye'],['petshop','Pet Shop'],['zuccaciye','Züccaciye'],['esnaf','Yerel Esnaf']],
+      diger:[['diger','Diğer']]
+    };
+
+    homeCategoryGrid.innerHTML = homeCategories.map(([key,title,desc]) => {
+      const subs=(homeSubcategories[key]||[]).map(([subKey,subTitle]) =>
+        '<button type="button" class="home-subcategory-pick" data-home-sector="'+key+'" data-home-subcategory="'+subKey+'">'+subTitle+'</button>'
+      ).join('');
+      return '<div class="home-category-item" data-category-item="'+key+'">'+
+        '<button type="button" class="home-category-pick" data-toggle-home-sector="'+key+'">'+
+          '<span class="home-category-copy"><strong>'+title+'</strong><span>'+desc+'</span></span>'+
+          '<span class="home-category-chevron">⌄</span>'+
+        '</button>'+
+        '<div class="home-subcategory-panel hidden">'+
+          '<button type="button" class="home-subcategory-pick all" data-home-sector="'+key+'">Tüm '+title+'</button>'+
+          subs+
+        '</div>'+
+      '</div>';
+    }).join('');
 
     function openHomeCategoryModal(){
       homeCategoryModal.classList.remove('hidden');
@@ -170,10 +219,28 @@
     document.querySelectorAll('[data-close-home-category]').forEach(el=>el.addEventListener('click',closeHomeCategoryModal));
     document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHomeCategoryModal(); });
 
+    homeCategoryGrid.querySelectorAll('[data-toggle-home-sector]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const item=btn.closest('.home-category-item');
+        const panel=item.querySelector('.home-subcategory-panel');
+        const wasOpen=!panel.classList.contains('hidden');
+
+        homeCategoryGrid.querySelectorAll('.home-subcategory-panel').forEach(p=>p.classList.add('hidden'));
+        homeCategoryGrid.querySelectorAll('.home-category-item').forEach(i=>i.classList.remove('open'));
+
+        if(!wasOpen){
+          panel.classList.remove('hidden');
+          item.classList.add('open');
+          setTimeout(()=>item.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+        }
+      });
+    });
+
     homeCategoryGrid.querySelectorAll('[data-home-sector]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const params=new URLSearchParams();
         params.set('sector',btn.dataset.homeSector);
+        if(btn.dataset.homeSubcategory) params.set('subCategory',btn.dataset.homeSubcategory);
         if(citySelect.value) params.set('city',citySelect.value);
         if(districtSelect.value) params.set('district',districtSelect.value);
         window.location.href='arama.html?'+params.toString();
