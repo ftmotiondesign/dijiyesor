@@ -227,6 +227,17 @@ const signupEmail=document.getElementById("accountEmail");
 const msg=document.getElementById("message");
 const signupPassword=document.getElementById("accountPassword");
 const signupPasswordToggle=document.getElementById("toggleSignupPassword");
+const tourLeadRaw=sessionStorage.getItem("dijiyesor360Lead");
+let tourLead=null;
+try{tourLead=tourLeadRaw?JSON.parse(tourLeadRaw):null}catch(_){tourLead=null}
+if(tourLead){
+  const nameEl=document.getElementById("name");
+  const contactEl=document.getElementById("contactName");
+  if(nameEl&&!nameEl.value)nameEl.value=tourLead.businessName||"";
+  if(contactEl&&!contactEl.value)contactEl.value=tourLead.contactName||"";
+  msg.className="notice";
+  msg.innerHTML="<strong>360° çekim talebi bilgilerin aktarıldı.</strong><br>Hesabını oluşturduğunda telefon, şehir ve not bilgilerin de başvuruya eklenecek.";
+}
 const passwordHint=document.getElementById("passwordHint");
 
 function setPasswordHint(){
@@ -326,26 +337,27 @@ document.getElementById("form").addEventListener("submit",async e=>{
       mainCategory:"diger",
       subCategory:"diger",
       category:"diger",
-      city:"",
+      city:tourLead?.city||"",
       district:"",
       address:"",
-      phone:"",
+      phone:tourLead?.phone||"",
       whatsapp:"",
       website:"",
       instagram:"",
       description:"",
-      promotionInterests:[],
+      promotionInterests:tourLead?["360_mekan_cekimi"]:[],
       wantsPhoto:false,
       wantsVideo:false,
-      wants360Tour:false,
+      wants360Tour:Boolean(tourLead),
       wantsVip:false,
       wantsQrNfc:false,
       wantsCampaign:false,
       wantsSponsoredCampaign:false,
       campaignRequest:null,
+      requestNote:tourLead?.note||"",
       status:"new",
       date,
-      source:"dijiyesor-simple-membership"
+      source:tourLead?"dijiyesor-360-lead":"dijiyesor-simple-membership"
     });
 
     await registrationDb.collection("institutionUsers").doc(createdUser.uid).set({
@@ -363,6 +375,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     msg.className="notice success";
     msg.innerHTML="<strong>Üyelik başvurunuz oluşturuldu.</strong><br>Yönetici onayından sonra e-posta ve şifrenizle <button type='button' class='inline-login-button' data-open-login>Kurum Girişi</button> yapabilirsiniz.";
     e.target.reset();
+    if(tourLead)sessionStorage.removeItem("dijiyesor360Lead");
     setPasswordHint();
     msg.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
