@@ -187,7 +187,7 @@
           district:row.district,
           address:row.address||"",
           phone:row.phone||"",
-          whatsapp:row.phone||"",
+          whatsapp:"",
           website:row.website||"",
           instagram:"",
           description:row.description||"",
