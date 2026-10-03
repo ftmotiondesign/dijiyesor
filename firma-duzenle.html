@@ -119,11 +119,23 @@ async function uploadSelectedCover(){
   const user=auth.currentUser;
   if(!user){box.className="message error";box.textContent="Yönetici oturumu bulunamadı. Panelden tekrar giriş yap.";return}
   try{
-    box.className="message";box.textContent="Görsel yükleniyor...";
-    const safe=String(file.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-");
+    const safe=String(file.name||"firma").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]+/g,"-");
     const ref=storage.ref("demo-card/"+user.uid+"/firms/"+id+"/"+Date.now()+"-"+safe);
-    const task=await ref.put(file,{contentType:file.type});
-    const url=await task.ref.getDownloadURL();
+    box.className="message";box.textContent="Yükleme hazırlanıyor...";
+    const task=ref.put(file,{contentType:file.type,customMetadata:{institutionId:id,uploadedBy:user.uid}});
+    const url=await new Promise((resolve,reject)=>{
+      let settled=false;
+      const timer=setTimeout(()=>{if(!settled){settled=true;try{task.cancel()}catch(_){};reject(new Error("Yükleme 45 saniye içinde tamamlanamadı. Firebase Storage bağlantısı yanıt vermiyor."))}},45000);
+      task.on("state_changed",
+        snap=>{
+          const pct=snap.totalBytes?Math.round((snap.bytesTransferred/snap.totalBytes)*100):0;
+          box.className="message";
+          box.textContent="Yükleniyor... %"+pct;
+        },
+        err=>{if(settled)return;settled=true;clearTimeout(timer);reject(err)},
+        async()=>{if(settled)return;settled=true;clearTimeout(timer);try{resolve(await task.snapshot.ref.getDownloadURL())}catch(err){reject(err)}}
+      );
+    });
     $("coverUrl").value=url;preview(url);
     await db.collection("institutions").doc(id).set({coverUrl:url,updatedAt:new Date().toISOString()},{merge:true});
     firm.coverUrl=url;
@@ -132,7 +144,11 @@ async function uploadSelectedCover(){
     console.error("Firma görseli yükleme hatası",e);
     box.className="message error";
     const code=e?.code?(" ["+e.code+"]"):"";
-    box.textContent="Görsel yüklenemedi"+code+": "+(e?.message||"Bilinmeyen hata");
+    let detail=e?.message||"Bilinmeyen hata";
+    if(e?.code==="storage/unauthorized")detail="Firebase Storage yükleme izni reddedildi.";
+    if(e?.code==="storage/canceled")detail="Yükleme zaman aşımı nedeniyle durduruldu.";
+    if(e?.code==="storage/retry-limit-exceeded")detail="Firebase Storage bağlantısı zaman aşımına uğradı.";
+    box.textContent="Görsel yüklenemedi"+code+": "+detail;
   }
 }
 $("coverFile").onchange=uploadSelectedCover;
