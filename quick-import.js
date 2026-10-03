@@ -156,6 +156,55 @@
 
     return {name,phone,address,location,website,instagram:instagramUrl,rating,reviewCount,plusCode,googleCategory};
   }
+  function splitMultipleGoogleBusinesses(raw){
+    const text=String(raw||"").trim();
+    if(!text)return [];
+
+    // En güvenilir biçim: Google/Markdown kopyasında her firma "# Firma Adı" ile başlar.
+    const headingMatches=[...text.matchAll(/^#{1,6}\s+.+$/gm)];
+    if(headingMatches.length>=2){
+      const chunks=[];
+      for(let i=0;i<headingMatches.length;i++){
+        const from=headingMatches[i].index;
+        const to=i+1<headingMatches.length?headingMatches[i+1].index:text.length;
+        const chunk=text.slice(from,to).trim();
+        if(chunk)chunks.push(chunk);
+      }
+      return chunks;
+    }
+
+    // Başlık işareti yoksa Google sonuç yapısından firma başlangıçlarını bul.
+    const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    const starts=[];
+    for(let i=0;i<lines.length;i++){
+      const cur=clean(lines[i]);
+      if(!cur||isNoise(cur)||phoneFrom(cur)||webFrom(cur)||isAddress(cur))continue;
+
+      const letters=(cur.match(/[A-Za-zÇĞİÖŞÜçğıöşü]/g)||[]).length;
+      if(letters<3)continue;
+      if(/^\(?\d+\)?$/.test(cur)||/^[1-5](?:[,.]\d)?/.test(cur))continue;
+
+      const look=lines.slice(i+1,i+5).map(clean);
+      const hasReview=look.some(x=>/^\(?\d[\d.]*\)?$/.test(x)||/^[1-5](?:[,.]\d)?/.test(x));
+      const hasCategory=look.some(x=>/sürücü kursu|surucu kursu|eğitim|egitim|anaokulu|kreş|kres|dershane|yurt|restoran|kafe|cafe|otel|emlak|oto servis|ekspertiz|kuaför|berber|klinik|kursu/i.test(x));
+
+      if(hasReview&&hasCategory)starts.push(i);
+    }
+
+    if(starts.length>=2){
+      const chunks=[];
+      for(let n=0;n<starts.length;n++){
+        const from=starts[n];
+        const to=n+1<starts.length?starts[n+1]:lines.length;
+        const chunk=lines.slice(from,to).join("\n").trim();
+        if(chunk)chunks.push(chunk);
+      }
+      return chunks;
+    }
+
+    return [];
+  }
+
   function parseInput(){
     const raw=String(q.value||"").trim();
     if(!raw)return [];
@@ -165,6 +214,11 @@
         return {name:p[0]||"",phone:p[1]||"",address:p[2]||"",website:p[3]||""};
       }).filter(x=>x.name);
     }
+    const multiGoogleBlocks=splitMultipleGoogleBusinesses(raw);
+    if(multiGoogleBlocks.length>1){
+      return multiGoogleBlocks.map(parseBlock).filter(x=>x&&x.name);
+    }
+
     const rawNorm=norm(raw);
     const mapsUiTerms=[
       "genel bakış","genel bakis","yorumlar","hakkında","hakkinda",
@@ -298,7 +352,12 @@
     });
     render();
     q.value="";
-    show(added+" firma listeye eklendi. Toplam "+queue.length+" firma hazır.","success");
+    show(
+      added
+        ? added+" firma listeye eklendi. Toplam "+queue.length+" firma hazır."
+        : "Bu firma zaten kontrol listesindeydi. Toplam "+queue.length+" firma hazır.",
+      added?"success":""
+    );
   });
 
   previewList.addEventListener("click",e=>{
