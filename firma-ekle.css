@@ -79,3 +79,14 @@
 .simple-password-row button{border:1px solid #cfe0f7;background:#eef5ff;color:#155db8;border-radius:10px;padding:0 13px;font-size:10.5px;font-weight:900;cursor:pointer}
 .simple-signup-form>button[type="submit"]{margin-top:3px}
 @media(max-width:620px){.simple-password-row{grid-template-columns:1fr}.simple-password-row button{height:40px}}
+
+
+.qr-card-link{
+  border-color:#c9dcf7!important;
+  background:#f7fbff!important;
+  color:#1677ff!important;
+}
+.qr-card-link:hover{
+  background:#eef6ff!important;
+  border-color:#9fc3f5!important;
+}
