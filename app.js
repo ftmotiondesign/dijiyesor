@@ -304,7 +304,6 @@ async function initHome(){
           '<span>Bir kategori seçin veya firma / hizmet adını yazarak arayın.</span>'+
           '<div class="smart-start-actions">'+
             '<button type="button" class="smart-start-primary" data-open-category-search>Kategori Seç</button>'+
-            '<button type="button" class="smart-start-secondary" data-focus-search>Firma / Hizmet Ara</button>'+
           '</div>'+
           '<div class="smart-start-quick">'+
             '<button type="button" data-quick-sub="surucu" data-quick-sector="egitim">Sürücü Kursu</button>'+
