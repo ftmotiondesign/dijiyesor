@@ -392,6 +392,16 @@
     const loc=[district,city].filter(Boolean).join(", ");
     return loc?row.name+"; "+loc+" bölgesinde hizmet veren "+(labels[main]||"yerel")+" işletmesidir.":row.name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
   }
+  function locationPartsFromAddress(address){
+    const s=String(address||"").trim();
+    if(!s)return null;
+    const m=s.match(/([^,;\/]+)\s*\/\s*([^,;]+?)(?:\s*,?\s*(?:Türkiye|Turkey))?$/i);
+    if(!m)return null;
+    const district=String(m[1]||"").trim();
+    const city=String(m[2]||"").trim().replace(/\s+Türkiye$/i,"").trim();
+    return district&&city?{district,city}:null;
+  }
+
   function normalizedPhone(v){
     return String(v||"").replace(/\D/g,"").replace(/^90/,"0");
   }
@@ -445,8 +455,11 @@
     if(!rows.length){show("Firma bilgileri okunamadı. Metni tekrar yapıştırın.","error");return}
     let added=0;
     rows.forEach(row=>{
-      const item={...row,city,district,mainCategory:main,subCategory:inferSub(row,main)};
-      item.description=desc(item,main,city,district);
+      const parsedLoc=locationPartsFromAddress(row.address);
+      const rowCity=parsedLoc?.city||city;
+      const rowDistrict=parsedLoc?.district||district;
+      const item={...row,city:rowCity,district:rowDistrict,mainCategory:main,subCategory:inferSub(row,main)};
+      item.description=desc(item,main,rowCity,rowDistrict);
       item.searchKeywords=autoKeywords(item,main,item.subCategory);
       if(queue.some(x=>sameBusiness(x,item)))return;
       queue.push(item);added++;
