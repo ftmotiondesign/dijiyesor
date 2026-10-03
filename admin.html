@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-14">
+  <link rel="stylesheet" href="admin.css?v=20261003-18">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -32,7 +32,7 @@
       <button class="nav-item" data-view="qr">QR / NFC Kartlar</button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
-      <button class="nav-item" data-view="media">360° & Medya</button>
+      <button class="nav-item" data-view="media">360° & Medya <b id="navTourLeadCount">0</b></button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
     </nav>
     <div class="sidebar-foot">
@@ -59,6 +59,7 @@
         <article><span>Aktif Sponsor</span><strong id="statSponsors">0</strong><small>öne çıkan firma</small></article>
         <article><span>Aktif Kampanya</span><strong id="statCampaigns">0</strong><small>yayındaki kampanya</small></article>
         <article><span>Bekleyen Başvuru</span><strong id="statApplications">0</strong><small>inceleme bekliyor</small></article>
+        <article><span>Yeni 360° Talebi</span><strong id="statTourLeads">0</strong><small>geri dönüş bekliyor</small></article>
       </div>
 
       <div class="overview-grid">
@@ -296,8 +297,24 @@ Gerçek mekanda hizmet"></textarea>
 
     <section class="view" data-panel-view="media">
       <div class="media-intro">
-        <span>360° & MEDYA</span><h2>Medya hizmeti fırsatlarını gör.</h2>
-        <p>360° tur, profesyonel fotoğraf veya video isteyen firmaları buradan takip et.</p>
+        <span>360° & MEDYA</span><h2>360° çekim talepleri ve medya fırsatları.</h2>
+        <p>Yeni gelen 360° çekim taleplerini burada takip et, durumunu değiştir ve WhatsApp ile iletişime geç.</p>
+      </div>
+      <section class="card tour-lead-card">
+        <div class="card-head">
+          <div><span>360° ÇEKİM TALEPLERİ</span><h2>Yeni talepler</h2></div>
+          <select id="tourLeadFilter">
+            <option value="">Tüm durumlar</option>
+            <option value="new">Yeni</option>
+            <option value="called">Arandı</option>
+            <option value="planned">Planlandı</option>
+            <option value="completed">Tamamlandı</option>
+          </select>
+        </div>
+        <div id="tourLeadList" class="tour-lead-list"></div>
+      </section>
+      <div class="media-intro media-secondary-intro">
+        <span>DİĞER MEDYA TALEPLERİ</span><h2>Firma başvurularındaki medya istekleri</h2>
       </div>
       <div id="mediaList" class="media-grid"></div>
     </section>
@@ -422,7 +439,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-17"></script>
+<script src="admin.js?v=20261003-18"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
