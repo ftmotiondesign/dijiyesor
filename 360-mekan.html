@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>360° Mekan Çekimi | DijiyeSor</title>
   <meta name="description" content="İşletmeler için 360° mekan çekimi, sanal tur ve DijiyeSor profil entegrasyonu.">
-  <link rel="stylesheet" href="360-mekan.css?v=20261003-2221">
+  <link rel="stylesheet" href="360-mekan.css?v=20261003-2230">
 </head>
 <body>
   <header class="topbar">
@@ -195,20 +195,15 @@
             <input id="tourLeadCity" maxlength="60" placeholder="Örn. Çanakkale">
           </label>
         </div>
-        <div class="lead-form-grid">
-          <label>E-posta
-            <input id="tourLeadEmail" type="email" required maxlength="160" placeholder="ornek@firma.com" autocomplete="email">
-          </label>
-          <label>Şifre
-            <input id="tourLeadPassword" type="password" required minlength="8" placeholder="En az 8 karakter" autocomplete="new-password">
-          </label>
-        </div>
+        <label>E-posta
+          <input id="tourLeadEmail" type="email" maxlength="160" placeholder="ornek@firma.com" autocomplete="email">
+        </label>
         <label>Kısa not
           <textarea id="tourLeadNote" maxlength="500" rows="3" placeholder="Mekân türü, yaklaşık büyüklük veya çekimle ilgili notunuz..."></textarea>
         </label>
         <div id="tourLeadMessage" class="lead-message hidden"></div>
         <button class="lead-submit" type="submit">360° Çekim Talebi Gönder</button>
-        <small>Talebiniz yönetim paneline kaydedilir. Oluşturduğunuz e-posta ve şifre daha sonra kurum girişinde kullanılabilir.</small>
+        <small>Talebiniz yönetim paneline kaydedilir. Üyelik veya şifre oluşturmanız gerekmez.</small>
       </form>
     </div>
   </div>
@@ -220,16 +215,12 @@
     </div>
   </footer>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
     (()=>{
       const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
       if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
       const db=firebase.firestore();
-      const registrationApp=firebase.apps.find(a=>a.name==="dijiyesor360Registration")||firebase.initializeApp(firebaseConfig,"dijiyesor360Registration");
-      const registrationAuth=registrationApp.auth();
-      const registrationDb=registrationApp.firestore();
       const modal=document.getElementById("tourLeadModal");
       const form=document.getElementById("tourLeadForm");
       const message=document.getElementById("tourLeadMessage");
@@ -248,34 +239,23 @@
         const phone=document.getElementById("tourLeadPhone").value.trim();
         const city=document.getElementById("tourLeadCity").value.trim();
         const email=document.getElementById("tourLeadEmail").value.trim().toLowerCase();
-        const password=document.getElementById("tourLeadPassword").value;
         const note=document.getElementById("tourLeadNote").value.trim();
-
-        if(password.length<8){
-          message.className="lead-message error";
-          message.textContent="Şifre en az 8 karakter olmalı.";
-          return;
-        }
 
         submit.disabled=true;
         submit.textContent="Gönderiliyor...";
         message.className="lead-message";
         message.textContent="Talebiniz kaydediliyor...";
 
-        let createdUser=null;
         try{
-          if(registrationAuth.currentUser)await registrationAuth.signOut();
-          const credential=await registrationAuth.createUserWithEmailAndPassword(email,password);
-          createdUser=credential.user;
-
-          const applicationRef=registrationDb.collection("institutionApplications").doc();
+          const applicationRef=db.collection("institutionApplications").doc();
           const date=new Date().toISOString();
 
           await applicationRef.set({
             name:businessName,
             contactName,
+            contactEmail:email,
             accountEmail:email,
-            authUid:createdUser.uid,
+            authUid:"",
             requestedInstitutionId:applicationRef.id,
             mainCategory:"diger",
             subCategory:"diger",
@@ -300,37 +280,18 @@
             requestNote:note,
             status:"new",
             date,
-            source:"dijiyesor-360-popup"
+            source:"dijiyesor-360-public-lead"
           });
 
-          await registrationDb.collection("institutionUsers").doc(createdUser.uid).set({
-            email,
-            institutionId:applicationRef.id,
-            institutionName:businessName,
-            contactName,
-            city,
-            district:"",
-            status:"pending",
-            date
-          });
-
-          await registrationAuth.signOut();
-          sessionStorage.removeItem("dijiyesor360Lead");
           form.reset();
           message.className="lead-message success";
-          message.innerHTML="<strong>360° çekim talebiniz alındı.</strong><br>Talebiniz yönetim paneline düştü. Sizinle iletişime geçilecek.";
+          message.innerHTML="<strong>360° çekim talebiniz alındı.</strong><br>Talebiniz yönetim paneline kaydedildi. Sizinle iletişime geçilecek.";
           submit.textContent="Talep Alındı";
           setTimeout(()=>{submit.disabled=false;submit.textContent="360° Çekim Talebi Gönder"},2500);
         }catch(err){
           console.error(err);
-          if(createdUser){try{await createdUser.delete()}catch(_){}}
-          const map={
-            "auth/email-already-in-use":"Bu e-posta ile daha önce hesap oluşturulmuş. Farklı bir e-posta kullanın veya kurum girişini kullanın.",
-            "auth/invalid-email":"E-posta adresini kontrol edin.",
-            "auth/weak-password":"Şifre en az 8 karakter olmalı."
-          };
           message.className="lead-message error";
-          message.textContent=map[err.code]||("Talep kaydedilemedi: "+(err.message||"Bilinmeyen hata"));
+          message.textContent="Talep kaydedilemedi: "+(err.message||"Bilinmeyen hata");
           submit.disabled=false;
           submit.textContent="360° Çekim Talebi Gönder";
         }
