@@ -267,6 +267,31 @@
       '</div>';
     }
 
+
+    function mapsQueryFor(d){
+      return String(d.address||d.googlePlusCode||d.location||[d.district,d.city].filter(Boolean).join(", ")||"").trim();
+    }
+    function mapsEmbedUrl(query){
+      if(!query)return "";
+      return "https://www.google.com/maps?q="+encodeURIComponent(query)+"&output=embed";
+    }
+    function mapsDirectionsUrl(query){
+      if(!query)return "";
+      return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(query);
+    }
+    function buildMapSection(d){
+      const query=mapsQueryFor(d);
+      if(!query)return "";
+      return '<section class="section-card map-section">'+
+        '<div class="section-title"><div><span>KONUM</span><h2>Harita & Yol Tarifi</h2></div></div>'+
+        '<div class="profile-map"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="'+esc(mapsEmbedUrl(query))+'" title="'+esc((d.name||"Firma")+" haritası")+'"></iframe></div>'+
+        '<div class="map-meta">'+
+          '<span>'+esc(d.address||d.googlePlusCode||d.location||[d.district,d.city].filter(Boolean).join(" · "))+'</span>'+
+          '<a href="'+esc(mapsDirectionsUrl(query))+'" target="_blank" rel="noopener">Yol Tarifi Al</a>'+
+        '</div>'+
+      '</section>';
+    }
+
     async function loadProfile(){
       if(!id){
         root.innerHTML='<section class="profile-error"><strong>Firma bulunamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
@@ -309,6 +334,7 @@
                 (campaignActive(d)?'<span class="profile-badge campaign">KAMPANYA</span>':'')+
               '</div>'+
               (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
+              (d.googleRating?'<div class="google-rating"><strong>★ '+esc(String(d.googleRating))+'</strong>'+(d.googleReviewCount?'<span>'+esc(String(d.googleReviewCount))+' Google yorumu</span>':'')+'</div>':'')+
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
             '</div>'+
             '<div class="hero-actions">'+
@@ -327,6 +353,7 @@
 
               buildCampaignSection(d)+
               buildTourSection(d)+
+              buildMapSection(d)+
               '<section class="section-card">'+
                 '<div class="section-title"><div><span>GALERİ</span><h2>Fotoğraf & Video</h2></div></div>'+
                 buildGallery(d)+
