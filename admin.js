@@ -2,6 +2,7 @@ const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomai
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
+const storage=firebase.storage();
 const legacyAccountRegistrationApp=firebase.apps.find(a=>a.name==="legacyInstitutionRegistration")||firebase.initializeApp(firebaseConfig,"legacyInstitutionRegistration");
 const legacyAccountRegistrationAuth=legacyAccountRegistrationApp.auth();
 const legacyAccountRegistrationDb=legacyAccountRegistrationApp.firestore();
@@ -224,9 +225,58 @@ function openFirmModal(id){
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
   $("editLogoUrl").value=f.logoUrl||"";$("editCoverUrl").value=f.coverUrl||"";$("editTourUrl").value=f.tour360Url||f.virtualTourUrl||f.tour360||"";$("editVideoUrl").value=f.videoUrl||f.youtubeUrl||"";
+  updateFirmImagePreview(f.coverUrl||"");
+  $("editCoverFile").value="";
+  $("coverUploadMessage").className="message hidden";
+  $("coverUploadMessage").textContent="";
   $("editVip").checked=Boolean(f.vip);$("editSponsored").checked=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
   $("firmFormMessage").className="message hidden";$("firmModal").classList.remove("hidden");
 }
+function updateFirmImagePreview(url){
+  const box=$("firmImagePreview");
+  if(!box)return;
+  const value=String(url||"").trim();
+  box.innerHTML=value
+    ? '<img src="'+esc(value)+'" alt="Firma görseli önizleme">'
+    : '<span>Görsel yok</span>';
+}
+$("editCoverUrl")?.addEventListener("input",e=>updateFirmImagePreview(e.target.value));
+$("chooseCoverFileBtn")?.addEventListener("click",()=>$("editCoverFile")?.click());
+$("clearCoverImageBtn")?.addEventListener("click",()=>{
+  $("editCoverUrl").value="";
+  $("editCoverFile").value="";
+  updateFirmImagePreview("");
+  const msg=$("coverUploadMessage");
+  if(msg){msg.className="message success";msg.textContent="Görsel kaldırıldı. Kaydet butonuna basınca işlem tamamlanır."}
+});
+$("editCoverFile")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  const msg=$("coverUploadMessage");
+  if(!file.type.startsWith("image/")){
+    msg.className="message error";msg.textContent="Lütfen bir görsel dosyası seçin.";return;
+  }
+  if(file.size>8*1024*1024){
+    msg.className="message error";msg.textContent="Görsel en fazla 8 MB olabilir.";return;
+  }
+  try{
+    const user=auth.currentUser;
+    if(!user)throw new Error("Yönetici oturumu bulunamadı.");
+    msg.className="message";msg.textContent="Görsel yükleniyor...";
+    const currentId=$("firmId").value||("new-"+Date.now());
+    const safeName=String(file.name||"firma").replace(/[^a-zA-Z0-9._-]+/g,"-");
+    const ref=storage.ref("demo-card/"+user.uid+"/firms/"+currentId+"/"+Date.now()+"-"+safeName);
+    await ref.put(file,{contentType:file.type});
+    const url=await ref.getDownloadURL();
+    $("editCoverUrl").value=url;
+    updateFirmImagePreview(url);
+    msg.className="message success";msg.textContent="Görsel yüklendi. Şimdi Kaydet butonuna basın.";
+  }catch(err){
+    msg.className="message error";
+    msg.textContent="Görsel yüklenemedi: "+(err.message||"Bilinmeyen hata");
+  }
+});
+
 $("addFirmBtn").addEventListener("click",()=>openFirmModal());
 $("newFirmBtn").addEventListener("click",()=>openFirmModal());
 
