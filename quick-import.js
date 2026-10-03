@@ -36,7 +36,7 @@
       /^(\d(?:[,.]\d)?\s*)?[★☆]?\s*\(?\d+\)?/.test(line) ||
       /gerçek mekanda hizmet|gercek mekanda hizmet/.test(s) ||
       /^\d+\s*(yıldan|yildan)\s+daha\s+uzun/.test(s) ||
-      /^(genel bakış|genel bakis|yorumlar|yol tarifi|kaydet|yakınında|yakininda|telefona gönder|telefona gonder|paylaş|paylas|google haritalar geçmişiniz|google haritalar gecmisiniz|etiket ekleyin|düzenleme önerin|duzenleme onerın|duzenleme onerın)$/i.test(s) ||
+      /^(genel bakış|genel bakis|yorumlar|hakkında|hakkinda|yol tarifi|kaydet|yakınında|yakininda|telefona gönder|telefona gonder|paylaş|paylas|google haritalar geçmişiniz|google haritalar gecmisiniz|etiket ekleyin|düzenleme önerin|duzenleme onerın)$/i.test(s) ||
       /^(kapalı|kapali|açık|acik)\b/.test(s);
   }
   function isAddress(line){
@@ -102,7 +102,12 @@
       location=lines.find((x,i)=>i>0 && (/\bmerkez\s*\//i.test(x)||/^[^/]{2,}\s*\/\s*[^/]{2,}$/i.test(x)))||"";
     }
 
-    let useful=lines.filter(x=>!isNoise(x) && !phoneFrom(x) && !webFrom(x));
+    let useful=lines.filter(x=>{
+      if(isNoise(x)||phoneFrom(x)||webFrom(x))return false;
+      const letters=String(x).match(/[A-Za-zÇĞİÖŞÜçğıöşü]/g)||[];
+      if(letters.length<2)return false;
+      return true;
+    });
     let name=useful[0]||lines[0]||"";
 
     const embedded=phoneFrom(name);
@@ -129,8 +134,18 @@
         return {name:p[0]||"",phone:p[1]||"",address:p[2]||"",website:p[3]||""};
       }).filter(x=>x.name);
     }
-    const looksLikeMapsDetail=/genel bakış|genel bakis|yorumlar|yol tarifi|telefona gönder|telefona gonder|google haritalar/i.test(raw)
-      && (phoneFrom(raw)||/mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]/i.test(raw));
+    const rawNorm=norm(raw);
+    const mapsUiTerms=[
+      "genel bakış","genel bakis","yorumlar","hakkında","hakkinda",
+      "yol tarifi","kaydet","yakınında","yakininda",
+      "telefona gönder","telefona gonder","paylaş","paylas",
+      "google haritalar","etiket ekleyin","düzenleme önerin","duzenleme onerın"
+    ];
+    const mapsUiCount=mapsUiTerms.filter(t=>rawNorm.includes(t)).length;
+    const looksLikeMapsDetail=
+      mapsUiCount>=2 ||
+      (mapsUiCount>=1 && (phoneFrom(raw)||/mah\.?|mahalle|cad\.?|caddesi|sok\.?|sokak|bulvar|blv\.?|no[:\s]/i.test(raw)));
+
     if(looksLikeMapsDetail){
       return [parseBlock(raw)].filter(x=>x&&x.name);
     }
