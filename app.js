@@ -326,6 +326,10 @@ async function initHome(){
         '</div>';
     }
   };
+  const params=new URLSearchParams(location.search);
+  const force360Only=window.DJS_FORCE_360_ONLY===true;
+  const is360Directory=/\/360-mekanlar\.html$/i.test(location.pathname);
+  const feature360=is360Directory || force360Only || params.get("feature")==="360";
   const only360Btn=document.getElementById("only360Btn");
   let only360Active=feature360;
   const sync360Button=()=>{
@@ -383,10 +387,6 @@ async function initHome(){
     renderActiveFilters();
   });
 
-  const params=new URLSearchParams(location.search);
-  const force360Only=window.DJS_FORCE_360_ONLY===true;
-  const is360Directory=/\/360-mekanlar\.html$/i.test(location.pathname);
-  const feature360=is360Directory || force360Only || params.get("feature")==="360";
   await loadProvinces(city,district);
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
