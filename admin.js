@@ -64,6 +64,26 @@ $("mobileMenuBtn").addEventListener("click",()=>document.querySelector(".sidebar
 
 async function loadAll(){
   await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads()]);
+  const existingAppIds=new Set(tourLeads.map(x=>String(x.applicationId||"")).filter(Boolean));
+  const application360=applications
+    .filter(a=>Boolean(a.wants360Tour) && !existingAppIds.has(String(a.id)))
+    .map(a=>({
+      id:a.id,
+      applicationId:a.id,
+      businessName:a.name||"İşletme",
+      contactName:a.contactName||"",
+      phone:a.phone||"",
+      city:a.city||"",
+      email:a.contactEmail||a.accountEmail||"",
+      note:a.requestNote||"",
+      status:a.tourLeadStatus||"new",
+      createdAt:a.date||"",
+      updatedAt:a.tourLeadUpdatedAt||a.date||"",
+      source:a.source||"institutionApplications",
+      _source:"institutionApplications"
+    }));
+  tourLeads=[...tourLeads.map(x=>({...x,_source:x._source||"tourLeads"})),...application360]
+    .sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
   renderAll();
 }
 async function loadFirms(){
@@ -669,10 +689,11 @@ function renderTourLeads(){
     return '<article class="tour-lead-row">'+
       '<div class="tour-lead-main"><div class="tour-lead-title"><strong>'+esc(x.businessName||"İşletme")+'</strong><span class="tour-lead-status '+esc(String(x.status||"new"))+'">'+esc(tourLeadStatusLabel(x.status))+'</span></div>'+
       '<small>'+esc([x.city,x.contactName,x.phone].filter(Boolean).join(" · "))+'</small>'+
-      (x.note?'<p>'+esc(x.note)+'</p>':'')+
+      (x.email?'<small>E-posta: '+esc(x.email)+'</small>':'')+
+      (x.note?'<p><strong>Not:</strong> '+esc(x.note)+'</p>':'')+
       '<em>'+esc(date)+'</em></div>'+
       '<div class="tour-lead-actions">'+
-        '<select data-tour-lead-status="'+esc(x.id)+'">'+
+        '<select data-tour-lead-status="'+esc(x.id)+'" data-tour-lead-source="'+esc(x._source||"tourLeads")+'">'+
           '<option value="new" '+(String(x.status||"new")==="new"?"selected":"")+'>Yeni</option>'+
           '<option value="called" '+(x.status==="called"?"selected":"")+'>Arandı</option>'+
           '<option value="planned" '+(x.status==="planned"?"selected":"")+'>Planlandı</option>'+
@@ -685,8 +706,8 @@ function renderTourLeads(){
 }
 function renderMedia(){
   renderTourLeads();
-  const list=applications.filter(a=>a.wantsPhoto||a.wantsVideo||a.wants360Tour||a.wantsVip);
-  $("mediaList").innerHTML=list.length?list.map(a=>'<article class="media-card"><h3>'+esc(a.name)+'</h3><div class="media-tags">'+(a.wants360Tour?'<span>360° Tur</span>':'')+(a.wantsPhoto?'<span>Fotoğraf</span>':'')+(a.wantsVideo?'<span>Video</span>':'')+(a.wantsVip?'<span>VIP</span>':'')+'</div><p>'+esc([a.city,a.district].filter(Boolean).join(" · "))+'</p></article>').join(""):'<div class="empty">Medya hizmeti isteyen firma yok.</div>';
+  const list=applications.filter(a=>a.wantsPhoto||a.wantsVideo||a.wantsVip);
+  $("mediaList").innerHTML=list.length?list.map(a=>'<article class="media-card"><h3>'+esc(a.name)+'</h3><div class="media-tags">'+(a.wantsPhoto?'<span>Fotoğraf</span>':'')+(a.wantsVideo?'<span>Video</span>':'')+(a.wantsVip?'<span>VIP</span>':'')+'</div><p>'+esc([a.city,a.district].filter(Boolean).join(" · "))+'</p></article>').join(""):'<div class="empty">Diğer medya talebi yok.</div>';
 }
 
 document.addEventListener("click",async e=>{
@@ -977,12 +998,20 @@ document.addEventListener("change",async e=>{
   const select=e.target.closest("[data-tour-lead-status]");
   if(!select)return;
   try{
-    await db.collection("tourLeads").doc(select.dataset.tourLeadStatus).set({
-      status:select.value,
-      updatedAt:new Date().toISOString()
-    },{merge:true});
-    await loadTourLeads();
-    renderAll();
+    const id=select.dataset.tourLeadStatus;
+    const source=select.dataset.tourLeadSource||"tourLeads";
+    if(source==="institutionApplications"){
+      await db.collection("institutionApplications").doc(id).set({
+        tourLeadStatus:select.value,
+        tourLeadUpdatedAt:new Date().toISOString()
+      },{merge:true});
+    }else{
+      await db.collection("tourLeads").doc(id).set({
+        status:select.value,
+        updatedAt:new Date().toISOString()
+      },{merge:true});
+    }
+    await loadAll();
   }catch(err){
     alert("360° talep durumu güncellenemedi: "+(err.message||"Bilinmeyen hata"));
   }
