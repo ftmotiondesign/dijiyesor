@@ -213,15 +213,27 @@ async function initHome(){
     ["diger","Diğer","Diğer kurum ve hizmetler"]
   ];
   if(categoryGrid){
-    categoryGrid.innerHTML=pickerCategories.map(([key,title,desc])=>'<button type="button" class="category-pick" data-pick-sector="'+key+'"><strong>'+esc(title)+'</strong><span>'+esc(desc)+'</span></button>').join("");
+    categoryGrid.innerHTML=pickerCategories.map(([key,title,desc])=>{
+      const subs=Object.entries(subcategoryMap[key]||{}).map(([subKey,subTitle])=>'<button type="button" class="category-subpick" data-pick-sector="'+key+'" data-pick-subcategory="'+subKey+'">'+esc(subTitle)+'</button>').join("");
+      return '<div class="category-picker-item"><button type="button" class="category-pick" data-toggle-picker-sector="'+key+'"><span class="category-pick-copy"><strong>'+esc(title)+'</strong><span>'+esc(desc)+'</span></span><span class="category-pick-chevron">⌄</span></button><div class="category-subpanel hidden"><button type="button" class="category-subpick all" data-pick-sector="'+key+'">Tüm '+esc(title)+'</button>'+subs+'</div></div>';
+    }).join("");
   }
-  const openCategoryModal=()=>modal?.classList.remove("hidden");
-  const closeCategoryModal=()=>modal?.classList.add("hidden");
+  const openCategoryModal=()=>{modal?.classList.remove("hidden");document.body.style.overflow="hidden"};
+  const closeCategoryModal=()=>{modal?.classList.add("hidden");document.body.style.overflow=""};
   document.querySelectorAll("[data-close-category-modal]").forEach(el=>el.addEventListener("click",closeCategoryModal));
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCategoryModal()});
+  categoryGrid?.querySelectorAll("[data-toggle-picker-sector]").forEach(btn=>btn.addEventListener("click",()=>{
+    const item=btn.closest(".category-picker-item"),panel=item?.querySelector(".category-subpanel");
+    if(!item||!panel)return;
+    const wasOpen=!panel.classList.contains("hidden");
+    categoryGrid.querySelectorAll(".category-subpanel").forEach(p=>p.classList.add("hidden"));
+    categoryGrid.querySelectorAll(".category-picker-item").forEach(i=>i.classList.remove("open"));
+    if(!wasOpen){panel.classList.remove("hidden");item.classList.add("open")}
+  }));
   categoryGrid?.querySelectorAll("[data-pick-sector]").forEach(el=>el.addEventListener("click",()=>{
     sector.value=el.dataset.pickSector;
     fillSubcategories();
+    subCategory.value=el.dataset.pickSubcategory||"";
     closeCategoryModal();
     filter();
   }));
@@ -252,8 +264,8 @@ async function initHome(){
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));fillSubcategories();filter()});
   subCategory?.addEventListener("change",filter);
   search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
-  btn.addEventListener("click",()=>{const empty=!search.value.trim()&&!city.value&&!district.value&&!sector.value&&!(subCategory?.value);if(empty)openCategoryModal();else filter()});
-  search.addEventListener("keydown",e=>{if(e.key==="Enter"){const empty=!search.value.trim()&&!city.value&&!district.value&&!sector.value&&!(subCategory?.value);if(empty)openCategoryModal();else filter()}});
+  btn.addEventListener("click",openCategoryModal);
+  search.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();openCategoryModal()}});
   document.getElementById("clearFiltersBtn")?.addEventListener("click",async()=>{
     search.value="";
     city.value="";
