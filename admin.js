@@ -938,21 +938,69 @@ function parseQuickImportRows(){
     }).filter(x=>x.name);
   }
 
-  // Google arama sonucundan kopyalanan bloklar: boş satırlarla ayır.
+  // Google arama sonucundan kopyalanan bloklar: boş satırlar varsa doğrudan kullan.
   let blocks=raw.split(/\n\s*\n+/).map(x=>x.trim()).filter(Boolean);
 
-  // Tek blokta çok sayıda firma varsa telefon satırlarını sınır kabul etmeye çalış.
+  // Boş satır yoksa satır yapısından firma başlangıçlarını otomatik bul.
   if(blocks.length===1){
     const lines=raw.split(/\r?\n/).map(cleanGoogleLine).filter(Boolean);
-    const phoneIndexes=lines.map((x,i)=>looksLikePhone(x)?i:-1).filter(i=>i>=0);
-    if(phoneIndexes.length>1){
-      const auto=[];let start=0;
-      phoneIndexes.forEach((pi,idx)=>{
-        const next=idx+1<phoneIndexes.length?phoneIndexes[idx+1]-1:lines.length;
-        auto.push(lines.slice(start,next).join("\n"));
-        start=next;
-      });
-      blocks=auto.filter(Boolean);
+    const starts=[0];
+
+    for(let i=1;i<lines.length;i++){
+      const line=lines[i];
+      const prev=lines[i-1]||"";
+      const next=lines[i+1]||"";
+      const after=lines[i+2]||"";
+
+      const lineLooksName=
+        !looksLikePhone(line) &&
+        !looksLikeWebsite(line) &&
+        !looksLikeNoise(line) &&
+        !looksLikeAddress(line) &&
+        line.length>=4;
+
+      const nextLooksGoogleMeta=
+        /^(\d(?:[,.]\d)?\s*)?[★☆]?\s*\(?\d+/i.test(next) ||
+        /·/.test(next) ||
+        /sürücü kursu|kursu|restoran|kafe|otel|anaokulu|dershane|servis|kuaför|berber|emlak|klinik/i.test(next);
+
+      const nearbyPhone=looksLikePhone(next)||looksLikePhone(after);
+      const previousLooksEnd=looksLikePhone(prev)||/gerçek mekanda hizmet|gercek mekanda hizmet|web sitesi|yol tarifi|açık|acik|kapalı|kapali/i.test(prev);
+
+      if(lineLooksName && ((previousLooksEnd&&nextLooksGoogleMeta) || (nextLooksGoogleMeta&&nearbyPhone))){
+        starts.push(i);
+      }
+    }
+
+    if(starts.length>1){
+      const auto=[];
+      for(let s=0;s<starts.length;s++){
+        const from=starts[s];
+        const to=s+1<starts.length?starts[s+1]:lines.length;
+        const chunk=lines.slice(from,to).join("\n").trim();
+        if(chunk)auto.push(chunk);
+      }
+      blocks=auto;
+    }else{
+      // Son çare: birden çok telefon varsa telefonlardan sonra yeni başlık arayarak böl.
+      const phoneIndexes=lines.map((x,i)=>looksLikePhone(x)?i:-1).filter(i=>i>=0);
+      if(phoneIndexes.length>1){
+        const auto=[];let start=0;
+        for(let p=0;p<phoneIndexes.length;p++){
+          let end=lines.length;
+          if(p+1<phoneIndexes.length){
+            const nextPhone=phoneIndexes[p+1];
+            let candidate=phoneIndexes[p]+1;
+            while(candidate<nextPhone && looksLikeNoise(lines[candidate]))candidate++;
+            end=Math.max(candidate,nextPhone-3);
+            if(end<=start)end=nextPhone;
+          }
+          auto.push(lines.slice(start,end).join("\n"));
+          start=end;
+        }
+        if(start<lines.length)auto.push(lines.slice(start).join("\n"));
+        blocks=auto.filter(x=>x.trim());
+      }
     }
   }
 
