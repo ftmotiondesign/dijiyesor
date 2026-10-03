@@ -465,7 +465,7 @@ function getMemberRows(){
       applicationId:app?.id||"",
       institutionId:m.institutionId||app?.approvedInstitutionId||"",
       institutionName:m.institutionName||app?.name||"",
-      email:m.email||app?.accountEmail||"",
+      email:(m.email&&String(m.email).endsWith("@dijiyesor.app"))?"":(m.email||app?.accountEmail||""),
       status:m.status||"pending",
       date:m.date||app?.approvedAt||app?.date||"",
       hasAccount:true
