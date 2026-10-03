@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
-  <link rel="stylesheet" href="firma.css?v=20261003-16">
+  <link rel="stylesheet" href="firma.css?v=20261003-17">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -269,52 +269,6 @@
 
 
 
-    function ratingStars(value){
-      const n=Math.max(0,Math.min(5,Number(value)||0));
-      let out="";
-      for(let i=1;i<=5;i++)out+='<span class="'+(i<=Math.round(n)?"filled":"")+'">★</span>';
-      return out;
-    }
-    function reviewItemsFrom(d){
-      const candidates=[d.googleReviews,d.reviews,d.reviewItems,d.googleReviewItems];
-      const arr=candidates.find(Array.isArray)||[];
-      return arr.map(x=>{
-        if(typeof x==="string")return {text:x,name:"Google kullanıcısı",rating:null};
-        if(!x||typeof x!=="object")return null;
-        return {
-          text:String(x.text||x.comment||x.review||x.content||"").trim(),
-          name:String(x.name||x.author||x.user||"Google kullanıcısı").trim(),
-          rating:Number(x.rating||x.score||0)||null,
-          date:String(x.date||x.time||"").trim()
-        };
-      }).filter(x=>x&&x.text);
-    }
-    function buildReviewModal(d){
-      const items=reviewItemsFrom(d);
-      const body=items.length
-        ? items.map(x=>'<article class="review-item">'+
-            '<div class="review-item-head"><strong>'+esc(x.name)+'</strong>'+
-              (x.rating?'<span class="review-mini-stars">'+ratingStars(x.rating)+'</span>':'')+
-            '</div>'+
-            '<p>'+esc(x.text)+'</p>'+
-            (x.date?'<small>'+esc(x.date)+'</small>':'')+
-          '</article>').join("")
-        : '<div class="review-empty"><strong>'+esc(String(d.googleReviewCount||0))+' Google yorumu</strong><span>Yorum içerikleri henüz DijiyeSor’a aktarılmadı.</span></div>';
-
-      return '<div id="reviewModal" class="review-modal" hidden>'+
-        '<div class="review-modal-card">'+
-          '<button id="closeReviewModal" class="review-modal-close" type="button" aria-label="Kapat">×</button>'+
-          '<div class="review-modal-head"><span>GOOGLE YORUMLARI</span><h2>'+esc(d.name||"Firma")+'</h2>'+
-            ((d.googleRating||d.googleReviewCount)?'<div class="review-summary">'+
-              (d.googleRating?'<div class="review-stars">'+ratingStars(d.googleRating)+'</div><strong>'+esc(String(d.googleRating))+'</strong>':'')+
-              (d.googleReviewCount?'<span>'+esc(String(d.googleReviewCount))+' yorum</span>':'')+
-            '</div>':'')+
-          '</div>'+
-          '<div class="review-modal-body">'+body+'</div>'+
-        '</div>'+
-      '</div>';
-    }
-
     function mapsQueryFor(d){
       return String(d.address||d.googlePlusCode||d.location||[d.district,d.city].filter(Boolean).join(", ")||"").trim();
     }
@@ -381,10 +335,7 @@
                 (campaignActive(d)?'<span class="profile-badge campaign">KAMPANYA</span>':'')+
               '</div>'+
               (locationText?'<p class="profile-location">📍 '+esc(locationText)+'</p>':'')+
-              ((d.googleRating||d.googleReviewCount)?'<div class="google-rating">'+
-                (d.googleRating?'<div class="rating-stars" aria-label="'+esc(String(d.googleRating))+' üzerinden 5">'+ratingStars(d.googleRating)+'</div><strong>'+esc(String(d.googleRating))+'</strong>':'')+
-                (d.googleReviewCount?'<button type="button" class="google-review-open" id="openReviewModal">'+esc(String(d.googleReviewCount))+' Google yorumu</button>':'')+
-              '</div>':'')+
+
               (d.category||d.mainCategory?'<span class="profile-category">'+esc(d.category||d.mainCategory)+'</span>':'')+
             '</div>'+
             '<div class="hero-actions">'+
@@ -427,7 +378,6 @@
             '</aside>'+
           '</div>'+
 
-          buildReviewModal(d)+
           '<div id="imageModal" class="image-modal" hidden>'+
             '<button id="closeModal" type="button" aria-label="Kapat">×</button>'+
             '<img id="modalImage" alt="Firma fotoğrafı">'+
@@ -451,30 +401,12 @@
         };
 
 
-        const openReviewModal=()=>{
-          const modal=document.getElementById("reviewModal");
-          if(!modal)return;
-          modal.hidden=false;
-          document.body.classList.add("modal-open");
-        };
-        const closeReviewModal=()=>{
-          const modal=document.getElementById("reviewModal");
-          if(!modal)return;
-          modal.hidden=true;
-          document.body.classList.remove("modal-open");
-        };
-        document.getElementById("openReviewModal")?.addEventListener("click",openReviewModal);
-        document.getElementById("closeReviewModal")?.addEventListener("click",closeReviewModal);
-        document.getElementById("reviewModal")?.addEventListener("click",e=>{
-          if(e.target.id==="reviewModal")closeReviewModal();
-        });
-
         document.getElementById("closeModal")?.addEventListener("click",closeModal);
         document.getElementById("imageModal")?.addEventListener("click",e=>{
           if(e.target.id==="imageModal") closeModal();
         });
         document.addEventListener("keydown",e=>{
-          if(e.key==="Escape"){ closeModal(); closeReviewModal(); }
+          if(e.key==="Escape") closeModal();
         });
 
       }catch(e){
