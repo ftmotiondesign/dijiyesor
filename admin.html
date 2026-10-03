@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-12">
+  <link rel="stylesheet" href="admin.css?v=20261003-13">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -88,7 +88,7 @@
         <div class="toolbar">
           <div class="search-wrap"><input id="firmSearch" placeholder="Firma ara..."></div>
           <select id="firmSector"><option value="">Tüm sektörler</option></select>
-          <select id="firmStatus"><option value="">Tüm durumlar</option><option value="active">Aktif</option><option value="passive">Pasif</option><option value="sponsored">Sponsor</option></select>
+          <select id="firmStatus"><option value="">Tüm durumlar</option><option value="active">Aktif</option><option value="passive">Pasif</option><option value="sponsored">Sponsor</option></select><select id="firmCompleteness"><option value="">Tüm bilgi durumları</option><option value="missing-address">Adresi eksik</option><option value="missing-phone">Telefonu eksik</option><option value="missing-logo">Logo yok</option><option value="missing-photo">Fotoğraf yok</option><option value="missing-360">360° yok</option><option value="missing-whatsapp">WhatsApp yok</option><option value="low-quality">Doluluk %50 altı</option></select>
           <button id="newFirmBtn" class="primary">+ Firma Ekle</button>
         </div>
 
@@ -422,7 +422,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-15"></script>
+<script src="admin.js?v=20261003-16"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-27"></script>
 </body>
