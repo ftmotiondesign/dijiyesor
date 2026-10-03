@@ -56,3 +56,16 @@
 .login-submit{border:0;border-radius:11px;background:#1677ff;color:#fff;padding:11px 14px;font-weight:900;cursor:pointer}
 .login-forgot{border:0;background:none;color:#1677ff;font-size:10.5px;font-weight:850;cursor:pointer}
 .login-message{min-height:18px;font-size:10.5px;font-weight:750}.login-message.success{color:#15803d}.login-message.error{color:#b42318}
+
+
+.password-create-block{border:2px solid #9fc7ff;background:#fff;border-radius:14px;padding:14px;display:grid;gap:12px;box-shadow:0 8px 20px rgba(22,119,255,.08)}
+.password-create-title{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.password-create-title>div{display:grid;gap:3px}
+.password-create-title span{font-size:9px;font-weight:900;letter-spacing:.12em;color:#1677ff}
+.password-create-title strong{font-size:14px;color:#20304a}
+.password-create-title small{font-size:10.5px;color:#728096;line-height:1.4}
+.password-toggle{border:1px solid #cfe0f7;background:#eef5ff;color:#155db8;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}
+.password-match-hint{font-size:10.5px;color:#6f7c90}
+.password-match-hint.error{color:#b42318}
+.password-match-hint.success{color:#15803d;font-weight:800}
+@media(max-width:620px){.password-create-title{flex-direction:column}.password-toggle{width:100%}}
