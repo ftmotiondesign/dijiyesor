@@ -207,8 +207,13 @@
       <a href="index.html">Ana Sayfa</a>
     </div>
   </footer>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
     (()=>{
+      const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+      if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+      const db=firebase.firestore();
       const modal=document.getElementById("tourLeadModal");
       const form=document.getElementById("tourLeadForm");
       const open=()=>{modal.classList.remove("hidden");document.body.style.overflow="hidden";setTimeout(()=>document.getElementById("tourLeadBusiness")?.focus(),50)};
@@ -218,8 +223,9 @@
       document.querySelectorAll("[data-close-tour-lead]").forEach(el=>el.addEventListener("click",close));
       document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
 
-      form?.addEventListener("submit",e=>{
+      form?.addEventListener("submit",async e=>{
         e.preventDefault();
+        const submit=form.querySelector(".lead-submit");
         const payload={
           businessName:document.getElementById("tourLeadBusiness").value.trim(),
           contactName:document.getElementById("tourLeadContact").value.trim(),
@@ -227,10 +233,22 @@
           city:document.getElementById("tourLeadCity").value.trim(),
           note:document.getElementById("tourLeadNote").value.trim(),
           source:"360-mekan",
-          createdAt:new Date().toISOString()
+          status:"new",
+          createdAt:new Date().toISOString(),
+          updatedAt:new Date().toISOString()
         };
         sessionStorage.setItem("dijiyesor360Lead",JSON.stringify(payload));
-        window.location.href="firma-ekle.html?service=360#basvuru";
+        try{
+          submit.disabled=true;
+          submit.textContent="Talep gönderiliyor...";
+          await db.collection("tourLeads").add(payload);
+          window.location.href="firma-ekle.html?service=360#basvuru";
+        }catch(err){
+          console.error(err);
+          alert("Talep yönetim paneline kaydedilemedi: "+(err.message||"Bilinmeyen hata"));
+          submit.disabled=false;
+          submit.textContent="Talebi Devam Ettir";
+        }
       });
     })();
   </script>
