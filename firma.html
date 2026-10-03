@@ -188,6 +188,9 @@
       let phone=String(d.phone||"").trim();
       let address=String(d.address||"").trim();
 
+      const storedPhoneMatch=phone.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
+      if(storedPhoneMatch)phone=storedPhoneMatch[0].trim();
+
       const phoneMatch=name.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
       if(phoneMatch){
         if(!phone)phone=phoneMatch[0].trim();
@@ -224,7 +227,9 @@
 
       d.name=name||d.name||"Firma";
       d.phone=phone;
-      if(!d.whatsapp&&phone)d.whatsapp=phone;
+      const storedWa=String(d.whatsapp||"").trim();
+      const waMatch=storedWa.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
+      d.whatsapp=waMatch?waMatch[0].trim():(phone||storedWa);
       d.address=address;
       return d;
     }
