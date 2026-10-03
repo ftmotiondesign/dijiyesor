@@ -302,3 +302,6 @@
 .firm-quality b.low{background:#ffe8e8;color:#b82c2c}
 .firm-quality small{font-size:9px!important;color:#8a94a5!important;max-width:330px}
 #firmCompleteness{min-width:160px}
+
+.quick-data-warning{display:block!important;margin-top:4px;color:#b45309!important;font-weight:800}
+.quick-data-ok{display:block!important;margin-top:4px;color:#168044!important;font-weight:800}
