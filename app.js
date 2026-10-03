@@ -255,7 +255,6 @@ function render(data){
     ].filter(Boolean).join("");
 
     return '<article class="result-card'+(i.sponsored?' is-sponsored':'')+'">'+
-      resultCardVisual(i)+
       '<div class="result-card-body">'+
       '<div class="result-card-top">'+
         '<div class="result-logo">'+logo+'</div>'+
@@ -264,6 +263,7 @@ function render(data){
           '<div class="result-location">📍 '+esc(loc)+'</div>'+
           '<span class="result-category">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span>'+
         '</div>'+
+        resultCardVisual(i)+
       '</div>'+
       '<p class="result-desc">'+esc(desc)+'</p>'+
       (i.has360Tour&&i.tour360Url?'<button type="button" class="result-360-btn" data-open-360 data-tour-url="'+esc(i.tour360Url)+'" data-tour-name="'+esc(i.name)+'"><span>360°</span> Mekânı Gez</button>':'')+
