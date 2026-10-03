@@ -5,8 +5,97 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Arama Sonuçları | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma arama sonuçları.">
-  <link rel="stylesheet" href="arama.css?v=20261003-2340">
+  <link rel="stylesheet" href="arama.css?v=20261004-2341">
   <link rel="stylesheet" href="bilgi-modal.css">
+
+  <style>
+    /* Firma kartı: küçük logo solda, büyük kapak görseli sağda */
+    .result-card-top{
+      display:grid!important;
+      grid-template-columns:52px minmax(0,1fr) 150px!important;
+      gap:12px!important;
+      align-items:start!important;
+    }
+    .result-logo{
+      width:52px!important;
+      height:52px!important;
+      min-width:52px!important;
+      border-radius:12px!important;
+      overflow:hidden!important;
+      border:1px solid #e5e7eb!important;
+      background:#f8fafc!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+    }
+    .result-logo img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:contain!important;
+      display:block!important;
+      padding:4px!important;
+    }
+    .result-logo span{
+      font-size:16px!important;
+      font-weight:800!important;
+      color:#2563eb!important;
+    }
+    .result-card-copy{
+      min-width:0!important;
+      padding-top:1px!important;
+    }
+    .result-name-row h2{
+      margin-top:0!important;
+      line-height:1.2!important;
+    }
+    .result-visual{
+      width:150px!important;
+      height:112px!important;
+      min-width:150px!important;
+      border-radius:15px!important;
+      overflow:hidden!important;
+      align-self:start!important;
+    }
+    .result-visual img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:cover!important;
+      display:block!important;
+    }
+    .result-visual-fallback{
+      padding:12px!important;
+    }
+    .result-desc{
+      margin-top:14px!important;
+    }
+    @media (max-width:680px){
+      .result-card-top{
+        grid-template-columns:46px minmax(0,1fr) 112px!important;
+        gap:10px!important;
+      }
+      .result-logo{
+        width:46px!important;
+        height:46px!important;
+        min-width:46px!important;
+      }
+      .result-visual{
+        width:112px!important;
+        min-width:112px!important;
+        height:84px!important;
+        border-radius:12px!important;
+      }
+      .result-name-row h2{
+        font-size:16px!important;
+      }
+      .result-location{
+        font-size:11px!important;
+      }
+      .result-category{
+        font-size:11px!important;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <header class="top">
