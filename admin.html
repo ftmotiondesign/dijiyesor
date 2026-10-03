@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-2255">
+  <link rel="stylesheet" href="admin.css?v=20261003-30">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -29,10 +29,9 @@
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
-      <button class="nav-item" data-view="qr">QR / NFC Kartlar</button>
+      <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">2</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
-      <button class="nav-item" data-view="media">360° & Medya <b id="navTourLeadCount">0</b></button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
     </nav>
     <div class="sidebar-foot">
@@ -194,7 +193,51 @@ Gerçek mekanda hizmet"></textarea>
       <div id="campaignList" class="campaign-admin-grid"></div>
     </section>
 
+
+    <section class="view" data-panel-view="revenue">
+      <div class="revenue-head">
+        <div>
+          <span>GELİR ALANLARI</span>
+          <h2>DijiyeSor gelir modülleri</h2>
+          <p>Gelir sağlayan hizmetleri tek merkezden yönet. Yeni hizmetler geldikçe bu sayfaya yeni alt kategori ekleyebiliriz.</p>
+        </div>
+      </div>
+
+      <div class="revenue-grid">
+        <button type="button" class="revenue-card" data-go="qr">
+          <div class="revenue-icon">QR</div>
+          <div class="revenue-copy">
+            <span>NFC / QR KART</span>
+            <h3>NFC & QR Kart Yönetimi</h3>
+            <p>Siparişleri, karekodları ve firma kartlarını yönet.</p>
+          </div>
+          <div class="revenue-arrow">›</div>
+        </button>
+
+        <button type="button" class="revenue-card" data-go="media">
+          <div class="revenue-icon">360°</div>
+          <div class="revenue-copy">
+            <span>360° MEKAN</span>
+            <h3>360° Mekan Çekimi</h3>
+            <p>Çekim taleplerini, müşteri dönüşlerini ve medya fırsatlarını takip et.</p>
+          </div>
+          <div class="revenue-badge" id="revenueTourBadge">0 yeni</div>
+          <div class="revenue-arrow">›</div>
+        </button>
+
+        <div class="revenue-card revenue-card-placeholder">
+          <div class="revenue-icon">＋</div>
+          <div class="revenue-copy">
+            <span>YENİ MODÜL</span>
+            <h3>Yeni gelir alanı</h3>
+            <p>İleride sponsor paket, web sitesi, reklam çekimi veya başka bir hizmet buraya eklenebilir.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="view qr-full-view" data-panel-view="qr">
+      <button type="button" class="revenue-back" data-go="revenue">← Gelir Alanları</button>
       <div class="qr-admin-head">
         <div>
           <span>QR / NFC KARTLAR</span>
@@ -296,6 +339,7 @@ Gerçek mekanda hizmet"></textarea>
     </section>
 
     <section class="view" data-panel-view="media">
+      <button type="button" class="revenue-back" data-go="revenue">← Gelir Alanları</button>
       <div class="media-intro">
         <span>360° & MEDYA</span><h2>360° çekim talepleri ve medya fırsatları.</h2>
         <p>Yeni gelen 360° çekim taleplerini burada takip et, durumunu değiştir ve WhatsApp ile iletişime geç.</p>
@@ -455,7 +499,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261003-2255"></script>
+<script src="admin.js?v=20261003-30"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
