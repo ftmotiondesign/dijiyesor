@@ -883,12 +883,28 @@ function looksLikeAddress(line){
   if(/\/[a-zçğıöşü]+\b/.test(s)&&!looksLikeWebsite(line))return true;
   return false;
 }
+function extractPhoneFromText(text){
+  const m=String(text||"").match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
+  return m?m[0].trim():"";
+}
+function stripPhoneFromText(text,phone){
+  if(!phone)return String(text||"").trim();
+  return String(text||"").replace(phone," ").replace(/\s+/g," ").trim();
+}
+function makeQuickDescription(name,mainCategory,cityName,districtName){
+  const sector=categories[mainCategory]||"işletme";
+  const loc=[districtName,cityName].filter(Boolean).join(", ");
+  return loc
+    ? name+"; "+loc+" bölgesinde hizmet veren "+sector.toLocaleLowerCase("tr-TR")+" işletmesidir."
+    : name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
+}
 function parseGoogleBlock(block){
   let lines=block.split(/\r?\n/).map(cleanGoogleLine).filter(Boolean);
   if(!lines.length)return null;
 
-  const phoneLine=lines.find(looksLikePhone)||"";
-  const websiteLine=lines.find(looksLikeWebsite)||"";
+  let joined=lines.join(" ");
+  let phoneLine=lines.find(looksLikePhone)||extractPhoneFromText(joined)||"";
+  let websiteLine=lines.find(looksLikeWebsite)||"";
 
   // Google sonuçlarında adres çoğu zaman "açıldı · İlçe/İl" biçiminde aynı satırda gelir.
   let forcedAddress="";
@@ -904,9 +920,21 @@ function parseGoogleBlock(block){
   }
 
   const useful=lines.filter(x=>x!==phoneLine&&x!==websiteLine&&!looksLikeNoise(x));
-
   let name=useful[0]||lines[0]||"";
   let address=forcedAddress||useful.find((x,i)=>i>0&&looksLikeAddress(x))||"";
+
+  // Google kopyası tek satıra yapıştıysa: önce telefon ve adresi başlıktan ayır.
+  const embeddedPhone=extractPhoneFromText(name);
+  if(embeddedPhone){
+    phoneLine=phoneLine||embeddedPhone;
+    const parts=name.split(embeddedPhone);
+    name=(parts[0]||"").trim();
+    if(!address)address=(parts.slice(1).join(" ")||"").trim();
+  }else if(phoneLine && name.includes(phoneLine)){
+    const parts=name.split(phoneLine);
+    name=(parts[0]||"").trim();
+    if(!address)address=(parts.slice(1).join(" ")||"").trim();
+  }
 
   if(!address&&useful.length>1){
     address=useful.slice(1).find(x=>x.length>8&&!/sürücü kursu|kursu|restoran|kafe|otel|anaokulu|dershane/i.test(x))||"";
@@ -918,7 +946,11 @@ function parseGoogleBlock(block){
       .trim();
   }
 
-  name=name.replace(/\s+-\s+Ehliyet.*$/i,"").replace(/\s+-\s+.*$/,"").trim();
+  name=name
+    .replace(/\s+-\s+Ehliyet.*$/i,"")
+    .replace(/\s+-\s+.*$/,"")
+    .replace(/\s+\d{5,}.*$/,"")
+    .trim();
 
   return {
     name,
@@ -1062,7 +1094,8 @@ $("quickImportPreview")?.addEventListener("click",()=>{
       city:cityName,
       district:districtName,
       mainCategory:category,
-      subCategory:inferQuickSubCategory(row,category)
+      subCategory:inferQuickSubCategory(row,category),
+      description:makeQuickDescription(row.name,category,cityName,districtName)
     };
     const key=quickQueueKey(item);
     if(existingKeys.has(key)){skipped++;return}
@@ -1119,7 +1152,7 @@ $("quickImportAddAll")?.addEventListener("click",async()=>{
         whatsapp:row.phone||"",
         website:row.website||"",
         instagram:"",
-        description:"",
+        description:row.description||makeQuickDescription(row.name,row.mainCategory||"diger",row.city,row.district),
         status:"active",
         vip:false,
         sponsored:false,
