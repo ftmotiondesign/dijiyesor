@@ -520,6 +520,7 @@ function setQrMode(mode){
   document.querySelectorAll("[data-qr-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.qrMode===mode));
   $("qrOrdersPanel")?.classList.toggle("active",mode==="orders");
   $("qrManagerPanel")?.classList.toggle("active",mode==="manager");
+  $("qrMenuPanel")?.classList.toggle("active",mode==="menu");
   $("qrOrderPanel")?.classList.toggle("active",mode==="order");
 }
 document.querySelectorAll("[data-qr-mode]").forEach(btn=>btn.addEventListener("click",()=>setQrMode(btn.dataset.qrMode)));
