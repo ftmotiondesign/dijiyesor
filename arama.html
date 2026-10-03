@@ -48,7 +48,23 @@
       </div>
     </section>
 
-    <section class="results-head">
+    <section id="discoverSection" class="discover-section hidden">
+      <div class="discover-head">
+        <div>
+          <span class="discover-kicker">KEŞFET</span>
+          <h1>Ne arıyorsunuz?</h1>
+          <p>Kategori seçerek başlayabilir veya yukarıdaki arama kutusuna firma, kurum ya da hizmet yazabilirsiniz.</p>
+        </div>
+      </div>
+      <div id="discoverCategories" class="discover-categories"></div>
+      <div class="discover-subhead">
+        <h2>Öne çıkan kurumlar</h2>
+        <span>Profilini tamamlayan ve öne çıkan işletmeler</span>
+      </div>
+      <div id="discoverFeatured" class="discover-featured"></div>
+    </section>
+
+    <section id="resultsHead" class="results-head">
       <div>
         <h1 id="resultsTitle">Arama sonuçları</h1>
         <p id="resultsContext">Aramana uygun işletmeler listeleniyor.</p>
@@ -68,7 +84,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261003-19"></script>
+  <script src="app.js?v=20261003-20"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
