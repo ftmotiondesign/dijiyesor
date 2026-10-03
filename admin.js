@@ -521,7 +521,7 @@ function renderMembers(){
       '<div class="member-main"><strong>'+esc(m.institutionName||firm?.name||"Kurum")+'</strong><small>'+esc(m.email||"E-posta yok")+'</small>'+accountBadge+'</div>'+
       '<div class="member-place">'+esc([firm?.city,firm?.district].filter(Boolean).join(" · ")||"Konum yok")+'</div>'+
       '<span class="member-status '+esc(statusValue)+'">'+esc(memberStatusLabel(statusValue))+'</span>'+
-      '<div class="member-actions"><button data-member-detail="'+esc(m.id)+'">Detay</button>'+(firm?'<button data-edit-firm="'+esc(firm.id)+'">Firma</button>':'')+'</div>'+
+      '<div class="member-actions"><button data-member-detail="'+esc(m.id)+'">Detay</button>'+(firm?'<button data-edit-firm="'+esc(firm.id)+'">Firma</button>':'')+'<button class="danger" data-delete-member="'+esc(m.id)+'">Sil</button></div>'+
     '</article>';
   }).join(""):'<div class="empty">Üye bulunamadı.</div>';
 }
@@ -613,6 +613,31 @@ document.addEventListener("click",async e=>{
         createMemberAccount.disabled=false;
         createMemberAccount.textContent="Kurum Hesabı Oluştur";
       }
+    }
+    return;
+  }
+  const deleteMember=e.target.closest("[data-delete-member]");if(deleteMember){
+    const row=getMemberRows().find(x=>x.id===deleteMember.dataset.deleteMember);
+    if(!row)return;
+    const firmName=row.institutionName||"Bu üye";
+    if(!confirm(firmName+" üyeliğini silmek istiyor musunuz? Firma profili silinmeyecek, yalnızca kurum giriş yetkisi kaldırılacak."))return;
+    try{
+      if(row.memberId){
+        await db.collection("institutionUsers").doc(row.memberId).delete();
+      }
+      if(row.applicationId){
+        await db.collection("institutionApplications").doc(row.applicationId).set({
+          authUid:"",
+          accountEmail:"",
+          accountRemovedAt:new Date().toISOString()
+        },{merge:true});
+      }
+      await Promise.all([loadMembers(),loadApplications()]);
+      renderAll();
+      $("memberDetailModal")?.classList.add("hidden");
+      alert("Üyelik silindi. Firma kaydı korunuyor.");
+    }catch(err){
+      alert("Üye silinemedi: "+(err.message||"Bilinmeyen hata"));
     }
     return;
   }
