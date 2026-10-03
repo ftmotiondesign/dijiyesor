@@ -123,6 +123,51 @@
     }
     return "diger";
   }
+  function autoKeywords(row,main,sub){
+    const name=norm(row.name);
+    const words=name
+      .replace(/[^\p{L}\p{N}\s]/gu," ")
+      .split(/\s+/)
+      .map(x=>x.trim())
+      .filter(x=>x.length>=2);
+
+    const out=new Set(words);
+    if(name)out.add(name);
+
+    // Sık kullanılan iki kelimeli aramalar
+    for(let i=0;i<words.length-1;i++)out.add(words[i]+" "+words[i+1]);
+
+    const text=norm([row.name,row.address].join(" "));
+    if(main==="egitim"){
+      out.add("eğitim");
+      out.add("kurs");
+      if(sub==="surucu"||/sürücü|surucu|ehliyet|direksiyon/.test(text)){
+        ["sürücü kursu","surucu kursu","ehliyet","direksiyon","ehliyet kursu"].forEach(x=>out.add(x));
+      }
+      if(sub==="kres"||/anaokulu|ana okulu|kreş|kres/.test(text)){
+        ["anaokulu","ana okulu","kreş","kres","okul öncesi"].forEach(x=>out.add(x));
+      }
+      if(sub==="dershane"||/dershane|yks|tyt|ayt|lgs/.test(text)){
+        ["dershane","kurs merkezi","yks","tyt","ayt","lgs"].forEach(x=>out.add(x));
+      }
+      if(sub==="yurt"||/yurt/.test(text)){
+        ["öğrenci yurdu","ogrenci yurdu","yurt"].forEach(x=>out.add(x));
+      }
+    }
+    if(main==="otomotiv"){
+      ["otomotiv","oto"].forEach(x=>out.add(x));
+      if(sub==="oto_servis")["oto servis","araç bakım","arac bakim","tamir"].forEach(x=>out.add(x));
+      if(sub==="ekspertiz")["ekspertiz","oto ekspertiz","araç ekspertiz"].forEach(x=>out.add(x));
+    }
+    if(main==="yemeicme"){
+      ["yeme içme","yeme icme"].forEach(x=>out.add(x));
+      if(sub==="restoran")["restoran","lokanta","yemek"].forEach(x=>out.add(x));
+      if(sub==="kafe")["kafe","cafe","kahve"].forEach(x=>out.add(x));
+    }
+
+    return [...out].filter(Boolean).slice(0,40);
+  }
+
   function desc(row,main,city,district){
     const labels={egitim:"eğitim",otomotiv:"otomotiv",yemeicme:"yeme & içme",saglikguzellik:"sağlık & güzellik",evyapi:"ev & yapı",emlak:"emlak",turizm:"turizm & konaklama",organizasyonmedya:"organizasyon & medya",tasimacilik:"taşımacılık",profesyonel:"profesyonel hizmet",alisveris:"alışveriş & yerel esnaf",diger:"yerel işletme"};
     const loc=[district,city].filter(Boolean).join(", ");
@@ -150,6 +195,7 @@
     rows.forEach(row=>{
       const item={...row,city,district,mainCategory:main,subCategory:inferSub(row,main)};
       item.description=desc(item,main,city,district);
+      item.searchKeywords=autoKeywords(item,main,item.subCategory);
       const k=key(item);
       if(seen.has(k))return;
       seen.add(k);queue.push(item);added++;
@@ -191,6 +237,7 @@
           website:row.website||"",
           instagram:"",
           description:row.description||"",
+          searchKeywords:Array.isArray(row.searchKeywords)?row.searchKeywords:[],
           status:"active",
           vip:false,
           sponsored:false,
