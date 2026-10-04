@@ -191,6 +191,8 @@ campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
 campaignUrl:d.campaignUrl||d.promotionUrl||"",
 sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser),
 searchPopupActive:Boolean(d.searchPopupActive),
+searchPopupStartDate:d.searchPopupStartDate||"",
+searchPopupEndDate:d.searchPopupEndDate||"",
 searchPopupCity:d.searchPopupCity||"",
 searchPopupDistrict:d.searchPopupDistrict||"",
 searchPopupTitle:d.searchPopupTitle||"",
@@ -426,6 +428,14 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
     if(!x.searchPopupActive)return false;
+    if(x.searchPopupStartDate){
+      const start=new Date(x.searchPopupStartDate+"T00:00:00");
+      if(!Number.isNaN(start.getTime())&&Date.now()<start.getTime())return false;
+    }
+    if(x.searchPopupEndDate){
+      const end=new Date(x.searchPopupEndDate+"T23:59:59");
+      if(!Number.isNaN(end.getTime())&&Date.now()>end.getTime())return false;
+    }
     const adCity=norm(x.searchPopupCity||x.city),adDistrict=norm(x.searchPopupDistrict);
     if(adCity&&adCity!==nc)return false;
     if(adDistrict&&(!nd||adDistrict!==nd))return false;
