@@ -822,3 +822,29 @@ button,input,select{font:inherit}
   .only360-btn-compact .only360-icon{min-width:30px}
   .count{padding:7px 9px;font-size:11px}
 }
+
+
+/* Mobilde 360° filtresini sürekli görünür tut */
+@media(max-width:620px){
+  .only360-btn-compact{
+    position:fixed!important;
+    right:14px;
+    bottom:18px;
+    z-index:1450;
+    width:auto!important;
+    min-height:42px;
+    padding:6px 8px 6px 6px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid #cfe0f6;
+    box-shadow:0 10px 28px rgba(23,55,96,.18);
+  }
+  .only360-btn-compact .only360-copy{display:none!important}
+  .only360-btn-compact .only360-icon{min-width:34px;height:28px}
+  .only360-btn-compact .only360-switch{display:inline-block}
+  .only360-btn-compact.active{
+    background:#f2f7ff;
+    border-color:#8dbcf7;
+  }
+  .results-head-actions{min-width:0}
+}
