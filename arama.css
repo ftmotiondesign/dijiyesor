@@ -763,3 +763,14 @@ button,input,select{font:inherit}
   .location-picker-card h2{font-size:21px}
   .location-picker-fields{grid-template-columns:1fr}
 }
+
+
+/* Arama sonrası ilk firma başlığının görünür kalması */
+#companyGrid .result-card:first-child{
+  scroll-margin-top:84px;
+}
+@media(max-width:700px){
+  #companyGrid .result-card:first-child{
+    scroll-margin-top:72px;
+  }
+}
