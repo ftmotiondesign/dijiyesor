@@ -551,6 +551,9 @@ button,input,select{font:inherit}
 
 @media(max-width:700px){
   .search-area.compact{
+    position:relative;
+    top:auto;
+    z-index:auto;
     padding-top:6px;
     padding-bottom:6px;
   }
@@ -584,6 +587,6 @@ button,input,select{font:inherit}
 @media(max-width:700px){
   #locationNotice,
   #companyGrid{
-    scroll-margin-top:74px;
+    scroll-margin-top:10px;
   }
 }
