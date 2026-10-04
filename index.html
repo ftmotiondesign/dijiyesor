@@ -283,6 +283,30 @@
       });
     });
 
+    function cityLocative(cityName) {
+      const city = String(cityName || '').trim();
+      if (!city) return '';
+
+      const lower = city.toLocaleLowerCase('tr-TR');
+      const vowels = ['a','e','ı','i','o','ö','u','ü'];
+      const frontVowels = new Set(['e','i','ö','ü']);
+      const voiceless = new Set(['f','s','t','k','ç','ş','h','p']);
+
+      let lastVowel = '';
+      for (let i = lower.length - 1; i >= 0; i--) {
+        if (vowels.includes(lower[i])) {
+          lastVowel = lower[i];
+          break;
+        }
+      }
+
+      const lastLetter = lower.replace(/[^a-zçğıöşü]/g,'').slice(-1);
+      const vowelPart = frontVowels.has(lastVowel) ? 'e' : 'a';
+      const consonantPart = voiceless.has(lastLetter) ? 't' : 'd';
+
+      return city + "'" + consonantPart + vowelPart;
+    }
+
     function goSearch() {
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
@@ -295,7 +319,7 @@
 
         if (title) {
           title.textContent = citySelect.value
-            ? citySelect.value + ' için ne arıyorsunuz?'
+            ? cityLocative(citySelect.value) + ' ne arıyorsunuz?'
             : 'Ne arıyorsunuz?';
         }
 
