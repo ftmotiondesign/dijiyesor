@@ -214,10 +214,17 @@
       <span class="search-sponsor-label">SPONSORLU</span>
       <div id="searchSponsorMedia" class="search-sponsor-media"></div>
       <div class="search-sponsor-body">
-        <small id="searchSponsorRegion"></small>
-        <h2 id="searchSponsorTitle">Bölgenizde öne çıkan firma</h2>
-        <p id="searchSponsorText"></p>
-        <a id="searchSponsorLink" href="#" class="search-sponsor-link">Firmayı İncele</a>
+        <div class="search-sponsor-info">
+          <small id="searchSponsorRegion"></small>
+          <h2 id="searchSponsorTitle">Bölgenizde öne çıkan firma</h2>
+          <p id="searchSponsorText"></p>
+          <a id="searchSponsorLink" href="#" class="search-sponsor-link">Firmayı İncele</a>
+        </div>
+        <div id="searchSponsorMapBox" class="search-sponsor-mapbox hidden">
+          <a id="searchSponsorDirections" class="search-sponsor-directions" href="#" target="_blank" rel="noopener">📍 Yol Tarifi</a>
+          <iframe id="searchSponsorMap" class="search-sponsor-map" title="Firma konumu" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <a id="searchSponsorMapLink" class="search-sponsor-maplink" href="#" target="_blank" rel="noopener">Konumu Haritada Gör ↗</a>
+        </div>
       </div>
     </div>
   </div>
