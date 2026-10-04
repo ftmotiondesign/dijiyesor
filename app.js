@@ -641,6 +641,7 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
   });
   const ad=candidates[0],modal=document.getElementById("searchSponsorPopup");
   if(!modal)return;
+  currentSearchSponsorAd=ad;
   const freq=ad.searchPopupFrequency||"session";
   const adKey="djs_search_sponsor_"+ad.id;
   const locationKey=norm([cityValue,districtValue].filter(Boolean).join("|"));
