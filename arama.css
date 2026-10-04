@@ -504,3 +504,74 @@ button,input,select{font:inherit}
   .result-visual{width:92px;height:70px;flex-basis:92px}
   .result-visual-fallback>div:nth-child(2){display:none}
 }
+
+
+/* Sonuçlar geldikten sonra kompakt arama alanı */
+.search-area.compact{
+  position:sticky;
+  top:0;
+  z-index:25;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(8px);
+  padding-top:8px;
+  padding-bottom:8px;
+  border-bottom:1px solid #e6edf7;
+}
+.search-area.compact .search-line{
+  height:48px;
+  border-radius:18px;
+  transition:all .2s ease;
+}
+.search-area.compact .search-line input{
+  font-size:14px;
+  padding:0 8px;
+}
+.search-area.compact .search-line button{
+  height:34px;
+  padding:0 14px;
+  font-size:12px;
+  border-radius:16px;
+}
+.search-area.compact .search-icon{
+  font-size:18px;
+  margin-left:14px;
+}
+.search-area.compact .filters{
+  gap:8px;
+  margin-top:8px;
+}
+.search-area.compact .filters select{
+  height:40px;
+  font-size:13px;
+  border-radius:12px;
+}
+.search-area.compact .special-filter-row{
+  margin-top:8px;
+}
+
+@media(max-width:700px){
+  .search-area.compact{
+    padding-top:6px;
+    padding-bottom:6px;
+  }
+  .search-area.compact .search-line{
+    height:44px;
+    border-radius:16px;
+  }
+  .search-area.compact .search-line input{
+    font-size:13px;
+  }
+  .search-area.compact .search-line button{
+    height:32px;
+    padding:0 12px;
+    font-size:11px;
+  }
+  .search-area.compact .search-icon{
+    font-size:16px;
+    margin-left:12px;
+  }
+  .search-area.compact .filters select{
+    height:38px;
+    font-size:12px;
+  }
+}
