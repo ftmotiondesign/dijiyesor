@@ -308,6 +308,10 @@ function renderFirms(){
 function openFirmModal(id){
   const f=firms.find(x=>x.id===id)||{};
   $("firmModalTitle").textContent=id?"Hızlı Düzenle":"Yeni Firma Ekle";$("firmId").value=id||"";
+  if($("quickFirmViewBtn")){
+    $("quickFirmViewBtn").href=id?"firma.html?id="+encodeURIComponent(id):"#";
+    $("quickFirmViewBtn").style.display=id?"inline-flex":"none";
+  }
   $("editName").value=f.name||"";$("editStatus").value=f.status||"active";$("editMainCategory").value=f.mainCategory||"diger";$("editSubCategory").value=f.subCategory||f.category||"";
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
