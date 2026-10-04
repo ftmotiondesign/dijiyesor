@@ -358,6 +358,44 @@ function resultCardVisual(i){
   '</div>';
 }
 
+const CITY_HERO_IMAGES={
+  "çanakkale":"https://commons.wikimedia.org/wiki/Special:FilePath/Chanakkale_Turkey.jpg?width=1600",
+  "canakkale":"https://commons.wikimedia.org/wiki/Special:FilePath/Chanakkale_Turkey.jpg?width=1600",
+  "manisa":"https://commons.wikimedia.org/wiki/Special:FilePath/Spil_National_Park_and_Manisa.jpg?width=1600",
+  "istanbul":"https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul%2C_Turkey_Bosporus.jpg?width=1600",
+  "ankara":"https://commons.wikimedia.org/wiki/Special:FilePath/Anitkabir_Ankara.jpg?width=1600",
+  "izmir":"https://commons.wikimedia.org/wiki/Special:FilePath/%C4%B0zmir_Clock_Tower%2C_2026.jpg?width=1600"
+};
+function cityHeroKey(value){
+  return String(value||"").trim().toLocaleLowerCase("tr-TR");
+}
+function updateCityHero(){
+  const hero=document.getElementById("cityHero");
+  const img=document.getElementById("cityHeroImage");
+  const title=document.getElementById("cityHeroTitle");
+  const subtitle=document.getElementById("cityHeroSubtitle");
+  const cityEl=document.getElementById("citySelect");
+  const districtEl=document.getElementById("districtSelect");
+  if(!hero||!img||!title||!subtitle||!cityEl)return;
+
+  const city=String(cityEl.value||"").trim();
+  const district=String(districtEl?.value||"").trim();
+  const src=CITY_HERO_IMAGES[cityHeroKey(city)];
+
+  if(!city||!src){
+    hero.classList.add("hidden");
+    hero.setAttribute("aria-hidden","true");
+    img.removeAttribute("src");
+    return;
+  }
+
+  img.src=src;
+  img.alt=city+" şehir görünümü";
+  title.textContent=city+"’de keşfet";
+  subtitle.textContent=district?city+" / "+district+" bölgesindeki işletmeleri incele":city+" bölgesindeki işletmeleri incele";
+  hero.classList.remove("hidden");
+  hero.setAttribute("aria-hidden","false");
+}
 function render(data){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   if(!grid||!sum)return;
@@ -368,6 +406,7 @@ function render(data){
   const search=document.getElementById("searchInput");
   const city=document.getElementById("citySelect");
   const district=document.getElementById("districtSelect");
+  updateCityHero();
 
   if(title){
     title.textContent="Arama sonuçları";
@@ -1080,3 +1119,14 @@ function initResultImageLightbox(){
   });
 }
 document.addEventListener("DOMContentLoaded",initResultImageLightbox);
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const img=document.getElementById("cityHeroImage");
+  if(!img||img.dataset.cityHeroImageErrorBound)return;
+  img.dataset.cityHeroImageErrorBound="1";
+  img.addEventListener("error",()=>{
+    const hero=document.getElementById("cityHero");
+    if(hero){hero.classList.add("hidden");hero.setAttribute("aria-hidden","true")}
+  });
+});
