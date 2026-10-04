@@ -899,3 +899,16 @@ button,input,select{font:inherit}
     font-size:9px;
   }
 }
+
+
+/* Türkiye geneli sonuçlar alanındaki Konum Seç butonunu belirgin yeşil yap */
+.location-select-btn{
+  background:#16a34a!important;
+  border-color:#16a34a!important;
+  color:#fff!important;
+  box-shadow:0 6px 16px rgba(22,163,74,.22);
+}
+.location-select-btn:hover{
+  background:#15803d!important;
+  border-color:#15803d!important;
+}
