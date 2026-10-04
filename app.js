@@ -399,9 +399,23 @@ function render(data){
   if(!normalCards.length && sponsored.length)merged.push(...sponsored);
   grid.innerHTML=merged.join("");
 }
+async function loadManagedSearchCategories(){
+  try{
+    const snap=await db.collection("siteCategories").get();
+    snap.docs.forEach(d=>{
+      const x=d.data()||{},key=d.id;
+      if(x.active===false){delete categoryLabels[key];delete subcategoryMap[key];return}
+      if(x.label)categoryLabels[key]=x.label;
+      if(!subcategoryMap[key])subcategoryMap[key]={};
+      Object.assign(subcategoryMap[key],x.subcategories||{});
+    });
+  }catch(_){}
+}
 async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),subCategory=document.getElementById("subCategorySelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
   if(!search)return;
+  await loadManagedSearchCategories();
+  if(sector){const current=sector.value;sector.innerHTML='<option value="">Tüm Sektörler</option>'+Object.entries(categoryLabels).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");sector.value=current;}
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
 
   const modal=document.getElementById("categoryPickerModal");
@@ -412,20 +426,8 @@ async function initHome(){
   const locationSearchLabel=document.getElementById("locationSearchLabel");
   const applyPopupLocation=document.getElementById("applyPopupLocation");
   const allTurkeyBtn=document.getElementById("allTurkeyBtn");
-  const pickerCategories=[
-    ["egitim","Eğitim","Kurs, sürücü kursu, anaokulu, yurt"],
-    ["otomotiv","Otomotiv","Servis, ekspertiz, galeri, kiralama"],
-    ["yemeicme","Yeme & İçme","Restoran, kafe, pizza, döner"],
-    ["saglikguzellik","Sağlık & Güzellik","Diş, psikolog, kuaför, spor"],
-    ["evyapi","Ev & Yapı","Mobilya, dekorasyon, teknik servis"],
-    ["emlak","Emlak","Konut, arsa, emlak ofisi"],
-    ["turizm","Turizm & Konaklama","Otel, pansiyon, apart"],
-    ["organizasyonmedya","Organizasyon & Medya","Fotoğraf, video, organizasyon"],
-    ["tasimacilik","Taşımacılık","Nakliyat, kurye, teslimat"],
-    ["profesyonel","Profesyonel Hizmetler","Hukuk, muhasebe, web, danışmanlık"],
-    ["alisveris","Yerel Esnaf","Market, giyim, elektronik, pet shop"],
-    ["diger","Diğer","Diğer kurum ve hizmetler"]
-  ];
+  const pickerDescriptions={egitim:"Kurs, sürücü kursu, anaokulu, yurt",otomotiv:"Servis, ekspertiz, galeri, kiralama",yemeicme:"Restoran, kafe, pizza, döner",saglikguzellik:"Diş, psikolog, kuaför, spor",evyapi:"Mobilya, dekorasyon, teknik servis",emlak:"Konut, arsa, emlak ofisi",turizm:"Otel, pansiyon, apart",organizasyonmedya:"Fotoğraf, video, organizasyon",tasimacilik:"Nakliyat, kurye, teslimat",profesyonel:"Hukuk, muhasebe, web, danışmanlık",alisveris:"Market, giyim, elektronik, pet shop",diger:"Diğer kurum ve hizmetler"};
+  const pickerCategories=Object.entries(categoryLabels).map(([key,title])=>[key,title,pickerDescriptions[key]||Object.values(subcategoryMap[key]||{}).slice(0,4).join(", ")||"Firma ve hizmetler"]);
   if(categoryGrid){
     categoryGrid.innerHTML=pickerCategories.map(([key,title,desc])=>{
       const subs=Object.entries(subcategoryMap[key]||{}).map(([subKey,subTitle])=>'<button type="button" class="category-subpick" data-pick-sector="'+key+'" data-pick-subcategory="'+subKey+'">'+esc(subTitle)+'</button>').join("");
