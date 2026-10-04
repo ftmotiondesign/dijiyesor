@@ -47,7 +47,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -301,7 +301,7 @@ function renderAll(){
   if($("navTourLeadCount"))$("navTourLeadCount").textContent=newTourLeads.length;
   if($("revenueTourBadge"))$("revenueTourBadge").textContent=newTourLeads.length+" yeni";
   $("navMemberCount").textContent=getMemberRows().length;
-  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();
+  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();renderSponsorPopupManager();
 }
 function renderRecentApplications(){
   const list=applications.filter(a=>String(a.status||"new")==="new").slice(0,5);
@@ -503,6 +503,148 @@ $("firmForm").addEventListener("submit",async e=>{
     msg.className="message success";msg.textContent="Kaydedildi.";await loadFirms();renderAll();setTimeout(()=>$("firmModal").classList.add("hidden"),600);
   }catch(err){msg.className="message error";msg.textContent=err.message||"Kaydedilemedi."}
 });
+
+
+function sponsorPopupRows(){
+  return firms.filter(f=>f.searchPopupTitle||f.searchPopupMediaUrl||f.searchPopupActive);
+}
+function renderSponsorPopupManager(){
+  const firmSelect=$("sponsorPopupFirm");
+  if(firmSelect){
+    const current=firmSelect.value;
+    firmSelect.innerHTML='<option value="">Firma seçin</option>'+firms.map(f=>'<option value="'+esc(f.id)+'">'+esc(f.name)+' · '+esc([f.city,f.district].filter(Boolean).join(" / "))+'</option>').join("");
+    if(firms.some(f=>f.id===current))firmSelect.value=current;
+  }
+  const list=$("sponsorPopupList");
+  if(list){
+    const rows=sponsorPopupRows();
+    list.innerHTML=rows.length?rows.map(f=>'<article class="sponsor-popup-row">'+
+      '<div><strong>'+esc(f.name)+'</strong><small>'+esc([f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / ")||"Bölge yok")+'</small></div>'+
+      '<span class="status-pill">'+(f.searchPopupActive?"Aktif":"Pasif")+'</span>'+
+      '<div class="row-actions"><button data-edit-sponsor-popup="'+esc(f.id)+'">Düzenle</button><button class="danger" data-remove-sponsor-popup="'+esc(f.id)+'">Kaldır</button></div>'+
+    '</article>').join(""):'<div class="empty">Henüz popup reklamı oluşturulmadı.</div>';
+  }
+}
+async function loadSponsorCities(){
+  const city=$("sponsorPopupCity"),district=$("sponsorPopupDistrict");
+  if(!city||!district||city.options.length>1)return;
+  city.innerHTML='<option value="">İller yükleniyor...</option>';
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
+    const j=await r.json();
+    city.innerHTML='<option value="">İl seçin</option>';
+    (j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr")).forEach(x=>{
+      const o=document.createElement("option");o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
+    });
+  }catch(_){city.innerHTML='<option value="">İl seçin</option>'}
+}
+async function loadSponsorDistricts(selectedValue=""){
+  const city=$("sponsorPopupCity"),district=$("sponsorPopupDistrict");
+  if(!city||!district)return;
+  district.disabled=true;district.innerHTML='<option value="">Tüm İlçeler</option>';
+  const id=city.options[city.selectedIndex]?.dataset?.id;
+  if(!city.value||!id)return;
+  try{
+    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");
+    const j=await r.json();
+    (j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr")).forEach(x=>{
+      const o=document.createElement("option");o.value=x.name;o.textContent=x.name;district.appendChild(o);
+    });
+    district.disabled=false;
+    if(selectedValue)district.value=selectedValue;
+  }catch(_){district.disabled=false}
+}
+async function fillSponsorPopupForm(id){
+  await loadSponsorCities();
+  const f=firms.find(x=>x.id===id); if(!f)return;
+  $("sponsorPopupFirm").value=f.id;
+  $("sponsorPopupActive").value=String(f.searchPopupActive!==false);
+  $("sponsorPopupCity").value=f.searchPopupCity||f.city||"";
+  await loadSponsorDistricts(f.searchPopupDistrict||"");
+  $("sponsorPopupTitle").value=f.searchPopupTitle||f.name||"";
+  $("sponsorPopupText").value=f.searchPopupText||"";
+  $("sponsorPopupMediaType").value=f.searchPopupMediaType||"image";
+  $("sponsorPopupMediaUrl").value=f.searchPopupMediaUrl||"";
+  $("sponsorPopupButtonText").value=f.searchPopupButtonText||"Firmayı İncele";
+  $("sponsorPopupTargetUrl").value=f.searchPopupTargetUrl||"";
+}
+function clearSponsorPopupForm(){
+  ["sponsorPopupFirm","sponsorPopupCity","sponsorPopupTitle","sponsorPopupText","sponsorPopupMediaUrl","sponsorPopupTargetUrl"].forEach(id=>{if($(id))$(id).value=""});
+  if($("sponsorPopupDistrict")){$("sponsorPopupDistrict").innerHTML='<option value="">Tüm İlçeler</option>';$("sponsorPopupDistrict").disabled=true}
+  if($("sponsorPopupActive"))$("sponsorPopupActive").value="true";
+  if($("sponsorPopupMediaType"))$("sponsorPopupMediaType").value="image";
+  if($("sponsorPopupButtonText"))$("sponsorPopupButtonText").value="Firmayı İncele";
+  if($("sponsorPopupMediaFile"))$("sponsorPopupMediaFile").value="";
+}
+function uploadSponsorMedia(file){
+  return new Promise((resolve,reject)=>{
+    if(!file)return reject(new Error("Dosya seçilmedi."));
+    if(file.size>80*1024*1024)return reject(new Error("Dosya en fazla 80 MB olabilir."));
+    const fd=new FormData();fd.append("file",file);fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+    const xhr=new XMLHttpRequest();
+    xhr.open("POST","https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/auto/upload",true);
+    xhr.timeout=120000;
+    xhr.onload=()=>{
+      let d={};try{d=JSON.parse(xhr.responseText||"{}")}catch(_){}
+      if(xhr.status>=200&&xhr.status<300&&d.secure_url)resolve({url:d.secure_url,type:d.resource_type==="video"?"video":"image"});
+      else reject(new Error(d?.error?.message||("HTTP "+xhr.status)));
+    };
+    xhr.onerror=()=>reject(new Error("Yükleme bağlantısı kurulamadı."));
+    xhr.ontimeout=()=>reject(new Error("Yükleme zaman aşımına uğradı."));
+    xhr.send(fd);
+  });
+}
+$("sponsorPopupCity")?.addEventListener("change",()=>loadSponsorDistricts());
+$("sponsorPopupFirm")?.addEventListener("change",async e=>{
+  const f=firms.find(x=>x.id===e.target.value);if(!f)return;
+  await loadSponsorCities();
+  $("sponsorPopupCity").value=f.city||"";
+  await loadSponsorDistricts(f.district||"");
+  if(!$("sponsorPopupTitle").value)$("sponsorPopupTitle").value=f.name||"";
+});
+$("sponsorPopupUploadBtn")?.addEventListener("click",async()=>{
+  const file=$("sponsorPopupMediaFile")?.files?.[0],msg=$("sponsorPopupUploadMessage");if(!file)return;
+  try{
+    msg.textContent="Yükleniyor...";
+    const x=await uploadSponsorMedia(file);
+    $("sponsorPopupMediaUrl").value=x.url;$("sponsorPopupMediaType").value=x.type;
+    msg.textContent="Yüklendi ✓";
+  }catch(e){msg.textContent="Yüklenemedi: "+(e.message||"")}
+});
+$("saveSponsorPopupBtn")?.addEventListener("click",async()=>{
+  const id=$("sponsorPopupFirm")?.value,msg=$("sponsorPopupMessage");
+  if(!id){msg.className="message error";msg.textContent="Önce sponsor firma seçin.";return}
+  const patch={
+    searchPopupActive:$("sponsorPopupActive").value==="true",
+    searchPopupCity:$("sponsorPopupCity").value,
+    searchPopupDistrict:$("sponsorPopupDistrict").value,
+    searchPopupTitle:$("sponsorPopupTitle").value.trim(),
+    searchPopupText:$("sponsorPopupText").value.trim(),
+    searchPopupMediaType:$("sponsorPopupMediaType").value,
+    searchPopupMediaUrl:$("sponsorPopupMediaUrl").value.trim(),
+    searchPopupButtonText:$("sponsorPopupButtonText").value.trim()||"Firmayı İncele",
+    searchPopupTargetUrl:$("sponsorPopupTargetUrl").value.trim(),
+    searchPopupUpdatedAt:new Date().toISOString()
+  };
+  try{
+    await db.collection("institutions").doc(id).set(patch,{merge:true});
+    msg.className="message success";msg.textContent="Popup reklamı kaydedildi.";
+    await loadFirms();renderAll();
+  }catch(e){msg.className="message error";msg.textContent="Kaydedilemedi: "+(e.message||"")}
+});
+$("clearSponsorPopupBtn")?.addEventListener("click",clearSponsorPopupForm);
+document.addEventListener("click",async e=>{
+  const edit=e.target.closest("[data-edit-sponsor-popup]");
+  if(edit){await fillSponsorPopupForm(edit.dataset.editSponsorPopup);setView("sponsor-ads");return}
+  const remove=e.target.closest("[data-remove-sponsor-popup]");
+  if(remove){
+    await db.collection("institutions").doc(remove.dataset.removeSponsorPopup).set({
+      searchPopupActive:false,searchPopupTitle:"",searchPopupText:"",searchPopupMediaUrl:"",searchPopupTargetUrl:"",searchPopupUpdatedAt:new Date().toISOString()
+    },{merge:true});
+    await loadFirms();renderAll();return;
+  }
+});
+loadSponsorCities();
 
 function fillCampaignFirmSelect(){
   const search=$("campaignFirmSearch");
