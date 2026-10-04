@@ -6,7 +6,7 @@
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261004-3">
+  <link rel="stylesheet" href="firma.css?v=20261004-4">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -400,6 +400,33 @@
       return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
     }
 
+    function buildProfileCoverSlider(d){
+      const images=[
+        d.coverUrl,
+        ...asArray(d.coverUrls),
+        ...asArray(d.galleryUrls),
+        ...asArray(d.photos),
+        ...asArray(d.photoUrls)
+      ].map(v=>String(v||"").trim()).filter(Boolean);
+
+      const unique=[...new Set(images)].slice(0,6);
+      if(!unique.length)return buildFallbackCover(d);
+      if(unique.length===1){
+        return '<div class="profile-cover"><img src="'+esc(unique[0])+'" alt="'+esc(d.name||"Firma")+' kapak görseli"></div>';
+      }
+
+      return '<div class="profile-cover profile-cover-slider" data-cover-slider>'+
+        '<div class="profile-cover-track">'+
+          unique.map((url,index)=>'<div class="profile-cover-slide'+(index===0?' active':'')+'" data-cover-slide="'+index+'"><img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+' görsel '+(index+1))+'"></div>').join("")+
+        '</div>'+
+        '<button type="button" class="profile-cover-nav prev" data-cover-prev aria-label="Önceki görsel">‹</button>'+
+        '<button type="button" class="profile-cover-nav next" data-cover-next aria-label="Sonraki görsel">›</button>'+
+        '<div class="profile-cover-dots">'+
+          unique.map((_,index)=>'<button type="button" class="'+(index===0?'active':'')+'" data-cover-dot="'+index+'" aria-label="'+(index+1)+'. görsel"></button>').join("")+
+        '</div>'+
+      '</div>';
+    }
+
     function buildFallbackCover(d){
       const c=categoryFallback(d);
       return '<div class="profile-cover category-cover '+esc(c.tone)+'" aria-label="'+esc(c.label)+' kategori görseli">'+
@@ -449,9 +476,7 @@
           ? '<img src="'+esc(d.logoUrl)+'" alt="'+esc(d.name||"Firma")+' logosu">'
           : '<span>'+esc(initials(d.name))+'</span>';
 
-        const cover=d.coverUrl
-          ? '<div class="profile-cover"><img src="'+esc(d.coverUrl)+'" alt="'+esc(d.name||"Firma")+' kapak görseli"></div>'
-          : buildFallbackCover(d);
+        const cover=buildProfileCoverSlider(d);
 
         const locationText=[d.city,d.district].filter(Boolean).join(" · ") || d.location || "";
         const website=safeUrl(d.website);
@@ -523,6 +548,45 @@
             '<button id="closeModal" type="button" aria-label="Kapat">×</button>'+
             '<img id="modalImage" alt="Firma fotoğrafı">'+
           '</div>';
+
+        function initProfileCoverSlider(){
+          const slider=document.querySelector("[data-cover-slider]");
+          if(!slider)return;
+          const slides=[...slider.querySelectorAll("[data-cover-slide]")];
+          const dots=[...slider.querySelectorAll("[data-cover-dot]")];
+          if(slides.length<2)return;
+
+          let current=0;
+          let timer=null;
+
+          const show=index=>{
+            current=(index+slides.length)%slides.length;
+            slides.forEach((slide,i)=>slide.classList.toggle("active",i===current));
+            dots.forEach((dot,i)=>dot.classList.toggle("active",i===current));
+          };
+          const start=()=>{
+            clearInterval(timer);
+            timer=setInterval(()=>show(current+1),5000);
+          };
+
+          slider.querySelector("[data-cover-prev]")?.addEventListener("click",()=>{show(current-1);start()});
+          slider.querySelector("[data-cover-next]")?.addEventListener("click",()=>{show(current+1);start()});
+          dots.forEach(dot=>dot.addEventListener("click",()=>{show(Number(dot.dataset.coverDot)||0);start()}));
+
+          let touchStartX=0;
+          slider.addEventListener("touchstart",e=>{touchStartX=e.touches[0]?.clientX||0},{passive:true});
+          slider.addEventListener("touchend",e=>{
+            const endX=e.changedTouches[0]?.clientX||0;
+            const diff=endX-touchStartX;
+            if(Math.abs(diff)>45){show(diff<0?current+1:current-1);start()}
+          },{passive:true});
+
+          slider.addEventListener("mouseenter",()=>clearInterval(timer));
+          slider.addEventListener("mouseleave",start);
+          start();
+        }
+
+        initProfileCoverSlider();
 
         document.querySelectorAll("[data-image]").forEach(btn=>{
           btn.addEventListener("click",()=>{
