@@ -198,6 +198,7 @@ searchPopupDistrict:d.searchPopupDistrict||"",
 searchPopupTitle:d.searchPopupTitle||"",
 searchPopupText:d.searchPopupText||"",
 searchPopupMediaType:d.searchPopupMediaType||"image",
+searchPopupFrequency:d.searchPopupFrequency||"session",
 searchPopupMediaUrl:d.searchPopupMediaUrl||"",
 searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
 searchPopupTargetUrl:d.searchPopupTargetUrl||"",
@@ -427,7 +428,6 @@ async function loadManagedSearchCategories(){
   }catch(_){}
 }
 function maybeShowSearchSponsorPopup(cityValue,districtValue){
-  try{if(sessionStorage.getItem("djs_search_sponsor_shown")==="1")return}catch(_){}
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
     if(!x.searchPopupActive)return false;
@@ -459,6 +459,21 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
   });
   const ad=candidates[0],modal=document.getElementById("searchSponsorPopup");
   if(!modal)return;
+  const freq=ad.searchPopupFrequency||"session";
+  const adKey="djs_search_sponsor_"+ad.id;
+  const locationKey=norm([cityValue,districtValue].filter(Boolean).join("|"));
+  const now=Date.now();
+  try{
+    if(freq==="session"){
+      if(sessionStorage.getItem(adKey)==="1")return;
+    }else if(freq==="location"){
+      if(sessionStorage.getItem(adKey+"_loc_"+locationKey)==="1")return;
+    }else if(freq==="daily"||freq==="3days"){
+      const last=Number(localStorage.getItem(adKey+"_ts")||0);
+      const gap=freq==="daily"?86400000:259200000;
+      if(last&&now-last<gap)return;
+    }
+  }catch(_){};
   const media=document.getElementById("searchSponsorMedia");
   if(media){
     if(ad.searchPopupMediaUrl){
@@ -504,7 +519,11 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
   modal.classList.remove("hidden");
   document.body.classList.add("djs-modal-open");
   document.body.style.overflow="hidden";
-  try{sessionStorage.setItem("djs_search_sponsor_shown","1")}catch(_){}
+  try{
+    if(freq==="session")sessionStorage.setItem(adKey,"1");
+    else if(freq==="location")sessionStorage.setItem(adKey+"_loc_"+locationKey,"1");
+    else if(freq==="daily"||freq==="3days")localStorage.setItem(adKey+"_ts",String(now));
+  }catch(_){}
 }
 function initSearchSponsorPopup(){
   const modal=document.getElementById("searchSponsorPopup");if(!modal)return;
