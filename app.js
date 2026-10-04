@@ -743,7 +743,7 @@ function hideSearchSponsorReopen(){
 
 function initSearchSponsorPopup(){
   const modal=document.getElementById("searchSponsorPopup");if(!modal)return;
-  const close=()=>{modal.classList.add("hidden");if(!document.querySelector(".category-modal:not(.hidden),.location-picker-modal:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){}};
+  const close=()=>{modal.classList.add("hidden");if(!document.querySelector(".category-modal:not(.hidden),.location-picker-modal:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){};showSearchSponsorReopen()};
   modal.querySelectorAll("[data-close-search-sponsor]").forEach(x=>x.addEventListener("click",close));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
 }
@@ -995,7 +995,7 @@ async function initHome(){
     ranked.sort((a,b)=>b.score-a.score||String(a.item.name||"").localeCompare(String(b.item.name||""),"tr"));
     const filtered=ranked.map(x=>x.item);
     render(filtered);
-    setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value),180);
+    setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value,sector.value),180);
     if(feature360){
       const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");
       if(title)title.textContent="360° Mekânlar";
