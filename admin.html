@@ -33,6 +33,7 @@
     <nav>
       <button class="nav-item active" data-view="overview">Genel Bakış</button>
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
+      <button class="nav-item" data-view="auto-firm-import">Otomatik Firma Topla</button>
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
@@ -121,6 +122,96 @@
         </div>
         <div id="firmBulkMessage" class="message hidden"></div>
         <div id="firmList" class="data-list"></div>
+      </section>
+    </section>
+
+    <section class="view" data-panel-view="auto-firm-import">
+      <div class="auto-import-head">
+        <div>
+          <span>OTOMATİK FİRMA TOPLA</span>
+          <h2>Şehir ve kategori seç, firmaları tek ekranda topla.</h2>
+          <p>Google Places bağlantısı tamamlandığında bulunan firmalar burada taslak olarak listelenecek. Önce kontrol edip sonra DijiyeSor’a aktarabileceksin.</p>
+        </div>
+        <span class="auto-import-status">API BAĞLANTISI BEKLİYOR</span>
+      </div>
+
+      <section class="card auto-import-card">
+        <div class="auto-import-grid">
+          <label>İl
+            <select id="autoImportCity">
+              <option value="">İl seç</option>
+            </select>
+          </label>
+          <label>İlçe
+            <select id="autoImportDistrict" disabled>
+              <option value="">Önce il seç</option>
+            </select>
+          </label>
+          <label>Kategori
+            <select id="autoImportCategory">
+              <option value="surucu">Sürücü Kursu</option>
+              <option value="kres">Kreş / Anaokulu</option>
+              <option value="dershane">Dershane / Kurs Merkezi</option>
+              <option value="yurt">Öğrenci Yurdu</option>
+              <option value="oto_servis">Oto Servis</option>
+              <option value="restoran">Restoran</option>
+              <option value="dis_klinigi">Diş Kliniği</option>
+              <option value="emlak_ofisi">Emlak Ofisi</option>
+              <option value="otel">Otel / Konaklama</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="auto-import-options">
+          <label><input id="autoImportAllDistricts" type="checkbox"><span>Seçilen ilin tüm ilçelerini tara</span></label>
+          <label><input id="autoImportDraftOnly" type="checkbox" checked><span>Firmaları önce taslak olarak kaydet</span></label>
+          <label><input id="autoImportSkipDuplicates" type="checkbox" checked><span>Mevcut firmaları tekrar ekleme</span></label>
+        </div>
+
+        <div class="auto-import-actionbar">
+          <div>
+            <strong id="autoImportQueryPreview">Arama hazırlanıyor</strong>
+            <small>Örnek: Çanakkale / Merkez / Sürücü Kursu</small>
+          </div>
+          <button id="autoImportSearchBtn" type="button" class="primary">Firmaları Bul</button>
+        </div>
+        <div id="autoImportMessage" class="message hidden"></div>
+      </section>
+
+      <section class="card auto-import-results-card">
+        <div class="card-head">
+          <div>
+            <span>SONUÇLAR</span>
+            <h2>Bulunan firmalar</h2>
+          </div>
+          <div class="auto-import-summary">
+            <b id="autoImportFoundCount">0 firma</b>
+            <span id="autoImportNewCount">0 yeni</span>
+            <span id="autoImportDuplicateCount">0 kayıtlı</span>
+          </div>
+        </div>
+
+        <div class="auto-import-table-head">
+          <span></span><span>Firma</span><span>Konum</span><span>İletişim</span><span>Durum</span>
+        </div>
+        <div id="autoImportResults" class="auto-import-results">
+          <div class="auto-import-empty">
+            <strong>Henüz arama yapılmadı.</strong>
+            <span>İl, ilçe ve kategori seçip “Firmaları Bul” butonuna bas.</span>
+          </div>
+        </div>
+
+        <div class="auto-import-footer">
+          <span id="autoImportSelectedCount">0 firma seçildi</span>
+          <button id="autoImportSaveDraftsBtn" type="button" class="primary" disabled>Seçilenleri Taslağa Aktar</button>
+        </div>
+      </section>
+
+      <section class="card auto-import-info">
+        <div><strong>1</strong><span>Google Places üzerinden firma bilgileri alınır.</span></div>
+        <div><strong>2</strong><span>Place ID ile aynı firma tekrar eklenmez.</span></div>
+        <div><strong>3</strong><span>Yeni firmalar önce taslakta kontrol edilir.</span></div>
+        <div><strong>4</strong><span>Onayladıkların normal firma listesine aktarılır.</span></div>
       </section>
     </section>
 
