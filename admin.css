@@ -442,3 +442,15 @@
 /* Sponsor popup reklam yönetimi */
 .sponsor-popup-editor{max-width:900px}.sponsor-media-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.sponsor-media-upload input[type=file]{max-width:320px}.sponsor-media-upload span{font-size:11px;color:#66758a}.sponsor-popup-list{display:grid;gap:9px}.sponsor-popup-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;border:1px solid #e3e8ef;border-radius:12px;padding:12px}.sponsor-popup-row strong{display:block;font-size:13px}.sponsor-popup-row small{display:block;margin-top:3px;color:#7d899c;font-size:10.5px}
 @media(max-width:700px){.sponsor-popup-row{grid-template-columns:1fr}.sponsor-popup-row .row-actions{justify-content:flex-start}}
+
+
+/* Sponsor popup sürükle-sırala */
+.sponsor-popup-row{grid-template-columns:28px 32px minmax(0,1fr) auto auto!important;transition:.15s}
+.sponsor-popup-row.dragging{opacity:.45;transform:scale(.995);border-color:#8ebcf6;background:#f5f9ff}
+.sponsor-popup-drag{cursor:grab;user-select:none;color:#9aa6b5;font-size:18px;font-weight:900;text-align:center;line-height:1}
+.sponsor-popup-drag:active{cursor:grabbing}
+.sponsor-popup-order{width:26px;height:26px;border-radius:999px;background:#1677ff;color:#fff;display:grid;place-items:center;font-size:10px;font-weight:900}
+@media(max-width:700px){
+  .sponsor-popup-row{grid-template-columns:28px 32px minmax(0,1fr)!important}
+  .sponsor-popup-row>.status-pill,.sponsor-popup-row>.row-actions{grid-column:3}
+}
