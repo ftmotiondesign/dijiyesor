@@ -477,7 +477,9 @@ async function initHome(){
       const head=document.getElementById("resultsHead");
       if(head){
         const topbar=document.querySelector(".top");
-        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-8;
+        const searchArea=document.querySelector(".search-area");
+        const extra=(searchArea?.offsetHeight||0)+12;
+        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-extra;
         window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
       }
     },80);
@@ -612,17 +614,15 @@ async function initHome(){
       history.replaceState(null,"",url.pathname+"?"+url.searchParams.toString());
     }catch(_){}
     setTimeout(()=>{
-      const notice=document.getElementById("locationNotice");
-      const firstCard=document.querySelector("#companyGrid .result-card");
-      const grid=document.getElementById("companyGrid");
-      const target=(!city.value && notice && !notice.classList.contains("hidden"))
-        ? notice
-        : (firstCard || grid);
+      const head=document.getElementById("resultsHead");
+      const target=head || document.getElementById("companyGrid");
       if(target){
         const topbar=document.querySelector(".top");
+        const searchArea=document.querySelector(".search-area");
         const topbarH=topbar?.offsetHeight||0;
-        const extra=window.innerWidth<=700 ? 14 : 22;
-        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-extra;
+        const searchH=searchArea?.offsetHeight||0;
+        const extra=window.innerWidth<=700 ? 10 : 16;
+        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-searchH-extra;
         window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
       }
     },140);
