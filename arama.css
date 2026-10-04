@@ -919,3 +919,14 @@ button,input,select{font:inherit}
   color:#16a34a;
   font-weight:900;
 }
+
+
+/* Konum bilgilendirme metni vurgu düzeni */
+.location-prefix{
+  font-weight:900;
+  color:inherit;
+}
+.location-emphasis{
+  color:inherit;
+  font-weight:400;
+}
