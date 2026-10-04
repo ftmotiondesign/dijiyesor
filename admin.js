@@ -1047,7 +1047,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
-  const edit=e.target.closest("[data-edit-firm]");if(edit){location.href="firma-duzenle.html?id="+encodeURIComponent(edit.dataset.editFirm);return}
+  const edit=e.target.closest("[data-edit-firm]");if(edit){const f=firms.find(x=>x.id===edit.dataset.editFirm);location.href="firma-duzenle.html?id="+encodeURIComponent(edit.dataset.editFirm)+"&name="+encodeURIComponent(f?.name||"");return}
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
   const toggle=e.target.closest("[data-toggle-firm]");if(toggle){const f=firms.find(x=>x.id===toggle.dataset.toggleFirm);if(f){await db.collection("institutions").doc(f.id).update({status:String(f.status||"active")==="passive"?"active":"passive"});await loadFirms();renderAll()}return}
   const stop=e.target.closest("[data-stop-campaign]");if(stop){await db.collection("institutions").doc(stop.dataset.stopCampaign).set({campaignActive:false,sponsored:false},{merge:true});await loadFirms();renderAll();return}
