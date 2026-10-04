@@ -247,7 +247,7 @@ async function uploadSelectedCover(){
     box.textContent="Görsel yüklenemedi"+code+": "+detail;
   }
 }
-$("coverFile").onchange=uploadSelectedCover;
+if($("coverFile")) $("coverFile").onchange=uploadSelectedCover;
 
 $("toggleStatus").onclick=async()=>{$("status").value=val("status")==="passive"?"active":"passive";await save()};
 boot().catch(e=>{alert(e.message||"Sayfa başlatılamadı.");location.href="admin.html#firms"});
