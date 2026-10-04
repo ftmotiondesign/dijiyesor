@@ -38,6 +38,10 @@
 .slider-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .slider-thumb .slider-index{position:absolute;left:7px;bottom:7px;background:#0f172acc;color:#fff;border-radius:999px;padding:4px 7px;font-size:11px;font-weight:800}
 .slider-thumb button{position:absolute;right:7px;top:7px;width:27px;height:27px;border:0;border-radius:999px;background:#0f172acc;color:#fff;font-size:17px;cursor:pointer}
+.slider-thumb{cursor:grab;user-select:none;touch-action:none}
+.slider-thumb.dragging{opacity:.45;transform:scale(.97);cursor:grabbing}
+.slider-thumb.drag-over{outline:3px solid #2563eb;outline-offset:2px}
+.slider-thumb .drag-handle{position:absolute;left:7px;top:7px;background:#fff;color:#334155;border:1px solid #dbe3ef;border-radius:8px;padding:4px 6px;font-size:12px;font-weight:900;box-shadow:0 2px 8px #0001}
 .slider-empty{grid-column:1/-1;padding:16px;border:1px dashed #cbd5e1;border-radius:10px;color:#64748b;font-size:12px;text-align:center}
 .slider-admin-preview{position:relative;margin-top:12px;height:180px;border-radius:12px;overflow:hidden;background:#eef2f7}
 .slider-admin-preview img{width:100%;height:100%;object-fit:cover;display:block}
@@ -288,7 +292,7 @@ function renderCoverSliderAdmin(){
   const grid=$("coverSliderGrid");
   if(grid){
     grid.innerHTML=coverSliderUrls.length
-      ? coverSliderUrls.map((url,index)=>'<div class="slider-thumb"><img src="'+String(url).replace(/"/g,"&quot;")+'" alt="Kaydırmalı kapak '+(index+1)+'"><span class="slider-index">'+(index+1)+'</span><button type="button" data-remove-slider="'+index+'" aria-label="Görseli kaldır">×</button></div>').join("")
+      ? coverSliderUrls.map((url,index)=>'<div class="slider-thumb" draggable="true" data-slider-index="'+index+'"><img src="'+String(url).replace(/"/g,"&quot;")+'" alt="Kaydırmalı kapak '+(index+1)+'"><span class="drag-handle">↕ Sürükle</span><span class="slider-index">'+(index+1)+'</span><button type="button" data-remove-slider="'+index+'" aria-label="Görseli kaldır">×</button></div>').join("")
       : '<div class="slider-empty">Henüz kaydırmalı kapak görseli eklenmedi.</div>';
   }
   const preview=$("coverSliderAdminPreview"),img=$("coverSliderAdminImage"),counter=$("coverSliderAdminCounter");
@@ -304,6 +308,91 @@ function renderCoverSliderAdmin(){
   const navDisplay=coverSliderUrls.length>1?"block":"none";
   $("coverSliderAdminPrev").style.display=navDisplay;
   $("coverSliderAdminNext").style.display=navDisplay;
+  enableCoverSliderDragSort();
+}
+function enableCoverSliderDragSort(){
+  const grid=$("coverSliderGrid");
+  if(!grid)return;
+  let fromIndex=null;
+
+  grid.querySelectorAll(".slider-thumb").forEach(item=>{
+    item.addEventListener("dragstart",e=>{
+      fromIndex=Number(item.dataset.sliderIndex);
+      item.classList.add("dragging");
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",String(fromIndex));
+      }
+    });
+    item.addEventListener("dragend",()=>{
+      item.classList.remove("dragging");
+      grid.querySelectorAll(".slider-thumb").forEach(x=>x.classList.remove("drag-over"));
+      fromIndex=null;
+    });
+    item.addEventListener("dragover",e=>{
+      e.preventDefault();
+      item.classList.add("drag-over");
+      if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+    });
+    item.addEventListener("dragleave",()=>item.classList.remove("drag-over"));
+    item.addEventListener("drop",async e=>{
+      e.preventDefault();
+      item.classList.remove("drag-over");
+      const toIndex=Number(item.dataset.sliderIndex);
+      if(fromIndex===null||Number.isNaN(toIndex)||fromIndex===toIndex)return;
+
+      const moved=coverSliderUrls.splice(fromIndex,1)[0];
+      coverSliderUrls.splice(toIndex,0,moved);
+      coverSliderPreviewIndex=0;
+      renderCoverSliderAdmin();
+      try{
+        await saveCoverSliderOnly();
+        sliderMsg("Görsel sırası kaydedildi ✓","success");
+      }catch(err){
+        sliderMsg("Sıralama kaydedilemedi: "+(err.message||""),"error");
+      }
+    });
+  });
+
+  // Mobil / dokunmatik: basılı tutup sürükle.
+  grid.querySelectorAll(".slider-thumb").forEach(item=>{
+    let active=false,startIndex=null;
+    item.addEventListener("pointerdown",e=>{
+      if(e.target.closest("button"))return;
+      active=true;
+      startIndex=Number(item.dataset.sliderIndex);
+      item.setPointerCapture?.(e.pointerId);
+      item.classList.add("dragging");
+    });
+    item.addEventListener("pointermove",e=>{
+      if(!active)return;
+      const under=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slider-thumb");
+      grid.querySelectorAll(".slider-thumb").forEach(x=>x.classList.toggle("drag-over",x===under&&x!==item));
+    });
+    const finish=async e=>{
+      if(!active)return;
+      active=false;
+      item.releasePointerCapture?.(e.pointerId);
+      item.classList.remove("dragging");
+      const under=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slider-thumb");
+      grid.querySelectorAll(".slider-thumb").forEach(x=>x.classList.remove("drag-over"));
+      if(!under)return;
+      const toIndex=Number(under.dataset.sliderIndex);
+      if(Number.isNaN(toIndex)||startIndex===toIndex)return;
+      const moved=coverSliderUrls.splice(startIndex,1)[0];
+      coverSliderUrls.splice(toIndex,0,moved);
+      coverSliderPreviewIndex=0;
+      renderCoverSliderAdmin();
+      try{
+        await saveCoverSliderOnly();
+        sliderMsg("Görsel sırası kaydedildi ✓","success");
+      }catch(err){
+        sliderMsg("Sıralama kaydedilemedi: "+(err.message||""),"error");
+      }
+    };
+    item.addEventListener("pointerup",finish);
+    item.addEventListener("pointercancel",()=>{active=false;item.classList.remove("dragging");grid.querySelectorAll(".slider-thumb").forEach(x=>x.classList.remove("drag-over"))});
+  });
 }
 function sliderMsg(text,type=""){
   const box=$("coverSliderMsg"); if(!box)return;
