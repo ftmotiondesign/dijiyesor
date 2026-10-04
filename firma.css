@@ -286,3 +286,10 @@ button{font:inherit}
   .category-cover-content span:last-child{font-size:10px}
   .hero-actions{flex-wrap:wrap}
 }
+
+
+/* Instagram iletişim alanı */
+.contact-action.instagram{display:flex;align-items:center;justify-content:center;gap:8px}
+.instagram-logo{width:17px;height:17px;flex:0 0 auto;display:block}
+.contact-row a[href*="instagram.com"]{font-weight:700;color:#2d394f;text-decoration:none}
+.contact-row a[href*="instagram.com"]:hover{color:#9d2f78}
