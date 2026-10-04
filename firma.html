@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
-  <link rel="stylesheet" href="firma.css?v=20261003-18">
+  <link rel="stylesheet" href="firma.css?v=20261004-2">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -236,6 +236,21 @@
         .replace(/\s+\d{5,}.*$/,"")
         .trim();
 
+      // Eski hızlı kayıtlarda kısa konum yanlışlıkla adres alanına yazılmış olabilir.
+      if(address && !isDetailedAddress(address) && isCoarseLocation(address)){
+        if(!location)location=address;
+        address="";
+      }
+
+      d.name=name||d.name||"Firma";
+      d.phone=phone;
+      const addrLoc=locationFromAddress(address);
+      if(addrLoc){
+        d.city=addrLoc.city;
+        d.district=addrLoc.district;
+      }
+
+      // Otomatik firma açıklamasını, adres/şehir kesinleştikten sonra oluştur.
       if(!d.description){
         const sectorLabels={
           egitim:"eğitim",
@@ -255,20 +270,6 @@
         d.description=loc
           ? name+"; "+loc+" bölgesinde hizmet veren "+(sectorLabels[d.mainCategory]||"yerel")+" işletmesidir."
           : name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
-      }
-
-      // Eski hızlı kayıtlarda kısa konum yanlışlıkla adres alanına yazılmış olabilir.
-      if(address && !isDetailedAddress(address) && isCoarseLocation(address)){
-        if(!location)location=address;
-        address="";
-      }
-
-      d.name=name||d.name||"Firma";
-      d.phone=phone;
-      const addrLoc=locationFromAddress(address);
-      if(addrLoc){
-        d.city=addrLoc.city;
-        d.district=addrLoc.district;
       }
 
       const storedWa=String(d.whatsapp||"").trim();
