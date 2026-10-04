@@ -967,3 +967,9 @@ body:has(.search-sponsor-popup:not(.hidden)) #resultsHead,
 body:has(.tour360-modal:not(.hidden)) #resultsHead{
   visibility:hidden;
 }
+
+
+/* JS ile modal açıldığında sticky sonuç başlığını kesin olarak gizle */
+body.djs-modal-open #resultsHead{
+  display:none!important;
+}
