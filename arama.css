@@ -797,3 +797,8 @@ button,input,select{font:inherit}
   .result-visual{width:84px!important;min-width:84px!important;height:68px!important}
   .result-name-row h2{font-size:14px!important}
 }
+
+.results-head p strong{
+  color:#34435a;
+  font-weight:900;
+}
