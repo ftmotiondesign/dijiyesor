@@ -189,7 +189,16 @@ campaignBadge:d.campaignBadge||d.promotionBadge||"Kampanya",
 campaignEnd:d.campaignEnd||d.campaignEndDate||"",
 campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
 campaignUrl:d.campaignUrl||d.promotionUrl||"",
-sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser)
+sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser),
+searchPopupActive:Boolean(d.searchPopupActive),
+searchPopupCity:d.searchPopupCity||"",
+searchPopupDistrict:d.searchPopupDistrict||"",
+searchPopupTitle:d.searchPopupTitle||"",
+searchPopupText:d.searchPopupText||"",
+searchPopupMediaType:d.searchPopupMediaType||"image",
+searchPopupMediaUrl:d.searchPopupMediaUrl||"",
+searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
+searchPopupTargetUrl:d.searchPopupTargetUrl||""
 })});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
   }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
@@ -411,6 +420,58 @@ async function loadManagedSearchCategories(){
     });
   }catch(_){}
 }
+function maybeShowSearchSponsorPopup(cityValue,districtValue){
+  if(!cityValue)return;
+  try{if(sessionStorage.getItem("djs_search_sponsor_shown")==="1")return}catch(_){}
+  const nc=norm(cityValue),nd=norm(districtValue);
+  const candidates=companies.filter(x=>{
+    if(!x.searchPopupActive)return false;
+    const adCity=norm(x.searchPopupCity||x.city),adDistrict=norm(x.searchPopupDistrict);
+    if(adCity&&adCity!==nc)return false;
+    if(adDistrict&&(!nd||adDistrict!==nd))return false;
+    return true;
+  });
+  if(!candidates.length)return;
+  candidates.sort((a,b)=>{
+    const aExact=norm(a.searchPopupDistrict)&&norm(a.searchPopupDistrict)===nd?1:0;
+    const bExact=norm(b.searchPopupDistrict)&&norm(b.searchPopupDistrict)===nd?1:0;
+    return bExact-aExact;
+  });
+  const ad=candidates[0],modal=document.getElementById("searchSponsorPopup");
+  if(!modal)return;
+  const media=document.getElementById("searchSponsorMedia");
+  if(media){
+    if(ad.searchPopupMediaUrl){
+      media.innerHTML=ad.searchPopupMediaType==="video"
+        ? '<video src="'+esc(ad.searchPopupMediaUrl)+'" controls playsinline preload="metadata"></video>'
+        : '<img src="'+esc(ad.searchPopupMediaUrl)+'" alt="'+esc(ad.name)+'">';
+    }else{
+      media.innerHTML='<div style="padding:40px;text-align:center;color:#7b8798;font-weight:800">'+esc(ad.name)+'</div>';
+    }
+  }
+  const region=document.getElementById("searchSponsorRegion");
+  if(region)region.textContent=[cityValue,districtValue].filter(Boolean).join(" / ");
+  const title=document.getElementById("searchSponsorTitle");
+  if(title)title.textContent=ad.searchPopupTitle||ad.name||"Bölgenizde öne çıkan firma";
+  const text=document.getElementById("searchSponsorText");
+  if(text)text.textContent=ad.searchPopupText||"";
+  const link=document.getElementById("searchSponsorLink");
+  if(link){
+    link.textContent=ad.searchPopupButtonText||"Firmayı İncele";
+    link.href=ad.searchPopupTargetUrl||("firma.html?id="+encodeURIComponent(ad.id));
+  }
+  modal.classList.remove("hidden");
+  document.body.style.overflow="hidden";
+  try{sessionStorage.setItem("djs_search_sponsor_shown","1")}catch(_){}
+}
+function initSearchSponsorPopup(){
+  const modal=document.getElementById("searchSponsorPopup");if(!modal)return;
+  const close=()=>{modal.classList.add("hidden");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){}};
+  modal.querySelectorAll("[data-close-search-sponsor]").forEach(x=>x.addEventListener("click",close));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
+}
+document.addEventListener("DOMContentLoaded",initSearchSponsorPopup);
+
 async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),subCategory=document.getElementById("subCategorySelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
   if(!search)return;
@@ -588,7 +649,7 @@ async function initHome(){
     only360Btn.classList.toggle("active",only360Active);
     only360Btn.setAttribute("aria-pressed",String(only360Active));
   };
-  const filter=()=>{renderActiveFilters();const q=norm(search.value),qSmart=smartSearchText(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=qSmart.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const hSmart=smartSearchText(h);const tokenMatch=tokens.length>0&&smartTokenMatch(hSmart,qSmart);const keywordMatch=targets.length>0&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||hSmart.includes(qSmart)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
+  const filter=()=>{renderActiveFilters();const q=norm(search.value),qSmart=smartSearchText(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=qSmart.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const hSmart=smartSearchText(h);const tokenMatch=tokens.length>0&&smartTokenMatch(hSmart,qSmart);const keywordMatch=targets.length>0&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||hSmart.includes(qSmart)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(city.value)setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value),180);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
 
   const renderActiveFilters=()=>{
     const host=document.getElementById("activeFilters");
