@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor | Firma Ara</title>
   <meta name="description" content="DijiyeSor ile firma, kurum, sektör veya hizmet ara.">
-  <link rel="stylesheet" href="styles.css?v=20261004-27">
+  <link rel="stylesheet" href="styles.css?v=20261004-28">
 </head>
 <body>
   <header class="topbar">
@@ -46,6 +46,21 @@
         </div>
 
         <div class="search-help">Firma adı, sektör ya da hizmet yazarak arayabilirsin.</div>
+
+        <div class="home-quick-search" aria-label="Hızlı arama">
+          <div class="home-quick-head">
+            <strong>Hızlı Ara</strong>
+            <button id="homeAllCategoriesBtn" type="button">Tüm kategoriler</button>
+          </div>
+          <div class="home-quick-grid">
+            <button type="button" class="home-quick-chip" data-quick-sector="egitim" data-quick-sub="surucu"><span>🚗</span>Sürücü Kursu</button>
+            <button type="button" class="home-quick-chip" data-quick-sector="egitim" data-quick-sub="kres"><span>🧸</span>Anaokulu</button>
+            <button type="button" class="home-quick-chip" data-quick-sector="egitim" data-quick-sub="dershane"><span>📚</span>Dershane</button>
+            <button type="button" class="home-quick-chip" data-quick-sector="egitim" data-quick-sub="yurt"><span>🏠</span>Öğrenci Yurdu</button>
+            <button type="button" class="home-quick-chip" data-quick-sector="otomotiv" data-quick-sub="oto_servis"><span>🔧</span>Oto Servis</button>
+            <button type="button" class="home-quick-chip" data-quick-sector="yemeicme" data-quick-sub="restoran"><span>🍽</span>Restoran</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -241,6 +256,19 @@
           item.classList.add('open');
           setTimeout(()=>item.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
         }
+      });
+    });
+
+    document.getElementById('homeAllCategoriesBtn')?.addEventListener('click',openHomeCategoryModal);
+
+    document.querySelectorAll('[data-quick-sector]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const params=new URLSearchParams();
+        params.set('sector',btn.dataset.quickSector);
+        if(btn.dataset.quickSub)params.set('subCategory',btn.dataset.quickSub);
+        if(citySelect.value)params.set('city',citySelect.value);
+        if(districtSelect.value)params.set('district',districtSelect.value);
+        window.location.href='arama.html?'+params.toString();
       });
     });
 
