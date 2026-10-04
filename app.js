@@ -134,6 +134,27 @@ function locationFromAddress(address){
   if(!district||!city)return null;
   return {district,city};
 }
+
+const turkiyeCitiesSearch=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+
+function resolveSearchLocation(d){
+  const addrLoc=locationFromAddress(d.address);
+  if(addrLoc)return addrLoc;
+
+  const sources=[d.location,d.address,d.name].map(v=>String(v||"").toLocaleLowerCase("tr-TR"));
+  let city="";
+  for(const source of sources){
+    const found=turkiyeCitiesSearch.find(x=>source.includes(x.toLocaleLowerCase("tr-TR")));
+    if(found){city=found;break}
+  }
+  if(!city)city=String(d.city||"").trim();
+
+  let district=String(d.district||"").trim();
+  if(city && String(d.city||"").trim() && city.toLocaleLowerCase("tr-TR")!==String(d.city||"").trim().toLocaleLowerCase("tr-TR")){
+    if(/^merkez$/i.test(district))district="Merkez";
+  }
+  return {city,district};
+}
 let companies=[];
 
 async function loadProvinces(select,district){
@@ -160,7 +181,7 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const addrLoc=locationFromAddress(d.address);const fixedCity=addrLoc?.city||d.city||"";const fixedDistrict=addrLoc?.district||d.district||"";companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",cardImageUrl:d.cardImageUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const fixedLoc=resolveSearchLocation(d);const fixedCity=fixedLoc.city||"";const fixedDistrict=fixedLoc.district||"";companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",cardImageUrl:d.cardImageUrl||"",coverUrl:d.coverUrl||"",phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
 campaignActive:Boolean(d.campaignActive||d.hasCampaign),
 campaignTitle:d.campaignTitle||d.promotionTitle||"",
 campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
@@ -300,8 +321,15 @@ function render(data){
       ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
-    const storedDesc=String(i.description||"");
-    const desc=(storedDesc && (!i.city || norm(storedDesc).includes(norm(i.city)))) ? storedDesc : ((i.highlights||[]).slice(0,2).join(" · ")||([i.district,i.city].filter(Boolean).join(", ") ? i.name+"; "+[i.district,i.city].filter(Boolean).join(", ")+" bölgesinde hizmet veren işletmedir." : "Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin."));
+    const storedDesc=String(i.description||"").trim();
+    const autoStored=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDesc);
+    const storedHasCurrentCity=!i.city || norm(storedDesc).includes(norm(i.city));
+    const desc=(storedDesc && !autoStored && storedHasCurrentCity)
+      ? storedDesc
+      : ((i.highlights||[]).slice(0,2).join(" · ")
+        || ([i.district,i.city].filter(Boolean).join(", ")
+          ? i.name+"; "+[i.district,i.city].filter(Boolean).join(", ")+" bölgesinde hizmet veren işletmedir."
+          : "Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin."));
     const badges=[
       i.vip?'<span class="result-badge vip">VIP</span>':'',
       i.has360Tour?'<span class="result-badge">360° Tur</span>':'',
