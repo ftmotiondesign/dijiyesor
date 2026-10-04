@@ -163,6 +163,18 @@
         </div>
         <label>Web sitesi<input id="qWebsite"></label>
         <label>Instagram<input id="qInstagram"></label>
+        <label>Logo URL<input id="qLogoUrl" placeholder="https://..."></label>
+        <label>Üst Banner / Kapak Görseli URL<input id="qCoverUrl" placeholder="https://..."></label>
+        <div class="g2">
+          <div>
+            <small style="display:block;margin-bottom:6px;color:#64748b;font-weight:700">Logo Önizleme</small>
+            <div id="qLogoPreview" class="preview" style="height:120px"><strong>Logo</strong></div>
+          </div>
+          <div>
+            <small style="display:block;margin-bottom:6px;color:#64748b;font-weight:700">Banner Önizleme</small>
+            <div id="qCoverPreview" class="preview" style="height:120px"><strong>Banner</strong></div>
+          </div>
+        </div>
       </div>
       <div class="quick-edit-foot">
         <span id="quickEditStatus" class="quick-edit-status"></span>
@@ -258,8 +270,18 @@ function fillQuickEdit(){
   $("qWhatsapp").value=val("whatsapp");
   $("qWebsite").value=val("website");
   $("qInstagram").value=val("instagram");
+  $("qLogoUrl").value=val("logoUrl");
+  $("qCoverUrl").value=val("coverUrl");
+  refreshQuickEditPreviews();
   $("quickEditStatus").textContent="";
 }
+function refreshQuickEditPreviews(){
+  setPreview("qLogoPreview", $("qLogoUrl").value.trim(), "Logo", "500 × 500 px", "contain");
+  setPreview("qCoverPreview", $("qCoverUrl").value.trim(), "Banner", "1600 × 400 px", "cover");
+}
+$("qLogoUrl").oninput=refreshQuickEditPreviews;
+$("qCoverUrl").oninput=refreshQuickEditPreviews;
+
 function openQuickEdit(){
   fillQuickEdit();
   $("quickEditDrawer").classList.add("open");
@@ -282,6 +304,9 @@ $("quickEditSave").onclick=async()=>{
   $("whatsapp").value=$("qWhatsapp").value.trim();
   $("website").value=$("qWebsite").value.trim();
   $("instagram").value=$("qInstagram").value.trim();
+  $("logoUrl").value=$("qLogoUrl").value.trim();
+  $("coverUrl").value=$("qCoverUrl").value.trim();
+  refreshPreviews();
   $("quickEditStatus").textContent="Kaydediliyor...";
   await save();
   $("quickEditStatus").textContent="Kaydedildi ✓";
