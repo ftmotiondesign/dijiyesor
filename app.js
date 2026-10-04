@@ -172,8 +172,8 @@ function locationFromAddress(address){
 const turkiyeCitiesSearch=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
 
 function resolveSearchLocation(d){
-  // Önce yönetim panelinde kayıtlı açık il/ilçe alanlarını esas al.
-  // Adres sadece eski kayıtlarda il alanı boşsa yedek olarak kullanılır.
+  // Önce yönetim panelindeki açık il/ilçe alanlarını kullan.
+  // Eski kayıtlarda ilçe boşsa adres içinden tamamla.
   const explicitCity=String(d.city||"").trim();
   const canonicalExplicitCity=turkiyeCitiesSearch.find(
     x=>norm(x)===norm(explicitCity)
@@ -181,12 +181,14 @@ function resolveSearchLocation(d){
   let city=canonicalExplicitCity||explicitCity;
   let district=String(d.district||"").trim();
 
-  if(!city){
-    const addrLoc=locationFromAddress(d.address);
-    if(addrLoc){
-      city=addrLoc.city||"";
-      if(!district)district=addrLoc.district||"";
-    }
+  const addrLoc=locationFromAddress(d.address);
+
+  if(!city && addrLoc?.city){
+    city=addrLoc.city;
+  }
+
+  if(!district && addrLoc?.district){
+    district=addrLoc.district;
   }
 
   if(!city){
