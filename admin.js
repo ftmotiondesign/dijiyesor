@@ -850,10 +850,8 @@ async function fillSponsorPopupForm(id){
   updateSponsorPopupMediaSpecs();
   $("sponsorPopupFrequency").value=f.searchPopupFrequency||"session";
   if($("sponsorPopupScope"))$("sponsorPopupScope").value=f.searchPopupScope||"search_results";
-  if($("sponsorPopupSector")){
-    $("sponsorPopupSector").value=f.searchPopupSector||"";
-    $("sponsorPopupSector").disabled=$("sponsorPopupScope")?.value!=="sector";
-  }
+  if($("sponsorPopupSector"))$("sponsorPopupSector").value=f.searchPopupSector||"";
+  syncSponsorScopeUi();
   $("sponsorPopupMediaUrl").value=f.searchPopupMediaUrl||"";
   $("sponsorPopupButtonText").value=f.searchPopupButtonText||"Firmayı İncele";
   $("sponsorPopupTargetUrl").value=f.searchPopupTargetUrl||"";
@@ -866,7 +864,8 @@ function clearSponsorPopupForm(){
   updateSponsorPopupMediaSpecs();
   if($("sponsorPopupFrequency"))$("sponsorPopupFrequency").value="session";
   if($("sponsorPopupScope"))$("sponsorPopupScope").value="search_results";
-  if($("sponsorPopupSector")){$("sponsorPopupSector").value="";$("sponsorPopupSector").disabled=true}
+  if($("sponsorPopupSector"))$("sponsorPopupSector").value="";
+  syncSponsorScopeUi();
   if($("sponsorPopupButtonText"))$("sponsorPopupButtonText").value="Firmayı İncele";
   if($("sponsorPopupMediaFile"))$("sponsorPopupMediaFile").value="";
   if($("sponsorPopupFirmResults"))$("sponsorPopupFirmResults").classList.add("hidden");
@@ -904,11 +903,28 @@ function uploadSponsorMedia(file){
   });
 }
 $("sponsorPopupCity")?.addEventListener("change",()=>loadSponsorDistricts());
-$("sponsorPopupScope")?.addEventListener("change",e=>{
+function syncSponsorScopeUi(){
+  const scope=$("sponsorPopupScope")?.value||"search_results";
+  document.querySelectorAll("[data-sponsor-scope]").forEach(btn=>{
+    const active=btn.dataset.sponsorScope===scope;
+    btn.classList.toggle("active",active);
+    const badge=btn.querySelector("b");
+    if(badge)badge.textContent=active?"Seçili":"Seç";
+  });
+  const box=$("sponsorSectorTargetBox");
+  if(box)box.classList.toggle("hidden",scope!=="sector");
   const sector=$("sponsorPopupSector");
-  if(!sector)return;
-  sector.disabled=e.target.value!=="sector";
-  if(sector.disabled)sector.value="";
+  if(sector){
+    sector.disabled=scope!=="sector";
+    if(scope!=="sector")sector.value="";
+  }
+}
+document.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-sponsor-scope]");
+  if(!btn)return;
+  const input=$("sponsorPopupScope");
+  if(input)input.value=btn.dataset.sponsorScope||"search_results";
+  syncSponsorScopeUi();
 });
 
 function renderSponsorFirmResults(query){
