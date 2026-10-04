@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261003-31">
+  <link rel="stylesheet" href="admin.css?v=20261004-2">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -785,6 +785,20 @@ Gerçek mekanda hizmet"></textarea>
         </div>
       </div>
 
+      <div class="firm-image-upload firm-slider-upload">
+        <div class="firm-image-upload-copy" style="width:100%">
+          <strong>Üst Kaydırmalı Görseller</strong>
+          <small>Firma sayfasının en üstünde kayan görseller. Otomatik eklenmez; sadece burada seçtiklerin görünür. Önerilen: 1600 × 400 px.</small>
+          <input id="editCoverSliderFiles" type="file" accept="image/*" multiple>
+          <div class="firm-image-upload-actions">
+            <button id="chooseCoverSliderFilesBtn" class="secondary" type="button">Bilgisayardan Görseller Seç</button>
+            <button id="clearCoverSliderBtn" class="secondary" type="button">Tümünü Kaldır</button>
+          </div>
+          <div id="coverSliderPreview" class="cover-slider-preview"></div>
+          <div id="coverSliderUploadMessage" class="message hidden"></div>
+        </div>
+      </div>
+
       <div class="form-grid two">
         <label>360° Tur URL<input id="editTourUrl"></label>
         <label>Tanıtım Video URL<input id="editVideoUrl" placeholder="Video yüklenince otomatik dolar"></label>
@@ -907,7 +921,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261004-53"></script>
+<script src="admin.js?v=20261004-54"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
