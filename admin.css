@@ -532,3 +532,24 @@
 @media(max-width:900px){.city-admin-layout{grid-template-columns:1fr}.city-admin-form .two-col{grid-template-columns:1fr}}
 
 .city-seed-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.city-seed-row span{font-size:11px;color:#64748b;font-weight:700}.city-seed-row button:disabled{opacity:.6;cursor:wait}
+
+.sponsor-media-specs{
+  margin:-2px 0 10px;
+  padding:10px 12px;
+  border:1px solid #d8e8fb;
+  border-radius:11px;
+  background:#f5f9ff;
+}
+.sponsor-media-specs strong{
+  display:block;
+  color:#24558f;
+  font-size:11.5px;
+  font-weight:900;
+  margin-bottom:3px;
+}
+.sponsor-media-specs span{
+  display:block;
+  color:#718096;
+  font-size:10.5px;
+  line-height:1.4;
+}
