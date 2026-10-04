@@ -6,6 +6,18 @@
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}button,input,select,textarea{font:inherit}.hidden{display:none!important}
 .top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e5e7eb}.topin{max-width:1450px;margin:auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}.left{display:flex;align-items:center;gap:12px}.back,.btn{border:1px solid #dbe1ea;background:#fff;border-radius:11px;padding:10px 13px;text-decoration:none;color:#172033;font-weight:700;cursor:pointer}.btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}.btn.soft{background:#eff6ff;color:#1d4ed8;border-color:#dbeafe}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;color:#2563eb}.title{margin:2px 0;font-size:21px}.meta{font-size:12px;color:#64748b}.layout{max-width:1450px;margin:20px auto;padding:0 20px 40px;display:grid;grid-template-columns:250px 1fr;gap:18px}.side{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px;height:max-content;position:sticky;top:86px}.tab{width:100%;text-align:left;border:0;background:transparent;border-radius:10px;padding:12px;font-weight:700;color:#475569;cursor:pointer}.tab.active{background:#eff6ff;color:#1d4ed8}.tab small{display:block;font-weight:400;color:#94a3b8;margin-top:2px}.panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:16px;overflow:hidden}.head{padding:18px 20px;border-bottom:1px solid #e5e7eb}.head h2{margin:3px 0 4px;font-size:18px}.head p{margin:0;color:#64748b;font-size:13px}.body{padding:20px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}label{display:block;font-size:13px;font-weight:700;color:#334155}input,select,textarea{width:100%;margin-top:7px;padding:11px 12px;border:1px solid #d8dee8;border-radius:10px;outline:none}textarea{resize:vertical}.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;gap:9px;padding:12px;border:1px solid #e5e7eb;border-radius:11px;background:#fafafa}.check input{width:auto;margin:2px 0}.check small{display:block;color:#64748b;font-weight:400;margin-top:3px}.media{display:grid;grid-template-columns:220px 1fr;gap:16px;margin-top:16px}.preview{height:170px;border:1px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94a3b8}.preview img{width:100%;height:100%;object-fit:cover}.message{margin-top:10px;padding:10px;border-radius:9px;background:#f8fafc;color:#475569;font-size:13px}.message.success{background:#ecfdf5;color:#166534}.message.error{background:#fef2f2;color:#b91c1c}.stat{border:1px solid #e5e7eb;border-radius:12px;padding:14px}.stat span{font-size:12px;color:#64748b}.stat strong{display:block;font-size:23px;margin-top:5px}.service{border:1px solid #e5e7eb;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.service h3{margin:0 0 4px;font-size:15px}.service p{margin:0;color:#64748b;font-size:12px}.savebar{position:sticky;bottom:10px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:11px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 30px #0002}.danger{color:#b91c1c}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.site-preview-modal{position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.62);display:none;align-items:center;justify-content:center;padding:22px}
+.site-preview-modal.open{display:flex}
+.site-preview-box{width:min(1180px,96vw);height:min(820px,92vh);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0005;display:flex;flex-direction:column}
+.site-preview-head{padding:12px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff}
+.site-preview-title{min-width:0}.site-preview-title strong{display:block;font-size:15px}.site-preview-title small{display:block;margin-top:3px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:760px}
+.site-preview-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.site-preview-frame{border:0;width:100%;height:100%;background:#f8fafc}
+.site-preview-body{flex:1;min-height:0;position:relative;background:#f8fafc}
+.site-preview-loading{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;color:#64748b;background:#f8fafc;z-index:1}
+.site-preview-loading.hidden{display:none}
+.site-preview-close{width:40px;height:40px;border-radius:10px;border:1px solid #dbe1ea;background:#fff;font-size:22px;line-height:1;cursor:pointer}
+@media(max-width:650px){.site-preview-modal{padding:0}.site-preview-box{width:100vw;height:100vh;max-height:none;border-radius:0}.site-preview-title small{max-width:48vw}.site-preview-actions .btn{padding:9px 10px}}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.tab{min-width:150px}.g4{grid-template-columns:1fr 1fr}.media{grid-template-columns:1fr}}
 @media(max-width:650px){.topin{align-items:flex-start;flex-direction:column}.layout{padding:0 10px}.g2,.g3,.g4,.checks{grid-template-columns:1fr}.body,.head{padding:15px}.savebar{flex-direction:column;align-items:stretch}}
 </style>
@@ -16,7 +28,7 @@
   <strong style="display:block!important;font-size:14px!important;font-weight:900!important;color:inherit!important;white-space:nowrap!important;">DijiyeSor</strong>
   <small style="display:block!important;margin-top:3px!important;font-size:8px!important;font-weight:700!important;color:inherit!important;opacity:.68!important;white-space:nowrap!important;">Türkiye’nin Dijital Rehberi</small>
 </span></a><a class="back" href="admin.html#firms">← Firmalar</a><div><div class="eyebrow">FİRMA YÖNETİMİ</div><h1 id="pageName" class="title">Yükleniyor...</h1><div id="pageMeta" class="meta"></div></div></div>
-<div class="actions"><a id="viewFirm" class="btn soft" target="_blank">Firma Sayfasını Gör ↗</a><button id="topSave" class="btn primary">Kaydet</button></div>
+<div class="actions"><a id="viewFirm" class="btn soft" href="#">Firma Sitesini Göster</a><button id="topSave" class="btn primary">Kaydet</button></div>
 </div></header>
 
 <div class="layout">
@@ -104,6 +116,25 @@
 <div class="savebar"><div id="saveState" class="meta">Değişiklik yaptıktan sonra kaydet.</div><button id="saveBtn" class="btn primary">Değişiklikleri Kaydet</button></div>
 </main></div>
 
+<div id="sitePreviewModal" class="site-preview-modal" aria-hidden="true">
+  <div class="site-preview-box" role="dialog" aria-modal="true" aria-labelledby="sitePreviewName">
+    <div class="site-preview-head">
+      <div class="site-preview-title">
+        <strong id="sitePreviewName">Firma sayfası önizleme</strong>
+        <small id="sitePreviewUrl"></small>
+      </div>
+      <div class="site-preview-actions">
+        <a id="sitePreviewExternal" class="btn soft" target="_blank" rel="noopener">Yeni Sekmede Aç ↗</a>
+        <button id="sitePreviewClose" class="site-preview-close" type="button" aria-label="Kapat">×</button>
+      </div>
+    </div>
+    <div class="site-preview-body">
+      <div id="sitePreviewLoading" class="site-preview-loading">Firma sayfası yükleniyor...</div>
+      <iframe id="sitePreviewFrame" class="site-preview-frame" title="Firma sayfası önizleme"></iframe>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -151,6 +182,31 @@ async function load(){
 function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:val("cardImageUrl"),coverUrl:val("coverUrl"),tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
 async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
 $("saveBtn").onclick=save;$("topSave").onclick=save;$("logoUrl").oninput=refreshPreviews;$("cardImageUrl").oninput=refreshPreviews;$("coverUrl").oninput=refreshPreviews;
+
+function openSitePreview(e){
+  if(e)e.preventDefault();
+  const url=$("viewFirm").getAttribute("href");
+  if(!url||url==="#")return;
+  $("sitePreviewName").textContent=(firm.name||"Firma")+" · Site Önizleme";
+  $("sitePreviewUrl").textContent=new URL(url,location.href).href;
+  $("sitePreviewExternal").href=url;
+  $("sitePreviewLoading").classList.remove("hidden");
+  $("sitePreviewFrame").src=url;
+  $("sitePreviewModal").classList.add("open");
+  $("sitePreviewModal").setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+}
+function closeSitePreview(){
+  $("sitePreviewModal").classList.remove("open");
+  $("sitePreviewModal").setAttribute("aria-hidden","true");
+  $("sitePreviewFrame").src="about:blank";
+  document.body.style.overflow="";
+}
+$("viewFirm").onclick=openSitePreview;
+$("sitePreviewClose").onclick=closeSitePreview;
+$("sitePreviewModal").onclick=e=>{if(e.target===$("sitePreviewModal"))closeSitePreview()};
+$("sitePreviewFrame").onload=()=>$("sitePreviewLoading").classList.add("hidden");
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("sitePreviewModal").classList.contains("open"))closeSitePreview()});
 async function uploadSelectedCover(){
   const file=$("coverFile").files?.[0],box=$("uploadMsg");
   if(!file){box.className="message error";box.textContent="Önce bilgisayardan bir görsel seç.";return}
