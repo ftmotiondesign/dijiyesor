@@ -336,9 +336,9 @@
       const waMatch=storedWa.match(/(?:\+?90\s*)?(?:0?\d{3})[\s().-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}/);
       const cleanWa=waMatch?waMatch[0].trim():"";
 
-      // Eski kayıtlarda normal telefon otomatik WhatsApp'a kopyalanmışsa sabit hatta göstermeyelim.
-      const sameAsPhone=cleanWa && String(cleanWa).replace(/\D/g,"")===String(phone).replace(/\D/g,"");
-      d.whatsapp=(cleanWa && (!sameAsPhone || isMobileNumber(cleanWa))) ? cleanWa : "";
+      // WhatsApp alanına yönetim panelinden özel olarak bir numara girilmişse her zaman göster.
+      // Numara 05xx, 5xx veya +90 5xx formatında olabilir.
+      d.whatsapp=cleanWa || storedWa;
 
       d.address=address;
       d.location=location;
