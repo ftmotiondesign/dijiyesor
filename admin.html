@@ -851,53 +851,74 @@ Gerçek mekanda hizmet"></textarea>
 
         <section class="sponsor-display-target">
           <div class="sponsor-display-target-head">
-            <span>GÖSTERİM AYARI</span>
-            <h3>Reklam Nerede Gösterilsin?</h3>
-            <p>Reklamın sitede hangi alanlarda yayınlanacağını seç.</p>
+            <span>HEDEFLEME</span>
+            <h3>Reklam Nerede ve Kime Gösterilsin?</h3>
+            <p>Bölge, sektör, alt kategori ve gösterim alanlarını birlikte seçebilirsin.</p>
           </div>
 
           <input id="sponsorPopupScope" type="hidden" value="search_results">
 
-          <div class="sponsor-scope-options" id="sponsorScopeOptions">
-            <button type="button" class="sponsor-scope-card active" data-sponsor-scope="search_results">
-              <span class="scope-icon">ARA</span>
-              <strong>Sadece Arama Sonuçları</strong>
-              <small>Reklam yalnız firma arama sonuçları ekranında gösterilir.</small>
-              <b>Seçili</b>
-            </button>
-            <button type="button" class="sponsor-scope-card" data-sponsor-scope="all_pages">
-              <span class="scope-icon">TÜM</span>
-              <strong>Tüm Sayfalar</strong>
-              <small>Desteklenen site sayfalarında sponsor reklamı gösterilir.</small>
-              <b>Seç</b>
-            </button>
-            <button type="button" class="sponsor-scope-card" data-sponsor-scope="sector">
-              <span class="scope-icon">SEK</span>
-              <strong>Sadece Sektör</strong>
-              <small>Reklam yalnız seçtiğin sektörün aramalarında yayınlanır.</small>
-              <b>Seç</b>
-            </button>
+          <div class="sponsor-target-block">
+            <div class="sponsor-target-block-head">
+              <strong>1. Sektör ve Alt Kategori</strong>
+              <small>Boş bırakırsan tüm sektörlerde geçerli olur.</small>
+            </div>
+            <div class="form-grid two">
+              <label>Hedef sektör
+                <select id="sponsorPopupSector">
+                  <option value="">Tüm sektörler</option>
+                  <option value="egitim">Eğitim</option>
+                  <option value="otomotiv">Otomotiv</option>
+                  <option value="yemeicme">Yeme & İçme</option>
+                  <option value="saglikguzellik">Sağlık & Güzellik</option>
+                  <option value="evyapi">Ev & Yapı</option>
+                  <option value="emlak">Emlak</option>
+                  <option value="turizm">Turizm & Konaklama</option>
+                  <option value="organizasyonmedya">Organizasyon & Medya</option>
+                  <option value="tasimacilik">Taşımacılık & Teslimat</option>
+                  <option value="profesyonel">Profesyonel Hizmetler</option>
+                  <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+                  <option value="diger">Diğer</option>
+                </select>
+              </label>
+              <label>Alt kategori
+                <select id="sponsorPopupSubCategory" disabled>
+                  <option value="">Tüm alt kategoriler</option>
+                </select>
+              </label>
+            </div>
           </div>
 
-          <div id="sponsorSectorTargetBox" class="sponsor-sector-target hidden">
-            <label>Hedef sektör
-              <select id="sponsorPopupSector">
-                <option value="">Sektör seçin</option>
-                <option value="egitim">Eğitim</option>
-                <option value="otomotiv">Otomotiv</option>
-                <option value="yemeicme">Yeme & İçme</option>
-                <option value="saglikguzellik">Sağlık & Güzellik</option>
-                <option value="evyapi">Ev & Yapı</option>
-                <option value="emlak">Emlak</option>
-                <option value="turizm">Turizm & Konaklama</option>
-                <option value="organizasyonmedya">Organizasyon & Medya</option>
-                <option value="tasimacilik">Taşımacılık & Teslimat</option>
-                <option value="profesyonel">Profesyonel Hizmetler</option>
-                <option value="alisveris">Alışveriş & Yerel Esnaf</option>
-                <option value="diger">Diğer</option>
-              </select>
-            </label>
-            <small>Örn. Eğitim seçilirse reklam yalnız Eğitim aramalarında görünür.</small>
+          <div class="sponsor-target-block">
+            <div class="sponsor-target-block-head">
+              <strong>2. Gösterim Alanları</strong>
+              <small>Birden fazla alan seçebilirsin.</small>
+            </div>
+            <div class="sponsor-scope-options sponsor-placement-options" id="sponsorPlacementOptions">
+              <button type="button" class="sponsor-scope-card active" data-sponsor-placement="search_popup">
+                <span class="scope-icon">POP</span>
+                <strong>Arama Popup</strong>
+                <small>Uygun arama yapıldığında popup olarak gösterilir.</small>
+                <b>Seçili</b>
+              </button>
+              <button type="button" class="sponsor-scope-card" data-sponsor-placement="firm_detail">
+                <span class="scope-icon">DET</span>
+                <strong>Firma Detay</strong>
+                <small>Hedefe uyan firma detay sayfalarında gösterilir.</small>
+                <b>Seç</b>
+              </button>
+              <button type="button" class="sponsor-scope-card" data-sponsor-placement="all_pages">
+                <span class="scope-icon">TÜM</span>
+                <strong>Tüm Sayfalar</strong>
+                <small>Desteklenen tüm sayfalarda sponsor reklamı gösterilir.</small>
+                <b>Seç</b>
+              </button>
+            </div>
+          </div>
+
+          <div id="sponsorTargetSummary" class="sponsor-target-summary">
+            <strong>Hedef:</strong>
+            <span>Arama Popup · Tüm sektörler</span>
           </div>
         </section>
 
