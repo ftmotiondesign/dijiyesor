@@ -423,7 +423,6 @@ async function loadManagedSearchCategories(){
   }catch(_){}
 }
 function maybeShowSearchSponsorPopup(cityValue,districtValue){
-  if(!cityValue)return;
   try{if(sessionStorage.getItem("djs_search_sponsor_shown")==="1")return}catch(_){}
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
@@ -436,16 +435,23 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
       const end=new Date(x.searchPopupEndDate+"T23:59:59");
       if(!Number.isNaN(end.getTime())&&Date.now()>end.getTime())return false;
     }
+    const isAllTurkey=String(x.searchPopupCity||"")==="__ALL__";
     const adCity=norm(x.searchPopupCity||x.city),adDistrict=norm(x.searchPopupDistrict);
-    if(adCity&&adCity!==nc)return false;
-    if(adDistrict&&(!nd||adDistrict!==nd))return false;
+    if(!isAllTurkey){
+      if(!cityValue)return false;
+      if(adCity&&adCity!==nc)return false;
+      if(adDistrict&&(!nd||adDistrict!==nd))return false;
+    }
     return true;
   });
   if(!candidates.length)return;
   candidates.sort((a,b)=>{
-    const aExact=norm(a.searchPopupDistrict)&&norm(a.searchPopupDistrict)===nd?1:0;
-    const bExact=norm(b.searchPopupDistrict)&&norm(b.searchPopupDistrict)===nd?1:0;
-    return bExact-aExact;
+    const score=x=>{
+      if(String(x.searchPopupCity||"")==="__ALL__")return 0;
+      if(norm(x.searchPopupDistrict)&&norm(x.searchPopupDistrict)===nd)return 2;
+      return 1;
+    };
+    return score(b)-score(a);
   });
   const ad=candidates[0],modal=document.getElementById("searchSponsorPopup");
   if(!modal)return;
@@ -460,7 +466,7 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
     }
   }
   const region=document.getElementById("searchSponsorRegion");
-  if(region)region.textContent=[cityValue,districtValue].filter(Boolean).join(" / ");
+  if(region)region.textContent=String(ad.searchPopupCity||"")==="__ALL__"?"Tüm Türkiye":[cityValue,districtValue].filter(Boolean).join(" / ");
   const title=document.getElementById("searchSponsorTitle");
   if(title)title.textContent=ad.searchPopupTitle||ad.name||"Bölgenizde öne çıkan firma";
   const text=document.getElementById("searchSponsorText");
@@ -662,7 +668,7 @@ async function initHome(){
     only360Btn.classList.toggle("active",only360Active);
     only360Btn.setAttribute("aria-pressed",String(only360Active));
   };
-  const filter=()=>{renderActiveFilters();const q=norm(search.value),qSmart=smartSearchText(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=qSmart.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const hSmart=smartSearchText(h);const tokenMatch=tokens.length>0&&smartTokenMatch(hSmart,qSmart);const keywordMatch=targets.length>0&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||hSmart.includes(qSmart)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(city.value)setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value),180);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
+  const filter=()=>{renderActiveFilters();const q=norm(search.value),qSmart=smartSearchText(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=qSmart.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const hSmart=smartSearchText(h);const tokenMatch=tokens.length>0&&smartTokenMatch(hSmart,qSmart);const keywordMatch=targets.length>0&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||hSmart.includes(qSmart)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value),180);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
 
   const renderActiveFilters=()=>{
     const host=document.getElementById("activeFilters");
