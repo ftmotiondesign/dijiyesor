@@ -642,6 +642,7 @@ async function fillSponsorPopupForm(id){
   $("sponsorPopupTitle").value=f.searchPopupTitle||f.name||"";
   $("sponsorPopupText").value=f.searchPopupText||"";
   $("sponsorPopupMediaType").value=f.searchPopupMediaType||"image";
+  $("sponsorPopupFrequency").value=f.searchPopupFrequency||"session";
   $("sponsorPopupMediaUrl").value=f.searchPopupMediaUrl||"";
   $("sponsorPopupButtonText").value=f.searchPopupButtonText||"Firmayı İncele";
   $("sponsorPopupTargetUrl").value=f.searchPopupTargetUrl||"";
@@ -651,6 +652,7 @@ function clearSponsorPopupForm(){
   if($("sponsorPopupDistrict")){$("sponsorPopupDistrict").innerHTML='<option value="">Tüm İlçeler</option>';$("sponsorPopupDistrict").disabled=true}
   if($("sponsorPopupActive"))$("sponsorPopupActive").value="true";
   if($("sponsorPopupMediaType"))$("sponsorPopupMediaType").value="image";
+  if($("sponsorPopupFrequency"))$("sponsorPopupFrequency").value="session";
   if($("sponsorPopupButtonText"))$("sponsorPopupButtonText").value="Firmayı İncele";
   if($("sponsorPopupMediaFile"))$("sponsorPopupMediaFile").value="";
   if($("sponsorPopupFirmResults"))$("sponsorPopupFirmResults").classList.add("hidden");
@@ -723,6 +725,7 @@ $("saveSponsorPopupBtn")?.addEventListener("click",async()=>{
     searchPopupTitle:$("sponsorPopupTitle").value.trim(),
     searchPopupText:$("sponsorPopupText").value.trim(),
     searchPopupMediaType:$("sponsorPopupMediaType").value,
+    searchPopupFrequency:$("sponsorPopupFrequency").value||"session",
     searchPopupMediaUrl:$("sponsorPopupMediaUrl").value.trim(),
     searchPopupButtonText:$("sponsorPopupButtonText").value.trim()||"Firmayı İncele",
     searchPopupTargetUrl:$("sponsorPopupTargetUrl").value.trim(),
@@ -772,6 +775,7 @@ document.addEventListener("click",async e=>{
       searchPopupTitle:del,
       searchPopupText:del,
       searchPopupMediaType:del,
+      searchPopupFrequency:del,
       searchPopupMediaUrl:del,
       searchPopupButtonText:del,
       searchPopupTargetUrl:del,
