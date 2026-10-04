@@ -35,6 +35,7 @@
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
+      <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
       <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">4</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
@@ -202,6 +203,53 @@ Gerçek mekanda hizmet"></textarea>
       <div id="campaignList" class="campaign-admin-grid"></div>
     </section>
 
+
+
+    <section class="view" data-panel-view="keywords">
+      <div class="keyword-head">
+        <div>
+          <span>ARAMA GELİŞTİRME</span>
+          <h2>Anahtar Kelime Merkezi</h2>
+          <p>Google’dan gelecek arama önerilerini burada inceleyip DijiyeSor aramasına ekleyebilirsiniz.</p>
+        </div>
+        <button id="keywordGoogleFetchBtn" type="button" class="secondary">Google’dan Çek</button>
+      </div>
+
+      <div class="keyword-toolbar">
+        <select id="keywordSectorFilter">
+          <option value="">Tüm Sektörler</option>
+          <option value="egitim">Eğitim</option>
+          <option value="otomotiv">Otomotiv</option>
+          <option value="yemeicme">Yeme & İçme</option>
+          <option value="saglikguzellik">Sağlık & Güzellik</option>
+          <option value="evyapi">Ev & Yapı</option>
+          <option value="emlak">Emlak</option>
+          <option value="turizm">Turizm & Konaklama</option>
+          <option value="organizasyonmedya">Organizasyon & Medya</option>
+          <option value="tasimacilik">Taşımacılık & Teslimat</option>
+          <option value="profesyonel">Profesyonel Hizmetler</option>
+          <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+          <option value="diger">Diğer</option>
+        </select>
+        <input id="keywordSearchInput" type="search" placeholder="Anahtar kelime ara...">
+      </div>
+
+      <div id="keywordMessage" class="message hidden"></div>
+
+      <div class="keyword-table-wrap">
+        <table class="keyword-table">
+          <thead>
+            <tr>
+              <th>Anahtar Kelime</th>
+              <th>Aylık Arama</th>
+              <th>Sektör</th>
+              <th>DijiyeSor’a Ekle</th>
+            </tr>
+          </thead>
+          <tbody id="keywordTableBody"></tbody>
+        </table>
+      </div>
+    </section>
 
     <section class="view" data-panel-view="revenue">
       <div class="revenue-head">
