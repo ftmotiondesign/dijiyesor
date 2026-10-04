@@ -200,7 +200,10 @@ searchPopupText:d.searchPopupText||"",
 searchPopupMediaType:d.searchPopupMediaType||"image",
 searchPopupMediaUrl:d.searchPopupMediaUrl||"",
 searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
-searchPopupTargetUrl:d.searchPopupTargetUrl||""
+searchPopupTargetUrl:d.searchPopupTargetUrl||"",
+mapUrl:d.mapUrl||d.googleMapsUrl||d.mapsUrl||"",
+latitude:d.latitude||d.lat||"",
+longitude:d.longitude||d.lng||d.lon||""
 })});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
   }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
@@ -476,6 +479,27 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
     link.textContent=ad.searchPopupButtonText||"Firmayı İncele";
     link.href=ad.searchPopupTargetUrl||("firma.html?id="+encodeURIComponent(ad.id));
   }
+
+  const mapBox=document.getElementById("searchSponsorMapBox");
+  const mapFrame=document.getElementById("searchSponsorMap");
+  const directions=document.getElementById("searchSponsorDirections");
+  const mapLink=document.getElementById("searchSponsorMapLink");
+  const lat=String(ad.latitude||"").trim(),lng=String(ad.longitude||"").trim();
+  const addressQuery=[ad.address,ad.district,ad.city].filter(Boolean).join(", ").trim();
+  const destination=(lat&&lng)?(lat+","+lng):addressQuery;
+  if(mapBox&&destination){
+    const encoded=encodeURIComponent(destination);
+    mapBox.classList.remove("hidden");
+    if(mapFrame)mapFrame.src="https://www.google.com/maps?q="+encoded+"&output=embed";
+    const directionsUrl="https://www.google.com/maps/dir/?api=1&destination="+encoded;
+    const viewUrl=ad.mapUrl||("https://www.google.com/maps/search/?api=1&query="+encoded);
+    if(directions)directions.href=directionsUrl;
+    if(mapLink)mapLink.href=viewUrl;
+  }else if(mapBox){
+    mapBox.classList.add("hidden");
+    if(mapFrame)mapFrame.removeAttribute("src");
+  }
+
   modal.classList.remove("hidden");
   document.body.classList.add("djs-modal-open");
   document.body.style.overflow="hidden";
