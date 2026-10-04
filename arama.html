@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Arama Sonuçları | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma arama sonuçları.">
-  <link rel="stylesheet" href="arama.css?v=20261004-38">
+  <link rel="stylesheet" href="arama.css?v=20261004-39">
   <link rel="stylesheet" href="bilgi-modal.css">
 
   <style>
@@ -154,12 +154,15 @@
       </div>
       <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
     </section>
-    <div id="locationNotice" class="location-notice hidden">
+    <div id="locationNotice" class="location-notice location-notice-compact hidden">
       <div class="location-notice-left">
         <img class="location-mascot" src="./assets/diji-mascot-search.png" alt="Diji büyüteçle arıyor">
-        <strong>Konumunu seç, sana en yakın sonuçları gösterelim</strong>
-        <span>Şu anda Türkiye geneli sonuçları görüyorsunuz.</span>
+        <div>
+          <strong>Türkiye geneli sonuçlar</strong>
+          <span>Yakınındaki firmalar için konum seçebilirsin.</span>
+        </div>
       </div>
+      <button type="button" class="location-select-btn" data-open-location>📍 Konum Seç</button>
     </div>
 
     <section id="companyGrid" class="results-grid">
@@ -169,6 +172,28 @@
       </div>
     </section>
   </main>
+
+  <div id="locationPickerModal" class="location-picker-modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationPickerTitle">
+    <div class="location-picker-backdrop" data-close-location></div>
+    <div class="location-picker-card">
+      <button type="button" class="location-picker-close" data-close-location aria-label="Kapat">×</button>
+      <span class="location-picker-kicker">KONUM SEÇ</span>
+      <h2 id="locationPickerTitle">Nerede arıyorsunuz?</h2>
+      <p><strong id="locationSearchLabel">Aramanız</strong> için konum seçin.</p>
+      <div class="location-picker-fields">
+        <label>
+          <span>İl</span>
+          <select id="popupCitySelect"><option value="">İl Seç</option></select>
+        </label>
+        <label>
+          <span>İlçe</span>
+          <select id="popupDistrictSelect" disabled><option value="">Tüm İlçeler</option></select>
+        </label>
+      </div>
+      <button type="button" id="applyPopupLocation" class="location-apply-btn">Konumu Uygula</button>
+      <button type="button" id="allTurkeyBtn" class="location-turkey-btn">🇹🇷 Tüm Türkiye’de Ara</button>
+    </div>
+  </div>
 
   <div id="categoryPickerModal" class="category-modal hidden" role="dialog" aria-modal="true" aria-labelledby="categoryPickerTitle">
     <div class="category-modal-backdrop" data-close-category-modal></div>
@@ -205,7 +230,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261004-37"></script>
+  <script src="app.js?v=20261004-39"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
