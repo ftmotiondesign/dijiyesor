@@ -912,3 +912,10 @@ button,input,select{font:inherit}
   background:#15803d!important;
   border-color:#15803d!important;
 }
+
+
+/* Konum bilgilendirmesinde sadece "konum seç" kısmını yeşil vurgula */
+.location-emphasis{
+  color:#16a34a;
+  font-weight:900;
+}
