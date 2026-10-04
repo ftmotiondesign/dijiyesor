@@ -471,12 +471,13 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
     link.href=ad.searchPopupTargetUrl||("firma.html?id="+encodeURIComponent(ad.id));
   }
   modal.classList.remove("hidden");
+  document.body.classList.add("djs-modal-open");
   document.body.style.overflow="hidden";
   try{sessionStorage.setItem("djs_search_sponsor_shown","1")}catch(_){}
 }
 function initSearchSponsorPopup(){
   const modal=document.getElementById("searchSponsorPopup");if(!modal)return;
-  const close=()=>{modal.classList.add("hidden");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){}};
+  const close=()=>{modal.classList.add("hidden");if(!document.querySelector(".category-modal:not(.hidden),.location-picker-modal:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){}};
   modal.querySelectorAll("[data-close-search-sponsor]").forEach(x=>x.addEventListener("click",close));
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.classList.contains("hidden"))close()});
 }
@@ -505,8 +506,8 @@ async function initHome(){
       return '<div class="category-picker-item"><button type="button" class="category-pick" data-toggle-picker-sector="'+key+'"><span class="category-pick-copy"><strong>'+esc(title)+'</strong><span>'+esc(desc)+'</span></span><span class="category-pick-chevron">⌄</span></button><div class="category-subpanel hidden"><button type="button" class="category-subpick all" data-pick-sector="'+key+'">Tüm '+esc(title)+'</button>'+subs+'</div></div>';
     }).join("");
   }
-  const openCategoryModal=()=>{modal?.classList.remove("hidden");document.body.style.overflow="hidden"};
-  const closeCategoryModal=()=>{modal?.classList.add("hidden");document.body.style.overflow=""};
+  const openCategoryModal=()=>{modal?.classList.remove("hidden");document.body.classList.add("djs-modal-open");document.body.style.overflow="hidden"};
+  const closeCategoryModal=()=>{modal?.classList.add("hidden");if(!document.querySelector(".location-picker-modal:not(.hidden),.search-sponsor-popup:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");document.body.style.overflow=""};
 
   const currentSearchLabel=()=>{
     const q=search.value.trim();
@@ -532,10 +533,12 @@ async function initHome(){
   const openLocationModal=async()=>{
     await syncPopupLocation();
     locationModal?.classList.remove("hidden");
+    document.body.classList.add("djs-modal-open");
     document.body.style.overflow="hidden";
   };
   const closeLocationModal=()=>{
     locationModal?.classList.add("hidden");
+    if(!document.querySelector(".category-modal:not(.hidden),.search-sponsor-popup:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");
     document.body.style.overflow="";
   };
   document.querySelectorAll("[data-close-category-modal]").forEach(el=>el.addEventListener("click",closeCategoryModal));
@@ -790,6 +793,7 @@ function init360Popup(){
       frame.src=url;
       if(external)external.href=url;
       modal.classList.remove("hidden");
+      document.body.classList.add("djs-modal-open");
       document.body.style.overflow="hidden";
       return;
     }
