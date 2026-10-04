@@ -138,13 +138,6 @@
         <select id="subCategorySelect" disabled><option value="">Tüm Alt Kategoriler</option></select>
       </div>
       <div id="activeFilters" class="active-filters"></div>
-      <div class="special-filter-row">
-        <button id="only360Btn" class="only360-btn" type="button" aria-pressed="false">
-          <span class="only360-icon">360°</span>
-          <span class="only360-copy"><strong>360° mekânı olanları göster</strong><small>Yalnızca sanal turu bulunan işletmeler</small></span>
-          <span class="only360-switch" aria-hidden="true"></span>
-        </button>
-      </div>
     </section>
 
     <section id="resultsHead" class="results-head">
@@ -152,7 +145,14 @@
         <h1 id="resultsTitle">Arama sonuçları</h1>
         <p id="resultsContext">Aramana uygun işletmeler listeleniyor.</p>
       </div>
-      <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
+      <div class="results-head-actions">
+        <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
+        <button id="only360Btn" class="only360-btn only360-btn-compact" type="button" aria-pressed="false">
+          <span class="only360-icon">360°</span>
+          <span class="only360-copy"><strong>360° olanlar</strong></span>
+          <span class="only360-switch" aria-hidden="true"></span>
+        </button>
+      </div>
     </section>
 
     <div id="locationNotice" class="location-notice location-notice-compact hidden">
