@@ -287,7 +287,24 @@
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
 
-      if (!query && !citySelect.value && !districtSelect.value) {
+      // Arama metni yoksa il/ilçe seçilmiş olsa bile bütün sektörleri listeleme.
+      // Önce kategori seçtir; seçilen konum kategori seçiminde korunur.
+      if (!query) {
+        const title = document.getElementById('homeCategoryTitle');
+        const description = homeCategoryModal?.querySelector('.home-category-card > p');
+
+        if (title) {
+          title.textContent = citySelect.value
+            ? citySelect.value + ' için ne arıyorsunuz?'
+            : 'Ne arıyorsunuz?';
+        }
+
+        if (description) {
+          description.textContent = citySelect.value
+            ? 'Bir kategori seçin. Size sadece ' + citySelect.value + ' bölgesindeki ilgili kurumları gösterelim.'
+            : 'Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.';
+        }
+
         openHomeCategoryModal();
         return;
       }
