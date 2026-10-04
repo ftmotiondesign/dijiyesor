@@ -1157,17 +1157,17 @@ body.djs-modal-open #resultsHead{
 /* Popup reklam kapatıldıktan sonra yalnızca arama sonuçları sayfasında kalan geri açma kontrolü */
 .search-sponsor-reopen{
   position:fixed;
-  right:18px;
-  bottom:18px;
+  right:24px;
+  bottom:24px;
   z-index:1200;
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:10px;
   border:1px solid #dbe7ff;
   border-radius:999px;
   background:#fff;
   box-shadow:0 12px 34px rgba(15,23,42,.16);
-  padding:9px 13px 9px 9px;
+  padding:10px 15px 10px 10px;
   cursor:pointer;
   color:#16213a;
   font:inherit;
@@ -1193,6 +1193,6 @@ body.djs-modal-open #resultsHead{
 }
 .search-sponsor-reopen:hover{transform:translateY(-1px);box-shadow:0 14px 38px rgba(15,23,42,.2)}
 @media(max-width:680px){
-  .search-sponsor-reopen{right:12px;bottom:12px;padding:8px 11px 8px 8px}
+  .search-sponsor-reopen{right:12px;bottom:12px;padding:8px 11px 8px 8px;gap:8px}
   .search-sponsor-reopen strong{font-size:11px}
 }
