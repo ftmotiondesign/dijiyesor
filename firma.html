@@ -18,7 +18,7 @@
   <small style="display:block!important;margin-top:3px!important;font-size:8px!important;font-weight:700!important;color:inherit!important;opacity:.68!important;white-space:nowrap!important;">Türkiye’nin Dijital Rehberi</small>
 </span>
     </a>
-    <a class="back-search" href="arama.html">← Firma Ara</a>
+    <a class="back-search" href="arama.html" id="backToSearch">← Firma Ara</a>
   </header>
 
   <main id="profileRoot" class="profile-page">
@@ -555,6 +555,16 @@
         root.innerHTML='<section class="profile-error"><strong>Bu firma kaydına ulaşılamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
       }
     }
+
+    document.getElementById("backToSearch")?.addEventListener("click",e=>{
+      e.preventDefault();
+      // Firma sayfasına arama sonuçlarından gelindiyse tam olarak önceki sayfaya dön.
+      if(document.referrer && document.referrer.includes(location.host)){
+        history.back();
+      }else{
+        location.href="arama.html";
+      }
+    });
 
     loadProfile();
   </script>
