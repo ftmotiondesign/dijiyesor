@@ -45,6 +45,11 @@
 .slider-admin-preview .prev{left:10px}.slider-admin-preview .next{right:10px}
 .slider-admin-preview .counter{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);background:#0f172999;color:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
 @media(max-width:650px){.slider-upload-grid{grid-template-columns:1fr 1fr}.slider-admin-preview{height:135px}}
+.direct-upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.direct-upload-row input[type=file]{display:none}
+.direct-upload-note{font-size:11px;color:#64748b;font-weight:500}
+.upload-status{font-size:12px;color:#64748b;margin-top:6px}
+.upload-status.success{color:#166534}.upload-status.error{color:#b91c1c}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.tab{min-width:150px}.g4{grid-template-columns:1fr 1fr}.media{grid-template-columns:1fr}}
 @media(max-width:650px){.topin{align-items:flex-start;flex-direction:column}.layout{padding:0 10px}.g2,.g3,.g4,.checks{grid-template-columns:1fr}.body,.head{padding:15px}.savebar{flex-direction:column;align-items:stretch}}
 </style>
@@ -86,9 +91,12 @@
   <div class="stat"><span>Firma detay sayfası kapağı</span><strong style="font-size:18px">1600 × 400 px</strong><small>4:1 oran • geniş yatay kapak</small></div>
 </div>
 <div class="g2">
-<label>Logo URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 500 × 500 px, kare PNG/JPG</span><input id="logoUrl"></label>
-<label>Kart Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1200 × 900 px • 4:3</span><input id="cardImageUrl"></label>
-<label>Kapak Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1600 × 400 px • 4:1</span><input id="coverUrl"></label>
+<label>Logo URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 500 × 500 px, kare PNG/JPG</span><input id="logoUrl">
+<div class="direct-upload-row"><input id="logoFile" type="file" accept="image/jpeg,image/png,image/webp"><button id="logoUploadBtn" type="button" class="btn soft">Bilgisayardan Logo Yükle</button><span class="direct-upload-note">JPG / PNG / WEBP</span></div><div id="logoUploadStatus" class="upload-status"></div></label>
+<label>Kart Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1200 × 900 px • 4:3</span><input id="cardImageUrl">
+<div class="direct-upload-row"><input id="cardImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button id="cardImageUploadBtn" type="button" class="btn soft">Bilgisayardan Kart Görseli Yükle</button><span class="direct-upload-note">Ana sayfa / arama kartı sağ görseli</span></div><div id="cardImageUploadStatus" class="upload-status"></div></label>
+<label>Kapak Görseli URL <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Önerilen: 1600 × 400 px • 4:1</span><input id="coverUrl">
+<div class="direct-upload-row"><input id="coverFileDirect" type="file" accept="image/jpeg,image/png,image/webp"><button id="coverUploadDirectBtn" type="button" class="btn soft">Bilgisayardan Kapak Yükle</button><span class="direct-upload-note">Firma detay sayfası üst kapağı</span></div><div id="coverUploadDirectStatus" class="upload-status"></div></label>
 </div>
 <div class="media" style="grid-template-columns:repeat(3,1fr)">
   <div>
@@ -131,7 +139,12 @@
 </div></div></section>
 
 <section class="panel" data-panel="video"><div class="card"><div class="head"><div class="eyebrow">VİDEO & 360°</div><h2>Medya bağlantıları</h2><p>360° varsa öncelikli göster; yoksa harita devreye girsin.</p></div><div class="body">
-<div class="g2"><label>360° mekan / tur URL<input id="tour360Url"></label><label>Tanıtım video URL<input id="videoUrl"></label><label>Konum video URL<input id="locationVideoUrl"></label><label>Kampanya video URL<input id="campaignVideoUrl"></label></div>
+<div class="g2">
+<label>360° mekan / tur URL<input id="tour360Url"><span class="direct-upload-note" style="display:block;margin-top:6px">360° tur bağlantı ile çalışır.</span></label>
+<label>Tanıtım Video URL<input id="videoUrl"><div class="direct-upload-row"><input id="videoFile" type="file" accept="video/mp4,video/quicktime,video/webm"><button id="videoUploadBtn" type="button" class="btn soft">Bilgisayardan Video Yükle</button></div><div id="videoUploadStatus" class="upload-status"></div></label>
+<label>Konum Video URL<input id="locationVideoUrl"><div class="direct-upload-row"><input id="locationVideoFile" type="file" accept="video/mp4,video/quicktime,video/webm"><button id="locationVideoUploadBtn" type="button" class="btn soft">Bilgisayardan Video Yükle</button></div><div id="locationVideoUploadStatus" class="upload-status"></div></label>
+<label>Kampanya Video URL<input id="campaignVideoUrl"><div class="direct-upload-row"><input id="campaignVideoFile" type="file" accept="video/mp4,video/quicktime,video/webm"><button id="campaignVideoUploadBtn" type="button" class="btn soft">Bilgisayardan Video Yükle</button></div><div id="campaignVideoUploadStatus" class="upload-status"></div></label>
+</div>
 <div class="checks" style="margin-top:14px"><label class="check"><input id="prefer360" type="checkbox"><span><b>360° öncelikli</b><small>Harita alanında 360° içerik önce gelir.</small></span></label><label class="check"><input id="fallbackMap" type="checkbox"><span><b>360° yoksa harita</b><small>Bağlantı boşsa harita gösterilir.</small></span></label></div>
 </div></div></section>
 
@@ -299,6 +312,42 @@ async function saveCoverSliderOnly(){
   await db.collection("institutions").doc(id).set({coverUrls:[...coverSliderUrls],updatedAt:new Date().toISOString()},{merge:true});
   firm.coverUrls=[...coverSliderUrls];
 }
+async function uploadDirectMedia(file,resourceType="image",statusId=""){
+  if(!file)throw new Error("Dosya seçilmedi.");
+  const isImage=resourceType==="image";
+  if(isImage && !/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error("Sadece JPG, PNG veya WEBP yükleyebilirsin.");
+  if(!isImage && !/^video\/(mp4|quicktime|webm)$/i.test(file.type))throw new Error("Sadece MP4, MOV veya WEBM yükleyebilirsin.");
+  const max=isImage?10*1024*1024:100*1024*1024;
+  if(file.size>max)throw new Error(isImage?"Görsel en fazla 10 MB olabilir.":"Video en fazla 100 MB olabilir.");
+  const status=statusId?$(statusId):null;
+  if(status){status.className="upload-status";status.textContent="Yükleniyor...";}
+  const fd=new FormData();
+  fd.append("file",file);
+  fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+  const endpoint="https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/"+(isImage?"image":"video")+"/upload";
+  const res=await fetch(endpoint,{method:"POST",body:fd});
+  if(!res.ok)throw new Error("Yükleme başarısız.");
+  const data=await res.json();
+  return data.secure_url||data.url;
+}
+function wireDirectUpload(btnId,fileId,targetId,statusId,resourceType="image"){
+  const btn=$(btnId),input=$(fileId),target=$(targetId),status=$(statusId);
+  if(!btn||!input||!target)return;
+  btn.onclick=()=>input.click();
+  input.onchange=async()=>{
+    const file=input.files?.[0];
+    if(!file)return;
+    try{
+      const url=await uploadDirectMedia(file,resourceType,statusId);
+      target.value=url;
+      refreshPreviews();
+      if(status){status.className="upload-status success";status.textContent="Yüklendi ✓ Kaydet'e basın.";}
+    }catch(err){
+      if(status){status.className="upload-status error";status.textContent=err.message||"Yüklenemedi.";}
+    }finally{input.value="";}
+  };
+}
+
 async function load(){
  if(!id){location.href="admin.html#firms";return}
  const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
@@ -317,6 +366,12 @@ async function load(){
 function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:val("cardImageUrl"),coverUrl:val("coverUrl"),coverUrls:[...coverSliderUrls],tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
 async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
 $("saveBtn").onclick=save;$("topSave").onclick=save;$("logoUrl").oninput=refreshPreviews;$("cardImageUrl").oninput=refreshPreviews;$("coverUrl").oninput=refreshPreviews;
+wireDirectUpload("logoUploadBtn","logoFile","logoUrl","logoUploadStatus","image");
+wireDirectUpload("cardImageUploadBtn","cardImageFile","cardImageUrl","cardImageUploadStatus","image");
+wireDirectUpload("coverUploadDirectBtn","coverFileDirect","coverUrl","coverUploadDirectStatus","image");
+wireDirectUpload("videoUploadBtn","videoFile","videoUrl","videoUploadStatus","video");
+wireDirectUpload("locationVideoUploadBtn","locationVideoFile","locationVideoUrl","locationVideoUploadStatus","video");
+wireDirectUpload("campaignVideoUploadBtn","campaignVideoFile","campaignVideoUrl","campaignVideoUploadStatus","video");
 
 function openSitePreview(e){
   if(e)e.preventDefault();
