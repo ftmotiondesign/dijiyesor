@@ -45,6 +45,17 @@
 .slider-admin-preview .prev{left:10px}.slider-admin-preview .next{right:10px}
 .slider-admin-preview .counter{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);background:#0f172999;color:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
 @media(max-width:650px){.slider-upload-grid{grid-template-columns:1fr 1fr}.slider-admin-preview{height:135px}}
+.gallery-manager{margin-top:18px;border:1px solid #dbe3ef;border-radius:14px;padding:16px;background:#fff}
+.gallery-manager-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.gallery-manager-head h3{margin:0 0 4px;font-size:15px}.gallery-manager-head p{margin:0;color:#64748b;font-size:12px}
+.gallery-upload-actions{display:flex;gap:8px;flex-wrap:wrap}
+.gallery-upload-actions input{display:none}
+.gallery-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+.gallery-admin-item{position:relative;height:110px;border:1px solid #dbe3ef;border-radius:12px;overflow:hidden;background:#f8fafc}
+.gallery-admin-item img,.gallery-admin-item video{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-admin-item button{position:absolute;right:7px;top:7px;width:27px;height:27px;border:0;border-radius:999px;background:#0f172acc;color:#fff;font-size:17px;cursor:pointer}
+.gallery-admin-item span{position:absolute;left:7px;bottom:7px;background:#0f172acc;color:#fff;border-radius:999px;padding:4px 7px;font-size:10px;font-weight:800}
+.gallery-empty{grid-column:1/-1;padding:16px;border:1px dashed #cbd5e1;border-radius:10px;color:#64748b;font-size:12px;text-align:center}
 .direct-upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .direct-upload-row input[type=file]{display:none}
 .direct-upload-note{font-size:11px;color:#64748b;font-weight:500}
@@ -119,6 +130,23 @@
   </div>
   <div id="coverSliderGrid" class="slider-upload-grid"></div>
   <div id="coverSliderMsg" class="message" style="display:none"></div>
+</div>
+
+<div class="gallery-manager">
+  <div class="gallery-manager-head">
+    <div>
+      <h3>Fotoğraf & Video Galerisi</h3>
+      <p>Firma sayfasındaki “Galeri / Fotoğraf & Video” bölümüne buradan içerik yüklenir. Bu alan üstteki kaydırmalı görsellerden ayrıdır.</p>
+    </div>
+    <div class="gallery-upload-actions">
+      <input id="galleryPhotoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      <input id="galleryVideoFiles" type="file" accept="video/mp4,video/quicktime,video/webm" multiple>
+      <button id="galleryPhotoUploadBtn" type="button" class="btn soft">Fotoğraf Yükle</button>
+      <button id="galleryVideoUploadBtn" type="button" class="btn soft">Video Yükle</button>
+    </div>
+  </div>
+  <div id="galleryAdminGrid" class="gallery-admin-grid"></div>
+  <div id="galleryUploadMsg" class="message" style="display:none"></div>
 </div>
 </div></div></section>
 
@@ -231,6 +259,8 @@ const CLOUDINARY_CLOUD_NAME="okefpzsy";
 const CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
 let coverSliderUrls=[];
 let coverSliderPreviewIndex=0;
+let galleryPhotoUrls=[];
+let galleryVideoUrls=[];
 async function boot(){
   const src=await fetch("admin.js?config=1&v=20261004-56").then(r=>r.text());
   const m=src.match(/const firebaseConfig=({[\s\S]*?});/);
@@ -330,10 +360,34 @@ function wireDirectUpload(btnId,fileId,targetId,statusId,resourceType="image"){
   };
 }
 
+function galleryMsg(text,type=""){
+  const box=$("galleryUploadMsg"); if(!box)return;
+  box.style.display="block";box.className="message"+(type?" "+type:"");box.textContent=text;
+}
+function renderGalleryAdmin(){
+  const grid=$("galleryAdminGrid");
+  if(!grid)return;
+  const items=[
+    ...galleryPhotoUrls.map((url,index)=>'<div class="gallery-admin-item"><img src="'+String(url).replace(/"/g,"&quot;")+'" alt="Galeri fotoğrafı"><button type="button" data-remove-gallery-photo="'+index+'">×</button><span>Fotoğraf</span></div>'),
+    ...galleryVideoUrls.map((url,index)=>'<div class="gallery-admin-item"><video src="'+String(url).replace(/"/g,"&quot;")+'" muted preload="metadata"></video><button type="button" data-remove-gallery-video="'+index+'">×</button><span>Video</span></div>')
+  ];
+  grid.innerHTML=items.length?items.join(""):'<div class="gallery-empty">Henüz galeri fotoğrafı veya videosu eklenmedi.</div>';
+}
+async function saveGalleryOnly(){
+  await db.collection("institutions").doc(id).set({
+    galleryUrls:[...galleryPhotoUrls],
+    videoUrls:[...galleryVideoUrls],
+    updatedAt:new Date().toISOString()
+  },{merge:true});
+  firm.galleryUrls=[...galleryPhotoUrls];
+  firm.videoUrls=[...galleryVideoUrls];
+}
 async function load(){
  if(!id){location.href="admin.html#firms";return}
  const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
  firm={id:s.id,...s.data()};
+ galleryPhotoUrls=Array.isArray(firm.galleryUrls)?firm.galleryUrls.filter(Boolean):[];
+ galleryVideoUrls=Array.isArray(firm.videoUrls)?firm.videoUrls.filter(Boolean):[];
  coverSliderUrls=Array.isArray(firm.coverUrls)?firm.coverUrls.filter(Boolean):[];
  if(!coverSliderUrls.length){
    coverSliderUrls=[firm.cardImageUrl,firm.coverUrl].map(v=>String(v||"").trim()).filter(Boolean);
@@ -345,11 +399,11 @@ async function load(){
  ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","locationVideoUrl","campaignVideoUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
  $("status").value=firm.status||"active";$("mainCategory").value=firm.mainCategory||"diger";$("subCategory").value=firm.subCategory||firm.category||"";$("tour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";$("videoUrl").value=firm.videoUrl||firm.youtubeUrl||"";
  ["vip","homeFeatured","searchFeatured","opportunityFeatured"].forEach(k=>$(k).checked=!!firm[k]);$("sponsored").checked=!!(firm.sponsored||firm.isSponsored||firm.vipSponsored||firm.advertiser);$("prefer360").checked=firm.prefer360!==false;$("fallbackMap").checked=firm.fallbackMap!==false;$("infoRequestEnabled").checked=firm.infoRequestEnabled!==false;$("infoNotifyPanel").checked=firm.infoNotifyPanel!==false;$("infoRequestTarget").value=firm.infoRequestTarget||"both";$("infoRequestPhone").value=firm.infoRequestPhone||firm.whatsapp||firm.phone||"";
- $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="firma.html?id="+encodeURIComponent(id);refreshPreviews();renderCoverSliderAdmin();
+ $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="firma.html?id="+encodeURIComponent(id);refreshPreviews();renderCoverSliderAdmin();renderGalleryAdmin();
  const q="?firma="+encodeURIComponent(firm.name||"")+"&phone="+encodeURIComponent(firm.phone||"")+"&id="+encodeURIComponent(id);$("qrCardLink").href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"+q;$("menuQrLink").href="https://ftmotiondesign.github.io/dijiyer/menu-qr.html"+q;$("googleQrLink").href="https://ftmotiondesign.github.io/dijiyer/google-qr.html"+q;
  $("statViews").textContent=Number(firm.profileViews||firm.views||0).toLocaleString("tr-TR");$("statWhatsapp").textContent=Number(firm.whatsappClicks||0).toLocaleString("tr-TR");$("statRequests").textContent=Number(firm.infoRequestCount||firm.requestCount||0).toLocaleString("tr-TR");$("statTour").textContent=Number(firm.tourViews||firm.tour360Views||0).toLocaleString("tr-TR");$("statInstagram").textContent=Number(firm.instagramClicks||0).toLocaleString("tr-TR");$("statDirections").textContent=Number(firm.directionsClicks||0).toLocaleString("tr-TR");$("toggleStatus").textContent=(firm.status||"active")==="passive"?"Firmayı Aktif Yap":"Firmayı Pasife Al";
 }
-function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:coverSliderUrls[0]||"",coverUrl:coverSliderUrls[0]||"",coverUrls:[...coverSliderUrls],tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
+function data(){return{name:val("name"),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:coverSliderUrls[0]||"",coverUrl:coverSliderUrls[0]||"",coverUrls:[...coverSliderUrls],galleryUrls:[...galleryPhotoUrls],videoUrls:[...galleryVideoUrls],tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
 async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
 $("saveBtn").onclick=save;$("topSave").onclick=save;$("logoUrl").oninput=refreshPreviews;
 wireDirectUpload("logoUploadBtn","logoFile","logoUrl","logoUploadStatus","image");
@@ -482,6 +536,62 @@ $("coverSliderFiles").onchange=async e=>{
     sliderMsg("Yükleme hatası: "+(err.message||""),"error");
   }finally{
     e.target.value="";
+  }
+};
+
+$("galleryPhotoUploadBtn").onclick=()=>$("galleryPhotoFiles").click();
+$("galleryVideoUploadBtn").onclick=()=>$("galleryVideoFiles").click();
+
+$("galleryPhotoFiles").onchange=async e=>{
+  const files=[...(e.target.files||[])].slice(0,12);
+  if(!files.length)return;
+  try{
+    galleryMsg(files.length+" fotoğraf yükleniyor...");
+    for(let i=0;i<files.length;i++){
+      galleryMsg("Fotoğraf yükleniyor... "+(i+1)+" / "+files.length);
+      const url=await uploadDirectMedia(files[i],"image","");
+      if(url)galleryPhotoUrls.push(url);
+      renderGalleryAdmin();
+    }
+    galleryPhotoUrls=[...new Set(galleryPhotoUrls)].slice(0,24);
+    await saveGalleryOnly();
+    renderGalleryAdmin();
+    galleryMsg(files.length+" fotoğraf yüklendi ve kaydedildi ✓","success");
+  }catch(err){galleryMsg("Fotoğraf yükleme hatası: "+(err.message||""),"error")}
+  finally{e.target.value="";}
+};
+
+$("galleryVideoFiles").onchange=async e=>{
+  const files=[...(e.target.files||[])].slice(0,4);
+  if(!files.length)return;
+  try{
+    galleryMsg(files.length+" video yükleniyor...");
+    for(let i=0;i<files.length;i++){
+      galleryMsg("Video yükleniyor... "+(i+1)+" / "+files.length);
+      const url=await uploadDirectMedia(files[i],"video","");
+      if(url)galleryVideoUrls.push(url);
+      renderGalleryAdmin();
+    }
+    galleryVideoUrls=[...new Set(galleryVideoUrls)].slice(0,8);
+    await saveGalleryOnly();
+    renderGalleryAdmin();
+    galleryMsg(files.length+" video yüklendi ve kaydedildi ✓","success");
+  }catch(err){galleryMsg("Video yükleme hatası: "+(err.message||""),"error")}
+  finally{e.target.value="";}
+};
+
+$("galleryAdminGrid").onclick=async e=>{
+  const photo=e.target.closest("[data-remove-gallery-photo]");
+  const video=e.target.closest("[data-remove-gallery-video]");
+  if(photo){
+    galleryPhotoUrls.splice(Number(photo.dataset.removeGalleryPhoto),1);
+    renderGalleryAdmin();
+    try{await saveGalleryOnly();galleryMsg("Fotoğraf kaldırıldı ✓","success")}catch(err){galleryMsg("Kaydedilemedi: "+(err.message||""),"error")}
+  }
+  if(video){
+    galleryVideoUrls.splice(Number(video.dataset.removeGalleryVideo),1);
+    renderGalleryAdmin();
+    try{await saveGalleryOnly();galleryMsg("Video kaldırıldı ✓","success")}catch(err){galleryMsg("Kaydedilemedi: "+(err.message||""),"error")}
   }
 };
 
