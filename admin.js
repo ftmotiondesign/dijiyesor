@@ -533,7 +533,13 @@ $("firmForm").addEventListener("submit",async e=>{
 
 
 function sponsorPopupRows(){
-  return firms.filter(f=>f.searchPopupTitle||f.searchPopupMediaUrl||f.searchPopupActive||f.searchPopupStartDate||f.searchPopupEndDate);
+  return firms
+    .filter(f=>f.searchPopupTitle||f.searchPopupMediaUrl||f.searchPopupActive||f.searchPopupStartDate||f.searchPopupEndDate)
+    .sort((a,b)=>{
+      const ao=Number.isFinite(Number(a.searchPopupOrder))?Number(a.searchPopupOrder):999999;
+      const bo=Number.isFinite(Number(b.searchPopupOrder))?Number(b.searchPopupOrder):999999;
+      return ao-bo || String(a.name||"").localeCompare(String(b.name||""),"tr");
+    });
 }
 function sponsorPopupScheduleState(f){
   const enabled=f.searchPopupActive!==false && Boolean(f.searchPopupActive);
@@ -564,7 +570,10 @@ function renderSponsorPopupManager(){
     const rows=sponsorPopupRows();
     list.innerHTML=rows.length?rows.map(f=>{
       const st=sponsorPopupScheduleState(f);
-      return '<article class="sponsor-popup-row">'+
+      const order=rows.indexOf(f)+1;
+      return '<article class="sponsor-popup-row" draggable="true" data-sponsor-popup-row="'+esc(f.id)+'">'+
+        '<div class="sponsor-popup-drag" title="Sürükleyerek sırala">⋮⋮</div>'+
+        '<div class="sponsor-popup-order">'+order+'</div>'+
         '<div><strong>'+esc(f.name)+'</strong><small>'+esc((f.searchPopupCity==="__ALL__"?"Tüm Türkiye":[f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / "))||"Bölge yok")+'</small><small style="display:block;margin-top:4px;font-weight:800">📅 '+esc(sponsorPopupDateLabel(f))+'</small></div>'+
         '<span class="status-pill">'+esc(st.label)+'</span>'+
         '<div class="row-actions"><button data-toggle-sponsor-popup="'+esc(f.id)+'">'+(st.key==="passive"?"Aktif Yap":"Pasif Yap")+'</button><button data-edit-sponsor-popup="'+esc(f.id)+'">Düzenle</button><button class="danger" data-remove-sponsor-popup="'+esc(f.id)+'">Kaldır</button></div>'+
@@ -732,10 +741,74 @@ document.addEventListener("click",async e=>{
   }
   const remove=e.target.closest("[data-remove-sponsor-popup]");
   if(remove){
-    await db.collection("institutions").doc(remove.dataset.removeSponsorPopup).set({
-      searchPopupActive:false,searchPopupTitle:"",searchPopupText:"",searchPopupMediaUrl:"",searchPopupTargetUrl:"",searchPopupUpdatedAt:new Date().toISOString()
+    const id=remove.dataset.removeSponsorPopup;
+    if(!confirm("Bu popup reklamını kaldırmak istiyor musunuz?"))return;
+    const del=firebase.firestore.FieldValue.delete();
+    await db.collection("institutions").doc(id).set({
+      searchPopupActive:del,
+      searchPopupStartDate:del,
+      searchPopupEndDate:del,
+      searchPopupCity:del,
+      searchPopupDistrict:del,
+      searchPopupTitle:del,
+      searchPopupText:del,
+      searchPopupMediaType:del,
+      searchPopupMediaUrl:del,
+      searchPopupButtonText:del,
+      searchPopupTargetUrl:del,
+      searchPopupOrder:del,
+      searchPopupUpdatedAt:del
     },{merge:true});
     await loadFirms();renderAll();return;
+  }
+});
+let sponsorPopupDraggingId="";
+document.addEventListener("dragstart",e=>{
+  const row=e.target.closest("[data-sponsor-popup-row]");
+  if(!row)return;
+  sponsorPopupDraggingId=row.dataset.sponsorPopupRow||"";
+  row.classList.add("dragging");
+  if(e.dataTransfer){e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",sponsorPopupDraggingId)}
+});
+document.addEventListener("dragend",e=>{
+  e.target.closest("[data-sponsor-popup-row]")?.classList.remove("dragging");
+  sponsorPopupDraggingId="";
+});
+document.addEventListener("dragover",e=>{
+  const row=e.target.closest("[data-sponsor-popup-row]");
+  if(!row||!sponsorPopupDraggingId)return;
+  e.preventDefault();
+  const list=$("sponsorPopupList"),dragging=list?.querySelector('[data-sponsor-popup-row="'+CSS.escape(sponsorPopupDraggingId)+'"]');
+  if(!list||!dragging||dragging===row)return;
+  const rect=row.getBoundingClientRect();
+  const after=e.clientY>rect.top+rect.height/2;
+  list.insertBefore(dragging,after?row.nextSibling:row);
+  [...list.querySelectorAll("[data-sponsor-popup-row]")].forEach((r,i)=>{
+    const badge=r.querySelector(".sponsor-popup-order");if(badge)badge.textContent=String(i+1);
+  });
+});
+$("saveSponsorPopupOrderBtn")?.addEventListener("click",async()=>{
+  const rows=[...$("sponsorPopupList")?.querySelectorAll("[data-sponsor-popup-row]")||[]];
+  if(!rows.length)return;
+  const btn=$("saveSponsorPopupOrderBtn"),old=btn.textContent;
+  btn.disabled=true;btn.textContent="Kaydediliyor...";
+  try{
+    const batch=db.batch();
+    rows.forEach((row,i)=>{
+      batch.set(db.collection("institutions").doc(row.dataset.sponsorPopupRow),{
+        searchPopupOrder:i+1,
+        searchPopupUpdatedAt:new Date().toISOString()
+      },{merge:true});
+    });
+    await batch.commit();
+    await loadFirms();
+    renderSponsorPopupManager();
+    btn.textContent="Sıralama Kaydedildi ✓";
+    setTimeout(()=>{btn.textContent=old;btn.disabled=false},1200);
+  }catch(e){
+    btn.textContent="Kaydedilemedi";
+    btn.disabled=false;
+    setTimeout(()=>btn.textContent=old,1400);
   }
 });
 loadSponsorCities();
