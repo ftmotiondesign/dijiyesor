@@ -47,7 +47,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -62,7 +62,93 @@ document.addEventListener("click",e=>{
   }
   const close=e.target.closest("[data-close]");if(close)$(close.dataset.close).classList.add("hidden");
 });
+
+$("keywordSectorFilter")?.addEventListener("change",renderKeywordTable);
+$("keywordSearchInput")?.addEventListener("input",renderKeywordTable);
+$("keywordGoogleFetchBtn")?.addEventListener("click",()=>{
+  const msg=$("keywordMessage");
+  if(msg){
+    msg.textContent="Google arama hacmini çekmek için Google Ads Keyword Planner API bağlantısı gerekiyor. Arayüz hazır.";
+    msg.className="message";
+  }
+});
+document.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-add-keyword]");
+  if(!btn)return;
+  addKeywordToDijiyesor(btn.dataset.addKeyword,btn.dataset.keywordSector,btn);
+});
+loadAddedKeywords();
+
 $("mobileMenuBtn").addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("open"));
+
+
+const keywordSeedRows=[
+  {keyword:"sürücü kursu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"sürücü kursları",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"ehliyet kursu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"direksiyon kursu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"anaokulu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"anaokulları",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"öğrenci yurdu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
+  {keyword:"oto servis",volume:"—",sector:"otomotiv",sectorLabel:"Otomotiv"},
+  {keyword:"oto servisleri",volume:"—",sector:"otomotiv",sectorLabel:"Otomotiv"},
+  {keyword:"restoran",volume:"—",sector:"yemeicme",sectorLabel:"Yeme & İçme"},
+  {keyword:"restoranlar",volume:"—",sector:"yemeicme",sectorLabel:"Yeme & İçme"},
+  {keyword:"emlak ofisi",volume:"—",sector:"emlak",sectorLabel:"Emlak"}
+];
+let keywordRows=[...keywordSeedRows];
+let addedKeywordSet=new Set();
+
+function renderKeywordTable(){
+  const body=$("keywordTableBody");
+  if(!body)return;
+  const sector=$("keywordSectorFilter")?.value||"";
+  const q=String($("keywordSearchInput")?.value||"").toLocaleLowerCase("tr-TR").trim();
+  const rows=keywordRows.filter(r=>(!sector||r.sector===sector)&&(!q||r.keyword.toLocaleLowerCase("tr-TR").includes(q)));
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="4" class="keyword-empty">Bu filtreye uygun anahtar kelime yok.</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(r=>{
+    const key=r.sector+"::"+r.keyword;
+    const added=addedKeywordSet.has(key);
+    return '<tr>'+
+      '<td>'+escapeHtml(r.keyword)+'</td>'+
+      '<td><span class="keyword-volume">'+escapeHtml(String(r.volume||"—"))+'</span></td>'+
+      '<td><span class="keyword-sector">'+escapeHtml(r.sectorLabel||r.sector)+'</span></td>'+
+      '<td><button type="button" class="keyword-add-btn'+(added?' added':'')+'" data-add-keyword="'+escapeHtml(r.keyword)+'" data-keyword-sector="'+escapeHtml(r.sector)+'" '+(added?'disabled':'')+'>'+(added?'Eklendi':'Ekle')+'</button></td>'+
+    '</tr>';
+  }).join("");
+}
+
+async function loadAddedKeywords(){
+  try{
+    const snap=await db.collection("searchKeywords").get();
+    addedKeywordSet=new Set(snap.docs.map(d=>{
+      const x=d.data()||{};
+      return String(x.sector||"")+"::"+String(x.keyword||"");
+    }));
+  }catch(e){console.warn("Anahtar kelimeler yüklenemedi",e)}
+  renderKeywordTable();
+}
+
+async function addKeywordToDijiyesor(keyword,sector,button){
+  const msg=$("keywordMessage");
+  try{
+    const id=(sector+"-"+keyword).toLocaleLowerCase("tr-TR")
+      .replace(/[^a-z0-9çğıöşü]+/g,"-")
+      .replace(/^-+|-+$/g,"");
+    await db.collection("searchKeywords").doc(id).set({
+      keyword,sector,active:true,source:"admin",updatedAt:new Date().toISOString()
+    },{merge:true});
+    addedKeywordSet.add(sector+"::"+keyword);
+    if(button){button.textContent="Eklendi";button.classList.add("added");button.disabled=true}
+    if(msg){msg.textContent='"'+keyword+'" DijiyeSor arama sözlüğüne eklendi.';msg.className="message success"}
+  }catch(e){
+    console.error(e);
+    if(msg){msg.textContent="Anahtar kelime eklenemedi.";msg.className="message error"}
+  }
+}
 
 async function loadAll(){
   await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads()]);
