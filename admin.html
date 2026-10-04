@@ -598,9 +598,17 @@ Gerçek mekanda hizmet"></textarea>
         <label>Başlık<input id="sponsorPopupTitle" placeholder="Örn. Çanakkale’de öne çıkan sürücü kursu"></label>
         <label>Açıklama<textarea id="sponsorPopupText" rows="3" placeholder="Kısa reklam açıklaması"></textarea></label>
 
-        <div class="form-grid two">
+        <div class="form-grid three">
           <label>Medya türü
             <select id="sponsorPopupMediaType"><option value="image">Görsel</option><option value="video">Video</option></select>
+          </label>
+          <label>Gösterim sıklığı
+            <select id="sponsorPopupFrequency">
+              <option value="session">Her oturumda 1 kez</option>
+              <option value="daily">Günde 1 kez</option>
+              <option value="3days">3 günde 1 kez</option>
+              <option value="location">Her yeni konum seçiminde 1 kez</option>
+            </select>
           </label>
           <label>Buton yazısı<input id="sponsorPopupButtonText" placeholder="Firmayı İncele"></label>
         </div>
