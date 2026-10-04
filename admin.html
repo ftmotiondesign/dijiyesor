@@ -574,8 +574,21 @@ Gerçek mekanda hizmet"></textarea>
         <label><input id="editSponsored" type="checkbox"><span>Sponsor firma</span></label>
       </div>
       <div id="firmFormMessage" class="message hidden"></div>
-      <div class="modal-actions"><a id="quickFirmViewBtn" class="secondary" href="#" target="_blank" rel="noopener">Sayfayı Gör ↗</a><button type="button" class="secondary" data-close="firmModal">Vazgeç</button><button type="submit" class="primary">Kaydet</button></div>
+      <div class="modal-actions"><a id="quickFirmViewBtn" class="secondary" href="#">Sayfayı Gör</a><button type="button" class="secondary" data-close="firmModal">Vazgeç</button><button type="submit" class="primary">Kaydet</button></div>
     </form>
+  </div>
+</div>
+
+<div id="quickFirmPreviewModal" class="modal hidden">
+  <div class="modal-card modal-large" style="width:min(1180px,96vw);height:min(820px,92vh);display:flex;flex-direction:column;padding:0;overflow:hidden">
+    <div class="modal-head" style="padding:14px 16px;margin:0;border-bottom:1px solid #e5e7eb">
+      <div><span>FİRMA SAYFASI</span><h2 id="quickFirmPreviewTitle">Firma Önizleme</h2></div>
+      <button class="modal-close" data-close="quickFirmPreviewModal">×</button>
+    </div>
+    <div style="flex:1;min-height:0;position:relative;background:#f8fafc">
+      <div id="quickFirmPreviewLoading" style="position:absolute;inset:0;display:grid;place-items:center;font-weight:700;color:#64748b;background:#f8fafc;z-index:1">Firma sayfası yükleniyor...</div>
+      <iframe id="quickFirmPreviewFrame" title="Firma sayfası önizleme" style="width:100%;height:100%;border:0;background:#fff"></iframe>
+    </div>
   </div>
 </div>
 
