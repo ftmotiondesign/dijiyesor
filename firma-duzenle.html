@@ -140,7 +140,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
 <script>
-const $=id=>document.getElementById(id),id=new URLSearchParams(location.search).get("id"),ADMIN_EMAIL="ftmotiondesign@gmail.com";
+const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),id=params.get("id"),urlFirmName=params.get("name")||"",ADMIN_EMAIL="ftmotiondesign@gmail.com";
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
 let auth,db,storage,firm={};
 async function boot(){
@@ -172,6 +172,8 @@ async function load(){
  if(!id){location.href="admin.html#firms";return}
  const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
  firm={id:s.id,...s.data()};
+ const resolvedName=firm.name||firm.institutionName||firm.companyName||firm.businessName||firm.title||urlFirmName||"";
+ firm.name=resolvedName;
  ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","cardImageUrl","coverUrl","locationVideoUrl","campaignVideoUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
  $("status").value=firm.status||"active";$("mainCategory").value=firm.mainCategory||"diger";$("subCategory").value=firm.subCategory||firm.category||"";$("tour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";$("videoUrl").value=firm.videoUrl||firm.youtubeUrl||"";
  ["vip","homeFeatured","searchFeatured","opportunityFeatured"].forEach(k=>$(k).checked=!!firm[k]);$("sponsored").checked=!!(firm.sponsored||firm.isSponsored||firm.vipSponsored||firm.advertiser);$("prefer360").checked=firm.prefer360!==false;$("fallbackMap").checked=firm.fallbackMap!==false;$("infoRequestEnabled").checked=firm.infoRequestEnabled!==false;$("infoNotifyPanel").checked=firm.infoNotifyPanel!==false;$("infoRequestTarget").value=firm.infoRequestTarget||"both";$("infoRequestPhone").value=firm.infoRequestPhone||firm.whatsapp||firm.phone||"";
