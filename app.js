@@ -201,6 +201,7 @@ searchPopupMediaType:d.searchPopupMediaType||"image",
 searchPopupMediaUrl:d.searchPopupMediaUrl||"",
 searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
 searchPopupTargetUrl:d.searchPopupTargetUrl||"",
+searchPopupOrder:Number(d.searchPopupOrder||999999),
 mapUrl:d.mapUrl||d.googleMapsUrl||d.mapsUrl||"",
 latitude:d.latitude||d.lat||"",
 longitude:d.longitude||d.lng||d.lon||""
@@ -454,7 +455,7 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
       if(norm(x.searchPopupDistrict)&&norm(x.searchPopupDistrict)===nd)return 2;
       return 1;
     };
-    return score(b)-score(a);
+    return (score(b)-score(a)) || (Number(a.searchPopupOrder||999999)-Number(b.searchPopupOrder||999999));
   });
   const ad=candidates[0],modal=document.getElementById("searchSponsorPopup");
   if(!modal)return;
