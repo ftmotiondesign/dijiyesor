@@ -92,7 +92,14 @@ button,input,select{font:inherit}
   .filters select:nth-child(3),.clear-btn{grid-column:auto}
 }
 .result-card-copy{min-width:0;flex:1;overflow:hidden}
-.result-name-row h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.result-name-row h2{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
 .result-card:hover .result-name-row h2{color:#1677ff}
 .results-head{padding:0 2px}
 .search-area{max-width:900px;margin:0 auto}
@@ -774,4 +781,19 @@ button,input,select{font:inherit}
   #companyGrid .result-card:first-child{
     scroll-margin-top:72px;
   }
+}
+
+
+/* Firma adı okunabilirlik iyileştirmesi */
+@media(max-width:680px){
+  .result-name-row{align-items:flex-start}
+  .result-name-row h2{font-size:15px!important;line-height:1.3!important;flex:1 1 100%}
+  .result-card-top{grid-template-columns:46px minmax(0,1fr) 96px!important}
+  .result-visual{width:96px!important;min-width:96px!important;height:76px!important}
+}
+@media(max-width:430px){
+  .result-card-top{grid-template-columns:42px minmax(0,1fr) 84px!important;gap:8px!important}
+  .result-logo{width:42px!important;height:42px!important;min-width:42px!important}
+  .result-visual{width:84px!important;min-width:84px!important;height:68px!important}
+  .result-name-row h2{font-size:14px!important}
 }
