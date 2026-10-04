@@ -172,21 +172,31 @@ function locationFromAddress(address){
 const turkiyeCitiesSearch=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
 
 function resolveSearchLocation(d){
-  const addrLoc=locationFromAddress(d.address);
-  if(addrLoc)return addrLoc;
-
-  const sources=[d.location,d.address,d.name].map(v=>String(v||"").toLocaleLowerCase("tr-TR"));
-  let city="";
-  for(const source of sources){
-    const found=turkiyeCitiesSearch.find(x=>source.includes(x.toLocaleLowerCase("tr-TR")));
-    if(found){city=found;break}
-  }
-  if(!city)city=String(d.city||"").trim();
-
+  // Önce yönetim panelinde kayıtlı açık il/ilçe alanlarını esas al.
+  // Adres sadece eski kayıtlarda il alanı boşsa yedek olarak kullanılır.
+  const explicitCity=String(d.city||"").trim();
+  const canonicalExplicitCity=turkiyeCitiesSearch.find(
+    x=>norm(x)===norm(explicitCity)
+  );
+  let city=canonicalExplicitCity||explicitCity;
   let district=String(d.district||"").trim();
-  if(city && String(d.city||"").trim() && city.toLocaleLowerCase("tr-TR")!==String(d.city||"").trim().toLocaleLowerCase("tr-TR")){
-    if(/^merkez$/i.test(district))district="Merkez";
+
+  if(!city){
+    const addrLoc=locationFromAddress(d.address);
+    if(addrLoc){
+      city=addrLoc.city||"";
+      if(!district)district=addrLoc.district||"";
+    }
   }
+
+  if(!city){
+    const sources=[d.location,d.address].map(v=>String(v||"").toLocaleLowerCase("tr-TR"));
+    for(const source of sources){
+      const found=turkiyeCitiesSearch.find(x=>source.includes(x.toLocaleLowerCase("tr-TR")));
+      if(found){city=found;break}
+    }
+  }
+
   return {city,district};
 }
 let companies=[];
@@ -860,10 +870,11 @@ async function initHome(){
       const hSmart=smartSearchText(h);
       const nameSmart=smartSearchText(i.name);
       const keywordMatch=intent.targets.length>0&&intent.targets.some(t=>i.subCategory===t||i.category===t);
-      const cityText=norm([i.city,i.address,i.location].join(" "));
-      const districtText=norm([i.district,i.address,i.location].join(" "));
-      const cityMatch=!c||norm(i.city)===c||cityText.includes(c);
-      const districtMatch=!d||norm(i.district)===d||districtText.includes(d);
+      // İl seçildiyse yalnızca o ile kayıtlı firmalar gösterilir.
+      // İlçe seçildiyse yalnızca o ilçedeki firmalar gösterilir.
+      // İlçe boşsa seçilen ilin tüm ilçeleri gösterilir.
+      const cityMatch=!c||norm(i.city)===c;
+      const districtMatch=!d||norm(i.district)===d;
       const sectorMatch=!s||i.mainCategory===s;
       const subMatch=!sc||i.subCategory===sc||i.category===sc;
       const tourMatch=!(feature360||only360Active)||valid360Url(i.tour360Url);
