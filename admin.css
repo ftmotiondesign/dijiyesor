@@ -553,3 +553,131 @@
   font-size:10.5px;
   line-height:1.4;
 }
+
+
+/* Sponsor reklam gösterim alanı seçimi */
+.sponsor-display-target{
+  margin:16px 0 18px;
+  padding:16px;
+  border:1px solid #dfe7f1;
+  border-radius:16px;
+  background:#f9fbfe;
+}
+.sponsor-display-target-head span{
+  display:block;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.11em;
+  color:#1677ff;
+  margin-bottom:4px;
+}
+.sponsor-display-target-head h3{
+  margin:0 0 4px;
+  font-size:16px;
+  color:#263249;
+}
+.sponsor-display-target-head p{
+  margin:0 0 13px;
+  font-size:11px;
+  color:#768397;
+}
+.sponsor-scope-options{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.sponsor-scope-card{
+  position:relative;
+  min-height:132px;
+  border:1px solid #dfe6ef;
+  border-radius:14px;
+  background:#fff;
+  padding:13px;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  transition:.16s ease;
+}
+.sponsor-scope-card:hover{
+  transform:translateY(-1px);
+  border-color:#b7cef0;
+  box-shadow:0 8px 20px rgba(31,68,116,.07);
+}
+.sponsor-scope-card.active{
+  border-color:#1677ff;
+  background:#f4f8ff;
+  box-shadow:0 0 0 2px rgba(22,119,255,.08);
+}
+.scope-icon{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:#eef3f9;
+  color:#51647d;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.03em;
+  margin-bottom:9px;
+}
+.sponsor-scope-card.active .scope-icon{
+  background:#1677ff;
+  color:#fff;
+}
+.sponsor-scope-card strong{
+  font-size:12px;
+  color:#263249;
+  margin-bottom:5px;
+}
+.sponsor-scope-card small{
+  font-size:10px;
+  line-height:1.42;
+  color:#7b8798;
+  padding-right:26px;
+}
+.sponsor-scope-card b{
+  position:absolute;
+  right:10px;
+  top:10px;
+  border-radius:999px;
+  padding:4px 7px;
+  background:#edf1f5;
+  color:#7a8797;
+  font-size:8px;
+  font-weight:900;
+}
+.sponsor-scope-card.active b{
+  background:#e7f1ff;
+  color:#1677ff;
+}
+.sponsor-sector-target{
+  margin-top:12px;
+  padding:13px;
+  border:1px solid #d9e6f7;
+  border-radius:12px;
+  background:#fff;
+}
+.sponsor-sector-target.hidden{display:none!important}
+.sponsor-sector-target label{
+  display:block;
+  font-size:11px;
+  font-weight:900;
+  color:#334155;
+}
+.sponsor-sector-target select{
+  width:100%;
+  margin-top:6px;
+}
+.sponsor-sector-target>small{
+  display:block;
+  margin-top:6px;
+  color:#7a8797;
+  font-size:9.5px;
+}
+@media(max-width:760px){
+  .sponsor-scope-options{grid-template-columns:1fr}
+  .sponsor-scope-card{min-height:108px}
+}
