@@ -521,3 +521,12 @@
 .auto-import-info span{font-size:10px;line-height:1.45;color:#6f7c90}
 @media(max-width:850px){.auto-import-head{flex-direction:column}.auto-import-grid{grid-template-columns:1fr}.auto-import-actionbar{align-items:stretch;flex-direction:column}.auto-import-actionbar button{width:100%}.auto-import-table-head{display:none}.auto-import-info{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.auto-import-info{grid-template-columns:1fr}.auto-import-footer{align-items:stretch;flex-direction:column}.auto-import-footer button{width:100%}}
+
+.city-admin-head{margin-bottom:16px}.city-admin-head span{font-size:11px;font-weight:900;letter-spacing:.08em;color:#1677ff}.city-admin-head h2{margin:4px 0 6px}.city-admin-head p{margin:0;color:#64748b}
+.city-admin-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.city-admin-form{padding:16px}.city-admin-form label{display:block;font-size:12px;font-weight:800;color:#334155;margin-bottom:12px}.city-admin-form input,.city-admin-form select{width:100%;margin-top:6px}.city-admin-form .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.city-upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-2px 0 14px}.city-upload-row input{display:none}.city-upload-row span{font-size:11px;color:#64748b;font-weight:700}
+.city-banner-preview{position:relative;height:170px;border-radius:16px;overflow:hidden;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#64748b}
+.city-banner-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.city-banner-preview:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,20,40,.65),rgba(8,20,40,.08))}
+.city-banner-preview>div{position:relative;z-index:2;width:100%;padding:20px;color:#fff}.city-banner-preview strong{display:block;font-size:20px}.city-banner-preview small{display:block;margin-top:5px}
+.city-admin-actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin:16px 0}.city-admin-actions .message{margin:0 auto 0 0}.city-admin-info{padding:4px 16px 16px}.city-admin-info p{color:#64748b;line-height:1.6}
+@media(max-width:900px){.city-admin-layout{grid-template-columns:1fr}.city-admin-form .two-col{grid-template-columns:1fr}}
