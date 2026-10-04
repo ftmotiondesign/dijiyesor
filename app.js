@@ -769,21 +769,12 @@ async function initHome(){
       const subMatch=!sc||i.subCategory===sc||i.category===sc;
       const tourMatch=!(feature360||only360Active)||valid360Url(i.tour360Url);
 
-      // Metinle hizmet/firma arandığında seçilen konumu sonuçları elemek için değil,
-      // yakındaki firmaları üste taşımak için kullan. Sadece konum/kategori aramasında
-      // mevcut daraltma davranışı devam eder.
-      const locationPriorityMode=Boolean(q&&(c||d));
-      if((!locationPriorityMode&&(!cityMatch||!districtMatch))||!sectorMatch||!subMatch||!tourMatch)return;
+      // Seçilen şehir/ilçe her zaman kesin filtre olarak uygulanır.
+      // Örn. Adana seçildiyse Çanakkale'deki kurumlar sonuçlara girmez.
+      if(!cityMatch||!districtMatch||!sectorMatch||!subMatch||!tourMatch)return;
 
       let textMatch=!q;
       let score=0;
-
-      if(locationPriorityMode){
-        const sameCity=Boolean(c&&cityMatch);
-        const sameDistrict=Boolean(d&&districtMatch);
-        if(sameDistrict)score+=2200;
-        else if(sameCity)score+=1400;
-      }
 
       if(q){
         const exactName=nameSmart===intent.qSmart;
