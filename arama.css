@@ -1152,3 +1152,47 @@ body.djs-modal-open #resultsHead{
   .city-hero-sponsor-logo{width:30px;height:30px}.city-hero-sponsor-copy small{display:none!important}.city-hero-sponsor a{padding:6px 7px;font-size:9px}
   .city-hero-content{padding-right:38%}
 }
+
+
+/* Popup reklam kapatıldıktan sonra yalnızca arama sonuçları sayfasında kalan geri açma kontrolü */
+.search-sponsor-reopen{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:1200;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid #dbe7ff;
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(15,23,42,.16);
+  padding:9px 13px 9px 9px;
+  cursor:pointer;
+  color:#16213a;
+  font:inherit;
+}
+.search-sponsor-reopen.hidden{display:none!important}
+.search-sponsor-reopen-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#eaf3ff;
+  color:#1473e6;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+.search-sponsor-reopen strong{
+  font-size:12px;
+  font-weight:850;
+  white-space:nowrap;
+}
+.search-sponsor-reopen:hover{transform:translateY(-1px);box-shadow:0 14px 38px rgba(15,23,42,.2)}
+@media(max-width:680px){
+  .search-sponsor-reopen{right:12px;bottom:12px;padding:8px 11px 8px 8px}
+  .search-sponsor-reopen strong{font-size:11px}
+}
