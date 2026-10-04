@@ -387,26 +387,25 @@ async function initHome(){
   const params=new URLSearchParams(location.search);
 
   const locationHero=document.getElementById("locationHero");
-  const locationHeroTitle=document.getElementById("locationHeroTitle");
-  const locationHeroText=document.getElementById("locationHeroText");
   const cityHeroImages={
-    "çanakkale":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Cheval_de_Troie_de_%C3%87anakkale.jpg"
+    "çanakkale":[
+      "https://commons.wikimedia.org/wiki/Special:Redirect/file/CanakkaleTrojanHorse.jpg",
+      "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C3%87anakkale_1915_Bridge.jpg",
+      "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C3%87anakkale_Martyrs%27_Memorial_viewed_from_the_Dardanelles_Strait.jpg"
+    ]
   };
   const updateLocationHero=()=>{
     if(!locationHero)return;
     const cityName=String(city.value||"").trim();
-    const districtName=String(district.value||"").trim();
-    const imageUrl=cityHeroImages[norm(cityName)]||"";
-    if(!cityName||!imageUrl){
+    const images=cityHeroImages[norm(cityName)]||[];
+    if(!cityName||!images.length){
       locationHero.classList.add("hidden");
-      locationHero.style.backgroundImage="";
+      locationHero.querySelectorAll(".location-photo").forEach(el=>el.style.backgroundImage="");
       return;
     }
-    locationHero.style.backgroundImage='url("'+imageUrl+'")';
-    locationHeroTitle.textContent=districtName ? cityName+" / "+districtName : cityName;
-    locationHeroText.textContent=districtName
-      ? districtName+" bölgesindeki firma, kurum ve hizmetleri keşfedin."
-      : cityName+" genelindeki firma, kurum ve hizmetleri keşfedin.";
+    locationHero.querySelectorAll(".location-photo").forEach((el,index)=>{
+      el.style.backgroundImage='url("'+(images[index]||images[0])+'")';
+    });
     locationHero.classList.remove("hidden");
   };
   const force360Only=window.DJS_FORCE_360_ONLY===true;
