@@ -427,18 +427,17 @@ async function updateCityHero(){
     return;
   }
   const cfg=await loadCityHeroConfig(city);
-  let src=String(cfg.imageUrl||"").trim();
-  if(!src)src=await commonsCityImage(city);
+  const src=String(cfg.imageUrl||"").trim();
   if(token!==cityHeroRequestToken)return;
-  if(!src){
-    hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");return;
+  if(cfg.active!==true||!src){
+    hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");img.removeAttribute("src");return;
   }
   img.src=src;
   img.alt=city+" şehir görünümü";
   title.textContent=String(cfg.title||"").trim()||city+"’de keşfet";
   subtitle.textContent=String(cfg.subtitle||"").trim()||(district?city+" / "+district+" bölgesindeki işletmeleri incele":city+" bölgesindeki işletmeleri incele");
-  hero.classList.toggle("hidden",cfg.active===false);
-  hero.setAttribute("aria-hidden",cfg.active===false?"true":"false");
+  hero.classList.remove("hidden");
+  hero.setAttribute("aria-hidden","false");
   const showSponsor=sponsorDateActive(cfg);
   if(sponsor){
     sponsor.classList.toggle("hidden",!showSponsor);
