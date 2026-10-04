@@ -13,6 +13,71 @@
   const db=firebase.firestore();
   let queue=[];
 
+  const fallbackCities=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+
+  async function loadQuickImportCities(){
+    if(!cityInput||!districtInput)return;
+    cityInput.innerHTML='<option value="">İller yükleniyor...</option>';
+    districtInput.innerHTML='<option value="">Tüm İlçeler</option>';
+    districtInput.disabled=true;
+    try{
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
+      const j=await r.json();
+      const rows=(j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
+      cityInput.innerHTML='<option value="">İl seçin</option>';
+      rows.forEach(city=>{
+        const o=document.createElement("option");
+        o.value=city.name;
+        o.textContent=city.name;
+        o.dataset.id=city.id;
+        cityInput.appendChild(o);
+      });
+    }catch(_){
+      cityInput.innerHTML='<option value="">İl seçin</option>';
+      fallbackCities.forEach(name=>{
+        const o=document.createElement("option");
+        o.value=name;
+        o.textContent=name;
+        cityInput.appendChild(o);
+      });
+    }
+  }
+
+  async function loadQuickImportDistricts(){
+    if(!cityInput||!districtInput)return;
+    districtInput.disabled=true;
+    districtInput.innerHTML='<option value="">İlçeler yükleniyor...</option>';
+    const selected=cityInput.options[cityInput.selectedIndex];
+    const provinceId=selected?.dataset?.id;
+    if(!cityInput.value){
+      districtInput.innerHTML='<option value="">Tüm İlçeler</option>';
+      return;
+    }
+    if(!provinceId){
+      districtInput.innerHTML='<option value="">İlçe bilgisi yüklenemedi</option>';
+      districtInput.disabled=false;
+      return;
+    }
+    try{
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(provinceId)+"/districts?fields=id,name&limit=100");
+      const j=await r.json();
+      districtInput.innerHTML='<option value="">Tüm İlçeler</option>';
+      (j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr")).forEach(d=>{
+        const o=document.createElement("option");
+        o.value=d.name;
+        o.textContent=d.name;
+        districtInput.appendChild(o);
+      });
+      districtInput.disabled=false;
+    }catch(_){
+      districtInput.innerHTML='<option value="">İlçeler yüklenemedi</option>';
+      districtInput.disabled=false;
+    }
+  }
+
+  loadQuickImportCities();
+  cityInput?.addEventListener("change",loadQuickImportDistricts);
+
   const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").replace(/\s+/g," ").trim();
   const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 
