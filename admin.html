@@ -622,25 +622,54 @@ Gerçek mekanda hizmet"></textarea>
       <label>Instagram<input id="editInstagram"></label>
       <label>Açıklama<textarea id="editDescription" rows="4"></textarea></label>
       <div class="form-grid two">
-        <label>Logo URL<input id="editLogoUrl"></label>
-        <label>Firma Görseli URL<input id="editCoverUrl" placeholder="https://..."></label>
+        <label>Logo URL<input id="editLogoUrl" placeholder="https://..."></label>
+        <label>Firma Görseli / Banner URL<input id="editCoverUrl" placeholder="https://..."></label>
       </div>
+
+      <div class="firm-image-upload">
+        <div class="firm-image-preview" id="firmLogoPreview"><span>Logo yok</span></div>
+        <div class="firm-image-upload-copy">
+          <strong>Firma Logosu</strong>
+          <small>JPG, PNG veya WEBP dosyasını doğrudan bilgisayardan yükleyebilirsin.</small>
+          <input id="editLogoFile" type="file" accept="image/*">
+          <div class="firm-image-upload-actions">
+            <button id="chooseLogoFileBtn" class="secondary" type="button">Bilgisayardan Logo Seç</button>
+            <button id="clearLogoBtn" class="secondary" type="button">Logoyu Kaldır</button>
+          </div>
+          <div id="logoUploadMessage" class="message hidden"></div>
+        </div>
+      </div>
+
       <div class="firm-image-upload">
         <div class="firm-image-preview" id="firmImagePreview"><span>Görsel yok</span></div>
         <div class="firm-image-upload-copy">
-          <strong>Firma Görseli</strong>
-          <small>Bilgisayardan bir fotoğraf seç. Kaydedildiğinde arama kartının sağında ve firma sayfasında kullanılır.</small>
+          <strong>Üst Banner / Firma Görseli</strong>
+          <small>JPG, PNG veya WEBP dosyasını doğrudan bilgisayardan yükle.</small>
           <input id="editCoverFile" type="file" accept="image/*">
           <div class="firm-image-upload-actions">
-            <button id="chooseCoverFileBtn" class="secondary" type="button">Bilgisayardan Resim Seç</button>
+            <button id="chooseCoverFileBtn" class="secondary" type="button">Bilgisayardan Görsel Seç</button>
             <button id="clearCoverImageBtn" class="secondary" type="button">Görseli Kaldır</button>
           </div>
           <div id="coverUploadMessage" class="message hidden"></div>
         </div>
       </div>
+
       <div class="form-grid two">
         <label>360° Tur URL<input id="editTourUrl"></label>
-        <label>Tanıtım Video URL<input id="editVideoUrl"></label>
+        <label>Tanıtım Video URL<input id="editVideoUrl" placeholder="Video yüklenince otomatik dolar"></label>
+      </div>
+      <div class="firm-image-upload">
+        <div class="firm-image-preview" id="firmVideoPreview"><span>Video yok</span></div>
+        <div class="firm-image-upload-copy">
+          <strong>Tanıtım Videosu</strong>
+          <small>MP4, MOV veya WEBM videosunu doğrudan bilgisayardan yükleyebilirsin.</small>
+          <input id="editVideoFile" type="file" accept="video/mp4,video/quicktime,video/webm">
+          <div class="firm-image-upload-actions">
+            <button id="chooseVideoFileBtn" class="secondary" type="button">Bilgisayardan Video Seç</button>
+            <button id="clearVideoBtn" class="secondary" type="button">Videoyu Kaldır</button>
+          </div>
+          <div id="videoUploadMessage" class="message hidden"></div>
+        </div>
       </div>
       <div class="admin-checks">
         <label><input id="editVip" type="checkbox"><span>VIP firma</span></label>
