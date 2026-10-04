@@ -60,7 +60,7 @@ function setView(name,opts={}){
   }
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"auto-firm-import":["Otomatik Firma Topla","Şehir ve kategori seçerek firmaları taslak olarak içe aktar"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -1741,3 +1741,78 @@ document.addEventListener("DOMContentLoaded",()=>{
   const obs=new MutationObserver(removeLegacyUploadNotice);
   obs.observe(document.body,{childList:true,subtree:true});
 });
+
+
+/* Otomatik Firma Topla - arayüz hazırlığı */
+(function initAutoFirmImport(){
+  const city=document.getElementById("autoImportCity");
+  const district=document.getElementById("autoImportDistrict");
+  const category=document.getElementById("autoImportCategory");
+  const allDistricts=document.getElementById("autoImportAllDistricts");
+  const searchBtn=document.getElementById("autoImportSearchBtn");
+  const message=document.getElementById("autoImportMessage");
+  const preview=document.getElementById("autoImportQueryPreview");
+  if(!city||!district||!category)return;
+
+  const categoryLabels={
+    surucu:"Sürücü Kursu",kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",
+    yurt:"Öğrenci Yurdu",oto_servis:"Oto Servis",restoran:"Restoran",
+    dis_klinigi:"Diş Kliniği",emlak_ofisi:"Emlak Ofisi",otel:"Otel / Konaklama"
+  };
+
+  async function loadCities(){
+    city.innerHTML='<option value="">İller yükleniyor...</option>';
+    try{
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+      const j=await r.json();
+      city.innerHTML='<option value="">İl seç</option>';
+      (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(x=>{
+        const o=document.createElement("option");
+        o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
+      });
+    }catch(_){ city.innerHTML='<option value="">İl seç</option>'; }
+    updatePreview();
+  }
+
+  async function loadDistricts(){
+    district.disabled=true;
+    district.innerHTML='<option value="">İlçe yükleniyor...</option>';
+    const id=city.options[city.selectedIndex]?.dataset?.id;
+    if(!id){district.innerHTML='<option value="">Önce il seç</option>';updatePreview();return;}
+    try{
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");
+      const j=await r.json();
+      district.innerHTML='<option value="">Tüm İlçeler</option>';
+      (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(x=>{
+        const o=document.createElement("option");o.value=x.name;o.textContent=x.name;district.appendChild(o);
+      });
+      district.disabled=Boolean(allDistricts?.checked);
+    }catch(_){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=false;}
+    updatePreview();
+  }
+
+  function updatePreview(){
+    const parts=[city.value||"İl",allDistricts?.checked?"Tüm İlçeler":(district.value||"İlçe"),categoryLabels[category.value]||category.options[category.selectedIndex]?.text].filter(Boolean);
+    preview.textContent=parts.join(" / ");
+  }
+
+  city.addEventListener("change",loadDistricts);
+  district.addEventListener("change",updatePreview);
+  category.addEventListener("change",updatePreview);
+  allDistricts?.addEventListener("change",()=>{
+    district.disabled=allDistricts.checked||!city.value;
+    updatePreview();
+  });
+
+  searchBtn?.addEventListener("click",()=>{
+    message.classList.remove("hidden","success");
+    message.classList.add("error");
+    if(!city.value){
+      message.textContent="Önce bir il seç.";
+      return;
+    }
+    message.textContent="Arayüz hazır. Sıradaki adım Google Places API bağlantısını kurmak. Bağlantı tamamlandığında bu buton gerçek firmaları otomatik getirecek.";
+  });
+
+  loadCities();
+})();
