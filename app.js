@@ -591,10 +591,19 @@ async function initHome(){
     }catch(_){}
     setTimeout(()=>{
       const notice=document.getElementById("locationNotice");
+      const firstCard=document.querySelector("#companyGrid .result-card");
       const grid=document.getElementById("companyGrid");
-      const target=(!city.value && notice && !notice.classList.contains("hidden")) ? notice : grid;
-      if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
-    },120);
+      const target=(!city.value && notice && !notice.classList.contains("hidden"))
+        ? notice
+        : (firstCard || grid);
+      if(target){
+        const topbar=document.querySelector(".top");
+        const topbarH=topbar?.offsetHeight||0;
+        const extra=window.innerWidth<=700 ? 14 : 22;
+        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-extra;
+        window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+      }
+    },140);
   };
 
   btn.addEventListener("click",submitSearch);
