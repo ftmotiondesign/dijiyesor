@@ -37,7 +37,7 @@
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
       <button class="nav-item" data-view="categories">Kategori Yönetimi</button>
-      <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">4</b></button>
+      <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">5</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
       <button class="nav-item" data-view="settings">Ayarlar</button>
@@ -335,15 +335,88 @@ Gerçek mekanda hizmet"></textarea>
           <div class="revenue-arrow">›</div>
         </button>
 
+        <button type="button" class="revenue-card" data-go="sponsor-ads">
+          <div class="revenue-icon">AD</div>
+          <div class="revenue-copy">
+            <span>SPONSOR</span>
+            <h3>Sponsor Reklam Alanları</h3>
+            <p>İlk arama popup reklamını ve ileride eklenecek diğer sponsor alanlarını yönet.</p>
+          </div>
+          <div class="revenue-arrow">›</div>
+        </button>
+
         <div class="revenue-card revenue-card-placeholder">
           <div class="revenue-icon">＋</div>
           <div class="revenue-copy">
             <span>YENİ MODÜL</span>
             <h3>Yeni gelir alanı</h3>
-            <p>İleride sponsor paket, web sitesi, reklam çekimi veya başka bir hizmet buraya eklenebilir.</p>
+            <p>İleride yeni gelir alanlarını buraya ekleyebiliriz.</p>
           </div>
         </div>
       </div>
+    </section>
+
+    <section class="view" data-panel-view="sponsor-ads">
+      <button type="button" class="revenue-back" data-go="revenue">← Gelir Alanları</button>
+      <div class="revenue-head">
+        <div>
+          <span>SPONSOR REKLAM ALANLARI</span>
+          <h2>Ana Sayfa / İlk Arama Popup</h2>
+          <p>Kullanıcı ilk aramasını yaptığında ve konum seçtiğinde, seçilen bölgedeki sponsor firma popup olarak gösterilir. Aynı oturumda tekrar açılmaz.</p>
+        </div>
+      </div>
+
+      <section class="card sponsor-popup-editor">
+        <div class="card-head"><div><span>POPUP REKLAM</span><h2>Yeni reklam oluştur / düzenle</h2></div></div>
+
+        <div class="form-grid two">
+          <label>Sponsor firma
+            <select id="sponsorPopupFirm"><option value="">Firma seçin</option></select>
+          </label>
+          <label>Durum
+            <select id="sponsorPopupActive"><option value="true">Aktif</option><option value="false">Pasif</option></select>
+          </label>
+        </div>
+
+        <div class="form-grid two">
+          <label>İl
+            <select id="sponsorPopupCity"><option value="">İl seçin</option></select>
+          </label>
+          <label>İlçe
+            <select id="sponsorPopupDistrict" disabled><option value="">Tüm İlçeler</option></select>
+          </label>
+        </div>
+
+        <label>Başlık<input id="sponsorPopupTitle" placeholder="Örn. Çanakkale’de öne çıkan sürücü kursu"></label>
+        <label>Açıklama<textarea id="sponsorPopupText" rows="3" placeholder="Kısa reklam açıklaması"></textarea></label>
+
+        <div class="form-grid two">
+          <label>Medya türü
+            <select id="sponsorPopupMediaType"><option value="image">Görsel</option><option value="video">Video</option></select>
+          </label>
+          <label>Buton yazısı<input id="sponsorPopupButtonText" placeholder="Firmayı İncele"></label>
+        </div>
+
+        <label>Görsel / Video URL<input id="sponsorPopupMediaUrl" placeholder="https://..."></label>
+        <div class="sponsor-media-upload">
+          <input id="sponsorPopupMediaFile" type="file" accept="image/*,video/*">
+          <button id="sponsorPopupUploadBtn" type="button" class="secondary">Bilgisayardan Görsel / Video Yükle</button>
+          <span id="sponsorPopupUploadMessage"></span>
+        </div>
+
+        <label>Buton bağlantısı<input id="sponsorPopupTargetUrl" placeholder="Boş bırakılırsa firma sayfası açılır"></label>
+
+        <div id="sponsorPopupMessage" class="message hidden"></div>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button id="saveSponsorPopupBtn" type="button" class="primary">Kaydet</button>
+          <button id="clearSponsorPopupBtn" type="button" class="secondary">Formu Temizle</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><div><span>AKTİF / KAYITLI REKLAMLAR</span><h2>İlk arama popup reklamları</h2></div></div>
+        <div id="sponsorPopupList" class="sponsor-popup-list"></div>
+      </section>
     </section>
 
     <section class="view qr-full-view" data-panel-view="qr">
