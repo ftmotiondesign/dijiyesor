@@ -824,27 +824,78 @@ button,input,select{font:inherit}
 }
 
 
-/* Mobilde 360° filtresini sürekli görünür tut */
+
+
+/* Arama sonuçları başlığını ve 360° filtresini kaydırırken sabit tut */
+#resultsHead{
+  position:sticky;
+  top:68px;
+  z-index:1200;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  padding:10px 2px;
+  margin-top:18px;
+  margin-bottom:14px;
+  border-bottom:1px solid #edf1f6;
+}
+#resultsHead .results-head-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+#resultsHead .only360-btn-compact{
+  position:static!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:auto!important;
+  width:auto!important;
+  min-height:34px;
+  box-shadow:none;
+}
 @media(max-width:620px){
-  .only360-btn-compact{
-    position:fixed!important;
-    right:14px;
-    bottom:18px;
-    z-index:1450;
-    width:auto!important;
-    min-height:42px;
-    padding:6px 8px 6px 6px;
-    border-radius:999px;
-    background:#fff;
-    border:1px solid #cfe0f6;
-    box-shadow:0 10px 28px rgba(23,55,96,.18);
+  #resultsHead{
+    top:58px;
+    margin-top:14px;
+    padding:8px 2px;
+    align-items:center!important;
   }
-  .only360-btn-compact .only360-copy{display:none!important}
-  .only360-btn-compact .only360-icon{min-width:34px;height:28px}
-  .only360-btn-compact .only360-switch{display:inline-block}
-  .only360-btn-compact.active{
-    background:#f2f7ff;
-    border-color:#8dbcf7;
+  #resultsHead>div:first-child{
+    min-width:0;
   }
-  .results-head-actions{min-width:0}
+  #resultsHead h1{
+    font-size:18px;
+    margin-bottom:2px;
+    white-space:nowrap;
+  }
+  #resultsHead p{
+    font-size:10.5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:50vw;
+  }
+  #resultsHead .results-head-actions{
+    gap:6px;
+    flex:0 0 auto;
+  }
+  #resultsHead .count{
+    display:none;
+  }
+  #resultsHead .only360-btn-compact{
+    min-height:34px;
+    padding:4px 7px 4px 5px;
+  }
+  #resultsHead .only360-btn-compact .only360-copy{
+    display:block!important;
+  }
+  #resultsHead .only360-btn-compact .only360-copy strong{
+    font-size:10px;
+  }
+  #resultsHead .only360-btn-compact .only360-icon{
+    min-width:30px;
+    height:24px;
+    font-size:9px;
+  }
 }
