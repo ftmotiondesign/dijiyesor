@@ -16,6 +16,7 @@ let visibleMemberIds=[];
 const selectedFirmIds=new Set();
 let visibleFirmIds=[];
 let quickImportQueue=[];
+let editingCoverUrls=[];
 let googlePlaceResults=[];
 const selectedGooglePlaceIds=new Set();
 let googleMapsLoadPromise=null;
@@ -421,6 +422,8 @@ function openFirmModal(id){
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
   $("editLogoUrl").value=f.logoUrl||"";$("editCoverUrl").value=f.coverUrl||"";$("editTourUrl").value=f.tour360Url||f.virtualTourUrl||f.tour360||"";$("editVideoUrl").value=f.videoUrl||f.youtubeUrl||"";
+  editingCoverUrls=Array.isArray(f.coverUrls)?f.coverUrls.filter(Boolean):[];
+  renderCoverSliderPreview();
   updateFirmLogoPreview(f.logoUrl||"");
   updateFirmImagePreview(f.coverUrl||"");
   updateFirmVideoPreview(f.videoUrl||f.youtubeUrl||"");
@@ -467,6 +470,20 @@ function updateFirmLogoPreview(url){
   const value=String(url||"").trim();
   box.innerHTML=value?'<img src="'+esc(value)+'" alt="Firma logosu" style="object-fit:contain;background:#fff">':'<span>Logo yok</span>';
 }
+function renderCoverSliderPreview(){
+  const box=$("coverSliderPreview");
+  if(!box)return;
+  box.innerHTML=editingCoverUrls.length
+    ? editingCoverUrls.map((url,index)=>'<div class="cover-slider-thumb"><img src="'+esc(url)+'" alt="Slider görseli"><button type="button" data-remove-cover-slide="'+index+'" aria-label="Görseli kaldır">×</button><span>'+(index+1)+'</span></div>').join("")
+    : '<div class="cover-slider-empty">Henüz kaydırmalı görsel eklenmedi.</div>';
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-remove-cover-slide]");
+  if(!b)return;
+  editingCoverUrls.splice(Number(b.dataset.removeCoverSlide),1);
+  renderCoverSliderPreview();
+});
+
 function updateFirmImagePreview(url){
   const box=$("firmImagePreview"); if(!box)return;
   const value=String(url||"").trim();
@@ -522,6 +539,33 @@ $("editLogoFile")?.addEventListener("change",async e=>{
 });
 
 $("chooseCoverFileBtn")?.addEventListener("click",()=>$("editCoverFile")?.click());
+$("chooseCoverSliderFilesBtn")?.addEventListener("click",()=>$("editCoverSliderFiles")?.click());
+$("clearCoverSliderBtn")?.addEventListener("click",()=>{
+  editingCoverUrls=[];
+  if($("editCoverSliderFiles"))$("editCoverSliderFiles").value="";
+  renderCoverSliderPreview();
+  const msg=$("coverSliderUploadMessage");
+  if(msg){msg.className="message success";msg.textContent="Kaydırmalı görseller kaldırıldı. Kaydet'e basın.";}
+});
+$("editCoverSliderFiles")?.addEventListener("change",async e=>{
+  const files=[...(e.target.files||[])].slice(0,6);
+  if(!files.length)return;
+  const msg=$("coverSliderUploadMessage");
+  try{
+    if(msg){msg.className="message";msg.textContent="Görseller yükleniyor...";}
+    const uploaded=[];
+    for(const file of files){
+      uploaded.push(await uploadFirmMedia(file,"image","coverSliderUploadMessage"));
+    }
+    editingCoverUrls=[...editingCoverUrls,...uploaded].slice(0,6);
+    renderCoverSliderPreview();
+    if(msg){msg.className="message success";msg.textContent=uploaded.length+" görsel yüklendi ✓ Kaydet'e basın.";}
+  }catch(err){
+    if(msg){msg.className="message error";msg.textContent=err?.message||"Görseller yüklenemedi.";}
+  }finally{
+    e.target.value="";
+  }
+});
 $("clearCoverImageBtn")?.addEventListener("click",()=>{$("editCoverUrl").value="";$("editCoverFile").value="";updateFirmImagePreview("");$("coverUploadMessage").className="message success";$("coverUploadMessage").textContent="Görsel kaldırıldı. Kaydet'e basın.";});
 $("editCoverFile")?.addEventListener("change",async e=>{
   const file=e.target.files?.[0]; if(!file)return; const msg=$("coverUploadMessage");
@@ -542,7 +586,7 @@ $("newFirmBtn").addEventListener("click",()=>openFirmModal());
 
 $("firmForm").addEventListener("submit",async e=>{
   e.preventDefault();const id=$("firmId").value;const msg=$("firmFormMessage");
-  const data={name:$("editName").value.trim(),status:$("editStatus").value,mainCategory:$("editMainCategory").value,subCategory:$("editSubCategory").value.trim(),category:$("editSubCategory").value.trim()||$("editMainCategory").value,city:$("editCity").value.trim(),district:$("editDistrict").value.trim(),phone:$("editPhone").value.trim(),address:$("editAddress").value.trim(),whatsapp:$("editWhatsapp").value.trim(),website:$("editWebsite").value.trim(),instagram:$("editInstagram").value.trim(),description:$("editDescription").value.trim(),logoUrl:$("editLogoUrl").value.trim(),coverUrl:$("editCoverUrl").value.trim(),tour360Url:$("editTourUrl").value.trim(),videoUrl:$("editVideoUrl").value.trim(),has360Tour:Boolean($("editTourUrl").value.trim()),vip:$("editVip").checked,sponsored:$("editSponsored").checked,updatedAt:new Date().toISOString()};
+  const data={name:$("editName").value.trim(),status:$("editStatus").value,mainCategory:$("editMainCategory").value,subCategory:$("editSubCategory").value.trim(),category:$("editSubCategory").value.trim()||$("editMainCategory").value,city:$("editCity").value.trim(),district:$("editDistrict").value.trim(),phone:$("editPhone").value.trim(),address:$("editAddress").value.trim(),whatsapp:$("editWhatsapp").value.trim(),website:$("editWebsite").value.trim(),instagram:$("editInstagram").value.trim(),description:$("editDescription").value.trim(),logoUrl:$("editLogoUrl").value.trim(),coverUrl:$("editCoverUrl").value.trim(),coverUrls:[...editingCoverUrls],tour360Url:$("editTourUrl").value.trim(),videoUrl:$("editVideoUrl").value.trim(),has360Tour:Boolean($("editTourUrl").value.trim()),vip:$("editVip").checked,sponsored:$("editSponsored").checked,updatedAt:new Date().toISOString()};
   try{
     if(id)await db.collection("institutions").doc(id).set(data,{merge:true});
     else await db.collection("institutions").add({...data,createdAt:new Date().toISOString()});
@@ -857,7 +901,7 @@ function openCampaignModal(id){
 }
 $("newCampaignBtn").addEventListener("click",()=>openCampaignModal(""));
 function loadCampaignFirmData(f){
-  if(!f)return;
+  if(!f){editingCoverUrls=[];renderCoverSliderPreview();return;}
   $("campaignBadge").value=f.campaignBadge||"Kampanya";
   $("campaignEnd").value=String(f.campaignEnd||"").slice(0,10);
   $("campaignTitle").value=f.campaignTitle||"";
