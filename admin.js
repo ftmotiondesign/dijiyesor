@@ -1722,3 +1722,22 @@ $("tourLeadDetailDelete")?.addEventListener("click",e=>{
   fake.click();
   fake.remove();
 });
+
+
+function removeLegacyUploadNotice(){
+  const needles=[
+    "Şimdilik bilgisayardan doğrudan yükleme kapalı",
+    "Görsel URL'sini ilgili alana yapıştır",
+    "Görsel URL’sini ilgili alana yapıştır"
+  ];
+  document.querySelectorAll("body *").forEach(el=>{
+    if(el.children.length) return;
+    const t=String(el.textContent||"").trim();
+    if(needles.some(n=>t.includes(n))) el.remove();
+  });
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  removeLegacyUploadNotice();
+  const obs=new MutationObserver(removeLegacyUploadNotice);
+  obs.observe(document.body,{childList:true,subtree:true});
+});
