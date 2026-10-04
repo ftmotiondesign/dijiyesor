@@ -10,7 +10,7 @@ const CLOUDINARY_CLOUD_NAME="okefpzsy";
 const CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
-let firms=[],applications=[],members=[],tourLeads=[],campaignFilter="all";
+let firms=[],applications=[],members=[],tourLeads=[],campaignFilter="all",managedCategoryDocs=[];
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
 const selectedFirmIds=new Set();
@@ -47,7 +47,7 @@ $("logoutBtn").addEventListener("click",()=>auth.signOut());
 function setView(name){
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -151,7 +151,7 @@ async function addKeywordToDijiyesor(keyword,sector,button){
 }
 
 async function loadAll(){
-  await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads()]);
+  await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads(),loadManagedCategories()]);
   const existingAppIds=new Set(tourLeads.map(x=>String(x.applicationId||"")).filter(Boolean));
   const application360=applications
     .filter(a=>Boolean(a.wants360Tour) && !existingAppIds.has(String(a.id)))
@@ -174,6 +174,92 @@ async function loadAll(){
     .sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
   renderAll();
 }
+
+const defaultSubcategories={
+  egitim:{kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",surucu:"Sürücü Kursu",ozel_ders:"Özel Ders",dil_kursu:"Dil Kursu",etut:"Etüt Merkezi",ozel_okul:"Özel Okul",yurt:"Öğrenci Yurdu"},
+  otomotiv:{oto_servis:"Oto Servis",kaporta_boya:"Kaporta & Boya",oto_elektrik:"Oto Elektrik",lastik_jant:"Lastik & Jant",oto_yikama:"Oto Yıkama",ekspertiz:"Ekspertiz",galeri:"Oto Galeri",rentacar:"Rent a Car",yedek_parca:"Yedek Parça",motosiklet:"Motosiklet"},
+  yemeicme:{restoran:"Restoran",kafe:"Kafe",fastfood:"Fast Food",pastane:"Pastane",pizza:"Pizza",doner:"Döner",pide_lahmacun:"Pide & Lahmacun",catering:"Catering",ev_yemekleri:"Ev Yemekleri"},
+  saglikguzellik:{dis_klinigi:"Diş Kliniği",klinik:"Klinik",psikolog:"Psikolog",diyetisyen:"Diyetisyen",fizyoterapi:"Fizyoterapi",guzellik:"Güzellik Merkezi",kuafor:"Kuaför",berber:"Berber",spor:"Spor Merkezi"},
+  evyapi:{mobilya:"Mobilya",dekorasyon:"Dekorasyon",insaat:"İnşaat",elektrikci:"Elektrikçi",tesisatci:"Tesisatçı",teknik_servis:"Teknik Servis",klima:"Klima",cam_balkon:"Cam Balkon",temizlik:"Temizlik"},
+  emlak:{emlak_ofisi:"Emlak Ofisi",konut:"Konut",arsa:"Arsa",ticari:"Ticari Gayrimenkul",gunluk_kiralik:"Günlük Kiralık"},
+  turizm:{otel:"Otel",pansiyon:"Pansiyon",apart:"Apart",bungalov:"Bungalov",seyahat:"Seyahat Acentesi",kamp:"Kamp"},
+  organizasyonmedya:{dugun_salonu:"Düğün Salonu",organizasyon:"Organizasyon",fotograf:"Fotoğrafçı",video:"Video Prodüksiyon",drone:"Drone Çekimi",gelinlik:"Gelinlik",cicekci:"Çiçekçi",reklam:"Reklam Ajansı"},
+  tasimacilik:{nakliyat:"Nakliyat",kurye:"Kurye",sehirici:"Şehir İçi Taşımacılık",depolama:"Depolama"},
+  profesyonel:{hukuk:"Hukuk",muhasebe:"Muhasebe",web:"Web Tasarım",sosyal_medya:"Sosyal Medya",teknoloji:"Teknoloji",bilgisayar:"Bilgisayar",danismanlik:"Danışmanlık",veteriner:"Veteriner",tarim:"Tarım"},
+  alisveris:{giyim:"Giyim",ayakkabi:"Ayakkabı",market:"Market",elektronik:"Elektronik",kirtasiye:"Kırtasiye",petshop:"Pet Shop",zuccaciye:"Züccaciye",esnaf:"Yerel Esnaf"},
+  diger:{diger:"Diğer"}
+};
+const defaultCategoryDescriptions={
+  egitim:"Kurs, sürücü kursu, anaokulu, yurt",otomotiv:"Servis, ekspertiz, galeri, kiralama",
+  yemeicme:"Restoran, kafe, pizza, döner",saglikguzellik:"Diş, psikolog, kuaför, spor",
+  evyapi:"Mobilya, dekorasyon, teknik servis",emlak:"Konut, arsa, emlak ofisi",
+  turizm:"Otel, pansiyon, apart",organizasyonmedya:"Fotoğraf, video, organizasyon",
+  tasimacilik:"Nakliyat, kurye, teslimat",profesyonel:"Hukuk, muhasebe, web, danışmanlık",
+  alisveris:"Market, giyim, elektronik, pet shop",diger:"Diğer kurum ve hizmetler"
+};
+function categoryKey(v){
+  return String(v||"").toLocaleLowerCase("tr-TR")
+    .replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"").slice(0,48);
+}
+async function loadManagedCategories(){
+  try{
+    const snap=await db.collection("siteCategories").get();
+    managedCategoryDocs=snap.docs.map(d=>({key:d.id,...d.data()}));
+  }catch(_){managedCategoryDocs=[]}
+  renderCategoryAdmin();
+}
+function mergedCategoryRows(){
+  const map={};
+  Object.entries(categories).forEach(([key,label])=>{
+    map[key]={key,label,description:defaultCategoryDescriptions[key]||"",subcategories:{...(defaultSubcategories[key]||{})},isDefault:true};
+  });
+  managedCategoryDocs.forEach(doc=>{
+    if(doc.active===false){delete map[doc.key];return}
+    const base=map[doc.key]||{key:doc.key,label:doc.label||doc.key,description:"",subcategories:{},isDefault:false};
+    map[doc.key]={...base,...doc,label:doc.label||base.label,description:doc.description??base.description,subcategories:{...base.subcategories,...(doc.subcategories||{})}};
+  });
+  return Object.values(map).sort((a,b)=>String(a.label).localeCompare(String(b.label),"tr"));
+}
+function renderCategoryAdmin(){
+  const host=$("categoryAdminList"); if(!host)return;
+  const rows=mergedCategoryRows();
+  host.innerHTML=rows.map(row=>{
+    const subs=Object.entries(row.subcategories||{}).sort((a,b)=>a[1].localeCompare(b[1],"tr"));
+    return '<article class="category-admin-card" data-category-card="'+esc(row.key)+'">'+
+      '<div class="category-admin-card-head"><div><strong>'+esc(row.label)+'</strong><small>'+esc(row.description||"Açıklama yok")+'</small></div><span>'+subs.length+' alt kategori</span></div>'+
+      '<div class="category-admin-subs">'+(subs.length?subs.map(([k,v])=>'<span>'+esc(v)+'</span>').join(""):'<em>Henüz alt kategori yok.</em>')+'</div>'+
+      '<div class="category-admin-addsub"><input data-sub-name="'+esc(row.key)+'" placeholder="Yeni alt kategori adı"><input data-sub-key="'+esc(row.key)+'" placeholder="Anahtar (otomatik)"><button type="button" class="secondary" data-add-subcategory="'+esc(row.key)+'">+ Alt Kategori Ekle</button></div>'+
+    '</article>';
+  }).join("");
+}
+$("addCategoryBtn")?.addEventListener("click",async()=>{
+  const name=$("categoryNameInput")?.value.trim(),desc=$("categoryDescInput")?.value.trim();
+  const key=categoryKey($("categoryKeyInput")?.value||name);
+  const msg=$("categoryAdminMessage");
+  if(!name||!key){msg.className="message error";msg.textContent="Kategori adı girin.";return}
+  try{
+    await db.collection("siteCategories").doc(key).set({label:name,description:desc,active:true,subcategories:{},updatedAt:new Date().toISOString()},{merge:true});
+    msg.className="message success";msg.textContent="Kategori eklendi.";
+    $("categoryNameInput").value="";$("categoryDescInput").value="";$("categoryKeyInput").value="";
+    await loadManagedCategories();
+  }catch(e){msg.className="message error";msg.textContent="Kategori eklenemedi: "+(e.message||"")}
+});
+document.addEventListener("click",async e=>{
+  const btn=e.target.closest("[data-add-subcategory]"); if(!btn)return;
+  const key=btn.dataset.addSubcategory;
+  const name=document.querySelector('[data-sub-name="'+CSS.escape(key)+'"]')?.value.trim()||"";
+  const keyInput=document.querySelector('[data-sub-key="'+CSS.escape(key)+'"]')?.value.trim()||"";
+  const subKey=categoryKey(keyInput||name);
+  if(!name||!subKey)return;
+  const existing=managedCategoryDocs.find(x=>x.key===key);
+  const currentSubs={...(existing?.subcategories||{})};
+  currentSubs[subKey]=name;
+  const baseLabel=categories[key]||mergedCategoryRows().find(x=>x.key===key)?.label||key;
+  await db.collection("siteCategories").doc(key).set({label:existing?.label||baseLabel,active:true,subcategories:currentSubs,updatedAt:new Date().toISOString()},{merge:true});
+  await loadManagedCategories();
+});
+
 async function loadFirms(){
   const snap=await db.collection("institutions").get();
   firms=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
