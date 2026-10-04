@@ -606,20 +606,26 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
       const end=new Date(x.searchPopupEndDate+"T23:59:59");
       if(!Number.isNaN(end.getTime())&&Date.now()>end.getTime())return false;
     }
-    const isAllTurkey=String(x.searchPopupCity||"")==="__ALL__";
-    const adCity=norm(x.searchPopupCity||x.city),adDistrict=norm(x.searchPopupDistrict);
+    // Reklam hedefleme:
+    // İl + ilçe: yalnız o ilçe
+    // Yalnız il: ilin tüm ilçeleri
+    // İl boş veya "__ALL__": Tüm Türkiye
+    const popupCityRaw=String(x.searchPopupCity||"").trim();
+    const isAllTurkey=!popupCityRaw || popupCityRaw==="__ALL__";
+    const adCity=norm(popupCityRaw),adDistrict=normDistrict(x.searchPopupDistrict);
     if(!isAllTurkey){
       if(!cityValue)return false;
-      if(adCity&&adCity!==nc)return false;
-      if(adDistrict&&(!nd||adDistrict!==nd))return false;
+      if(adCity!==nc)return false;
+      if(adDistrict&&(!nd||adDistrict!==normDistrict(nd)))return false;
     }
     return true;
   });
   if(!candidates.length)return;
   candidates.sort((a,b)=>{
     const score=x=>{
-      if(String(x.searchPopupCity||"")==="__ALL__")return 0;
-      if(norm(x.searchPopupDistrict)&&norm(x.searchPopupDistrict)===nd)return 2;
+      const popupCityRaw=String(x.searchPopupCity||"").trim();
+      if(!popupCityRaw||popupCityRaw==="__ALL__")return 0;
+      if(normDistrict(x.searchPopupDistrict)&&normDistrict(x.searchPopupDistrict)===normDistrict(nd))return 2;
       return 1;
     };
     return (score(b)-score(a)) || (Number(a.searchPopupOrder||999999)-Number(b.searchPopupOrder||999999));
@@ -652,7 +658,12 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue){
     }
   }
   const region=document.getElementById("searchSponsorRegion");
-  if(region)region.textContent=String(ad.searchPopupCity||"")==="__ALL__"?"Tüm Türkiye":[cityValue,districtValue].filter(Boolean).join(" / ");
+  if(region){
+    const popupCityRaw=String(ad.searchPopupCity||"").trim();
+    region.textContent=(!popupCityRaw||popupCityRaw==="__ALL__")
+      ?"Tüm Türkiye"
+      :[cityValue,districtValue].filter(Boolean).join(" / ");
+  }
   const title=document.getElementById("searchSponsorTitle");
   if(title)title.textContent=ad.searchPopupTitle||ad.name||"Bölgenizde öne çıkan firma";
   const text=document.getElementById("searchSponsorText");
