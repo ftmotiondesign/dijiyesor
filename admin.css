@@ -681,3 +681,50 @@
   .sponsor-scope-options{grid-template-columns:1fr}
   .sponsor-scope-card{min-height:108px}
 }
+
+
+.sponsor-target-block{
+  margin-top:12px;
+  padding:13px;
+  border:1px solid #e2e8f0;
+  border-radius:13px;
+  background:#fff;
+}
+.sponsor-target-block-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.sponsor-target-block-head strong{
+  font-size:11px;
+  color:#263249;
+}
+.sponsor-target-block-head small{
+  font-size:9.5px;
+  color:#8290a2;
+  text-align:right;
+}
+.sponsor-placement-options .sponsor-scope-card.active{
+  border-color:#1677ff;
+  background:#f4f8ff;
+}
+.sponsor-target-summary{
+  margin-top:12px;
+  display:flex;
+  gap:6px;
+  align-items:flex-start;
+  padding:10px 12px;
+  border-radius:11px;
+  background:#eaf3ff;
+  color:#315d91;
+  font-size:10px;
+  line-height:1.45;
+}
+.sponsor-target-summary strong{font-weight:900;white-space:nowrap}
+.sponsor-target-summary span{font-weight:800}
+@media(max-width:760px){
+  .sponsor-target-block-head{flex-direction:column;gap:3px}
+  .sponsor-target-block-head small{text-align:left}
+}
