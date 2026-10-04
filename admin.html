@@ -135,10 +135,14 @@
       <section class="card quick-import-card">
         <div class="quick-import-grid">
           <label>İl
-            <input id="quickImportCity" placeholder="Örn. Çanakkale">
+            <select id="quickImportCity">
+              <option value="">İl seçin</option>
+            </select>
           </label>
           <label>İlçe
-            <input id="quickImportDistrict" placeholder="Örn. Merkez">
+            <select id="quickImportDistrict" disabled>
+              <option value="">Tüm İlçeler</option>
+            </select>
           </label>
           <label>Sektör
             <select id="quickImportCategory">
