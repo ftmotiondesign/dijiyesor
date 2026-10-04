@@ -1139,3 +1139,16 @@ body.djs-modal-open #resultsHead{
     font-size:10px;
   }
 }
+
+.city-hero-sponsor{position:absolute;right:14px;top:50%;transform:translateY(-50%);z-index:3;display:flex;align-items:center;gap:9px;max-width:390px;padding:9px 10px;border-radius:13px;background:rgba(255,255,255,.93);box-shadow:0 8px 24px rgba(0,0,0,.18);color:#172033}
+.city-hero-sponsor.hidden{display:none}
+.city-hero-sponsor-badge{position:absolute;right:8px;top:-8px;background:#f59e0b;color:#fff;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;letter-spacing:.07em}
+.city-hero-sponsor-logo{width:38px;height:38px;border-radius:9px;object-fit:cover;border:1px solid #e2e8f0;background:#fff}
+.city-hero-sponsor-logo.hidden,.city-hero-sponsor-copy small.hidden{display:none}
+.city-hero-sponsor-copy{min-width:0}.city-hero-sponsor-copy strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.city-hero-sponsor-copy small{display:block;margin-top:2px;font-size:9px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city-hero-sponsor a{padding:7px 9px;border-radius:8px;background:#1677ff;color:#fff;text-decoration:none;font-size:10px;font-weight:900;white-space:nowrap}
+@media(max-width:680px){
+  .city-hero-sponsor{right:7px;top:auto;bottom:7px;transform:none;max-width:64%;padding:6px 7px;gap:6px}
+  .city-hero-sponsor-logo{width:30px;height:30px}.city-hero-sponsor-copy small{display:none!important}.city-hero-sponsor a{padding:6px 7px;font-size:9px}
+  .city-hero-content{padding-right:38%}
+}
