@@ -270,21 +270,11 @@ function render(data){
     const hasCity=Boolean(city?.value);
     locationNotice.classList.toggle("hidden",hasCity);
     const noticeTitle=locationNotice.querySelector("strong");
-    const noticeText=locationNotice.querySelector(".location-notice-left > span");
-    if(noticeTitle)noticeTitle.textContent=data.length>0
-      ? "Konumunu seç, sana en yakın sonuçları gösterelim"
-      : "Konumunu seç, daha doğru sonuçlara ulaş";
+    const noticeText=locationNotice.querySelector(".location-notice-left span");
+    if(noticeTitle)noticeTitle.textContent=data.length>0 ? "Türkiye geneli sonuçlar" : "Konum seçerek tekrar deneyin";
     if(noticeText)noticeText.textContent=data.length>0
-      ? "Şu anda Türkiye geneli sonuçları görüyorsunuz."
-      : "Sonuç bulunamadı. İl veya ilçe seçerek aramanızı daraltabilirsiniz.";
-    if(!hasCity && !locationNotice.querySelector("[data-focus-city]")){
-      const action=document.createElement("button");
-      action.type="button";
-      action.className="location-select-btn";
-      action.dataset.focusCity="";
-      action.textContent="📍 İl Seç";
-      locationNotice.appendChild(action);
-    }
+      ? "Yakınındaki firmalar için konum seçebilirsin."
+      : "İl veya ilçe seçerek aramanı daraltabilirsin.";
   }
 
   if(!data.length){
@@ -342,6 +332,12 @@ async function initHome(){
 
   const modal=document.getElementById("categoryPickerModal");
   const categoryGrid=document.getElementById("categoryPickerGrid");
+  const locationModal=document.getElementById("locationPickerModal");
+  const popupCity=document.getElementById("popupCitySelect");
+  const popupDistrict=document.getElementById("popupDistrictSelect");
+  const locationSearchLabel=document.getElementById("locationSearchLabel");
+  const applyPopupLocation=document.getElementById("applyPopupLocation");
+  const allTurkeyBtn=document.getElementById("allTurkeyBtn");
   const pickerCategories=[
     ["egitim","Eğitim","Kurs, sürücü kursu, anaokulu, yurt"],
     ["otomotiv","Otomotiv","Servis, ekspertiz, galeri, kiralama"],
@@ -364,10 +360,43 @@ async function initHome(){
   }
   const openCategoryModal=()=>{modal?.classList.remove("hidden");document.body.style.overflow="hidden"};
   const closeCategoryModal=()=>{modal?.classList.add("hidden");document.body.style.overflow=""};
+
+  const currentSearchLabel=()=>{
+    const q=search.value.trim();
+    if(q)return "“"+q+"”";
+    const sc=subCategory?.value||"";
+    if(sc)return "“"+(subcategoryMap[sector.value]?.[sc]||subCategory.options[subCategory.selectedIndex]?.text||"Aramanız")+"”";
+    if(sector.value)return "“"+(categoryLabels[sector.value]||sector.options[sector.selectedIndex]?.text||"Aramanız")+"”";
+    return "Aramanız";
+  };
+  const syncPopupLocation=async()=>{
+    if(!popupCity||!popupDistrict)return;
+    popupCity.innerHTML=city.innerHTML;
+    popupCity.value=city.value||"";
+    if(popupCity.value){
+      await fillDistricts(popupCity,popupDistrict);
+      popupDistrict.value=district.value||"";
+    }else{
+      popupDistrict.innerHTML='<option value="">Tüm İlçeler</option>';
+      popupDistrict.disabled=true;
+    }
+    if(locationSearchLabel)locationSearchLabel.textContent=currentSearchLabel();
+  };
+  const openLocationModal=async()=>{
+    await syncPopupLocation();
+    locationModal?.classList.remove("hidden");
+    document.body.style.overflow="hidden";
+  };
+  const closeLocationModal=()=>{
+    locationModal?.classList.add("hidden");
+    document.body.style.overflow="";
+  };
   document.querySelectorAll("[data-close-category-modal]").forEach(el=>el.addEventListener("click",closeCategoryModal));
-  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCategoryModal()});
+  document.querySelectorAll("[data-close-location]").forEach(el=>el.addEventListener("click",closeLocationModal));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCategoryModal();closeLocationModal()}});
   document.addEventListener("click",e=>{
     if(e.target.closest("[data-open-category-search]"))openCategoryModal();
+    if(e.target.closest("[data-open-location]"))openLocationModal();
 
     const focusSearch=e.target.closest("[data-focus-search]");
     if(focusSearch){
@@ -390,10 +419,32 @@ async function initHome(){
 
     const focusCity=e.target.closest("[data-focus-city]");
     if(focusCity){
-      city.focus();
-      city.scrollIntoView({behavior:"smooth",block:"center"});
+      openLocationModal();
     }
   });
+  popupCity?.addEventListener("change",async()=>{await fillDistricts(popupCity,popupDistrict)});
+  applyPopupLocation?.addEventListener("click",async()=>{
+    city.value=popupCity?.value||"";
+    if(city.value){
+      await fillDistricts(city,district);
+      district.value=popupDistrict?.value||"";
+    }else{
+      district.value="";
+      district.innerHTML='<option value="">Tüm İlçeler</option>';
+      district.disabled=true;
+    }
+    closeLocationModal();
+    filter();
+  });
+  allTurkeyBtn?.addEventListener("click",()=>{
+    city.value="";
+    district.value="";
+    district.innerHTML='<option value="">Tüm İlçeler</option>';
+    district.disabled=true;
+    closeLocationModal();
+    filter();
+  });
+
   categoryGrid?.querySelectorAll("[data-toggle-picker-sector]").forEach(btn=>btn.addEventListener("click",()=>{
     const item=btn.closest(".category-picker-item"),panel=item?.querySelector(".category-subpanel");
     if(!item||!panel)return;
