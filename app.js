@@ -477,9 +477,7 @@ async function initHome(){
       const head=document.getElementById("resultsHead");
       if(head){
         const topbar=document.querySelector(".top");
-        const searchArea=document.querySelector(".search-area");
-        const extra=(searchArea?.offsetHeight||0)+12;
-        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-extra;
+        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-8;
         window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
       }
     },80);
@@ -618,11 +616,9 @@ async function initHome(){
       const target=head || document.getElementById("companyGrid");
       if(target){
         const topbar=document.querySelector(".top");
-        const searchArea=document.querySelector(".search-area");
         const topbarH=topbar?.offsetHeight||0;
-        const searchH=searchArea?.offsetHeight||0;
-        const extra=window.innerWidth<=700 ? 10 : 16;
-        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-searchH-extra;
+        const extra=window.innerWidth<=700 ? 8 : 12;
+        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-extra;
         window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
       }
     },140);
