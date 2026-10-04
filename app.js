@@ -713,6 +713,33 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
     else if(freq==="daily"||freq==="3days")localStorage.setItem(adKey+"_ts",String(now));
   }catch(_){}
 }
+function ensureSearchSponsorReopenButton(){
+  let btn=document.getElementById("searchSponsorReopen");
+  if(btn)return btn;
+  btn=document.createElement("button");
+  btn.id="searchSponsorReopen";
+  btn.type="button";
+  btn.className="search-sponsor-reopen hidden";
+  btn.innerHTML='<span class="search-sponsor-reopen-badge">AD · Sponsor</span><strong>Reklamı tekrar gör</strong>';
+  btn.addEventListener("click",()=>{
+    const modal=document.getElementById("searchSponsorPopup");
+    if(!modal||!currentSearchSponsorAd)return;
+    btn.classList.add("hidden");
+    modal.classList.remove("hidden");
+    document.body.classList.add("djs-modal-open");
+    document.body.style.overflow="hidden";
+  });
+  document.body.appendChild(btn);
+  return btn;
+}
+function showSearchSponsorReopen(){
+  if(!currentSearchSponsorAd)return;
+  ensureSearchSponsorReopenButton().classList.remove("hidden");
+}
+function hideSearchSponsorReopen(){
+  document.getElementById("searchSponsorReopen")?.classList.add("hidden");
+}
+
 function initSearchSponsorPopup(){
   const modal=document.getElementById("searchSponsorPopup");if(!modal)return;
   const close=()=>{modal.classList.add("hidden");if(!document.querySelector(".category-modal:not(.hidden),.location-picker-modal:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");document.body.style.overflow="";const v=modal.querySelector("video");if(v)try{v.pause()}catch(_){}};
