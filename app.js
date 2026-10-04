@@ -342,8 +342,8 @@ function render(data){
     const noticeTitle=locationNotice.querySelector("strong");
     const noticeText=locationNotice.querySelector(".location-notice-left span");
     if(noticeTitle)noticeTitle.textContent=data.length>0 ? "Türkiye geneli sonuçlar" : "Konum seçerek tekrar deneyin";
-    if(noticeText)noticeText.textContent=data.length>0
-      ? "Yakınındaki firmalar için konum seçebilirsin."
+    if(noticeText)noticeText.innerHTML=data.length>0
+      ? 'Yakınındaki firmalar için <strong class="location-emphasis">konum seç</strong>.'
       : "İl veya ilçe seçerek aramanı daraltabilirsin.";
   }
 
