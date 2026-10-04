@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261004-61">
+  <link rel="stylesheet" href="admin.css?v=20261004-62">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -434,8 +434,12 @@ Gerçek mekanda hizmet"></textarea>
       </div>
 
       <section class="card city-admin-info">
-        <div class="card-head"><div><span>81 İL HAZIR</span><h2>Nasıl çalışıyor?</h2></div></div>
-        <p>Tüm iller sistemde hazırdır. Özel görsel yüklenmemiş bir ilde sistem o il için uygun şehir/landmark fotoğrafını otomatik bulur. Buradan yüklediğin görsel varsa otomatik görselin yerine geçer.</p>
+        <div class="card-head"><div><span>81 İL HAZIR</span><h2>Şehir görsellerini toplu hazırla</h2></div></div>
+        <p>Tüm iller sistemde hazırdır. İlk açılışta eksik şehir görselleri otomatik olarak bulunup kaydedilir. İstersen aşağıdaki butonla yeniden kontrol ettirebilirsin; daha önce yüklediğin özel görseller korunur.</p>
+        <div class="city-seed-row">
+          <button id="seedCityBannerImagesBtn" type="button" class="secondary">81 İlin Görsellerini Yükle</button>
+          <span id="seedCityBannerImagesStatus">Eksik görseller kontrol edilmeye hazır.</span>
+        </div>
       </section>
     </section>
 
@@ -1076,7 +1080,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261004-61"></script>
+<script src="admin.js?v=20261004-62"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
