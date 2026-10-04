@@ -107,6 +107,18 @@ window.addEventListener("hashchange",()=>{
 
 
 let cityBannerAdminReady=false;
+async function loadCityBannerMasterSetting(){
+  try{
+    const snap=await db.collection("siteSettings").doc("cityBanners").get();
+    const active=snap.exists?snap.data()?.active===true:false;
+    if($("cityBannersMasterActive"))$("cityBannersMasterActive").checked=active;
+  }catch(_){
+    if($("cityBannersMasterActive"))$("cityBannersMasterActive").checked=false;
+  }
+}
+async function saveCityBannerMasterSetting(active){
+  await db.collection("siteSettings").doc("cityBanners").set({active:Boolean(active),updatedAt:new Date().toISOString()},{merge:true});
+}
 async function adminCommonsCityImage(city){
   try{
     const q=encodeURIComponent(city+" Turkey city landmark");
@@ -200,6 +212,17 @@ function initCityBannerAdmin(){
     sel.innerHTML=CITY_BANNER_PROVINCES.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join("");
     sel.value="Çanakkale";
     sel.addEventListener("change",loadCityBannerSettings);
+    $("cityBannersMasterActive")?.addEventListener("change",async e=>{
+      const checked=e.target.checked;
+      const msg=$("cityBannerMessage");
+      try{
+        await saveCityBannerMasterSetting(checked);
+        if(msg){msg.className="message success";msg.textContent=checked?"Şehir Görselleri kategorisi aktif edildi ✓":"Şehir Görselleri kategorisi pasif edildi ✓";}
+      }catch(err){
+        e.target.checked=!checked;
+        if(msg){msg.className="message error";msg.textContent=err.message||"Ayar kaydedilemedi.";}
+      }
+    });
     $("cityBannerImageUrl")?.addEventListener("input",e=>{
       const p=$("cityBannerPreview"),url=e.target.value.trim();
       if(p&&url)p.innerHTML='<img src="'+esc(url)+'" alt=""><div><strong>'+esc($("cityBannerTitle").value||sel.value+"’de keşfet")+'</strong></div>';
@@ -236,6 +259,7 @@ function initCityBannerAdmin(){
     });
     cityBannerAdminReady=true;
   }
+  loadCityBannerMasterSetting();
   loadCityBannerSettings();
 }
 
