@@ -256,7 +256,9 @@ searchPopupText:d.searchPopupText||"",
 searchPopupMediaType:d.searchPopupMediaType||"image",
 searchPopupFrequency:d.searchPopupFrequency||"session",
 searchPopupScope:d.searchPopupScope||"search_results",
+searchPopupPlacements:Array.isArray(d.searchPopupPlacements)?d.searchPopupPlacements:[],
 searchPopupSector:d.searchPopupSector||"",
+searchPopupSubCategory:d.searchPopupSubCategory||"",
 searchPopupMediaUrl:d.searchPopupMediaUrl||"",
 searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
 searchPopupTargetUrl:d.searchPopupTargetUrl||"",
@@ -598,15 +600,19 @@ async function loadManagedSearchCategories(){
 }
 let currentSearchSponsorAd=null;
 
-function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
+function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue,subCategoryValue){
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
     if(!x.searchPopupActive)return false;
-    const scope=String(x.searchPopupScope||"search_results");
-    if(scope==="sector"){
-      const targetSector=String(x.searchPopupSector||"").trim();
-      if(!targetSector || String(sectorValue||"")!==targetSector)return false;
-    }
+    const placements=Array.isArray(x.searchPopupPlacements)&&x.searchPopupPlacements.length
+      ?x.searchPopupPlacements
+      :(String(x.searchPopupScope||"search_results")==="all_pages"?["all_pages"]:["search_popup"]);
+    if(!placements.includes("search_popup")&&!placements.includes("all_pages"))return false;
+
+    const targetSector=String(x.searchPopupSector||"").trim();
+    const targetSubCategory=String(x.searchPopupSubCategory||"").trim();
+    if(targetSector&&String(sectorValue||"")!==targetSector)return false;
+    if(targetSubCategory&&String(subCategoryValue||"")!==targetSubCategory)return false;
     if(x.searchPopupStartDate){
       const start=new Date(x.searchPopupStartDate+"T00:00:00");
       if(!Number.isNaN(start.getTime())&&Date.now()<start.getTime())return false;
@@ -995,7 +1001,7 @@ async function initHome(){
     ranked.sort((a,b)=>b.score-a.score||String(a.item.name||"").localeCompare(String(b.item.name||""),"tr"));
     const filtered=ranked.map(x=>x.item);
     render(filtered);
-    setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value,sector.value),180);
+    setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value,sector.value,subCategory?.value||""),180);
     if(feature360){
       const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");
       if(title)title.textContent="360° Mekânlar";
