@@ -263,7 +263,21 @@ function render(data){
   }
   if(context){
     const loc=[city?.value,district?.value].filter(Boolean).join(" / ");
-    context.textContent=loc ? loc+" bölgesindeki uygun işletmeler." : "Aramana uygun işletmeler listeleniyor.";
+    const sectorEl=document.getElementById("sectorSelect");
+    const subEl=document.getElementById("subCategorySelect");
+    const sectorValue=sectorEl?.value||"";
+    const subValue=subEl?.value||"";
+    const sectorLabel=sectorValue ? (categoryLabels[sectorValue]||sectorEl?.options?.[sectorEl.selectedIndex]?.text||sectorValue) : "";
+    const subLabel=subValue ? (subcategoryMap[sectorValue]?.[subValue]||subEl?.options?.[subEl.selectedIndex]?.text||subValue) : "";
+    const q=String(search?.value||"").trim();
+
+    let base="";
+    if(subLabel) base=subLabel+" alanındaki uygun işletmeler listeleniyor.";
+    else if(sectorLabel) base=sectorLabel+" sektöründeki uygun işletmeler listeleniyor.";
+    else if(q) base="“"+q+"” aramasına uygun işletmeler listeleniyor.";
+    else base="Aramana uygun işletmeler listeleniyor.";
+
+    context.textContent=loc ? loc+" bölgesinde "+base.charAt(0).toLocaleLowerCase("tr-TR")+base.slice(1) : base;
   }
   const locationNotice=document.getElementById("locationNotice");
   if(locationNotice){
@@ -459,6 +473,14 @@ async function initHome(){
     subCategory.value=el.dataset.pickSubcategory||"";
     closeCategoryModal();
     filter();
+    setTimeout(()=>{
+      const head=document.getElementById("resultsHead");
+      if(head){
+        const topbar=document.querySelector(".top");
+        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-8;
+        window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+      }
+    },80);
   }));
 
   const showInitialState=()=>{setSearchCompactMode(false);
