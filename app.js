@@ -358,43 +358,93 @@ function resultCardVisual(i){
   '</div>';
 }
 
-const CITY_HERO_IMAGES={
-  "çanakkale":"https://commons.wikimedia.org/wiki/Special:FilePath/Chanakkale_Turkey.jpg?width=1600",
-  "canakkale":"https://commons.wikimedia.org/wiki/Special:FilePath/Chanakkale_Turkey.jpg?width=1600",
-  "manisa":"https://commons.wikimedia.org/wiki/Special:FilePath/Spil_National_Park_and_Manisa.jpg?width=1600",
-  "istanbul":"https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul%2C_Turkey_Bosporus.jpg?width=1600",
-  "ankara":"https://commons.wikimedia.org/wiki/Special:FilePath/Anitkabir_Ankara.jpg?width=1600",
-  "izmir":"https://commons.wikimedia.org/wiki/Special:FilePath/%C4%B0zmir_Clock_Tower%2C_2026.jpg?width=1600"
-};
+const TURKEY_PROVINCES=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+const cityHeroCache=new Map();
+let cityHeroRequestToken=0;
 function cityHeroKey(value){
-  return String(value||"").trim().toLocaleLowerCase("tr-TR");
+  return String(value||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 }
-function updateCityHero(){
+function sponsorDateActive(cfg){
+  if(!cfg?.sponsorActive)return false;
+  const today=new Date().toISOString().slice(0,10);
+  const start=String(cfg.sponsorStartDate||"").slice(0,10);
+  const end=String(cfg.sponsorEndDate||"").slice(0,10);
+  return (!start||today>=start)&&(!end||today<=end);
+}
+async function commonsCityImage(city){
+  const key="commons:"+cityHeroKey(city);
+  if(cityHeroCache.has(key))return cityHeroCache.get(key);
+  try{
+    const q=encodeURIComponent(city+" Turkey city landmark");
+    const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+q+"&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url&iiurlwidth=1600&format=json&origin=*";
+    const res=await fetch(url);
+    const data=await res.json();
+    const pages=Object.values(data?.query?.pages||{});
+    const page=pages.find(p=>p?.imageinfo?.[0]?.thumburl||p?.imageinfo?.[0]?.url);
+    const image=page?.imageinfo?.[0]?.thumburl||page?.imageinfo?.[0]?.url||"";
+    cityHeroCache.set(key,image);
+    return image;
+  }catch(_){return ""}
+}
+async function loadCityHeroConfig(city){
+  const key=cityHeroKey(city);
+  if(cityHeroCache.has("cfg:"+key))return cityHeroCache.get("cfg:"+key);
+  try{
+    const snap=await db.collection("cityBanners").doc(key).get();
+    const cfg=snap.exists?snap.data()||{}:{};
+    cityHeroCache.set("cfg:"+key,cfg);
+    return cfg;
+  }catch(_){return {}}
+}
+async function updateCityHero(){
+  const token=++cityHeroRequestToken;
   const hero=document.getElementById("cityHero");
   const img=document.getElementById("cityHeroImage");
   const title=document.getElementById("cityHeroTitle");
   const subtitle=document.getElementById("cityHeroSubtitle");
+  const sponsor=document.getElementById("cityHeroSponsor");
+  const sponsorLogo=document.getElementById("cityHeroSponsorLogo");
+  const sponsorName=document.getElementById("cityHeroSponsorName");
+  const sponsorText=document.getElementById("cityHeroSponsorText");
+  const sponsorLink=document.getElementById("cityHeroSponsorLink");
   const cityEl=document.getElementById("citySelect");
   const districtEl=document.getElementById("districtSelect");
   if(!hero||!img||!title||!subtitle||!cityEl)return;
-
   const city=String(cityEl.value||"").trim();
   const district=String(districtEl?.value||"").trim();
-  const src=CITY_HERO_IMAGES[cityHeroKey(city)];
-
-  if(!city||!src){
-    hero.classList.add("hidden");
-    hero.setAttribute("aria-hidden","true");
-    img.removeAttribute("src");
+  if(!city){
+    hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");img.removeAttribute("src");
     return;
   }
-
+  const cfg=await loadCityHeroConfig(city);
+  let src=String(cfg.imageUrl||"").trim();
+  if(!src)src=await commonsCityImage(city);
+  if(token!==cityHeroRequestToken)return;
+  if(!src){
+    hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");return;
+  }
   img.src=src;
   img.alt=city+" şehir görünümü";
-  title.textContent=city+"’de keşfet";
-  subtitle.textContent=district?city+" / "+district+" bölgesindeki işletmeleri incele":city+" bölgesindeki işletmeleri incele";
-  hero.classList.remove("hidden");
-  hero.setAttribute("aria-hidden","false");
+  title.textContent=String(cfg.title||"").trim()||city+"’de keşfet";
+  subtitle.textContent=String(cfg.subtitle||"").trim()||(district?city+" / "+district+" bölgesindeki işletmeleri incele":city+" bölgesindeki işletmeleri incele");
+  hero.classList.toggle("hidden",cfg.active===false);
+  hero.setAttribute("aria-hidden",cfg.active===false?"true":"false");
+  const showSponsor=sponsorDateActive(cfg);
+  if(sponsor){
+    sponsor.classList.toggle("hidden",!showSponsor);
+    if(showSponsor){
+      if(sponsorLogo){
+        const logo=String(cfg.sponsorLogoUrl||"").trim();
+        sponsorLogo.src=logo||"";
+        sponsorLogo.classList.toggle("hidden",!logo);
+      }
+      sponsorName.textContent=String(cfg.sponsorName||"Sponsor").trim()||"Sponsor";
+      sponsorText.textContent=String(cfg.sponsorText||"").trim();
+      sponsorText.classList.toggle("hidden",!String(cfg.sponsorText||"").trim());
+      sponsorLink.href=String(cfg.sponsorUrl||"#").trim()||"#";
+      sponsorLink.textContent=String(cfg.sponsorButtonText||"İncele").trim()||"İncele";
+    }
+  }
 }
 function render(data){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
