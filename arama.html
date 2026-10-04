@@ -207,6 +207,21 @@
     </div>
   </div>
 
+  <div id="searchSponsorPopup" class="search-sponsor-popup hidden" role="dialog" aria-modal="true" aria-labelledby="searchSponsorTitle">
+    <div class="search-sponsor-backdrop" data-close-search-sponsor></div>
+    <div class="search-sponsor-card">
+      <button type="button" class="search-sponsor-close" data-close-search-sponsor aria-label="Kapat">×</button>
+      <span class="search-sponsor-label">SPONSORLU</span>
+      <div id="searchSponsorMedia" class="search-sponsor-media"></div>
+      <div class="search-sponsor-body">
+        <small id="searchSponsorRegion"></small>
+        <h2 id="searchSponsorTitle">Bölgenizde öne çıkan firma</h2>
+        <p id="searchSponsorText"></p>
+        <a id="searchSponsorLink" href="#" class="search-sponsor-link">Firmayı İncele</a>
+      </div>
+    </div>
+  </div>
+
   <div id="tour360Modal" class="tour360-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tour360Title">
     <div class="tour360-backdrop" data-close-360></div>
     <div class="tour360-card">
@@ -231,7 +246,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261004-46"></script>
+  <script src="app.js?v=20261004-47"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
