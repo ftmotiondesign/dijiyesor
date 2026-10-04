@@ -500,14 +500,7 @@ async function initHome(){
     subCategory.value=el.dataset.pickSubcategory||"";
     closeCategoryModal();
     filter();
-    setTimeout(()=>{
-      const head=document.getElementById("resultsHead");
-      if(head){
-        const topbar=document.querySelector(".top");
-        const y=head.getBoundingClientRect().top+window.pageYOffset-(topbar?.offsetHeight||0)-8;
-        window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
-      }
-    },80);
+    setTimeout(scrollToResultsTop,80);
   }));
 
   const showInitialState=()=>{setSearchCompactMode(false);
@@ -538,6 +531,15 @@ async function initHome(){
     if(!searchArea)return;
     searchArea.classList.toggle("compact",Boolean(compact));
   }
+
+  const scrollToResultsTop=()=>{
+    const head=document.getElementById("resultsHead");
+    if(!head)return;
+    const topbar=document.querySelector(".top");
+    const topbarH=topbar?.offsetHeight||0;
+    const y=head.getBoundingClientRect().top+window.pageYOffset-topbarH-6;
+    window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+  };
 
   const params=new URLSearchParams(location.search);
 
@@ -638,17 +640,7 @@ async function initHome(){
       url.searchParams.set("q",search.value.trim());
       history.replaceState(null,"",url.pathname+"?"+url.searchParams.toString());
     }catch(_){}
-    setTimeout(()=>{
-      const head=document.getElementById("resultsHead");
-      const target=head || document.getElementById("companyGrid");
-      if(target){
-        const topbar=document.querySelector(".top");
-        const topbarH=topbar?.offsetHeight||0;
-        const extra=window.innerWidth<=700 ? 8 : 12;
-        const y=target.getBoundingClientRect().top+window.pageYOffset-topbarH-extra;
-        window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
-      }
-    },140);
+    setTimeout(scrollToResultsTop,140);
   };
 
   btn.addEventListener("click",submitSearch);
@@ -662,7 +654,10 @@ async function initHome(){
   chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
   await loadCompanies();
   const hasInitial=params.get("q")||params.get("city")||params.get("district")||params.get("sector")||params.get("subCategory")||feature360;
-  if(hasInitial)filter();else showInitialState();
+  if(hasInitial){
+    filter();
+    requestAnimationFrame(()=>setTimeout(scrollToResultsTop,120));
+  }else showInitialState();
 }
 document.addEventListener("DOMContentLoaded",initHome);
 
