@@ -53,14 +53,63 @@ const searchKeywords={
 };
 
 function keywordTargets(query){
-  const q=norm(query);
+  const q=smartSearchText(query);
   if(!q)return [];
   return Object.entries(searchKeywords)
-    .filter(([,words])=>words.some(word=>q.includes(norm(word)) || norm(word).includes(q)))
+    .filter(([,words])=>words.some(word=>{
+      const w=smartSearchText(word);
+      return q===w || q.includes(w) || w.includes(q) || smartTokenMatch(w,q);
+    }))
     .map(([key])=>key);
 }
 const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
+
+/* Daha esnek Türkçe arama:
+   - sürücü kursu / sürücü kursları
+   - restoran / restoranlar
+   - anaokulu / anaokulları
+   - Türkçe karakterli / karaktersiz yazımlar
+*/
+const searchAscii=v=>norm(v)
+  .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i")
+  .replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u");
+
+const searchRoot=word=>{
+  let w=searchAscii(word).replace(/[^a-z0-9]/g,"");
+  if(w.length<=4)return w;
+  const suffixes=[
+    "larindan","lerinden","larinda","lerinde","larini","lerini","larinin","lerinin",
+    "lardan","lerden","lara","lere","lari","leri","lar","ler",
+    "dan","den","nin","nın","nun","nün","dir","dır","dur","dür",
+    "yi","yı","yu","yü","in","ın","un","ün","i","ı","u","ü","a","e"
+  ].map(searchAscii).sort((a,b)=>b.length-a.length);
+  for(const suffix of suffixes){
+    if(w.endsWith(suffix)&&w.length-suffix.length>=3){
+      w=w.slice(0,-suffix.length);
+      break;
+    }
+  }
+  return w;
+};
+
+const smartSearchText=v=>searchAscii(v)
+  .replace(/['’`]/g," ")
+  .replace(/[^a-z0-9\s]/g," ")
+  .split(/\s+/).filter(Boolean)
+  .map(searchRoot).filter(Boolean)
+  .join(" ");
+
+const smartTokenMatch=(haystack,needle)=>{
+  const hs=smartSearchText(haystack).split(/\s+/).filter(Boolean);
+  const ns=smartSearchText(needle).split(/\s+/).filter(Boolean);
+  if(!ns.length)return true;
+  return ns.every(n=>hs.some(h=>
+    h===n ||
+    (n.length>=4&&h.startsWith(n)) ||
+    (h.length>=4&&n.startsWith(h))
+  ));
+};
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const mainCategory=d=>d.mainCategory||legacyMain[d.subCategory||d.category]||"diger";
 const initials=n=>String(n||"Firma").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
@@ -402,7 +451,7 @@ async function initHome(){
     only360Btn.classList.toggle("active",only360Active);
     only360Btn.setAttribute("aria-pressed",String(only360Active));
   };
-  const filter=()=>{renderActiveFilters();const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=q.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const tokenMatch=tokens.length>1&&tokens.every(t=>h.includes(t));const keywordMatch=tokens.length===1&&targets.length&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
+  const filter=()=>{renderActiveFilters();const q=norm(search.value),qSmart=smartSearchText(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}setSearchCompactMode(true);document.getElementById("resultsHead")?.classList.remove("hidden");const targets=keywordTargets(q),tokens=qSmart.split(/\s+/).filter(Boolean);const filtered=companies.filter(i=>{const h=norm([i.name,i.description,i.city,i.district,i.address,i.location,i.category,i.subCategory,i.mainCategory,categoryLabels[i.mainCategory]||"",subcategoryMap[i.mainCategory]?.[i.subCategory]||"",...(searchKeywords[i.subCategory]||[]),(i.keywords||[]).join(" "),(i.highlights||[]).join(" "),(i.programs||[]).join(" ")].join(" "));const hSmart=smartSearchText(h);const tokenMatch=tokens.length>0&&smartTokenMatch(hSmart,qSmart);const keywordMatch=targets.length>0&&targets.some(t=>i.subCategory===t||i.category===t);const cityText=norm([i.city,i.address,i.location].join(" "));const districtText=norm([i.district,i.address,i.location].join(" "));const cityMatch=!c||norm(i.city)===c||cityText.includes(c);const districtMatch=!d||norm(i.district)===d||districtText.includes(d);return(!q||h.includes(q)||hSmart.includes(qSmart)||tokenMatch||keywordMatch)&&cityMatch&&districtMatch&&(!s||i.mainCategory===s)&&(!sc||i.subCategory===sc||i.category===sc)&&(!(feature360||only360Active)||valid360Url(i.tour360Url))});render(filtered);if(feature360){const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");if(title)title.textContent="360° Mekânlar";if(context)context.textContent="Sanal tur ile gezebileceğiniz işletmeler listeleniyor."}};
 
   const renderActiveFilters=()=>{
     const host=document.getElementById("activeFilters");
