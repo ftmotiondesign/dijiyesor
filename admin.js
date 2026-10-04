@@ -409,6 +409,19 @@ function openFirmModal(id){
   $("editVip").checked=Boolean(f.vip);$("editSponsored").checked=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
   $("firmFormMessage").className="message hidden";$("firmModal").classList.remove("hidden");
 }
+$("quickFirmViewBtn")?.addEventListener("click",e=>{
+  e.preventDefault();
+  const firmId=$("firmId")?.value||"";
+  if(!firmId)return;
+  const f=firms.find(x=>x.id===firmId)||{};
+  $("quickFirmPreviewTitle").textContent=(f.name||"Firma")+" · Önizleme";
+  $("quickFirmPreviewLoading").style.display="grid";
+  $("quickFirmPreviewFrame").src="firma.html?id="+encodeURIComponent(firmId)+"&_="+Date.now();
+  $("quickFirmPreviewModal").classList.remove("hidden");
+});
+$("quickFirmPreviewFrame")?.addEventListener("load",()=>{
+  if($("quickFirmPreviewLoading"))$("quickFirmPreviewLoading").style.display="none";
+});
 function updateFirmImagePreview(url){
   const box=$("firmImagePreview");
   if(!box)return;
