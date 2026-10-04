@@ -344,6 +344,7 @@ function resultCardVisual(i){
     return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'">'+
       slides+
       (images.length>1?'<button type="button" class="result-slide-nav prev" data-result-slide-prev aria-label="Önceki görsel">‹</button><button type="button" class="result-slide-nav next" data-result-slide-next aria-label="Sonraki görsel">›</button><span class="result-slide-count">1 / '+images.length+'</span>':'')+
+      '<span class="result-enlarge-hint" aria-hidden="true"><span class="result-enlarge-icon">⌕</span><span class="desktop-label">Büyüt</span><span class="mobile-label">Dokun</span></span>'+
       (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
       (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'')+
     '</div>';
