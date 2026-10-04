@@ -849,6 +849,34 @@ Gerçek mekanda hizmet"></textarea>
           </label>
         </div>
 
+        <div class="form-grid two">
+          <label>Gösterim alanı
+            <select id="sponsorPopupScope">
+              <option value="search_results">Sadece arama sonuçları</option>
+              <option value="all_pages">Tüm sayfalar</option>
+              <option value="sector">Sadece sektör aramalarında</option>
+            </select>
+          </label>
+          <label>Hedef sektör
+            <select id="sponsorPopupSector" disabled>
+              <option value="">Sektör seçin</option>
+              <option value="egitim">Eğitim</option>
+              <option value="otomotiv">Otomotiv</option>
+              <option value="yemeicme">Yeme & İçme</option>
+              <option value="saglikguzellik">Sağlık & Güzellik</option>
+              <option value="evyapi">Ev & Yapı</option>
+              <option value="emlak">Emlak</option>
+              <option value="turizm">Turizm & Konaklama</option>
+              <option value="organizasyonmedya">Organizasyon & Medya</option>
+              <option value="tasimacilik">Taşımacılık & Teslimat</option>
+              <option value="profesyonel">Profesyonel Hizmetler</option>
+              <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+              <option value="diger">Diğer</option>
+            </select>
+          </label>
+        </div>
+        <small style="display:block;margin:-6px 0 14px;color:#64748b;font-weight:700">Sadece sektör seçilirse reklam yalnız seçilen sektörün arama sonuçlarında gösterilir.</small>
+
         <label>Başlık<input id="sponsorPopupTitle" placeholder="Örn. Çanakkale’de öne çıkan sürücü kursu"></label>
         <label>Açıklama<textarea id="sponsorPopupText" rows="3" placeholder="Kısa reklam açıklaması"></textarea></label>
 
