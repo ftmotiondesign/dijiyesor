@@ -386,28 +386,6 @@ async function initHome(){
   };
   const params=new URLSearchParams(location.search);
 
-  const locationHero=document.getElementById("locationHero");
-  const cityHeroImages={
-    "çanakkale":[
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/CanakkaleTrojanHorse.jpg",
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C3%87anakkale_1915_Bridge.jpg",
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C3%87anakkale_Martyrs%27_Memorial_viewed_from_the_Dardanelles_Strait.jpg"
-    ]
-  };
-  const updateLocationHero=()=>{
-    if(!locationHero)return;
-    const cityName=String(city.value||"").trim();
-    const images=cityHeroImages[norm(cityName)]||[];
-    if(!cityName||!images.length){
-      locationHero.classList.add("hidden");
-      locationHero.querySelectorAll(".location-photo").forEach(el=>el.style.backgroundImage="");
-      return;
-    }
-    locationHero.querySelectorAll(".location-photo").forEach((el,index)=>{
-      el.style.backgroundImage='url("'+(images[index]||images[0])+'")';
-    });
-    locationHero.classList.remove("hidden");
-  };
   const force360Only=window.DJS_FORCE_360_ONLY===true;
   const is360Directory=/\/360-mekanlar\.html$/i.test(location.pathname);
   const feature360=is360Directory || force360Only;
@@ -463,8 +441,6 @@ async function initHome(){
       only360Active=false;
       sync360Button();
     }
-
-    updateLocationHero();
     filter();
     renderActiveFilters();
   });
@@ -489,9 +465,8 @@ async function initHome(){
     filter();
   });
   renderActiveFilters();
-  updateLocationHero();
-  city.addEventListener("change",async()=>{await fillDistricts(city,district);updateLocationHero();filter()});
-  district.addEventListener("change",()=>{updateLocationHero();filter()});
+  city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});
+  district.addEventListener("change",filter);
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));fillSubcategories();filter()});
   subCategory?.addEventListener("change",filter);
   search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
