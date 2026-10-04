@@ -533,7 +533,25 @@ $("firmForm").addEventListener("submit",async e=>{
 
 
 function sponsorPopupRows(){
-  return firms.filter(f=>f.searchPopupTitle||f.searchPopupMediaUrl||f.searchPopupActive);
+  return firms.filter(f=>f.searchPopupTitle||f.searchPopupMediaUrl||f.searchPopupActive||f.searchPopupStartDate||f.searchPopupEndDate);
+}
+function sponsorPopupScheduleState(f){
+  const enabled=f.searchPopupActive!==false && Boolean(f.searchPopupActive);
+  const today=new Date();today.setHours(0,0,0,0);
+  const start=f.searchPopupStartDate?new Date(f.searchPopupStartDate+"T00:00:00"):null;
+  const end=f.searchPopupEndDate?new Date(f.searchPopupEndDate+"T23:59:59"):null;
+  if(!enabled)return {key:"passive",label:"Pasif",live:false};
+  if(start&&!Number.isNaN(start.getTime())&&Date.now()<start.getTime())return {key:"scheduled",label:"Planlandı",live:false};
+  if(end&&!Number.isNaN(end.getTime())&&Date.now()>end.getTime())return {key:"expired",label:"Süresi Doldu",live:false};
+  return {key:"active",label:"Aktif",live:true};
+}
+function sponsorPopupDateLabel(f){
+  const s=f.searchPopupStartDate||"",e=f.searchPopupEndDate||"";
+  const fmt=v=>{if(!v)return "";const d=new Date(v+"T00:00:00");return Number.isNaN(d.getTime())?v:d.toLocaleDateString("tr-TR")};
+  if(s&&e)return fmt(s)+" – "+fmt(e);
+  if(s)return fmt(s)+" itibarıyla";
+  if(e)return "Bitiş: "+fmt(e);
+  return "Süresiz";
 }
 function renderSponsorPopupManager(){
   const firmSelect=$("sponsorPopupFirm");
@@ -545,11 +563,14 @@ function renderSponsorPopupManager(){
   const list=$("sponsorPopupList");
   if(list){
     const rows=sponsorPopupRows();
-    list.innerHTML=rows.length?rows.map(f=>'<article class="sponsor-popup-row">'+
-      '<div><strong>'+esc(f.name)+'</strong><small>'+esc([f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / ")||"Bölge yok")+'</small></div>'+
-      '<span class="status-pill">'+(f.searchPopupActive?"Aktif":"Pasif")+'</span>'+
-      '<div class="row-actions"><button data-edit-sponsor-popup="'+esc(f.id)+'">Düzenle</button><button class="danger" data-remove-sponsor-popup="'+esc(f.id)+'">Kaldır</button></div>'+
-    '</article>').join(""):'<div class="empty">Henüz popup reklamı oluşturulmadı.</div>';
+    list.innerHTML=rows.length?rows.map(f=>{
+      const st=sponsorPopupScheduleState(f);
+      return '<article class="sponsor-popup-row">'+
+        '<div><strong>'+esc(f.name)+'</strong><small>'+esc([f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / ")||"Bölge yok")+'</small><small style="display:block;margin-top:4px;font-weight:800">📅 '+esc(sponsorPopupDateLabel(f))+'</small></div>'+
+        '<span class="status-pill">'+esc(st.label)+'</span>'+
+        '<div class="row-actions"><button data-toggle-sponsor-popup="'+esc(f.id)+'">'+(st.key==="passive"?"Aktif Yap":"Pasif Yap")+'</button><button data-edit-sponsor-popup="'+esc(f.id)+'">Düzenle</button><button class="danger" data-remove-sponsor-popup="'+esc(f.id)+'">Kaldır</button></div>'+
+      '</article>';
+    }).join(""):'<div class="empty">Henüz popup reklamı oluşturulmadı.</div>';
   }
 }
 async function loadSponsorCities(){
@@ -585,7 +606,9 @@ async function fillSponsorPopupForm(id){
   await loadSponsorCities();
   const f=firms.find(x=>x.id===id); if(!f)return;
   $("sponsorPopupFirm").value=f.id;
-  $("sponsorPopupActive").value=String(f.searchPopupActive!==false);
+  $("sponsorPopupActive").value=String(Boolean(f.searchPopupActive));
+  $("sponsorPopupStartDate").value=String(f.searchPopupStartDate||"").slice(0,10);
+  $("sponsorPopupEndDate").value=String(f.searchPopupEndDate||"").slice(0,10);
   $("sponsorPopupCity").value=f.searchPopupCity||f.city||"";
   await loadSponsorDistricts(f.searchPopupDistrict||"");
   $("sponsorPopupTitle").value=f.searchPopupTitle||f.name||"";
@@ -596,7 +619,7 @@ async function fillSponsorPopupForm(id){
   $("sponsorPopupTargetUrl").value=f.searchPopupTargetUrl||"";
 }
 function clearSponsorPopupForm(){
-  ["sponsorPopupFirm","sponsorPopupCity","sponsorPopupTitle","sponsorPopupText","sponsorPopupMediaUrl","sponsorPopupTargetUrl"].forEach(id=>{if($(id))$(id).value=""});
+  ["sponsorPopupFirm","sponsorPopupCity","sponsorPopupTitle","sponsorPopupText","sponsorPopupMediaUrl","sponsorPopupTargetUrl","sponsorPopupStartDate","sponsorPopupEndDate"].forEach(id=>{if($(id))$(id).value=""});
   if($("sponsorPopupDistrict")){$("sponsorPopupDistrict").innerHTML='<option value="">Tüm İlçeler</option>';$("sponsorPopupDistrict").disabled=true}
   if($("sponsorPopupActive"))$("sponsorPopupActive").value="true";
   if($("sponsorPopupMediaType"))$("sponsorPopupMediaType").value="image";
@@ -641,8 +664,12 @@ $("sponsorPopupUploadBtn")?.addEventListener("click",async()=>{
 $("saveSponsorPopupBtn")?.addEventListener("click",async()=>{
   const id=$("sponsorPopupFirm")?.value,msg=$("sponsorPopupMessage");
   if(!id){msg.className="message error";msg.textContent="Önce sponsor firma seçin.";return}
+  const start=$("sponsorPopupStartDate").value,end=$("sponsorPopupEndDate").value;
+  if(start&&end&&start>end){msg.className="message error";msg.textContent="Bitiş tarihi başlangıç tarihinden önce olamaz.";return}
   const patch={
     searchPopupActive:$("sponsorPopupActive").value==="true",
+    searchPopupStartDate:$("sponsorPopupStartDate").value,
+    searchPopupEndDate:$("sponsorPopupEndDate").value,
     searchPopupCity:$("sponsorPopupCity").value,
     searchPopupDistrict:$("sponsorPopupDistrict").value,
     searchPopupTitle:$("sponsorPopupTitle").value.trim(),
@@ -661,6 +688,13 @@ $("saveSponsorPopupBtn")?.addEventListener("click",async()=>{
 });
 $("clearSponsorPopupBtn")?.addEventListener("click",clearSponsorPopupForm);
 document.addEventListener("click",async e=>{
+  const toggle=e.target.closest("[data-toggle-sponsor-popup]");
+  if(toggle){
+    const f=firms.find(x=>x.id===toggle.dataset.toggleSponsorPopup);if(!f)return;
+    const next=!Boolean(f.searchPopupActive);
+    await db.collection("institutions").doc(f.id).set({searchPopupActive:next,searchPopupUpdatedAt:new Date().toISOString()},{merge:true});
+    await loadFirms();renderAll();return;
+  }
   const edit=e.target.closest("[data-edit-sponsor-popup]");
   if(edit){await fillSponsorPopupForm(edit.dataset.editSponsorPopup);setView("sponsor-ads");return}
   const remove=e.target.closest("[data-remove-sponsor-popup]");
