@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
+  <!-- firma-profile-fix: 20261004-3 -->
   <link rel="stylesheet" href="firma.css?v=20261004-2">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
@@ -250,7 +251,8 @@
         d.district=addrLoc.district;
       }
 
-      // Firma açıklamasında eski/yanlış şehir kalmışsa doğru konumla yeniden oluştur.
+      // Otomatik oluşturulmuş açıklamalar eski şehir bilgisi taşıyabilir.
+      // Bu tip açıklamaları her açılışta güncel il/ilçe bilgisinden yeniden üret.
       const sectorLabels={
         egitim:"eğitim",
         otomotiv:"otomotiv",
@@ -265,15 +267,13 @@
         alisveris:"alışveriş & yerel esnaf",
         diger:"yerel işletme"
       };
-      const loc=[d.district,d.city].filter(Boolean).join(", ");
-      const currentCity=String(d.city||"").trim();
+
       const storedDescription=String(d.description||"").trim();
-      const knownCities=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
-      const mentionedWrongCity=currentCity && knownCities.some(city=>{
-        if(city.toLocaleLowerCase("tr-TR")===currentCity.toLocaleLowerCase("tr-TR"))return false;
-        return storedDescription.toLocaleLowerCase("tr-TR").includes(city.toLocaleLowerCase("tr-TR"));
-      });
-      if(!storedDescription || mentionedWrongCity){
+      const autoDescription=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDescription)
+        && /\bişletmesidir\.?\s*$/i.test(storedDescription);
+      const loc=[d.district,d.city].filter(Boolean).join(", ");
+
+      if(!storedDescription || autoDescription){
         d.description=loc
           ? name+"; "+loc+" bölgesinde hizmet veren "+(sectorLabels[d.mainCategory]||"yerel")+" işletmesidir."
           : name+" hakkında temel firma bilgileri DijiyeSor üzerinden görüntülenebilir.";
