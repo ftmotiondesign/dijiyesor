@@ -26,7 +26,13 @@ const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 const initials=v=>String(v||"F").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
 
 function showLogin(){ $("loginView").classList.remove("hidden");$("panelView").classList.add("hidden") }
-function showPanel(){ $("loginView").classList.add("hidden");$("panelView").classList.remove("hidden");const requested=location.hash.replace("#","");if(requested)setView(requested);loadAll() }
+function showPanel(){
+  $("loginView").classList.add("hidden");
+  $("panelView").classList.remove("hidden");
+  const requested=location.hash.replace("#","");
+  setView(requested||"overview",{updateHash:false});
+  loadAll();
+}
 
 auth.onAuthStateChanged(user=>{
   if(user && String(user.email||"").toLowerCase()===ADMIN_EMAIL){showPanel()}
@@ -44,7 +50,13 @@ $("loginForm").addEventListener("submit",async e=>{
 });
 $("logoutBtn").addEventListener("click",()=>auth.signOut());
 
-function setView(name){
+function setView(name,opts={}){
+  const panel=document.querySelector('[data-panel-view="'+name+'"]');
+  if(!panel)name="overview";
+  if(opts.updateHash!==false){
+    const nextHash="#"+name;
+    if(location.hash!==nextHash) history.replaceState(null,"",location.pathname+location.search+nextHash);
+  }
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
   const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
@@ -80,6 +92,13 @@ document.addEventListener("click",e=>{
 loadAddedKeywords();
 
 $("mobileMenuBtn").addEventListener("click",()=>document.querySelector(".sidebar").classList.toggle("open"));
+
+window.addEventListener("hashchange",()=>{
+  if(!$("panelView")?.classList.contains("hidden")){
+    const requested=location.hash.replace("#","");
+    setView(requested||"overview",{updateHash:false});
+  }
+});
 
 
 const keywordSeedRows=[
