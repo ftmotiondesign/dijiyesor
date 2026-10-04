@@ -602,6 +602,11 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
     if(!x.searchPopupActive)return false;
+    const scope=String(x.searchPopupScope||"search_results");
+    if(scope==="sector"){
+      const targetSector=String(x.searchPopupSector||"").trim();
+      if(!targetSector || String(sectorValue||"")!==targetSector)return false;
+    }
     if(x.searchPopupStartDate){
       const start=new Date(x.searchPopupStartDate+"T00:00:00");
       if(!Number.isNaN(start.getTime())&&Date.now()<start.getTime())return false;
