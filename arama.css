@@ -802,3 +802,23 @@ button,input,select{font:inherit}
   color:#34435a;
   font-weight:900;
 }
+
+
+/* 360° filtresi sonuç sayacının yanında */
+.results-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.only360-btn-compact{min-height:34px;padding:4px 8px 4px 5px;gap:6px;border-radius:999px;box-shadow:none}
+.only360-btn-compact .only360-icon{min-width:34px;height:25px;padding:0 6px;border-radius:999px;font-size:10px}
+.only360-btn-compact .only360-copy{display:block}
+.only360-btn-compact .only360-copy strong{font-size:10.5px;white-space:nowrap}
+.only360-btn-compact .only360-switch{width:30px;height:17px;margin-left:1px}
+.only360-btn-compact .only360-switch:after{width:13px;height:13px}
+.only360-btn-compact.active .only360-switch:after{transform:translateX(13px)}
+@media(max-width:620px){
+  .results-head{flex-direction:row!important;align-items:flex-end!important;gap:10px!important}
+  .results-head>div:first-child{min-width:0;flex:1}
+  .results-head-actions{flex:0 0 auto;gap:6px}
+  .only360-btn-compact{width:auto!important}
+  .only360-btn-compact .only360-copy{display:none}
+  .only360-btn-compact .only360-icon{min-width:30px}
+  .count{padding:7px 9px;font-size:11px}
+}
