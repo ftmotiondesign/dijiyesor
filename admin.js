@@ -402,10 +402,11 @@ function openFirmModal(id){
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
   $("editLogoUrl").value=f.logoUrl||"";$("editCoverUrl").value=f.coverUrl||"";$("editTourUrl").value=f.tour360Url||f.virtualTourUrl||f.tour360||"";$("editVideoUrl").value=f.videoUrl||f.youtubeUrl||"";
+  updateFirmLogoPreview(f.logoUrl||"");
   updateFirmImagePreview(f.coverUrl||"");
-  $("editCoverFile").value="";
-  $("coverUploadMessage").className="message hidden";
-  $("coverUploadMessage").textContent="";
+  updateFirmVideoPreview(f.videoUrl||f.youtubeUrl||"");
+  ["editLogoFile","editCoverFile","editVideoFile"].forEach(x=>{if($(x))$(x).value=""});
+  ["logoUploadMessage","coverUploadMessage","videoUploadMessage"].forEach(x=>{if($(x)){ $(x).className="message hidden"; $(x).textContent=""; }});
   $("editVip").checked=Boolean(f.vip);$("editSponsored").checked=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
   $("firmFormMessage").className="message hidden";$("firmModal").classList.remove("hidden");
 }
@@ -422,74 +423,80 @@ $("quickFirmViewBtn")?.addEventListener("click",e=>{
 $("quickFirmPreviewFrame")?.addEventListener("load",()=>{
   if($("quickFirmPreviewLoading"))$("quickFirmPreviewLoading").style.display="none";
 });
-function updateFirmImagePreview(url){
-  const box=$("firmImagePreview");
-  if(!box)return;
+function updateFirmLogoPreview(url){
+  const box=$("firmLogoPreview"); if(!box)return;
   const value=String(url||"").trim();
-  box.innerHTML=value
-    ? '<img src="'+esc(value)+'" alt="Firma görseli önizleme">'
-    : '<span>Görsel yok</span>';
+  box.innerHTML=value?'<img src="'+esc(value)+'" alt="Firma logosu" style="object-fit:contain;background:#fff">':'<span>Logo yok</span>';
 }
+function updateFirmImagePreview(url){
+  const box=$("firmImagePreview"); if(!box)return;
+  const value=String(url||"").trim();
+  box.innerHTML=value?'<img src="'+esc(value)+'" alt="Firma görseli önizleme">':'<span>Görsel yok</span>';
+}
+function updateFirmVideoPreview(url){
+  const box=$("firmVideoPreview"); if(!box)return;
+  const value=String(url||"").trim();
+  box.innerHTML=value?'<video src="'+esc(value)+'" controls preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video>':'<span>Video yok</span>';
+}
+$("editLogoUrl")?.addEventListener("input",e=>updateFirmLogoPreview(e.target.value));
 $("editCoverUrl")?.addEventListener("input",e=>updateFirmImagePreview(e.target.value));
-$("chooseCoverFileBtn")?.addEventListener("click",()=>$("editCoverFile")?.click());
-$("clearCoverImageBtn")?.addEventListener("click",()=>{
-  $("editCoverUrl").value="";
-  $("editCoverFile").value="";
-  updateFirmImagePreview("");
-  const msg=$("coverUploadMessage");
-  if(msg){msg.className="message success";msg.textContent="Görsel kaldırıldı. Kaydet butonuna basınca işlem tamamlanır."}
-});
-function uploadFirmImage(file){
+$("editVideoUrl")?.addEventListener("input",e=>updateFirmVideoPreview(e.target.value));
+
+function uploadFirmMedia(file,kind,msgId){
   return new Promise((resolve,reject)=>{
     if(!file)return resolve("");
     if(!auth.currentUser)return reject(new Error("Oturum bulunamadı."));
-    if(!file.type.startsWith("image/"))return reject(new Error("Sadece görsel dosyası yükleyebilirsiniz."));
-    if(file.size>10*1024*1024)return reject(new Error("Görsel en fazla 10 MB olabilir."));
-    const msg=$("coverUploadMessage");
+    const isImage=file.type.startsWith("image/");
+    const isVideo=file.type.startsWith("video/");
+    if(kind==="image"&&!isImage)return reject(new Error("Lütfen bir görsel dosyası seçin."));
+    if(kind==="video"&&!isVideo)return reject(new Error("Lütfen bir video dosyası seçin."));
+    const limit=kind==="video"?100*1024*1024:10*1024*1024;
+    if(file.size>limit)return reject(new Error(kind==="video"?"Video en fazla 100 MB olabilir.":"Görsel en fazla 10 MB olabilir."));
+    const msg=$(msgId);
     const fd=new FormData();
     fd.append("file",file);
     fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
     const xhr=new XMLHttpRequest();
-    xhr.open("POST","https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/image/upload",true);
-    xhr.timeout=30000;
+    const resource=kind==="video"?"video":"image";
+    xhr.open("POST","https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/"+resource+"/upload",true);
+    xhr.timeout=kind==="video"?120000:45000;
     xhr.onload=()=>{
-      let data={};
-      try{data=JSON.parse(xhr.responseText||"{}")}catch(_){}
-      if(xhr.status>=200&&xhr.status<300&&data.secure_url){
-        resolve(data.secure_url);
-      }else{
-        const detail=data?.error?.message||("HTTP "+xhr.status);
-        reject(new Error(detail));
-      }
+      let data={}; try{data=JSON.parse(xhr.responseText||"{}")}catch(_){}
+      if(xhr.status>=200&&xhr.status<300&&data.secure_url)resolve(data.secure_url);
+      else reject(new Error(data?.error?.message||("HTTP "+xhr.status)));
     };
-    xhr.onerror=()=>reject(new Error("Cloudinary bağlantısı kurulamadı."));
+    xhr.onerror=()=>reject(new Error("Dosya yükleme bağlantısı kurulamadı."));
     xhr.ontimeout=()=>reject(new Error("Yükleme zaman aşımına uğradı."));
     xhr.upload.onprogress=e=>{
-      if(e.lengthComputable){
-        msg.className="message";
-        msg.textContent="%"+Math.round(e.loaded/e.total*100)+" yükleniyor...";
-      }
+      if(msg&&e.lengthComputable){msg.className="message";msg.textContent="%"+Math.round(e.loaded/e.total*100)+" yükleniyor...";}
     };
     xhr.send(fd);
   });
 }
 
+$("chooseLogoFileBtn")?.addEventListener("click",()=>$("editLogoFile")?.click());
+$("clearLogoBtn")?.addEventListener("click",()=>{$("editLogoUrl").value="";$("editLogoFile").value="";updateFirmLogoPreview("");$("logoUploadMessage").className="message success";$("logoUploadMessage").textContent="Logo kaldırıldı. Kaydet'e basın.";});
+$("editLogoFile")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0]; if(!file)return; const msg=$("logoUploadMessage");
+  try{msg.className="message";msg.textContent="Logo yükleniyor...";const url=await uploadFirmMedia(file,"image","logoUploadMessage");$("editLogoUrl").value=url;updateFirmLogoPreview(url);msg.className="message success";msg.textContent="Logo yüklendi ✓ Kaydet'e basın.";}
+  catch(err){msg.className="message error";msg.textContent="Logo yüklenemedi: "+(err.message||"Bilinmeyen hata");}
+});
+
+$("chooseCoverFileBtn")?.addEventListener("click",()=>$("editCoverFile")?.click());
+$("clearCoverImageBtn")?.addEventListener("click",()=>{$("editCoverUrl").value="";$("editCoverFile").value="";updateFirmImagePreview("");$("coverUploadMessage").className="message success";$("coverUploadMessage").textContent="Görsel kaldırıldı. Kaydet'e basın.";});
 $("editCoverFile")?.addEventListener("change",async e=>{
-  const file=e.target.files?.[0];
-  if(!file)return;
-  const msg=$("coverUploadMessage");
-  try{
-    msg.className="message";msg.textContent="Görsel yükleniyor...";
-    const url=await uploadFirmImage(file);
-    $("editCoverUrl").value=url;
-    updateFirmImagePreview(url);
-    msg.className="message success";
-    msg.textContent="Görsel yüklendi ✓ Şimdi Kaydet butonuna basın.";
-  }catch(err){
-    msg.className="message error";
-    msg.textContent="Görsel yüklenemedi: "+(err.message||"Bilinmeyen hata");
-  }
-})
+  const file=e.target.files?.[0]; if(!file)return; const msg=$("coverUploadMessage");
+  try{msg.className="message";msg.textContent="Görsel yükleniyor...";const url=await uploadFirmMedia(file,"image","coverUploadMessage");$("editCoverUrl").value=url;updateFirmImagePreview(url);msg.className="message success";msg.textContent="Görsel yüklendi ✓ Kaydet'e basın.";}
+  catch(err){msg.className="message error";msg.textContent="Görsel yüklenemedi: "+(err.message||"Bilinmeyen hata");}
+});
+
+$("chooseVideoFileBtn")?.addEventListener("click",()=>$("editVideoFile")?.click());
+$("clearVideoBtn")?.addEventListener("click",()=>{$("editVideoUrl").value="";$("editVideoFile").value="";updateFirmVideoPreview("");$("videoUploadMessage").className="message success";$("videoUploadMessage").textContent="Video kaldırıldı. Kaydet'e basın.";});
+$("editVideoFile")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0]; if(!file)return; const msg=$("videoUploadMessage");
+  try{msg.className="message";msg.textContent="Video yükleniyor...";const url=await uploadFirmMedia(file,"video","videoUploadMessage");$("editVideoUrl").value=url;updateFirmVideoPreview(url);msg.className="message success";msg.textContent="Video yüklendi ✓ Kaydet'e basın.";}
+  catch(err){msg.className="message error";msg.textContent="Video yüklenemedi: "+(err.message||"Bilinmeyen hata");}
+});
 
 $("addFirmBtn").addEventListener("click",()=>openFirmModal());
 $("newFirmBtn").addEventListener("click",()=>openFirmModal());
