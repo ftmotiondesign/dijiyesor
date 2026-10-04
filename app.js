@@ -371,6 +371,15 @@ function resultCardVisual(i){
 const TURKEY_PROVINCES=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
 const cityHeroCache=new Map();
 let cityHeroRequestToken=0;
+let cityBannersMasterActiveCache=null;
+async function loadCityBannersMasterActive(){
+  if(cityBannersMasterActiveCache!==null)return cityBannersMasterActiveCache;
+  try{
+    const snap=await db.collection("siteSettings").doc("cityBanners").get();
+    cityBannersMasterActiveCache=snap.exists&&snap.data()?.active===true;
+  }catch(_){cityBannersMasterActiveCache=false}
+  return cityBannersMasterActiveCache;
+}
 function cityHeroKey(value){
   return String(value||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 }
@@ -422,6 +431,10 @@ async function updateCityHero(){
   if(!hero||!img||!title||!subtitle||!cityEl)return;
   const city=String(cityEl.value||"").trim();
   const district=String(districtEl?.value||"").trim();
+  const masterActive=await loadCityBannersMasterActive();
+  if(!masterActive){
+    hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");img.removeAttribute("src");return;
+  }
   if(!city){
     hero.classList.add("hidden");hero.setAttribute("aria-hidden","true");img.removeAttribute("src");
     return;
