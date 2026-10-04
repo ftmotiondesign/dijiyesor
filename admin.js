@@ -398,7 +398,7 @@ function openFirmModal(id){
     $("quickFirmViewBtn").href=id?"firma.html?id="+encodeURIComponent(id):"#";
     $("quickFirmViewBtn").style.display=id?"inline-flex":"none";
   }
-  $("editName").value=f.name||"";$("editStatus").value=f.status||"active";$("editMainCategory").value=f.mainCategory||"diger";$("editSubCategory").value=f.subCategory||f.category||"";
+  $("editName").value=f.name||"";$("editStatus").value=f.status||"active";if($("quickFirmStatusBtn")){$("quickFirmStatusBtn").textContent=String(f.status||"active")==="passive"?"Aktif Yap":"Pasife Al";$("quickFirmStatusBtn").classList.toggle("danger",String(f.status||"active")!=="passive");}$("editMainCategory").value=f.mainCategory||"diger";$("editSubCategory").value=f.subCategory||f.category||"";
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
   $("editLogoUrl").value=f.logoUrl||"";$("editCoverUrl").value=f.coverUrl||"";$("editTourUrl").value=f.tour360Url||f.virtualTourUrl||f.tour360||"";$("editVideoUrl").value=f.videoUrl||f.youtubeUrl||"";
@@ -410,6 +410,26 @@ function openFirmModal(id){
   $("editVip").checked=Boolean(f.vip);$("editSponsored").checked=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
   $("firmFormMessage").className="message hidden";$("firmModal").classList.remove("hidden");
 }
+$("quickFirmStatusBtn")?.addEventListener("click",async()=>{
+  const id=$("firmId")?.value||"";
+  if(!id)return;
+  const current=$("editStatus").value||"active";
+  const next=current==="passive"?"active":"passive";
+  try{
+    $("quickFirmStatusBtn").disabled=true;
+    await db.collection("institutions").doc(id).set({status:next,updatedAt:new Date().toISOString()},{merge:true});
+    $("editStatus").value=next;
+    $("quickFirmStatusBtn").textContent=next==="passive"?"Aktif Yap":"Pasife Al";
+    $("quickFirmStatusBtn").classList.toggle("danger",next!=="passive");
+    await loadFirms();
+    renderAll();
+  }catch(err){
+    alert("Firma durumu değiştirilemedi: "+(err.message||"Bilinmeyen hata"));
+  }finally{
+    $("quickFirmStatusBtn").disabled=false;
+  }
+});
+
 $("quickFirmViewBtn")?.addEventListener("click",e=>{
   e.preventDefault();
   const firmId=$("firmId")?.value||"";
