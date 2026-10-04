@@ -554,11 +554,10 @@ function sponsorPopupDateLabel(f){
   return "Süresiz";
 }
 function renderSponsorPopupManager(){
-  const firmSelect=$("sponsorPopupFirm");
-  if(firmSelect){
-    const current=firmSelect.value;
-    firmSelect.innerHTML='<option value="">Firma seçin</option>'+firms.map(f=>'<option value="'+esc(f.id)+'">'+esc(f.name)+' · '+esc([f.city,f.district].filter(Boolean).join(" / "))+'</option>').join("");
-    if(firms.some(f=>f.id===current))firmSelect.value=current;
+  const firmInput=$("sponsorPopupFirmSearch");
+  if(firmInput && $("sponsorPopupFirm")?.value){
+    const current=firms.find(f=>f.id===$("sponsorPopupFirm").value);
+    if(current&&!firmInput.value)firmInput.value=current.name||"";
   }
   const list=$("sponsorPopupList");
   if(list){
@@ -566,7 +565,7 @@ function renderSponsorPopupManager(){
     list.innerHTML=rows.length?rows.map(f=>{
       const st=sponsorPopupScheduleState(f);
       return '<article class="sponsor-popup-row">'+
-        '<div><strong>'+esc(f.name)+'</strong><small>'+esc([f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / ")||"Bölge yok")+'</small><small style="display:block;margin-top:4px;font-weight:800">📅 '+esc(sponsorPopupDateLabel(f))+'</small></div>'+
+        '<div><strong>'+esc(f.name)+'</strong><small>'+esc((f.searchPopupCity==="__ALL__"?"Tüm Türkiye":[f.searchPopupCity||f.city,f.searchPopupDistrict].filter(Boolean).join(" / "))||"Bölge yok")+'</small><small style="display:block;margin-top:4px;font-weight:800">📅 '+esc(sponsorPopupDateLabel(f))+'</small></div>'+
         '<span class="status-pill">'+esc(st.label)+'</span>'+
         '<div class="row-actions"><button data-toggle-sponsor-popup="'+esc(f.id)+'">'+(st.key==="passive"?"Aktif Yap":"Pasif Yap")+'</button><button data-edit-sponsor-popup="'+esc(f.id)+'">Düzenle</button><button class="danger" data-remove-sponsor-popup="'+esc(f.id)+'">Kaldır</button></div>'+
       '</article>';
@@ -580,7 +579,7 @@ async function loadSponsorCities(){
   try{
     const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
     const j=await r.json();
-    city.innerHTML='<option value="">İl seçin</option>';
+    city.innerHTML='<option value="">İl seçin</option><option value="__ALL__">Tüm Türkiye</option>';
     (j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr")).forEach(x=>{
       const o=document.createElement("option");o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
     });
@@ -591,7 +590,7 @@ async function loadSponsorDistricts(selectedValue=""){
   if(!city||!district)return;
   district.disabled=true;district.innerHTML='<option value="">Tüm İlçeler</option>';
   const id=city.options[city.selectedIndex]?.dataset?.id;
-  if(!city.value||!id)return;
+  if(!city.value||city.value==="__ALL__"||!id)return;
   try{
     const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");
     const j=await r.json();
@@ -606,6 +605,7 @@ async function fillSponsorPopupForm(id){
   await loadSponsorCities();
   const f=firms.find(x=>x.id===id); if(!f)return;
   $("sponsorPopupFirm").value=f.id;
+  if($("sponsorPopupFirmSearch"))$("sponsorPopupFirmSearch").value=f.name||"";
   $("sponsorPopupActive").value=String(Boolean(f.searchPopupActive));
   $("sponsorPopupStartDate").value=String(f.searchPopupStartDate||"").slice(0,10);
   $("sponsorPopupEndDate").value=String(f.searchPopupEndDate||"").slice(0,10);
@@ -619,12 +619,14 @@ async function fillSponsorPopupForm(id){
   $("sponsorPopupTargetUrl").value=f.searchPopupTargetUrl||"";
 }
 function clearSponsorPopupForm(){
-  ["sponsorPopupFirm","sponsorPopupCity","sponsorPopupTitle","sponsorPopupText","sponsorPopupMediaUrl","sponsorPopupTargetUrl","sponsorPopupStartDate","sponsorPopupEndDate"].forEach(id=>{if($(id))$(id).value=""});
+  ["sponsorPopupFirm","sponsorPopupFirmSearch","sponsorPopupCity","sponsorPopupTitle","sponsorPopupText","sponsorPopupMediaUrl","sponsorPopupTargetUrl","sponsorPopupStartDate","sponsorPopupEndDate"].forEach(id=>{if($(id))$(id).value=""});
   if($("sponsorPopupDistrict")){$("sponsorPopupDistrict").innerHTML='<option value="">Tüm İlçeler</option>';$("sponsorPopupDistrict").disabled=true}
   if($("sponsorPopupActive"))$("sponsorPopupActive").value="true";
   if($("sponsorPopupMediaType"))$("sponsorPopupMediaType").value="image";
   if($("sponsorPopupButtonText"))$("sponsorPopupButtonText").value="Firmayı İncele";
   if($("sponsorPopupMediaFile"))$("sponsorPopupMediaFile").value="";
+  if($("sponsorPopupFirmResults"))$("sponsorPopupFirmResults").classList.add("hidden");
+  if($("sponsorPopupEditorTitle"))$("sponsorPopupEditorTitle").textContent="Yeni reklam oluştur";
 }
 function uploadSponsorMedia(file){
   return new Promise((resolve,reject)=>{
@@ -645,12 +647,30 @@ function uploadSponsorMedia(file){
   });
 }
 $("sponsorPopupCity")?.addEventListener("change",()=>loadSponsorDistricts());
-$("sponsorPopupFirm")?.addEventListener("change",async e=>{
-  const f=firms.find(x=>x.id===e.target.value);if(!f)return;
-  await loadSponsorCities();
-  $("sponsorPopupCity").value=f.city||"";
-  await loadSponsorDistricts(f.district||"");
-  if(!$("sponsorPopupTitle").value)$("sponsorPopupTitle").value=f.name||"";
+function renderSponsorFirmResults(query){
+  const host=$("sponsorPopupFirmResults");if(!host)return;
+  const q=norm(query);
+  const list=firms.filter(f=>!q||norm([f.name,f.city,f.district].join(" ")).includes(q)).slice(0,20);
+  host.innerHTML=list.length?list.map(f=>
+    '<button type="button" class="firm-picker-option" data-pick-sponsor-firm="'+esc(f.id)+'"><strong>'+esc(f.name)+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></button>'
+  ).join(""):'<div class="firm-picker-empty">Firma bulunamadı.</div>';
+}
+$("sponsorPopupFirmSearch")?.addEventListener("focus",e=>{renderSponsorFirmResults(e.target.value);$("sponsorPopupFirmResults")?.classList.remove("hidden")});
+$("sponsorPopupFirmSearch")?.addEventListener("input",e=>{$("sponsorPopupFirm").value="";renderSponsorFirmResults(e.target.value);$("sponsorPopupFirmResults")?.classList.remove("hidden")});
+document.addEventListener("click",async e=>{
+  const pick=e.target.closest("[data-pick-sponsor-firm]");
+  if(pick){
+    const f=firms.find(x=>x.id===pick.dataset.pickSponsorFirm);if(!f)return;
+    $("sponsorPopupFirm").value=f.id;
+    $("sponsorPopupFirmSearch").value=f.name||"";
+    $("sponsorPopupFirmResults").classList.add("hidden");
+    await loadSponsorCities();
+    $("sponsorPopupCity").value=f.city||"";
+    await loadSponsorDistricts(f.district||"");
+    if(!$("sponsorPopupTitle").value)$("sponsorPopupTitle").value=f.name||"";
+    return;
+  }
+  if(!e.target.closest(".firm-picker"))$("sponsorPopupFirmResults")?.classList.add("hidden");
 });
 $("sponsorPopupUploadBtn")?.addEventListener("click",async()=>{
   const file=$("sponsorPopupMediaFile")?.files?.[0],msg=$("sponsorPopupUploadMessage");if(!file)return;
@@ -684,9 +704,17 @@ $("saveSponsorPopupBtn")?.addEventListener("click",async()=>{
     await db.collection("institutions").doc(id).set(patch,{merge:true});
     msg.className="message success";msg.textContent="Popup reklamı kaydedildi.";
     await loadFirms();renderAll();
+    setTimeout(()=>$("sponsorPopupEditorModal")?.classList.add("hidden"),700);
   }catch(e){msg.className="message error";msg.textContent="Kaydedilemedi: "+(e.message||"")}
 });
 $("clearSponsorPopupBtn")?.addEventListener("click",clearSponsorPopupForm);
+$("newSponsorPopupBtn")?.addEventListener("click",async()=>{
+  clearSponsorPopupForm();
+  await loadSponsorCities();
+  $("sponsorPopupEditorTitle").textContent="Yeni reklam oluştur";
+  $("sponsorPopupEditorModal").classList.remove("hidden");
+  setTimeout(()=>$("sponsorPopupFirmSearch")?.focus(),50);
+});
 document.addEventListener("click",async e=>{
   const toggle=e.target.closest("[data-toggle-sponsor-popup]");
   if(toggle){
@@ -696,7 +724,12 @@ document.addEventListener("click",async e=>{
     await loadFirms();renderAll();return;
   }
   const edit=e.target.closest("[data-edit-sponsor-popup]");
-  if(edit){await fillSponsorPopupForm(edit.dataset.editSponsorPopup);setView("sponsor-ads");return}
+  if(edit){
+    await fillSponsorPopupForm(edit.dataset.editSponsorPopup);
+    if($("sponsorPopupEditorTitle"))$("sponsorPopupEditorTitle").textContent="Reklamı Düzenle";
+    $("sponsorPopupEditorModal")?.classList.remove("hidden");
+    return;
+  }
   const remove=e.target.closest("[data-remove-sponsor-popup]");
   if(remove){
     await db.collection("institutions").doc(remove.dataset.removeSponsorPopup).set({
