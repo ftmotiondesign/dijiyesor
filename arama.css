@@ -508,11 +508,10 @@ button,input,select{font:inherit}
 
 /* Sonuçlar geldikten sonra kompakt arama alanı */
 .search-area.compact{
-  position:sticky;
-  top:0;
-  z-index:25;
-  background:rgba(255,255,255,.97);
-  backdrop-filter:blur(8px);
+  position:relative;
+  top:auto;
+  z-index:auto;
+  background:#fff;
   padding-top:8px;
   padding-bottom:8px;
   border-bottom:1px solid #e6edf7;
@@ -579,15 +578,17 @@ button,input,select{font:inherit}
   }
 }
 
-/* Sticky arama alanı altında hedeflerin görünür kalması */
+/* Arama alanı sticky değil; sonuç hedefleri normal akışta */
+#resultsHead,
 #locationNotice,
 #companyGrid{
-  scroll-margin-top:90px;
+  scroll-margin-top:12px;
 }
 @media(max-width:700px){
+  #resultsHead,
   #locationNotice,
   #companyGrid{
-    scroll-margin-top:10px;
+    scroll-margin-top:8px;
   }
 }
 
