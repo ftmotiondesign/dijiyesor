@@ -219,6 +219,37 @@ function campaignCard(i){
     '</div>'+
   '</article>';
 }
+function automaticCategoryDescription(i){
+  const sub=String(i.subCategory||i.category||"").trim();
+  const descriptions={
+    surucu:"Ehliyet eğitimi ve direksiyon dersleri sunar.",
+    kres:"Okul öncesi eğitim ve çocuk gelişimi hizmetleri sunar.",
+    dershane:"Sınav hazırlık ve akademik destek programları sunar.",
+    yurt:"Öğrencilere konaklama ve yurt hizmetleri sunar.",
+    oto_servis:"Araç bakım, onarım ve teknik servis hizmetleri sunar.",
+    ekspertiz:"Araç ekspertiz ve kontrol hizmetleri sunar.",
+    kafe:"Kafe ve yiyecek-içecek hizmetleri sunar.",
+    restoran:"Yeme-içme ve restoran hizmetleri sunar.",
+    dis_klinigi:"Ağız ve diş sağlığı hizmetleri sunar.",
+    psikolog:"Psikolojik danışmanlık ve destek hizmetleri sunar.",
+    guzellik:"Güzellik ve kişisel bakım hizmetleri sunar.",
+    kuafor:"Saç bakım ve kuaförlük hizmetleri sunar.",
+    mobilya:"Mobilya ve yaşam alanı çözümleri sunar.",
+    emlak_ofisi:"Gayrimenkul danışmanlığı ve emlak hizmetleri sunar.",
+    otel:"Konaklama ve misafir ağırlama hizmetleri sunar.",
+    fotograf:"Fotoğraf çekimi ve görsel hizmetler sunar.",
+    video:"Video çekimi ve prodüksiyon hizmetleri sunar.",
+    nakliyat:"Taşımacılık ve nakliye hizmetleri sunar.",
+    hukuk:"Hukuki danışmanlık ve avukatlık hizmetleri sunar.",
+    muhasebe:"Muhasebe ve mali müşavirlik hizmetleri sunar.",
+    web:"Web tasarım ve dijital çözümler sunar.",
+    sosyal_medya:"Sosyal medya yönetimi ve dijital iletişim hizmetleri sunar.",
+    veteriner:"Veterinerlik ve hayvan sağlığı hizmetleri sunar.",
+    market:"Market ve günlük ihtiyaç ürünleri sunar."
+  };
+  return descriptions[sub]||"İhtiyacınıza yönelik hizmet ve çözümler sunar.";
+}
+
 function resultCardFallback(i){
   const main=String(i.mainCategory||"diger");
   const sub=String(i.subCategory||i.category||"");
@@ -327,14 +358,11 @@ function render(data){
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
     const storedDesc=String(i.description||"").trim();
-    const autoStored=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDesc);
-    const storedHasCurrentCity=!i.city || norm(storedDesc).includes(norm(i.city));
-    const desc=(storedDesc && !autoStored && storedHasCurrentCity)
+    const autoStored=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDesc)
+      || /\bişletmesidir\.?\s*$/i.test(storedDesc);
+    const desc=(storedDesc && !autoStored)
       ? storedDesc
-      : ((i.highlights||[]).slice(0,2).join(" · ")
-        || ([i.district,i.city].filter(Boolean).join(", ")
-          ? i.name+"; "+[i.district,i.city].filter(Boolean).join(", ")+" bölgesinde hizmet veren işletmedir."
-          : "Firma hakkında ayrıntılı bilgi için tanıtım sayfasını inceleyin."));
+      : automaticCategoryDescription(i);
     const badges=[
       i.vip?'<span class="result-badge vip">VIP</span>':'',
       i.has360Tour?'<span class="result-badge">360° Tur</span>':'',
