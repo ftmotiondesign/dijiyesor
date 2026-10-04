@@ -340,8 +340,8 @@ function resultCardVisual(i){
   images=[...new Set(images)].slice(0,6);
 
   if(images.length){
-    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy">').join("");
-    return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0">'+
+    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy">').join("");
+    return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'">'+
       slides+
       (images.length>1?'<button type="button" class="result-slide-nav prev" data-result-slide-prev aria-label="Önceki görsel">‹</button><button type="button" class="result-slide-nav next" data-result-slide-next aria-label="Sonraki görsel">›</button><span class="result-slide-count">1 / '+images.length+'</span>':'')+
       (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
@@ -989,3 +989,93 @@ document.addEventListener("click",e=>{
   e.stopPropagation();
   moveResultCardSlider(prev||next,prev?-1:1);
 });
+
+
+function initResultImageLightbox(){
+  let modal=document.getElementById("resultImageLightbox");
+  if(!modal){
+    modal=document.createElement("div");
+    modal.id="resultImageLightbox";
+    modal.className="result-image-lightbox hidden";
+    modal.innerHTML=
+      '<div class="result-image-lightbox-backdrop" data-lightbox-close></div>'+
+      '<div class="result-image-lightbox-card" role="dialog" aria-modal="true" aria-label="Firma görsel galerisi">'+
+        '<div class="result-image-lightbox-head">'+
+          '<div><small>FİRMA GÖRSELLERİ</small><strong id="resultLightboxFirmName">Firma</strong></div>'+
+          '<button type="button" class="result-image-lightbox-close" data-lightbox-close aria-label="Kapat">×</button>'+
+        '</div>'+
+        '<div class="result-image-lightbox-stage">'+
+          '<img id="resultLightboxImage" alt="Firma görseli">'+
+          '<button type="button" class="result-image-lightbox-nav prev" data-lightbox-prev aria-label="Önceki görsel">‹</button>'+
+          '<button type="button" class="result-image-lightbox-nav next" data-lightbox-next aria-label="Sonraki görsel">›</button>'+
+          '<span id="resultLightboxCount" class="result-image-lightbox-count"></span>'+
+        '</div>'+
+        '<div class="result-image-lightbox-foot">'+
+          '<span>Görselleri sağ / sol oklarla veya mobilde kaydırarak gezebilirsin.</span>'+
+          '<a id="resultLightboxFirmLink" href="arama.html">Firmayı İncele</a>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(modal);
+  }
+
+  const img=document.getElementById("resultLightboxImage");
+  const name=document.getElementById("resultLightboxFirmName");
+  const count=document.getElementById("resultLightboxCount");
+  const link=document.getElementById("resultLightboxFirmLink");
+  let images=[],index=0;
+
+  const render=()=>{
+    if(!images.length)return;
+    index=(index+images.length)%images.length;
+    img.src=images[index];
+    count.textContent=(index+1)+" / "+images.length;
+    const show=images.length>1;
+    modal.querySelector("[data-lightbox-prev]").style.display=show?"grid":"none";
+    modal.querySelector("[data-lightbox-next]").style.display=show?"grid":"none";
+  };
+  const open=(slider,clicked)=>{
+    images=[...slider.querySelectorAll("[data-result-slide]")].map(x=>x.src).filter(Boolean);
+    index=Math.max(0,[...slider.querySelectorAll("[data-result-slide]")].indexOf(clicked));
+    name.textContent=slider.dataset.resultFirmName||"Firma";
+    link.href="firma.html?id="+encodeURIComponent(slider.dataset.resultFirmId||"");
+    render();
+    modal.classList.remove("hidden");
+    document.body.style.overflow="hidden";
+  };
+  const close=()=>{
+    modal.classList.add("hidden");
+    img.removeAttribute("src");
+    document.body.style.overflow="";
+  };
+  const move=delta=>{if(images.length>1){index+=delta;render()}};
+
+  document.addEventListener("click",e=>{
+    const clicked=e.target.closest("[data-result-image-open]");
+    if(clicked){
+      e.preventDefault();
+      e.stopPropagation();
+      const slider=clicked.closest("[data-result-slider]");
+      if(slider)open(slider,clicked);
+      return;
+    }
+    if(e.target.closest("[data-lightbox-close]")){e.preventDefault();close();return}
+    if(e.target.closest("[data-lightbox-prev]")){e.preventDefault();move(-1);return}
+    if(e.target.closest("[data-lightbox-next]")){e.preventDefault();move(1);return}
+  });
+
+  let touchX=0;
+  modal.addEventListener("touchstart",e=>{touchX=e.touches[0]?.clientX||0},{passive:true});
+  modal.addEventListener("touchend",e=>{
+    const end=e.changedTouches[0]?.clientX||0;
+    const diff=end-touchX;
+    if(Math.abs(diff)>45)move(diff<0?1:-1);
+  },{passive:true});
+
+  document.addEventListener("keydown",e=>{
+    if(modal.classList.contains("hidden"))return;
+    if(e.key==="Escape")close();
+    if(e.key==="ArrowLeft")move(-1);
+    if(e.key==="ArrowRight")move(1);
+  });
+}
+document.addEventListener("DOMContentLoaded",initResultImageLightbox);
