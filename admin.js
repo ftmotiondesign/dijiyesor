@@ -847,6 +847,7 @@ async function fillSponsorPopupForm(id){
   $("sponsorPopupTitle").value=f.searchPopupTitle||f.name||"";
   $("sponsorPopupText").value=f.searchPopupText||"";
   $("sponsorPopupMediaType").value=f.searchPopupMediaType||"image";
+  updateSponsorPopupMediaSpecs();
   $("sponsorPopupFrequency").value=f.searchPopupFrequency||"session";
   if($("sponsorPopupScope"))$("sponsorPopupScope").value=f.searchPopupScope||"search_results";
   if($("sponsorPopupSector")){
@@ -862,6 +863,7 @@ function clearSponsorPopupForm(){
   if($("sponsorPopupDistrict")){$("sponsorPopupDistrict").innerHTML='<option value="">Tüm İlçeler</option>';$("sponsorPopupDistrict").disabled=true}
   if($("sponsorPopupActive"))$("sponsorPopupActive").value="true";
   if($("sponsorPopupMediaType"))$("sponsorPopupMediaType").value="image";
+  updateSponsorPopupMediaSpecs();
   if($("sponsorPopupFrequency"))$("sponsorPopupFrequency").value="session";
   if($("sponsorPopupScope"))$("sponsorPopupScope").value="search_results";
   if($("sponsorPopupSector")){$("sponsorPopupSector").value="";$("sponsorPopupSector").disabled=true}
@@ -870,6 +872,19 @@ function clearSponsorPopupForm(){
   if($("sponsorPopupFirmResults"))$("sponsorPopupFirmResults").classList.add("hidden");
   if($("sponsorPopupEditorTitle"))$("sponsorPopupEditorTitle").textContent="Yeni reklam oluştur";
 }
+function updateSponsorPopupMediaSpecs(){
+  const type=$("sponsorPopupMediaType")?.value||"image";
+  const box=$("sponsorPopupMediaSpecs");
+  if(!box)return;
+  if(type==="video"){
+    box.innerHTML='<strong>Önerilen video ölçüsü: 1200 × 800 px</strong><span>3:2 yatay oran · MP4 önerilir · Kısa video kullanın</span>';
+  }else{
+    box.innerHTML='<strong>Önerilen görsel ölçüsü: 1200 × 800 px</strong><span>3:2 yatay oran · JPG, PNG veya WebP</span>';
+  }
+}
+
+$("sponsorPopupMediaType")?.addEventListener("change",updateSponsorPopupMediaSpecs);
+
 function uploadSponsorMedia(file){
   return new Promise((resolve,reject)=>{
     if(!file)return reject(new Error("Dosya seçilmedi."));
@@ -926,7 +941,7 @@ $("sponsorPopupUploadBtn")?.addEventListener("click",async()=>{
   try{
     msg.textContent="Yükleniyor...";
     const x=await uploadSponsorMedia(file);
-    $("sponsorPopupMediaUrl").value=x.url;$("sponsorPopupMediaType").value=x.type;
+    $("sponsorPopupMediaUrl").value=x.url;$("sponsorPopupMediaType").value=x.type;updateSponsorPopupMediaSpecs();
     msg.textContent="Yüklendi ✓";
   }catch(e){msg.textContent="Yüklenemedi: "+(e.message||"")}
 });
