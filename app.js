@@ -539,8 +539,10 @@ async function initHome(){
       history.replaceState(null,"",url.pathname+"?"+url.searchParams.toString());
     }catch(_){}
     setTimeout(()=>{
+      const notice=document.getElementById("locationNotice");
       const grid=document.getElementById("companyGrid");
-      if(grid)grid.scrollIntoView({behavior:"smooth",block:"start"});
+      const target=(!city.value && notice && !notice.classList.contains("hidden")) ? notice : grid;
+      if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
     },120);
   };
 
