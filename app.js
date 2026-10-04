@@ -704,6 +704,7 @@ function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
     if(mapFrame)mapFrame.removeAttribute("src");
   }
 
+  hideSearchSponsorReopen();
   modal.classList.remove("hidden");
   document.body.classList.add("djs-modal-open");
   document.body.style.overflow="hidden";
