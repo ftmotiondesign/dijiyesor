@@ -481,3 +481,10 @@
 .sponsor-specs b{color:#263249;font-weight:900;margin-right:4px}
 .sponsor-area-card.is-active .sponsor-specs span{background:#fff;border-color:#dce9fb}
 .sponsor-area-card.is-passive .sponsor-specs{opacity:.82}
+
+.cover-slider-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.cover-slider-thumb{position:relative;height:88px;border:1px solid #dfe5ee;border-radius:12px;overflow:hidden;background:#f8fafc}
+.cover-slider-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cover-slider-thumb button{position:absolute;right:6px;top:6px;width:24px;height:24px;border:0;border-radius:999px;background:rgba(15,23,42,.72);color:#fff;font-size:17px;cursor:pointer}
+.cover-slider-thumb span{position:absolute;left:7px;bottom:6px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:rgba(15,23,42,.68);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.cover-slider-empty{grid-column:1/-1;padding:12px;border:1px dashed #cbd5e1;border-radius:10px;color:#64748b;font-size:12px}
