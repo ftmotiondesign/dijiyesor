@@ -937,3 +937,19 @@ button,input,select{font:inherit}
   color:#16a34a!important;
   font-weight:900;
 }
+
+
+/* Mobilde Arama sonuçları alt açıklaması tam görünsün */
+@media(max-width:620px){
+  #resultsHead p{
+    max-width:none!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    line-height:1.25;
+  }
+  #resultsHead>div:first-child{
+    min-width:0;
+    flex:1 1 auto;
+  }
+}
