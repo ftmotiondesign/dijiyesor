@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261004-2">
+  <link rel="stylesheet" href="admin.css?v=20261004-61">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -38,6 +38,7 @@
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
       <button class="nav-item" data-view="categories">Kategori Yönetimi</button>
+      <button class="nav-item" data-view="city-banners">Şehir Görselleri</button>
       <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">5</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
@@ -373,6 +374,69 @@ Gerçek mekanda hizmet"></textarea>
           <tbody id="keywordTableBody"></tbody>
         </table>
       </div>
+    </section>
+
+
+    <section class="view" data-panel-view="city-banners">
+      <div class="city-admin-head">
+        <div><span>ŞEHİR GÖRSELLERİ</span><h2>81 il için arama sonucu şehir bandı</h2><p>Varsayılan şehir fotoğrafları otomatik bulunur. İstediğin il için kendi görselini yükleyebilir, başlığı değiştirebilir ve görsel üzerine sponsor yayınlayabilirsin.</p></div>
+      </div>
+
+      <div class="city-admin-layout">
+        <section class="card city-admin-settings">
+          <div class="card-head"><div><span>ŞEHİR SEÇ</span><h2>Görsel ve metin ayarları</h2></div></div>
+          <div class="city-admin-form">
+            <label>İl<select id="cityBannerProvince"></select></label>
+            <div class="two-col">
+              <label>Durum<select id="cityBannerActive"><option value="true">Aktif</option><option value="false">Pasif</option></select></label>
+              <label>Başlık<input id="cityBannerTitle" placeholder="Örn. Çanakkale’de keşfet"></label>
+            </div>
+            <label>Alt yazı<input id="cityBannerSubtitle" placeholder="Boş bırakırsan otomatik oluşturulur"></label>
+            <label>Şehir Görseli URL<input id="cityBannerImageUrl" placeholder="Boşsa otomatik şehir fotoğrafı kullanılır"></label>
+            <div class="city-upload-row">
+              <input id="cityBannerImageFile" type="file" accept="image/jpeg,image/png,image/webp">
+              <button id="cityBannerImageUploadBtn" type="button" class="secondary">Bilgisayardan Şehir Görseli Yükle</button>
+              <span id="cityBannerImageUploadMsg"></span>
+            </div>
+            <div id="cityBannerPreview" class="city-banner-preview"><span>Önizleme yükleniyor...</span></div>
+          </div>
+        </section>
+
+        <section class="card city-admin-sponsor">
+          <div class="card-head"><div><span>SPONSOR ALANI</span><h2>Şehir görseli sponsorluğu</h2><small>Seçilen ilin arama sonuçlarında şehir görselinin üzerine sponsor kartı gelir.</small></div></div>
+          <div class="city-admin-form">
+            <div class="two-col">
+              <label>Sponsor<select id="cityBannerSponsorActive"><option value="false">Pasif</option><option value="true">Aktif</option></select></label>
+              <label>Sponsor adı<input id="cityBannerSponsorName" placeholder="Firma / marka adı"></label>
+            </div>
+            <label>Kısa açıklama<input id="cityBannerSponsorText" placeholder="Örn. Çanakkale’de öne çıkan kurum"></label>
+            <div class="two-col">
+              <label>Başlangıç<input id="cityBannerSponsorStart" type="date"></label>
+              <label>Bitiş<input id="cityBannerSponsorEnd" type="date"></label>
+            </div>
+            <label>Sponsor Logo URL<input id="cityBannerSponsorLogoUrl" placeholder="Logo yükleyebilir veya URL girebilirsin"></label>
+            <div class="city-upload-row">
+              <input id="cityBannerSponsorLogoFile" type="file" accept="image/jpeg,image/png,image/webp">
+              <button id="cityBannerSponsorLogoUploadBtn" type="button" class="secondary">Bilgisayardan Sponsor Logo Yükle</button>
+              <span id="cityBannerSponsorLogoUploadMsg"></span>
+            </div>
+            <div class="two-col">
+              <label>Buton yazısı<input id="cityBannerSponsorButtonText" value="İncele"></label>
+              <label>Buton bağlantısı<input id="cityBannerSponsorUrl" placeholder="https://..."></label>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="city-admin-actions">
+        <div id="cityBannerMessage" class="message hidden"></div>
+        <button id="saveCityBannerBtn" type="button" class="primary">Şehir Ayarlarını Kaydet</button>
+      </div>
+
+      <section class="card city-admin-info">
+        <div class="card-head"><div><span>81 İL HAZIR</span><h2>Nasıl çalışıyor?</h2></div></div>
+        <p>Tüm iller sistemde hazırdır. Özel görsel yüklenmemiş bir ilde sistem o il için uygun şehir/landmark fotoğrafını otomatik bulur. Buradan yüklediğin görsel varsa otomatik görselin yerine geçer.</p>
+      </section>
     </section>
 
     <section class="view" data-panel-view="revenue">
@@ -1012,7 +1076,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261004-55"></script>
+<script src="admin.js?v=20261004-61"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
