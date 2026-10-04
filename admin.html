@@ -366,60 +366,10 @@ Gerçek mekanda hizmet"></textarea>
         </div>
       </div>
 
-      <section class="card sponsor-popup-editor">
-        <div class="card-head"><div><span>POPUP REKLAM</span><h2>Yeni reklam oluştur / düzenle</h2></div></div>
-
-        <div class="form-grid two">
-          <label>Sponsor firma
-            <select id="sponsorPopupFirm"><option value="">Firma seçin</option></select>
-          </label>
-          <label>Durum
-            <select id="sponsorPopupActive"><option value="true">Aktif</option><option value="false">Pasif</option></select>
-          </label>
-        </div>
-
-        <div class="form-grid two">
-          <label>Yayın başlangıç tarihi
-            <input id="sponsorPopupStartDate" type="date">
-          </label>
-          <label>Yayın bitiş tarihi
-            <input id="sponsorPopupEndDate" type="date">
-          </label>
-        </div>
-        <small style="display:block;margin:-6px 0 14px;color:#64748b;font-weight:700">Tarih aralığı boş bırakılırsa reklam, durum Aktif olduğu sürece yayınlanır. Bitiş tarihi dolunca otomatik durur.</small>
-
-        <div class="form-grid two">
-          <label>İl
-            <select id="sponsorPopupCity"><option value="">İl seçin</option></select>
-          </label>
-          <label>İlçe
-            <select id="sponsorPopupDistrict" disabled><option value="">Tüm İlçeler</option></select>
-          </label>
-        </div>
-
-        <label>Başlık<input id="sponsorPopupTitle" placeholder="Örn. Çanakkale’de öne çıkan sürücü kursu"></label>
-        <label>Açıklama<textarea id="sponsorPopupText" rows="3" placeholder="Kısa reklam açıklaması"></textarea></label>
-
-        <div class="form-grid two">
-          <label>Medya türü
-            <select id="sponsorPopupMediaType"><option value="image">Görsel</option><option value="video">Video</option></select>
-          </label>
-          <label>Buton yazısı<input id="sponsorPopupButtonText" placeholder="Firmayı İncele"></label>
-        </div>
-
-        <label>Görsel / Video URL<input id="sponsorPopupMediaUrl" placeholder="https://..."></label>
-        <div class="sponsor-media-upload">
-          <input id="sponsorPopupMediaFile" type="file" accept="image/*,video/*">
-          <button id="sponsorPopupUploadBtn" type="button" class="secondary">Bilgisayardan Görsel / Video Yükle</button>
-          <span id="sponsorPopupUploadMessage"></span>
-        </div>
-
-        <label>Buton bağlantısı<input id="sponsorPopupTargetUrl" placeholder="Boş bırakılırsa firma sayfası açılır"></label>
-
-        <div id="sponsorPopupMessage" class="message hidden"></div>
-        <div class="modal-actions" style="justify-content:flex-start">
-          <button id="saveSponsorPopupBtn" type="button" class="primary">Kaydet</button>
-          <button id="clearSponsorPopupBtn" type="button" class="secondary">Formu Temizle</button>
+      <section class="card">
+        <div class="card-head">
+          <div><span>POPUP REKLAM</span><h2>Reklam yönetimi</h2><p>Yeni reklam oluştur veya aşağıdaki kayıtlı reklamlardan birini düzenle.</p></div>
+          <button id="newSponsorPopupBtn" type="button" class="primary">+ Yeni Reklam Oluştur</button>
         </div>
       </section>
 
@@ -605,6 +555,74 @@ Gerçek mekanda hizmet"></textarea>
     </section>
   </main>
 </div>
+
+<div id="sponsorPopupEditorModal" class="modal hidden">
+  <div class="modal-card modal-large sponsor-popup-editor">
+        <div class="modal-head">
+  <div><span>POPUP REKLAM</span><h2 id="sponsorPopupEditorTitle">Yeni reklam oluştur / düzenle</h2></div>
+  <button class="modal-close" data-close="sponsorPopupEditorModal">×</button>
+</div>
+
+        <div class="form-grid two">
+          <label>Sponsor firma
+            <div class="firm-picker">
+              <input id="sponsorPopupFirmSearch" type="text" placeholder="Firma adını yazın..." autocomplete="off">
+              <input id="sponsorPopupFirm" type="hidden">
+              <div id="sponsorPopupFirmResults" class="firm-picker-results hidden"></div>
+            </div>
+          </label>
+          <label>Durum
+            <select id="sponsorPopupActive"><option value="true">Aktif</option><option value="false">Pasif</option></select>
+          </label>
+        </div>
+
+        <div class="form-grid two">
+          <label>Yayın başlangıç tarihi
+            <input id="sponsorPopupStartDate" type="date">
+          </label>
+          <label>Yayın bitiş tarihi
+            <input id="sponsorPopupEndDate" type="date">
+          </label>
+        </div>
+        <small style="display:block;margin:-6px 0 14px;color:#64748b;font-weight:700">Tarih aralığı boş bırakılırsa reklam, durum Aktif olduğu sürece yayınlanır. Bitiş tarihi dolunca otomatik durur.</small>
+
+        <div class="form-grid two">
+          <label>İl
+            <select id="sponsorPopupCity"><option value="">İl seçin</option></select>
+          </label>
+          <label>İlçe
+            <select id="sponsorPopupDistrict" disabled><option value="">Tüm İlçeler</option></select>
+          </label>
+        </div>
+
+        <label>Başlık<input id="sponsorPopupTitle" placeholder="Örn. Çanakkale’de öne çıkan sürücü kursu"></label>
+        <label>Açıklama<textarea id="sponsorPopupText" rows="3" placeholder="Kısa reklam açıklaması"></textarea></label>
+
+        <div class="form-grid two">
+          <label>Medya türü
+            <select id="sponsorPopupMediaType"><option value="image">Görsel</option><option value="video">Video</option></select>
+          </label>
+          <label>Buton yazısı<input id="sponsorPopupButtonText" placeholder="Firmayı İncele"></label>
+        </div>
+
+        <label>Görsel / Video URL<input id="sponsorPopupMediaUrl" placeholder="https://..."></label>
+        <div class="sponsor-media-upload">
+          <input id="sponsorPopupMediaFile" type="file" accept="image/*,video/*">
+          <button id="sponsorPopupUploadBtn" type="button" class="secondary">Bilgisayardan Görsel / Video Yükle</button>
+          <span id="sponsorPopupUploadMessage"></span>
+        </div>
+
+        <label>Buton bağlantısı<input id="sponsorPopupTargetUrl" placeholder="Boş bırakılırsa firma sayfası açılır"></label>
+
+        <div id="sponsorPopupMessage" class="message hidden"></div>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button id="saveSponsorPopupBtn" type="button" class="primary">Kaydet</button>
+          <button id="clearSponsorPopupBtn" type="button" class="secondary">Formu Temizle</button>
+        </div>
+  </div>
+</div>
+
+
 
 <div id="firmModal" class="modal hidden">
   <div class="modal-card modal-large">
