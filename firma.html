@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
-  <!-- firma-profile-fix: 20261004-3 -->
-  <link rel="stylesheet" href="firma.css?v=20261004-2">
+  <!-- firma-profile-fix: 20261004-4 <link rel="stylesheet" href="firma.css?v=20261004-2">
   <link rel="stylesheet" href="bilgi-modal.css">
 </head>
 <body>
@@ -207,6 +206,17 @@
       return '<div class="media-grid">'+items.join("")+'</div>';
     }
 
+    const turkiyeCities=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+
+    function resolveProfileCity(d,name,address,location){
+      const fields=[address,location,name].map(v=>String(v||"").toLocaleLowerCase("tr-TR"));
+      for(const field of fields){
+        const found=turkiyeCities.find(city=>field.includes(city.toLocaleLowerCase("tr-TR")));
+        if(found)return found;
+      }
+      return String(d.city||"").trim();
+    }
+
     function normalizeQuickProfileData(data){
       const d={...data};
       let name=String(d.name||"Firma").trim();
@@ -249,6 +259,19 @@
       if(addrLoc){
         d.city=addrLoc.city;
         d.district=addrLoc.district;
+      }
+
+      // Şehir bilgisini adres/konum/firma adından doğrula.
+      // Böylece eski test verisindeki yanlış city değeri ekrana taşınmaz.
+      const resolvedCity=resolveProfileCity(d,name,address,location);
+      if(resolvedCity){
+        const oldCity=String(d.city||"").trim();
+        d.city=resolvedCity;
+        // Şehir değiştiyse ve ilçe sadece genel "merkez" ise yanlış eski ilçeyi taşıma.
+        if(oldCity && oldCity.toLocaleLowerCase("tr-TR")!==resolvedCity.toLocaleLowerCase("tr-TR")
+          && /^merkez$/i.test(String(d.district||"").trim())){
+          d.district="Merkez";
+        }
       }
 
       // Otomatik oluşturulmuş açıklamalar eski şehir bilgisi taşıyabilir.
