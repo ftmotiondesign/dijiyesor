@@ -258,8 +258,7 @@ function render(data){
   const district=document.getElementById("districtSelect");
 
   if(title){
-    const q=String(search?.value||"").trim();
-    title.textContent=q ? "“"+q+"” için sonuçlar" : "Arama sonuçları";
+    title.textContent="Arama sonuçları";
   }
   if(context){
     const loc=[city?.value,district?.value].filter(Boolean).join(" / ");
