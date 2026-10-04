@@ -385,6 +385,30 @@ async function initHome(){
     }
   };
   const params=new URLSearchParams(location.search);
+
+  const locationHero=document.getElementById("locationHero");
+  const locationHeroTitle=document.getElementById("locationHeroTitle");
+  const locationHeroText=document.getElementById("locationHeroText");
+  const cityHeroImages={
+    "çanakkale":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Cheval_de_Troie_de_%C3%87anakkale.jpg"
+  };
+  const updateLocationHero=()=>{
+    if(!locationHero)return;
+    const cityName=String(city.value||"").trim();
+    const districtName=String(district.value||"").trim();
+    const imageUrl=cityHeroImages[norm(cityName)]||"";
+    if(!cityName||!imageUrl){
+      locationHero.classList.add("hidden");
+      locationHero.style.backgroundImage="";
+      return;
+    }
+    locationHero.style.backgroundImage='url("'+imageUrl+'")';
+    locationHeroTitle.textContent=districtName ? cityName+" / "+districtName : cityName;
+    locationHeroText.textContent=districtName
+      ? districtName+" bölgesindeki firma, kurum ve hizmetleri keşfedin."
+      : cityName+" genelindeki firma, kurum ve hizmetleri keşfedin.";
+    locationHero.classList.remove("hidden");
+  };
   const force360Only=window.DJS_FORCE_360_ONLY===true;
   const is360Directory=/\/360-mekanlar\.html$/i.test(location.pathname);
   const feature360=is360Directory || force360Only;
@@ -441,6 +465,7 @@ async function initHome(){
       sync360Button();
     }
 
+    updateLocationHero();
     filter();
     renderActiveFilters();
   });
@@ -465,8 +490,9 @@ async function initHome(){
     filter();
   });
   renderActiveFilters();
-  city.addEventListener("change",async()=>{await fillDistricts(city,district);filter()});
-  district.addEventListener("change",filter);
+  updateLocationHero();
+  city.addEventListener("change",async()=>{await fillDistricts(city,district);updateLocationHero();filter()});
+  district.addEventListener("change",()=>{updateLocationHero();filter()});
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));fillSubcategories();filter()});
   subCategory?.addEventListener("change",filter);
   search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
