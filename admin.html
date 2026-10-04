@@ -388,7 +388,7 @@ Gerçek mekanda hizmet"></textarea>
           <div class="city-admin-form">
             <label>İl<select id="cityBannerProvince"></select></label>
             <div class="two-col">
-              <label>Durum<select id="cityBannerActive"><option value="true">Aktif</option><option value="false">Pasif</option></select></label>
+              <label>Durum<select id="cityBannerActive"><option value="false">Pasif</option><option value="true">Aktif</option></select></label>
               <label>Başlık<input id="cityBannerTitle" placeholder="Örn. Çanakkale’de keşfet"></label>
             </div>
             <label>Alt yazı<input id="cityBannerSubtitle" placeholder="Boş bırakırsan otomatik oluşturulur"></label>
@@ -403,7 +403,7 @@ Gerçek mekanda hizmet"></textarea>
         </section>
 
         <section class="card city-admin-sponsor">
-          <div class="card-head"><div><span>SPONSOR ALANI</span><h2>Şehir görseli sponsorluğu</h2><small>Seçilen ilin arama sonuçlarında şehir görselinin üzerine sponsor kartı gelir.</small></div></div>
+          <div class="card-head"><div><span>SPONSOR ALANI</span><h2>Şehir görseli sponsorluğu</h2><small>Sponsor aktif olduğunda şehir görselinin sağ tarafında, görselin üzerinde ayrı bir sponsor kartı görünür. Şehir fotoğrafının üzerine doğrudan yazı basılmaz.</small></div></div>
           <div class="city-admin-form">
             <div class="two-col">
               <label>Sponsor<select id="cityBannerSponsorActive"><option value="false">Pasif</option><option value="true">Aktif</option></select></label>
@@ -434,12 +434,8 @@ Gerçek mekanda hizmet"></textarea>
       </div>
 
       <section class="card city-admin-info">
-        <div class="card-head"><div><span>81 İL HAZIR</span><h2>Şehir görsellerini toplu hazırla</h2></div></div>
-        <p>Tüm iller sistemde hazırdır. İlk açılışta eksik şehir görselleri otomatik olarak bulunup kaydedilir. İstersen aşağıdaki butonla yeniden kontrol ettirebilirsin; daha önce yüklediğin özel görseller korunur.</p>
-        <div class="city-seed-row">
-          <button id="seedCityBannerImagesBtn" type="button" class="secondary">81 İlin Görsellerini Yükle</button>
-          <span id="seedCityBannerImagesStatus">Eksik görseller kontrol edilmeye hazır.</span>
-        </div>
+        <div class="card-head"><div><span>81 İL HAZIR</span><h2>Yayınlama mantığı</h2></div></div>
+        <p>Tüm iller listede hazırdır fakat şehir bandı varsayılan olarak pasiftir. Önce kendi şehir görselini bilgisayardan yükle, önizlemeyi kontrol et, sonra Durum alanını <b>Aktif</b> yapıp kaydet. Pasifken arama sonuçlarında şehir bandı hiç görünmez.</p>
       </section>
     </section>
 
@@ -1080,7 +1076,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261004-62"></script>
+<script src="admin.js?v=20261004-63"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
