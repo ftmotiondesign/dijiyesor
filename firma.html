@@ -401,10 +401,10 @@
     }
 
     function buildProfileCoverSlider(d){
-      const images=[
-        d.coverUrl,
-        ...asArray(d.coverUrls)
-      ].map(v=>String(v||"").trim()).filter(Boolean);
+      let images=asArray(d.coverUrls).map(v=>String(v||"").trim()).filter(Boolean);
+      if(!images.length){
+        images=[d.coverUrl,d.cardImageUrl].map(v=>String(v||"").trim()).filter(Boolean);
+      }
 
       const unique=[...new Set(images)].slice(0,6);
       if(!unique.length)return buildFallbackCover(d);
