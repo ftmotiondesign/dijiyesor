@@ -596,7 +596,9 @@ async function loadManagedSearchCategories(){
     });
   }catch(_){}
 }
-function maybeShowSearchSponsorPopup(cityValue,districtValue){
+let currentSearchSponsorAd=null;
+
+function maybeShowSearchSponsorPopup(cityValue,districtValue,sectorValue){
   const nc=norm(cityValue),nd=norm(districtValue);
   const candidates=companies.filter(x=>{
     if(!x.searchPopupActive)return false;
