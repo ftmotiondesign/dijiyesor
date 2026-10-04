@@ -25,6 +25,8 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 const initials=v=>String(v||"F").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
+const CITY_BANNER_PROVINCES=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+const cityBannerKey=v=>String(v||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 
 function showLogin(){ $("loginView").classList.remove("hidden");$("panelView").classList.add("hidden") }
 function showPanel(){
@@ -60,10 +62,11 @@ function setView(name,opts={}){
   }
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"auto-firm-import":["Otomatik Firma Topla","Şehir ve kategori seçerek firmaları taslak olarak içe aktar"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"auto-firm-import":["Otomatik Firma Topla","Şehir ve kategori seçerek firmaları taslak olarak içe aktar"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],"city-banners":["Şehir Görselleri","81 il görsellerini ve şehir sponsorlarını yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
+  if(name==="city-banners")initCityBannerAdmin();
 }
 document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-view]");if(nav)setView(nav.dataset.view);
@@ -101,6 +104,96 @@ window.addEventListener("hashchange",()=>{
   }
 });
 
+
+
+let cityBannerAdminReady=false;
+async function adminCommonsCityImage(city){
+  try{
+    const q=encodeURIComponent(city+" Turkey city landmark");
+    const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+q+"&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url&iiurlwidth=1600&format=json&origin=*";
+    const res=await fetch(url),data=await res.json();
+    const pages=Object.values(data?.query?.pages||{});
+    const page=pages.find(p=>p?.imageinfo?.[0]?.thumburl||p?.imageinfo?.[0]?.url);
+    return page?.imageinfo?.[0]?.thumburl||page?.imageinfo?.[0]?.url||"";
+  }catch(_){return ""}
+}
+async function uploadCityBannerImage(file,msgEl){
+  if(!file)return "";
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error("Sadece JPG, PNG veya WEBP yükleyebilirsin.");
+  if(file.size>10*1024*1024)throw new Error("Görsel en fazla 10 MB olabilir.");
+  if(msgEl)msgEl.textContent="Yükleniyor...";
+  const fd=new FormData();fd.append("file",file);fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+  const res=await fetch("https://api.cloudinary.com/v1_1/"+CLOUDINARY_CLOUD_NAME+"/image/upload",{method:"POST",body:fd});
+  if(!res.ok)throw new Error("Görsel yüklenemedi.");
+  const data=await res.json();return data.secure_url||data.url||"";
+}
+async function loadCityBannerSettings(){
+  const city=$("cityBannerProvince")?.value;if(!city)return;
+  const key=cityBannerKey(city);
+  const preview=$("cityBannerPreview");
+  if(preview)preview.innerHTML="<span>Önizleme yükleniyor...</span>";
+  let data={};
+  try{const snap=await db.collection("cityBanners").doc(key).get();if(snap.exists)data=snap.data()||{}}catch(_){}
+  $("cityBannerActive").value=String(data.active!==false);
+  $("cityBannerTitle").value=data.title||"";
+  $("cityBannerSubtitle").value=data.subtitle||"";
+  $("cityBannerImageUrl").value=data.imageUrl||"";
+  $("cityBannerSponsorActive").value=String(Boolean(data.sponsorActive));
+  $("cityBannerSponsorName").value=data.sponsorName||"";
+  $("cityBannerSponsorText").value=data.sponsorText||"";
+  $("cityBannerSponsorStart").value=String(data.sponsorStartDate||"").slice(0,10);
+  $("cityBannerSponsorEnd").value=String(data.sponsorEndDate||"").slice(0,10);
+  $("cityBannerSponsorLogoUrl").value=data.sponsorLogoUrl||"";
+  $("cityBannerSponsorButtonText").value=data.sponsorButtonText||"İncele";
+  $("cityBannerSponsorUrl").value=data.sponsorUrl||"";
+  const src=data.imageUrl||await adminCommonsCityImage(city);
+  if(preview){
+    preview.innerHTML=src?'<img src="'+esc(src)+'" alt="'+esc(city)+'"><div><strong>'+(data.title||city+"’de keşfet")+'</strong><small>'+(data.subtitle||city+" bölgesindeki işletmeleri incele")+'</small></div>':'<span>Bu il için görsel bulunamadı.</span>';
+  }
+}
+function initCityBannerAdmin(){
+  const sel=$("cityBannerProvince");if(!sel)return;
+  if(!cityBannerAdminReady){
+    sel.innerHTML=CITY_BANNER_PROVINCES.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join("");
+    sel.value="Çanakkale";
+    sel.addEventListener("change",loadCityBannerSettings);
+    $("cityBannerImageUrl")?.addEventListener("input",e=>{
+      const p=$("cityBannerPreview"),url=e.target.value.trim();
+      if(p&&url)p.innerHTML='<img src="'+esc(url)+'" alt=""><div><strong>'+esc($("cityBannerTitle").value||sel.value+"’de keşfet")+'</strong></div>';
+    });
+    $("cityBannerImageUploadBtn")?.addEventListener("click",()=>$("cityBannerImageFile")?.click());
+    $("cityBannerSponsorLogoUploadBtn")?.addEventListener("click",()=>$("cityBannerSponsorLogoFile")?.click());
+    $("cityBannerImageFile")?.addEventListener("change",async e=>{
+      const msg=$("cityBannerImageUploadMsg");
+      try{const url=await uploadCityBannerImage(e.target.files?.[0],msg);if(url){$("cityBannerImageUrl").value=url;msg.textContent="Yüklendi ✓";loadCityBannerSettings()}}catch(err){msg.textContent=err.message||"Yüklenemedi"}finally{e.target.value=""}
+    });
+    $("cityBannerSponsorLogoFile")?.addEventListener("change",async e=>{
+      const msg=$("cityBannerSponsorLogoUploadMsg");
+      try{const url=await uploadCityBannerImage(e.target.files?.[0],msg);if(url){$("cityBannerSponsorLogoUrl").value=url;msg.textContent="Yüklendi ✓"}}catch(err){msg.textContent=err.message||"Yüklenemedi"}finally{e.target.value=""}
+    });
+    $("saveCityBannerBtn")?.addEventListener("click",async()=>{
+      const city=sel.value,msg=$("cityBannerMessage");if(!city)return;
+      const start=$("cityBannerSponsorStart").value,end=$("cityBannerSponsorEnd").value;
+      if(start&&end&&end<start){msg.className="message error";msg.textContent="Sponsor bitiş tarihi başlangıçtan önce olamaz.";return}
+      const data={
+        city,active:$("cityBannerActive").value==="true",title:$("cityBannerTitle").value.trim(),subtitle:$("cityBannerSubtitle").value.trim(),
+        imageUrl:$("cityBannerImageUrl").value.trim(),sponsorActive:$("cityBannerSponsorActive").value==="true",
+        sponsorName:$("cityBannerSponsorName").value.trim(),sponsorText:$("cityBannerSponsorText").value.trim(),
+        sponsorStartDate:start,sponsorEndDate:end,sponsorLogoUrl:$("cityBannerSponsorLogoUrl").value.trim(),
+        sponsorButtonText:$("cityBannerSponsorButtonText").value.trim()||"İncele",sponsorUrl:$("cityBannerSponsorUrl").value.trim(),
+        updatedAt:new Date().toISOString()
+      };
+      try{
+        msg.className="message";msg.textContent="Kaydediliyor...";
+        await db.collection("cityBanners").doc(cityBannerKey(city)).set(data,{merge:true});
+        msg.className="message success";msg.textContent=city+" şehir görseli ve sponsor ayarları kaydedildi ✓";
+        await loadCityBannerSettings();
+      }catch(err){msg.className="message error";msg.textContent=err.message||"Kaydedilemedi."}
+    });
+    cityBannerAdminReady=true;
+  }
+  loadCityBannerSettings();
+}
 
 const keywordSeedRows=[
   {keyword:"sürücü kursu",volume:"—",sector:"egitim",sectorLabel:"Eğitim"},
