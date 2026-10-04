@@ -214,7 +214,6 @@
           '<span class="home-category-chevron">⌄</span>'+
         '</button>'+
         '<div class="home-subcategory-panel hidden">'+
-          '<button type="button" class="home-subcategory-pick all" data-home-sector="'+key+'">Tüm '+title+'</button>'+
           subs+
         '</div>'+
       '</div>';
@@ -274,9 +273,13 @@
 
     homeCategoryGrid.querySelectorAll('[data-home-sector]').forEach(btn=>{
       btn.addEventListener('click',()=>{
+        // Sonuç sayfasına yalnızca alt kategori seçilince git.
+        // Böylece "Eğitim" gibi ana kategoriler tüm kurumları bir anda listelemez.
+        if(!btn.dataset.homeSubcategory)return;
+
         const params=new URLSearchParams();
         params.set('sector',btn.dataset.homeSector);
-        if(btn.dataset.homeSubcategory) params.set('subCategory',btn.dataset.homeSubcategory);
+        params.set('subCategory',btn.dataset.homeSubcategory);
         if(citySelect.value) params.set('city',citySelect.value);
         if(districtSelect.value) params.set('district',districtSelect.value);
         window.location.href='arama.html?'+params.toString();
