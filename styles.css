@@ -15,9 +15,25 @@ button,input,select{font:inherit}
   display:flex;
   align-items:center;
   gap:9px;
+  color:#172139;
+}
+.mini-brand-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1.05;
+}
+.mini-brand-copy strong{
   font-size:15px;
   font-weight:900;
-  color:#172139;
+  letter-spacing:-.2px;
+}
+.mini-brand-copy small{
+  margin-top:4px;
+  font-size:9px;
+  font-weight:700;
+  color:#8a94a6;
+  white-space:nowrap;
 }
 
 .mini-brand-mark{
@@ -238,9 +254,12 @@ button,input,select{font:inherit}
 
 @media(max-width:680px){
   .topbar{height:56px;padding:0 14px}
-  .mini-brand span:last-child{display:none}
-  .home-main{min-height:calc(100vh - 104px);padding:10px 14px 65px}
-  .mascot{width:148px;max-width:52vw;margin-bottom:15px}
+  .mini-brand-copy{display:flex}
+  .mini-brand-copy strong{font-size:14px}
+  .mini-brand-copy small{font-size:8px;margin-top:3px}
+  .home-main{min-height:calc(100vh - 104px);padding:8px 14px 65px}
+  .mascot-wrap{min-height:135px!important;margin-bottom:10px!important}
+  .mascot-wrap .mascot{width:130px!important;max-width:42vw!important;margin-bottom:8px!important}
   .location-row{grid-template-columns:1fr}
   .search-main{height:56px}
   .search-main button{height:40px;padding:0 17px}
