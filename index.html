@@ -7,6 +7,23 @@
   <meta name="description" content="DijiyeSor ile firma, kurum, sektör veya hizmet ara.">
   <link rel="stylesheet" href="styles.css?v=20261004-28">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
+
+  <style>
+    .location-prompt-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+    .location-prompt-modal.hidden{display:none}
+    .location-prompt-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(5px)}
+    .location-prompt-card{position:relative;width:min(430px,100%);background:#fff;border-radius:24px;padding:30px 24px 24px;text-align:center;box-shadow:0 24px 80px rgba(15,23,42,.24);animation:locationPromptIn .18s ease-out}
+    .location-prompt-close{position:absolute;right:14px;top:10px;border:0;background:transparent;color:#8a94a6;font-size:28px;line-height:1;cursor:pointer}
+    .location-prompt-icon{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;background:#eef6ff;font-size:29px}
+    .location-prompt-card h2{margin:0 0 8px;font-size:25px;color:#182033}
+    .location-prompt-card p{margin:0 auto 22px;color:#6f7b91;font-size:15px;max-width:320px}
+    .location-prompt-actions{display:grid;gap:10px}
+    .location-prompt-actions button{min-height:48px;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer}
+    .location-prompt-primary{border:0;background:#0d6efd;color:#fff}
+    .location-prompt-secondary{border:1px solid #dfe6f0;background:#fff;color:#344054}
+    @keyframes locationPromptIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -74,6 +91,21 @@
       <h2 id="homeCategoryTitle">Ne arıyorsunuz?</h2>
       <p>Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.</p>
       <div id="homeCategoryGrid" class="home-category-grid"></div>
+    </div>
+  </div>
+
+
+  <div id="locationPromptModal" class="location-prompt-modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationPromptTitle">
+    <div class="location-prompt-backdrop" data-close-location-prompt></div>
+    <div class="location-prompt-card">
+      <button type="button" class="location-prompt-close" data-close-location-prompt aria-label="Kapat">×</button>
+      <div class="location-prompt-icon">📍</div>
+      <h2 id="locationPromptTitle">Nerede arıyorsunuz?</h2>
+      <p>Daha doğru sonuçlar için il veya ilçe seçebilirsiniz.</p>
+      <div class="location-prompt-actions">
+        <button id="locationPromptSelectBtn" type="button" class="location-prompt-primary">Konum Seç</button>
+        <button id="locationPromptAllBtn" type="button" class="location-prompt-secondary">Tüm Türkiye’de Ara</button>
+      </div>
     </div>
   </div>
 
@@ -311,9 +343,46 @@
       return city + "'" + consonantPart + vowelPart;
     }
 
+    const locationPromptModal = document.getElementById('locationPromptModal');
+    const locationPromptSelectBtn = document.getElementById('locationPromptSelectBtn');
+    const locationPromptAllBtn = document.getElementById('locationPromptAllBtn');
+    let allowAllTurkeySearchOnce = false;
+
+    function openLocationPrompt(){
+      locationPromptModal?.classList.remove('hidden');
+      document.body.style.overflow='hidden';
+    }
+
+    function closeLocationPrompt(){
+      locationPromptModal?.classList.add('hidden');
+      document.body.style.overflow='';
+    }
+
+    document.querySelectorAll('[data-close-location-prompt]').forEach(el=>el.addEventListener('click',closeLocationPrompt));
+
+    locationPromptSelectBtn?.addEventListener('click',()=>{
+      closeLocationPrompt();
+      citySelect.focus();
+      citySelect.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+
+    locationPromptAllBtn?.addEventListener('click',()=>{
+      allowAllTurkeySearchOnce = true;
+      closeLocationPrompt();
+      goSearch();
+    });
+
     function goSearch() {
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
+
+
+      // Arama metni var fakat il/ilçe seçilmediyse kullanıcıya kısa bir konum seçimi sor.
+      if (query && !citySelect.value && !districtSelect.value && !allowAllTurkeySearchOnce) {
+        openLocationPrompt();
+        return;
+      }
+      allowAllTurkeySearchOnce = false;
 
       // İl veya ilçe seçilmiş olsa da sektör/hizmet yazılmadıysa
       // tüm firmaları dökmek yerine önce "Ne arıyorsunuz?" kategori penceresini aç.
