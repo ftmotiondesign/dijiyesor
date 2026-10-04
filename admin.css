@@ -530,3 +530,5 @@
 .city-banner-preview>div{position:relative;z-index:2;width:100%;padding:20px;color:#fff}.city-banner-preview strong{display:block;font-size:20px}.city-banner-preview small{display:block;margin-top:5px}
 .city-admin-actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin:16px 0}.city-admin-actions .message{margin:0 auto 0 0}.city-admin-info{padding:4px 16px 16px}.city-admin-info p{color:#64748b;line-height:1.6}
 @media(max-width:900px){.city-admin-layout{grid-template-columns:1fr}.city-admin-form .two-col{grid-template-columns:1fr}}
+
+.city-seed-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.city-seed-row span{font-size:11px;color:#64748b;font-weight:700}.city-seed-row button:disabled{opacity:.6;cursor:wait}
