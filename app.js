@@ -470,8 +470,32 @@ async function initHome(){
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));fillSubcategories();filter()});
   subCategory?.addEventListener("change",filter);
   search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
-  btn.addEventListener("click",openCategoryModal);
-  search.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();openCategoryModal()}});
+
+  const submitSearch=()=>{
+    if(!search.value.trim()){
+      openCategoryModal();
+      return;
+    }
+    filter();
+    search.blur();
+    try{
+      const url=new URL(location.href);
+      url.searchParams.set("q",search.value.trim());
+      history.replaceState(null,"",url.pathname+"?"+url.searchParams.toString());
+    }catch(_){}
+    setTimeout(()=>{
+      const grid=document.getElementById("companyGrid");
+      if(grid)grid.scrollIntoView({behavior:"smooth",block:"start"});
+    },120);
+  };
+
+  btn.addEventListener("click",submitSearch);
+  search.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      e.preventDefault();
+      submitSearch();
+    }
+  });
   
   chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
   await loadCompanies();
