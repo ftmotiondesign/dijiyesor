@@ -1069,3 +1069,73 @@ body.djs-modal-open #resultsHead{
   .result-image-lightbox-stage{padding:12px;box-sizing:border-box}
   .result-image-lightbox-stage img{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 190px);object-fit:contain;object-position:center}
 }
+
+
+/* İl seçildiğinde arama sonuçları şehir görsel bandı */
+.city-hero{
+  position:relative;
+  height:138px;
+  margin:0 0 18px;
+  border-radius:18px;
+  overflow:hidden;
+  background:#dbeafe;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+}
+.city-hero.hidden{display:none}
+.city-hero-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+.city-hero-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(8,20,40,.72) 0%,rgba(8,20,40,.42) 45%,rgba(8,20,40,.12) 100%);
+}
+.city-hero-content{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  padding:18px 24px;
+  color:#fff;
+}
+.city-hero-content span{
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.13em;
+  opacity:.86;
+}
+.city-hero-content strong{
+  margin-top:5px;
+  font-size:24px;
+  line-height:1.1;
+}
+.city-hero-content small{
+  margin-top:6px;
+  font-size:12px;
+  font-weight:700;
+  opacity:.92;
+}
+@media(max-width:680px){
+  .city-hero{
+    height:100px;
+    margin-bottom:14px;
+    border-radius:14px;
+  }
+  .city-hero-content{
+    padding:13px 16px;
+  }
+  .city-hero-content strong{
+    font-size:19px;
+  }
+  .city-hero-content small{
+    font-size:10px;
+  }
+}
