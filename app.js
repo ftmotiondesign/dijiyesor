@@ -221,17 +221,19 @@ function render(data){
     const hasCity=Boolean(city?.value);
     locationNotice.classList.toggle("hidden",hasCity);
     const noticeTitle=locationNotice.querySelector("strong");
-    const noticeText=locationNotice.querySelector(":scope > span");
-    if(noticeTitle)noticeTitle.textContent="Konum seçilmedi · Türkiye geneli sonuçlar gösteriliyor.";
+    const noticeText=locationNotice.querySelector(".location-notice-left > span");
+    if(noticeTitle)noticeTitle.textContent=data.length>0
+      ? "Konumunu seç, sana en yakın sonuçları gösterelim"
+      : "Konumunu seç, daha doğru sonuçlara ulaş";
     if(noticeText)noticeText.textContent=data.length>0
-      ? "Daha yakın ve ilgili sonuçlar için il veya ilçe seçebilirsiniz."
-      : "Sonuç bulunamadı. Daha doğru sonuçlar için önce il veya ilçe seçebilirsiniz.";
+      ? "Şu anda Türkiye geneli sonuçları görüyorsunuz."
+      : "Sonuç bulunamadı. İl veya ilçe seçerek aramanızı daraltabilirsiniz.";
     if(!hasCity && !locationNotice.querySelector("[data-focus-city]")){
       const action=document.createElement("button");
       action.type="button";
       action.className="location-select-btn";
       action.dataset.focusCity="";
-      action.textContent="İl Seç";
+      action.textContent="📍 İl Seç";
       locationNotice.appendChild(action);
     }
   }
