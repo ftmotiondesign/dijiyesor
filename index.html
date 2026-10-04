@@ -314,29 +314,27 @@
       const params = new URLSearchParams();
       const query = searchInput.value.trim();
 
-      // İlçe seçildiyse doğrudan o ilçedeki kayıtlı firmaları göster.
-      // Sadece il seçildiyse bütün sektörleri dökmek yerine kategori seçtir.
+      // İl veya ilçe seçilmiş olsa da sektör/hizmet yazılmadıysa
+      // tüm firmaları dökmek yerine önce "Ne arıyorsunuz?" kategori penceresini aç.
       if (!query) {
-        if (citySelect.value && districtSelect.value) {
-          params.set('city', citySelect.value);
-          params.set('district', districtSelect.value);
-          window.location.href = 'arama.html?' + params.toString();
-          return;
-        }
-
         const title = document.getElementById('homeCategoryTitle');
         const description = homeCategoryModal?.querySelector('.home-category-card > p');
+        const selectedLocation = districtSelect.value || citySelect.value || '';
 
         if (title) {
-          title.textContent = citySelect.value
-            ? cityLocative(citySelect.value) + ' ne arıyorsunuz?'
+          title.textContent = selectedLocation
+            ? cityLocative(selectedLocation) + ' ne arıyorsunuz?'
             : 'Ne arıyorsunuz?';
         }
 
         if (description) {
-          description.textContent = citySelect.value
-            ? 'Bir kategori seçin. Size sadece ' + citySelect.value + ' bölgesindeki ilgili kurumları gösterelim.'
-            : 'Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.';
+          if (citySelect.value && districtSelect.value) {
+            description.textContent = 'Bir kategori seçin. Size sadece ' + citySelect.value + ' / ' + districtSelect.value + ' bölgesindeki ilgili kurumları gösterelim.';
+          } else if (citySelect.value) {
+            description.textContent = 'Bir kategori seçin. Size sadece ' + citySelect.value + ' bölgesindeki ilgili kurumları gösterelim.';
+          } else {
+            description.textContent = 'Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.';
+          }
         }
 
         openHomeCategoryModal();
