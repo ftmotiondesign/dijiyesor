@@ -36,6 +36,7 @@
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
+      <button class="nav-item" data-view="categories">Kategori Yönetimi</button>
       <button class="nav-item" data-view="revenue">Gelir Alanları <b id="navRevenueCount">4</b></button>
       <button class="nav-item" data-view="applications">Başvurular <b id="navApplicationCount">0</b></button>
       <button class="nav-item" data-view="members">Üyeler <b id="navMemberCount">0</b></button>
@@ -208,6 +209,34 @@ Gerçek mekanda hizmet"></textarea>
     </section>
 
 
+
+    <section class="view" data-panel-view="categories">
+      <div class="category-admin-head">
+        <div>
+          <span>KATEGORİ YÖNETİMİ</span>
+          <h2>Kategori ve alt kategorileri yönet.</h2>
+          <p>Buraya eklediğin kategori ve alt kategoriler arama ekranındaki “Ne arıyorsunuz?” bölümüne otomatik yansır.</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head"><div><span>YENİ KATEGORİ</span><h2>Ana kategori ekle</h2></div></div>
+        <div class="form-grid three">
+          <label>Kategori adı<input id="categoryNameInput" placeholder="Örn. Eğitim"></label>
+          <label>Kısa açıklama<input id="categoryDescInput" placeholder="Örn. Kurs, okul, yurt"></label>
+          <label>Sistem anahtarı<input id="categoryKeyInput" placeholder="Otomatik oluşturulur"></label>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button id="addCategoryBtn" type="button" class="primary">+ Kategori Ekle</button>
+        </div>
+        <div id="categoryAdminMessage" class="message hidden"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><div><span>MEVCUT KATEGORİLER</span><h2>Kategori ve alt kategori listesi</h2></div></div>
+        <div id="categoryAdminList" class="category-admin-list"></div>
+      </section>
+    </section>
 
     <section class="view" data-panel-view="keywords">
       <div class="keyword-head">
