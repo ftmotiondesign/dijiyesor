@@ -291,13 +291,18 @@ function render(data){
     const subLabel=subValue ? (subcategoryMap[sectorValue]?.[subValue]||subEl?.options?.[subEl.selectedIndex]?.text||subValue) : "";
     const q=String(search?.value||"").trim();
 
-    let base="";
-    if(subLabel) base=subLabel+" alanındaki uygun işletmeler listeleniyor.";
-    else if(sectorLabel) base=sectorLabel+" sektöründeki uygun işletmeler listeleniyor.";
-    else if(q) base="“"+q+"” aramasına uygun işletmeler listeleniyor.";
-    else base="Aramana uygun işletmeler listeleniyor.";
+    const targetLabel=subLabel||sectorLabel||q;
+    const targetSuffix=subLabel ? " alanındaki uygun işletmeler listeleniyor."
+      : sectorLabel ? " sektöründeki uygun işletmeler listeleniyor."
+      : q ? " aramasına uygun işletmeler listeleniyor."
+      : "Aramana uygun işletmeler listeleniyor.";
 
-    context.textContent=loc ? loc+" bölgesinde "+base.charAt(0).toLocaleLowerCase("tr-TR")+base.slice(1) : base;
+    if(targetLabel){
+      context.innerHTML=(loc ? '<strong>'+esc(loc)+'</strong> bölgesinde ' : '')
+        +'<strong>'+esc(targetLabel)+'</strong>'+targetSuffix;
+    }else{
+      context.textContent="Aramana uygun işletmeler listeleniyor.";
+    }
   }
   const locationNotice=document.getElementById("locationNotice");
   if(locationNotice){
