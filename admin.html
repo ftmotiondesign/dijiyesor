@@ -379,7 +379,11 @@ Gerçek mekanda hizmet"></textarea>
 
     <section class="view" data-panel-view="city-banners">
       <div class="city-admin-head">
-        <div><span>ŞEHİR GÖRSELLERİ</span><h2>81 il için arama sonucu şehir bandı</h2><p>Varsayılan şehir fotoğrafları otomatik bulunur. İstediğin il için kendi görselini yükleyebilir, başlığı değiştirebilir ve görsel üzerine sponsor yayınlayabilirsin.</p></div>
+        <div><span>ŞEHİR GÖRSELLERİ</span><h2>81 il için arama sonucu şehir bandı</h2><p>İstediğin il için kendi görselini yükleyebilir, başlığı değiştirebilir ve görsel üzerine sponsor yayınlayabilirsin.</p></div>
+        <div class="city-master-switch">
+          <label><input id="cityBannersMasterActive" type="checkbox"><span>Şehir Görselleri Kategorisi Aktif</span></label>
+          <small>Kapalıysa tüm şehir görselleri ve şehir sponsorları sitede tamamen gizlenir.</small>
+        </div>
       </div>
 
       <div class="city-admin-layout">
@@ -1076,7 +1080,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="admin.js?v=20261004-63"></script>
+<script src="admin.js?v=20261004-64"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
