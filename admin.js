@@ -177,7 +177,7 @@ async function loadCityBannerSettings(){
   if(preview)preview.innerHTML="<span>Önizleme yükleniyor...</span>";
   let data={};
   try{const snap=await db.collection("cityBanners").doc(key).get();if(snap.exists)data=snap.data()||{}}catch(_){}
-  $("cityBannerActive").value=String(data.active!==false);
+  $("cityBannerActive").value=String(data.active===true);
   $("cityBannerTitle").value=data.title||"";
   $("cityBannerSubtitle").value=data.subtitle||"";
   $("cityBannerImageUrl").value=data.imageUrl||"";
@@ -189,9 +189,9 @@ async function loadCityBannerSettings(){
   $("cityBannerSponsorLogoUrl").value=data.sponsorLogoUrl||"";
   $("cityBannerSponsorButtonText").value=data.sponsorButtonText||"İncele";
   $("cityBannerSponsorUrl").value=data.sponsorUrl||"";
-  const src=data.imageUrl||await adminCommonsCityImage(city);
+  const src=data.imageUrl||"";
   if(preview){
-    preview.innerHTML=src?'<img src="'+esc(src)+'" alt="'+esc(city)+'"><div><strong>'+(data.title||city+"’de keşfet")+'</strong><small>'+(data.subtitle||city+" bölgesindeki işletmeleri incele")+'</small></div>':'<span>Bu il için görsel bulunamadı.</span>';
+    preview.innerHTML=src?'<img src="'+esc(src)+'" alt="'+esc(city)+'"><div><strong>'+(data.title||city+"’de keşfet")+'</strong><small>'+(data.subtitle||city+" bölgesindeki işletmeleri incele")+'</small></div>':'<span>Henüz şehir görseli yüklenmedi. Görseli yükledikten sonra Durum → Aktif yap.</span>';
   }
 }
 function initCityBannerAdmin(){
@@ -235,9 +235,6 @@ function initCityBannerAdmin(){
       }catch(err){msg.className="message error";msg.textContent=err.message||"Kaydedilemedi."}
     });
     cityBannerAdminReady=true;
-    let alreadySeeded=false;
-    try{alreadySeeded=localStorage.getItem("dijiyesorCityImagesSeeded")==="1"}catch(_){}
-    if(!alreadySeeded)setTimeout(()=>seedAllCityBannerImages({force:false}),300);
   }
   loadCityBannerSettings();
 }
