@@ -127,6 +127,49 @@ async function uploadCityBannerImage(file,msgEl){
   if(!res.ok)throw new Error("Görsel yüklenemedi.");
   const data=await res.json();return data.secure_url||data.url||"";
 }
+
+async function seedAllCityBannerImages({force=false}={}){
+  const btn=$("seedCityBannerImagesBtn");
+  const status=$("seedCityBannerImagesStatus");
+  const old=btn?.textContent||"81 İlin Görsellerini Yükle";
+  if(btn){btn.disabled=true;btn.textContent="Şehir görselleri hazırlanıyor...";}
+  let done=0,skipped=0,failed=0;
+  try{
+    for(let i=0;i<CITY_BANNER_PROVINCES.length;i++){
+      const city=CITY_BANNER_PROVINCES[i];
+      const key=cityBannerKey(city);
+      try{
+        const ref=db.collection("cityBanners").doc(key);
+        const snap=await ref.get();
+        const current=snap.exists?(snap.data()||{}):{};
+        if(!force&&String(current.imageUrl||"").trim()){
+          skipped++;
+        }else{
+          const imageUrl=await adminCommonsCityImage(city);
+          if(imageUrl){
+            await ref.set({
+              city,
+              imageUrl,
+              active:current.active!==false,
+              imageSource:"Wikimedia Commons",
+              autoSeeded:true,
+              updatedAt:new Date().toISOString()
+            },{merge:true});
+            done++;
+          }else failed++;
+        }
+      }catch(_){failed++}
+      if(status)status.textContent=(i+1)+" / "+CITY_BANNER_PROVINCES.length+" il işlendi · "+done+" yüklendi · "+skipped+" zaten vardı";
+      await new Promise(resolve=>setTimeout(resolve,120));
+    }
+    if(status)status.textContent="Tamamlandı: "+done+" görsel yüklendi, "+skipped+" mevcut korundu"+(failed?", "+failed+" il bulunamadı":"")+".";
+    try{localStorage.setItem("dijiyesorCityImagesSeeded","1")}catch(_){}
+    await loadCityBannerSettings();
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=old;}
+  }
+}
+
 async function loadCityBannerSettings(){
   const city=$("cityBannerProvince")?.value;if(!city)return;
   const key=cityBannerKey(city);
@@ -171,6 +214,7 @@ function initCityBannerAdmin(){
       const msg=$("cityBannerSponsorLogoUploadMsg");
       try{const url=await uploadCityBannerImage(e.target.files?.[0],msg);if(url){$("cityBannerSponsorLogoUrl").value=url;msg.textContent="Yüklendi ✓"}}catch(err){msg.textContent=err.message||"Yüklenemedi"}finally{e.target.value=""}
     });
+    $("seedCityBannerImagesBtn")?.addEventListener("click",()=>seedAllCityBannerImages({force:false}));
     $("saveCityBannerBtn")?.addEventListener("click",async()=>{
       const city=sel.value,msg=$("cityBannerMessage");if(!city)return;
       const start=$("cityBannerSponsorStart").value,end=$("cityBannerSponsorEnd").value;
@@ -191,6 +235,9 @@ function initCityBannerAdmin(){
       }catch(err){msg.className="message error";msg.textContent=err.message||"Kaydedilemedi."}
     });
     cityBannerAdminReady=true;
+    let alreadySeeded=false;
+    try{alreadySeeded=localStorage.getItem("dijiyesorCityImagesSeeded")==="1"}catch(_){}
+    if(!alreadySeeded)setTimeout(()=>seedAllCityBannerImages({force:false}),300);
   }
   loadCityBannerSettings();
 }
