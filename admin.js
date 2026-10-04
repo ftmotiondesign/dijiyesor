@@ -298,7 +298,7 @@ function renderFirms(){
       '<div class="firm-ident"><div class="firm-logo">'+logo+'</div><div><strong>'+esc(f.name)+(sponsor?'<span class="sponsor-dot">Sponsor</span>':'')+(f.vip?'<span class="vip-dot">VIP</span>':'')+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small>'+qualityHtml+'</div></div>'+
       '<span>'+esc(categories[f.mainCategory]||f.mainCategory||"Diğer")+'</span>'+
       '<span>'+esc(f.phone||"Telefon yok")+'</span>'+
-      '<div class="row-actions"><button data-edit-firm="'+esc(f.id)+'">Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button><button class="danger" data-delete-firm="'+esc(f.id)+'">Sil</button></div>'+
+      '<div class="row-actions"><button class="primary" data-quick-edit-firm="'+esc(f.id)+'">Hızlı Düzenle</button><button data-edit-firm="'+esc(f.id)+'">Detaylı Düzenle</button><button data-campaign-firm="'+esc(f.id)+'">Reklam</button><button data-qr-firm="'+esc(f.id)+'">QR/NFC</button><button data-toggle-firm="'+esc(f.id)+'">'+(String(f.status||"active")==="passive"?"Aktif Yap":"Pasif")+'</button><button class="danger" data-delete-firm="'+esc(f.id)+'">Sil</button></div>'+
     '</div>'
   }).join(""):'<div class="empty">Firma bulunamadı.</div>';
   updateFirmBulkUi();
@@ -307,7 +307,7 @@ function renderFirms(){
 
 function openFirmModal(id){
   const f=firms.find(x=>x.id===id)||{};
-  $("firmModalTitle").textContent=id?"Firma Düzenle":"Yeni Firma Ekle";$("firmId").value=id||"";
+  $("firmModalTitle").textContent=id?"Hızlı Düzenle":"Yeni Firma Ekle";$("firmId").value=id||"";
   $("editName").value=f.name||"";$("editStatus").value=f.status||"active";$("editMainCategory").value=f.mainCategory||"diger";$("editSubCategory").value=f.subCategory||f.category||"";
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
@@ -1047,6 +1047,7 @@ document.addEventListener("click",async e=>{
     return;
   }
   const qrBtn=e.target.closest("[data-qr-firm]");if(qrBtn)return openQrForFirm(qrBtn.dataset.qrFirm);
+  const quickEdit=e.target.closest("[data-quick-edit-firm]");if(quickEdit){openFirmModal(quickEdit.dataset.quickEditFirm);return}
   const edit=e.target.closest("[data-edit-firm]");if(edit){const f=firms.find(x=>x.id===edit.dataset.editFirm);location.href="firma-duzenle.html?id="+encodeURIComponent(edit.dataset.editFirm)+"&name="+encodeURIComponent(f?.name||"");return}
   const camp=e.target.closest("[data-campaign-firm]");if(camp)return openCampaignModal(camp.dataset.campaignFirm);
   const toggle=e.target.closest("[data-toggle-firm]");if(toggle){const f=firms.find(x=>x.id===toggle.dataset.toggleFirm);if(f){await db.collection("institutions").doc(f.id).update({status:String(f.status||"active")==="passive"?"active":"passive"});await loadFirms();renderAll()}return}
