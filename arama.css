@@ -930,3 +930,10 @@ button,input,select{font:inherit}
   color:inherit;
   font-weight:400;
 }
+
+
+/* Yakınındaki firmalar için metnini yeşil vurgula */
+.location-prefix{
+  color:#16a34a!important;
+  font-weight:900;
+}
