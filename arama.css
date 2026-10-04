@@ -575,3 +575,15 @@ button,input,select{font:inherit}
     font-size:12px;
   }
 }
+
+/* Sticky arama alanı altında hedeflerin görünür kalması */
+#locationNotice,
+#companyGrid{
+  scroll-margin-top:90px;
+}
+@media(max-width:700px){
+  #locationNotice,
+  #companyGrid{
+    scroll-margin-top:74px;
+  }
+}
