@@ -296,29 +296,39 @@
 
     document.getElementById('homeAllCategoriesBtn')?.addEventListener('click',openHomeCategoryModal);
 
+    function goCategorySearch(sector,subCategory,{skipLocationPrompt=false}={}){
+      const params=new URLSearchParams();
+      params.set('sector',sector);
+      if(subCategory)params.set('subCategory',subCategory);
+
+      if(!citySelect.value && !skipLocationPrompt){
+        pendingCategorySearch={sector,subCategory};
+        const title=document.getElementById('locationPromptTitle');
+        const description=locationPromptModal?.querySelector('p');
+        if(title)title.textContent='İl seçmek ister misiniz?';
+        if(description)description.textContent='Daha yakın ve doğru sonuçlar için bir il seçebilirsiniz.';
+        openLocationPrompt();
+        return;
+      }
+
+      if(citySelect.value)params.set('city',citySelect.value);
+      if(districtSelect.value)params.set('district',districtSelect.value);
+      pendingCategorySearch=null;
+      window.location.href='arama.html?'+params.toString();
+    }
+
     document.querySelectorAll('[data-quick-sector]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        const params=new URLSearchParams();
-        params.set('sector',btn.dataset.quickSector);
-        if(btn.dataset.quickSub)params.set('subCategory',btn.dataset.quickSub);
-        if(citySelect.value)params.set('city',citySelect.value);
-        if(districtSelect.value)params.set('district',districtSelect.value);
-        window.location.href='arama.html?'+params.toString();
+        goCategorySearch(btn.dataset.quickSector,btn.dataset.quickSub);
       });
     });
 
     homeCategoryGrid.querySelectorAll('[data-home-sector]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         // Sonuç sayfasına yalnızca alt kategori seçilince git.
-        // Böylece "Eğitim" gibi ana kategoriler tüm kurumları bir anda listelemez.
         if(!btn.dataset.homeSubcategory)return;
-
-        const params=new URLSearchParams();
-        params.set('sector',btn.dataset.homeSector);
-        params.set('subCategory',btn.dataset.homeSubcategory);
-        if(citySelect.value) params.set('city',citySelect.value);
-        if(districtSelect.value) params.set('district',districtSelect.value);
-        window.location.href='arama.html?'+params.toString();
+        closeHomeCategoryModal();
+        goCategorySearch(btn.dataset.homeSector,btn.dataset.homeSubcategory);
       });
     });
 
@@ -350,6 +360,7 @@
     const locationPromptSelectBtn = document.getElementById('locationPromptSelectBtn');
     const locationPromptAllBtn = document.getElementById('locationPromptAllBtn');
     let allowAllTurkeySearchOnce = false;
+    let pendingCategorySearch = null;
 
     function openLocationPrompt(){
       locationPromptModal?.classList.remove('hidden');
@@ -370,8 +381,14 @@
     });
 
     locationPromptAllBtn?.addEventListener('click',()=>{
-      allowAllTurkeySearchOnce = true;
       closeLocationPrompt();
+      if(pendingCategorySearch){
+        const pending={...pendingCategorySearch};
+        pendingCategorySearch=null;
+        goCategorySearch(pending.sector,pending.subCategory,{skipLocationPrompt:true});
+        return;
+      }
+      allowAllTurkeySearchOnce = true;
       goSearch();
     });
 
@@ -420,7 +437,14 @@
       window.location.href = 'arama.html' + (params.toString() ? '?' + params.toString() : '');
     }
 
-    citySelect.addEventListener('change', loadDistricts);
+    citySelect.addEventListener('change', async()=>{
+      await loadDistricts();
+      if(citySelect.value && pendingCategorySearch){
+        const pending={...pendingCategorySearch};
+        pendingCategorySearch=null;
+        goCategorySearch(pending.sector,pending.subCategory,{skipLocationPrompt:true});
+      }
+    });
     searchBtn.addEventListener('click', goSearch);
 
     searchInput.addEventListener('keydown', event => { if (event.key === 'Enter') goSearch(); });
