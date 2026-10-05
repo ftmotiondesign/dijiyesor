@@ -2130,6 +2130,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const newCount=document.getElementById("autoImportNewCount");
   const duplicateCount=document.getElementById("autoImportDuplicateCount");
   const selectedCount=document.getElementById("autoImportSelectedCount");
+  const selectAllBtn=document.getElementById("autoImportSelectAllBtn");
+  const clearSelectionBtn=document.getElementById("autoImportClearSelectionBtn");
   if(!city||!district||!category||!results)return;
 
   let functionsInstance=null;
@@ -2335,6 +2337,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
   searchBtn?.addEventListener("click",runSearch);
   saveBtn?.addEventListener("click",saveDrafts);
+  selectAllBtn?.addEventListener("click",()=>{
+    rows.filter(r=>!r.alreadyExists&&r.placeId).forEach(r=>selected.add(r.placeId));
+    renderRows();
+  });
+  clearSelectionBtn?.addEventListener("click",()=>{
+    selected.clear();
+    renderRows();
+  });
 
   loadCities();
 })();
