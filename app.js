@@ -361,6 +361,46 @@ function resultCardFallback(i){
   const detail=subMap[sub]||{};
   return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
 }
+function resultVisualFallbackHtml(i){
+  const c=resultCardFallback(i);
+  return '<div class="result-visual-fallback-icon">'+c.icon+'</div>'+
+    '<div><small>DİJİYESOR</small><strong>'+esc(c.label)+'</strong></div>'+
+    (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
+    (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'');
+}
+function handleResultImageError(img){
+  const slider=img?.closest?.("[data-result-slider]");
+  if(!slider)return;
+  img.remove();
+  const slides=[...slider.querySelectorAll("[data-result-slide]")];
+  if(slides.length){
+    slides.forEach((el,index)=>{
+      el.dataset.resultSlide=String(index);
+      el.classList.toggle("active",index===0);
+    });
+    const count=slider.querySelector(".result-slide-count");
+    if(count)count.textContent="1 / "+slides.length;
+    slider.dataset.resultIndex="0";
+    if(slides.length===1){
+      slider.querySelectorAll(".result-slide-nav,.result-slide-count").forEach(el=>el.remove());
+    }
+    return;
+  }
+  slider.className="result-visual result-visual-fallback "+(slider.dataset.fallbackTone||"other");
+  slider.removeAttribute("data-result-slider");
+  slider.innerHTML=
+    '<div class="result-visual-fallback-icon">'+(slider.dataset.fallbackIcon||"📍")+'</div>'+
+    '<div><small>DİJİYESOR</small><strong>'+esc(slider.dataset.fallbackLabel||"Yerel İşletme")+'</strong></div>'+
+    (slider.dataset.has360==="1"?'<span class="result-visual-badge">360° Mekân</span>':'')+
+    (slider.dataset.sponsored==="1"?'<span class="result-visual-sponsor">Sponsor</span>':'');
+}
+function handleResultLogoError(img,initialText){
+  const parent=img?.parentElement;
+  if(!parent)return;
+  const span=document.createElement("span");
+  span.textContent=initialText||"D";
+  parent.replaceChildren(span);
+}
 function resultCardVisual(i){
   let images=Array.isArray(i.coverUrls)?i.coverUrls.map(x=>String(x||"").trim()).filter(Boolean):[];
   if(!images.length){
@@ -368,10 +408,11 @@ function resultCardVisual(i){
     if(legacy)images=[legacy];
   }
   images=[...new Set(images)].slice(0,6);
+  const fb=resultCardFallback(i);
 
   if(images.length){
-    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy">').join("");
-    return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'">'+
+    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy" onerror="handleResultImageError(this)">').join("");
+    return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'" data-fallback-icon="'+esc(fb.icon)+'" data-fallback-label="'+esc(fb.label)+'" data-fallback-tone="'+esc(fb.tone)+'" data-has360="'+(i.has360Tour?'1':'0')+'" data-sponsored="'+(i.sponsored?'1':'0')+'">'+
       slides+
       (images.length>1?'<button type="button" class="result-slide-nav prev" data-result-slide-prev aria-label="Önceki görsel">‹</button><button type="button" class="result-slide-nav next" data-result-slide-next aria-label="Sonraki görsel">›</button><span class="result-slide-count">1 / '+images.length+'</span>':'')+
       '<span class="result-enlarge-hint" aria-hidden="true"><span class="result-enlarge-icon">⌕</span><span class="desktop-label">Büyüt</span><span class="mobile-label">Dokun</span></span>'+
@@ -379,13 +420,7 @@ function resultCardVisual(i){
       (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'')+
     '</div>';
   }
-  const c=resultCardFallback(i);
-  return '<div class="result-visual result-visual-fallback '+esc(c.tone)+'">'+
-    '<div class="result-visual-fallback-icon">'+c.icon+'</div>'+
-    '<div><small>DİJİYESOR</small><strong>'+esc(c.label)+'</strong></div>'+
-    (i.has360Tour?'<span class="result-visual-badge">360° Mekân</span>':'')+
-    (i.sponsored?'<span class="result-visual-sponsor">Sponsor</span>':'')+
-  '</div>';
+  return '<div class="result-visual result-visual-fallback '+esc(fb.tone)+'">'+resultVisualFallbackHtml(i)+'</div>';
 }
 
 const TURKEY_PROVINCES=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
@@ -549,7 +584,7 @@ function render(data,{keepLimit=false}={}){
 
   const normalCards=visibleData.map(i=>{
     const logo=i.logoUrl
-      ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
+      ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu" onerror="handleResultLogoError(this,\''+esc(initials(i.name))+'\')">'
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
     const storedDesc=String(i.description||"").trim();
