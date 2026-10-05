@@ -761,3 +761,34 @@
 .draft-firm-check input{width:17px;height:17px}
 .draft-firm-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:900px){.draft-firm-row{grid-template-columns:34px 1fr}.draft-firm-contact,.draft-firm-actions{grid-column:2}.draft-firm-toolbar-actions{justify-content:flex-start}}
+
+/* Taslak firmalar - sabit ve kompakt masaüstü düzeni */
+.draft-firm-row{
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1.7fr) minmax(180px,.75fr) auto!important;
+  grid-template-areas:"check main contact actions";
+  column-gap:16px!important;
+  row-gap:8px!important;
+  align-items:center!important;
+  min-height:88px;
+  padding:12px 14px!important;
+}
+.draft-firm-check{grid-area:check;margin:0!important;align-self:center!important}
+.draft-firm-main{grid-area:main;min-width:0}
+.draft-firm-contact{grid-area:contact;min-width:0}
+.draft-firm-actions{grid-area:actions;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;white-space:nowrap}
+.draft-firm-main strong,.draft-firm-main small,.draft-firm-main p,.draft-firm-contact b,.draft-firm-contact small{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.draft-firm-toolbar{align-items:center!important}
+.draft-firm-toolbar-actions{margin-left:auto}
+@media(max-width:1000px){
+  .draft-firm-row{
+    grid-template-columns:32px minmax(0,1fr)!important;
+    grid-template-areas:
+      "check main"
+      ". contact"
+      ". actions";
+  }
+  .draft-firm-actions{justify-content:flex-start!important;white-space:normal}
+  .draft-firm-toolbar{flex-direction:column!important;align-items:flex-start!important}
+  .draft-firm-toolbar-actions{margin-left:0!important;justify-content:flex-start!important}
+}
