@@ -18,6 +18,7 @@ const CATEGORY_MAP = {
   halk_egitim: { label: "Halk Eğitim Merkezi", mainCategory: "egitim", subCategory: "halk_egitim" },
   kamu_egitim: { label: "Kamu Eğitim Kurumu", mainCategory: "egitim", subCategory: "kamu_egitim" },
   mesleki_egitim: { label: "Mesleki Eğitim Merkezi", mainCategory: "egitim", subCategory: "mesleki_egitim" },
+  e_sinav: { label: "E-Sınav Merkezi", mainCategory: "egitim", subCategory: "e_sinav" },
   ozel_ders: { label: "Özel Ders Merkezi", mainCategory: "egitim", subCategory: "ozel_ders" },
   dil_kursu: { label: "Dil Kursu", mainCategory: "egitim", subCategory: "dil_kursu" },
   etut: { label: "Etüt Merkezi", mainCategory: "egitim", subCategory: "etut" },
