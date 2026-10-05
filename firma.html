@@ -17,6 +17,9 @@
   <meta property="og:locale" content="tr_TR">
   <meta property="og:site_name" content="DijiyeSor">
   <meta name="twitter:card" content="summary_large_image">
+  <meta id="seoTwitterTitle" name="twitter:title" content="Firma | DijiyeSor">
+  <meta id="seoTwitterDescription" name="twitter:description" content="Firma bilgileri, konum ve iletişim detayları DijiyeSor'da.">
+  <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
   <link rel="stylesheet" href="firma.css?v=20261004-4">
@@ -124,41 +127,77 @@
       const district=String(d.district||"").trim();
       const category=String(d.subCategory||d.category||d.mainCategory||"").trim();
       const categoryLabels={
-        surucu:"Sürücü Kursu",src:"SRC Kursu",psikoteknik:"Psikoteknik",
-        kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",yurt:"Öğrenci Yurdu",
+        surucu:"Sürücü Kursu",src:"SRC Kursu",psikoteknik:"Psikoteknik",e_sinav:"E-Sınav Merkezi",
+        kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",ozel_ders:"Özel Ders",dil_kursu:"Dil Kursu",
+        etut:"Etüt Merkezi",ozel_okul:"Özel Okul",yurt:"Öğrenci Yurdu",
         halk_egitim:"Halk Eğitim Merkezi",kamu_egitim:"Kamu Eğitim Kurumu",mesleki_egitim:"Mesleki Eğitim Merkezi",
-        e_sinav:"E-Sınav Merkezi",oto_servis:"Oto Servis",restoran:"Restoran",dis_klinigi:"Diş Kliniği",
-        emlak_ofisi:"Emlak Ofisi",otel:"Otel",guzellik:"Güzellik Merkezi"
+        oto_servis:"Oto Servis",kaporta_boya:"Kaporta & Boya",oto_elektrik:"Oto Elektrik",lastik_jant:"Lastik & Jant",
+        oto_yikama:"Oto Yıkama",ekspertiz:"Oto Ekspertiz",galeri:"Oto Galeri",rentacar:"Araç Kiralama",
+        yedek_parca:"Yedek Parça",motosiklet:"Motosiklet",restoran:"Restoran",kafe:"Kafe",
+        fastfood:"Fast Food",pastane:"Pastane",pizza:"Pizza",doner:"Döner",pide_lahmacun:"Pide & Lahmacun",
+        catering:"Catering",ev_yemekleri:"Ev Yemekleri",dis_klinigi:"Diş Kliniği",klinik:"Klinik",
+        psikolog:"Psikolog",diyetisyen:"Diyetisyen",fizyoterapi:"Fizyoterapi",guzellik:"Güzellik Merkezi",
+        kuafor:"Kuaför",berber:"Berber",spor:"Spor Merkezi",mobilya:"Mobilya",dekorasyon:"Dekorasyon",
+        insaat:"İnşaat",elektrikci:"Elektrikçi",tesisatci:"Tesisatçı",teknik_servis:"Teknik Servis",
+        klima:"Klima",cam_balkon:"Cam Balkon",temizlik:"Temizlik",emlak_ofisi:"Emlak Ofisi",
+        konut:"Konut",arsa:"Arsa",ticari:"Ticari Gayrimenkul",gunluk_kiralik:"Günlük Kiralık",
+        otel:"Otel",pansiyon:"Pansiyon",apart:"Apart",bungalov:"Bungalov",seyahat:"Seyahat Acentesi",kamp:"Kamp",
+        dugun_salonu:"Düğün Salonu",organizasyon:"Organizasyon",fotograf:"Fotoğrafçı",video:"Video Prodüksiyon",
+        drone:"Drone Çekimi",gelinlik:"Gelinlik",cicekci:"Çiçekçi",reklam:"Reklam Ajansı",nakliyat:"Nakliyat",
+        kurye:"Kurye",sehirici:"Şehir İçi Taşımacılık",depolama:"Depolama",hukuk:"Hukuk",muhasebe:"Muhasebe",
+        web:"Web Tasarım",sosyal_medya:"Sosyal Medya",teknoloji:"Teknoloji",bilgisayar:"Bilgisayar",
+        danismanlik:"Danışmanlık",veteriner:"Veteriner",tarim:"Tarım",giyim:"Giyim",ayakkabi:"Ayakkabı",
+        market:"Market",elektronik:"Elektronik",kirtasiye:"Kırtasiye",petshop:"Pet Shop",zuccaciye:"Züccaciye",esnaf:"Yerel Esnaf"
       };
       const categoryLabel=categoryLabels[category]||"Firma";
       const place=[district,city].filter(Boolean).join(" / ");
       const title=[name,place,categoryLabel,"DijiyeSor"].filter(Boolean).join(" | ").slice(0,160);
       const desc=(name+(place?" - "+place:"")+". "+categoryLabel+" bilgileri, konum, iletişim, fotoğraflar ve hizmet detaylarını DijiyeSor'da inceleyin.").slice(0,160);
       const canonical="https://dijiyer.web.app/firma.html?id="+encodeURIComponent(id||"");
+
       document.title=title;
       document.querySelector('meta[name="description"]')?.setAttribute("content",desc);
       document.getElementById("seoCanonical")?.setAttribute("href",canonical);
       setMetaContent("seoOgTitle",title);
       setMetaContent("seoOgDescription",desc);
       setMetaContent("seoOgUrl",canonical);
+      setMetaContent("seoTwitterTitle",title);
+      setMetaContent("seoTwitterDescription",desc);
 
-      const image=asArray(d.coverUrls)[0]||d.coverUrl||d.cardImageUrl||d.logoUrl||"";
-      if(image){
-        let ogImage=document.querySelector('meta[property="og:image"]');
-        if(!ogImage){ogImage=document.createElement("meta");ogImage.setAttribute("property","og:image");document.head.appendChild(ogImage)}
-        ogImage.setAttribute("content",safeUrl(image));
-      }
+      const image=asArray(d.coverUrls)[0]||d.coverUrl||d.cardImageUrl||d.logoUrl||"https://dijiyer.web.app/assets/diji-mascot-v2.png";
+      let ogImage=document.querySelector('meta[property="og:image"]');
+      if(!ogImage){ogImage=document.createElement("meta");ogImage.setAttribute("property","og:image");document.head.appendChild(ogImage)}
+      ogImage.setAttribute("content",safeUrl(image));
+      let ogImageAlt=document.querySelector('meta[property="og:image:alt"]');
+      if(!ogImageAlt){ogImageAlt=document.createElement("meta");ogImageAlt.setAttribute("property","og:image:alt");document.head.appendChild(ogImageAlt)}
+      ogImageAlt.setAttribute("content",name+" - "+categoryLabel);
+      setMetaContent("seoTwitterImage",safeUrl(image));
 
+      const schemaTypes={
+        egitim:"EducationalOrganization",otomotiv:"AutomotiveBusiness",yemeicme:"FoodEstablishment",
+        saglikguzellik:"HealthAndBeautyBusiness",evyapi:"HomeAndConstructionBusiness",emlak:"RealEstateAgent",
+        turizm:"LodgingBusiness",organizasyonmedya:"ProfessionalService",tasimacilik:"LocalBusiness",
+        profesyonel:"ProfessionalService",alisveris:"Store",diger:"LocalBusiness"
+      };
+      const subTypes={
+        restoran:"Restaurant",kafe:"CafeOrCoffeeShop",dis_klinigi:"Dentist",otel:"Hotel",
+        oto_servis:"AutoRepair",emlak_ofisi:"RealEstateAgent",kuafor:"HairSalon",
+        guzellik:"BeautySalon",veteriner:"VeterinaryCare",spor:"ExerciseGym",market:"GroceryStore"
+      };
+      const businessType=subTypes[category]||schemaTypes[d.mainCategory]||"LocalBusiness";
       const localBusiness={
-        "@context":"https://schema.org",
-        "@type":"LocalBusiness",
+        "@type":businessType,
         "@id":canonical+"#business",
         "name":name,
-        "url":canonical
+        "description":desc,
+        "url":canonical,
+        "image":safeUrl(image)
       };
       if(d.phone)localBusiness.telephone=String(d.phone);
-      if(d.website)localBusiness.sameAs=[safeUrl(d.website)];
-      if(image)localBusiness.image=safeUrl(image);
+      const sameAs=[];
+      if(d.website)sameAs.push(safeUrl(d.website));
+      if(d.instagram)sameAs.push(safeUrl(String(d.instagram).includes("instagram.com")?d.instagram:"instagram.com/"+String(d.instagram).replace(/^@/,"")));
+      if(sameAs.length)localBusiness.sameAs=sameAs;
       if(d.address||district||city){
         localBusiness.address={
           "@type":"PostalAddress",
@@ -167,23 +206,36 @@
           "addressRegion":city||"",
           "addressCountry":"TR"
         };
+        localBusiness.areaServed=[district,city].filter(Boolean).join(", ");
       }
       const lat=Number(d.latitude||d.lat);
       const lng=Number(d.longitude||d.lng||d.lon);
       if(Number.isFinite(lat)&&Number.isFinite(lng)){
         localBusiness.geo={"@type":"GeoCoordinates","latitude":lat,"longitude":lng};
       }
+
+      const webpage={
+        "@type":"WebPage",
+        "@id":canonical+"#webpage",
+        "url":canonical,
+        "name":title,
+        "description":desc,
+        "inLanguage":"tr-TR",
+        "mainEntity":{"@id":canonical+"#business"},
+        "isPartOf":{"@id":"https://dijiyer.web.app/#website"}
+      };
       const breadcrumb={
-        "@context":"https://schema.org",
         "@type":"BreadcrumbList",
+        "@id":canonical+"#breadcrumb",
         "itemListElement":[
           {"@type":"ListItem","position":1,"name":"DijiyeSor","item":"https://dijiyer.web.app/"},
-          {"@type":"ListItem","position":2,"name":categoryLabel,"item":"https://dijiyer.web.app/arama.html?sector="+encodeURIComponent(d.mainCategory||"")+"&subCategory="+encodeURIComponent(category)},
+          {"@type":"ListItem","position":2,"name":categoryLabel,"item":"https://dijiyer.web.app/sektorler.html"},
           {"@type":"ListItem","position":3,"name":name,"item":canonical}
         ]
       };
+      const website={"@type":"WebSite","@id":"https://dijiyer.web.app/#website","url":"https://dijiyer.web.app/","name":"DijiyeSor","inLanguage":"tr-TR"};
       const jsonLd=document.getElementById("seoJsonLd");
-      if(jsonLd)jsonLd.textContent=JSON.stringify({"@context":"https://schema.org","@graph":[localBusiness,breadcrumb]});
+      if(jsonLd)jsonLd.textContent=JSON.stringify({"@context":"https://schema.org","@graph":[website,webpage,localBusiness,breadcrumb]});
     }
 
     function campaignActive(d){
