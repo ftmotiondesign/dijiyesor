@@ -9,7 +9,7 @@ on:
 
 concurrency:
   group: firebase-hosting-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build_and_deploy:
