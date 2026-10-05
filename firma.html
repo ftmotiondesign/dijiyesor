@@ -9,7 +9,6 @@
   <title>Firma | DijiyeSor</title>
   <meta name="description" content="Firma bilgileri, konum, iletişim, fotoğraflar ve hizmet detayları DijiyeSor'da.">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <link id="seoCanonical" rel="canonical" href="https://dijiyer.web.app/firma.html">
   <meta id="seoOgTitle" property="og:title" content="Firma | DijiyeSor">
   <meta id="seoOgDescription" property="og:description" content="Firma bilgileri, konum ve iletişim detayları DijiyeSor'da.">
   <meta id="seoOgUrl" property="og:url" content="https://dijiyer.web.app/firma.html">
@@ -157,7 +156,14 @@
 
       document.title=title;
       document.querySelector('meta[name="description"]')?.setAttribute("content",desc);
-      document.getElementById("seoCanonical")?.setAttribute("href",canonical);
+      let canonicalEl=document.getElementById("seoCanonical");
+      if(!canonicalEl){
+        canonicalEl=document.createElement("link");
+        canonicalEl.id="seoCanonical";
+        canonicalEl.rel="canonical";
+        document.head.appendChild(canonicalEl);
+      }
+      canonicalEl.setAttribute("href",canonical);
       setMetaContent("seoOgTitle",title);
       setMetaContent("seoOgDescription",desc);
       setMetaContent("seoOgUrl",canonical);
