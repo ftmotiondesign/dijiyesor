@@ -303,8 +303,8 @@ exports.importPlaceDrafts = onCall(
   {
     region: "europe-west1",
     secrets: [GOOGLE_PLACES_API_KEY],
-    timeoutSeconds: 120,
-    memory: "256MiB"
+    timeoutSeconds: 540,
+    memory: "512MiB"
   },
   async (request) => {
     requireAdmin(request);
@@ -326,10 +326,6 @@ exports.importPlaceDrafts = onCall(
     if (!placeIds.length) {
       throw new HttpsError("invalid-argument", "En az bir firma seçmelisin.");
     }
-    if (placeIds.length > 20) {
-      throw new HttpsError("invalid-argument", "Tek seferde en fazla 20 firma aktarılabilir.");
-    }
-
     const [institutionSnap, draftSnap] = await Promise.all([
       db.collection("institutions").get(),
       db.collection("institutionDrafts").get()
@@ -351,8 +347,26 @@ exports.importPlaceDrafts = onCall(
     const created = [];
     const skipped = [];
 
-    for (const placeId of placeIds) {
-      const p = await getPlaceDetails(placeId);
+    // Uygulama tarafında adet sınırı yok. Google Place detaylarını küçük gruplar
+    // halinde paralel alarak yüksek sayıda seçimi daha hızlı işle.
+    const detailRows = [];
+    const DETAIL_CONCURRENCY = 10;
+
+    for (let i = 0; i < placeIds.length; i += DETAIL_CONCURRENCY) {
+      const chunk = placeIds.slice(i, i + DETAIL_CONCURRENCY);
+      const chunkResults = await Promise.all(
+        chunk.map(async (placeId) => ({
+          placeId,
+          place: await getPlaceDetails(placeId)
+        }))
+      );
+      detailRows.push(...chunkResults);
+    }
+
+    // Tekrarlı firma kontrolü güvenilir kalsın diye kayıt aşamasını sırayla yap.
+    for (const item of detailRows) {
+      const placeId = item.placeId;
+      const p = item.place;
 
       const candidate = {
         googlePlaceId: p.id || placeId,
@@ -392,10 +406,6 @@ exports.importPlaceDrafts = onCall(
         googlePlaceId: p.id || placeId,
         googleTypes: Array.isArray(p.types) ? p.types : [],
         googleBusinessStatus: p.businessStatus || "",
-        googlePhotoName: p.photos?.[0]?.name || "",
-        profileImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
-        cardImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
-        galleryUrls: p.photos?.[0]?.name ? [googlePhotoProxyUrl(p.photos[0].name)] : [],
         source: "google_places",
         status: "draft",
         createdAt: FieldValue.serverTimestamp(),
