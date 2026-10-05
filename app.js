@@ -67,6 +67,46 @@ function keywordTargets(query){
 const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",src:"egitim",psikoteknik:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 
+function firmSmartText(firm){
+  return smartSearchText([
+    firm?.name,
+    firm?.description,
+    firm?.category,
+    firm?.subCategory,
+    ...(Array.isArray(firm?.keywords)?firm.keywords:[]),
+    ...(Array.isArray(firm?.highlights)?firm.highlights:[]),
+    ...(Array.isArray(firm?.programs)?firm.programs:[])
+  ].filter(Boolean).join(" "));
+}
+function isPublicEducationInstitution(firm){
+  const t=firmSmartText(firm);
+  return [
+    "halk egitim",
+    "milli egitim mudur",
+    "ilce milli egitim",
+    "meb",
+    "belediye",
+    "kaymakam",
+    "universite",
+    "fakulte",
+    "meslek yuksekokul"
+  ].some(x=>t.includes(x));
+}
+function isLikelyDrivingSchool(firm){
+  if(isPublicEducationInstitution(firm))return false;
+  const t=firmSmartText(firm);
+  const positive=[
+    "surucu kurs",
+    "motorlu tasit surucu",
+    "ehliyet",
+    "direksiyon ders",
+    "direksiyon egitim",
+    "driving school"
+  ];
+  if(positive.some(x=>t.includes(x)))return true;
+  return String(firm?.subCategory||firm?.category||"")==="surucu";
+}
+
 // Türkiye genelinde ilçe alanlarında posta kodunu otomatik temizler.
 // Örn: "17200 Biga" -> "Biga", "34000 Kadıköy" -> "Kadıköy".
 const cleanDistrictName=v=>String(v||"")
@@ -307,8 +347,15 @@ function companyFromDoc(doc){
   const fixedLoc=resolveSearchLocation(d);
   const fixedCity=fixedLoc.city||"";
   const fixedDistrict=cleanDistrictName(fixedLoc.district||"");
-  const normalizedName=norm(d.name||"");
-  const looksPublicEducation=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedName);
+  const looksPublicEducation=isPublicEducationInstitution({
+    name:d.name||"",
+    description:d.description||"",
+    category:d.category||"",
+    subCategory:d.subCategory||"",
+    keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],
+    highlights:Array.isArray(d.highlights)?d.highlights:[],
+    programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[])
+  });
   const effectiveSubCategory=looksPublicEducation
     ?""
     :(/psikoteknik/.test(normalizedName)
@@ -476,8 +523,7 @@ function campaignCard(i){
   '</article>';
 }
 function automaticCategoryDescription(i){
-  const normalizedName=norm(i.name||"");
-  if(/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedName)){
+  if(isPublicEducationInstitution(i)){
     return "Kurum bilgileri, konum ve iletişim detaylarını inceleyebilirsiniz.";
   }
   const sub=String(i.subCategory||i.category||"").trim();
@@ -892,8 +938,7 @@ function render(data,{keepLimit=false}={}){
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
     const storedDesc=String(i.description||"").trim();
-    const normalizedFirmName=norm(i.name||"");
-    const publicEducationLike=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedFirmName);
+    const publicEducationLike=isPublicEducationInstitution(i);
     const autoStored=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDesc)
       || /\bişletmesidir\.?\s*$/i.test(storedDesc)
       || /^ehliyet eğitimi ve direksiyon dersleri sunar\.?$/i.test(storedDesc);
@@ -1346,8 +1391,12 @@ async function initHome(){
       const cityMatch=!c||norm(i.city)===c;
       const districtMatch=!d||normDistrict(i.district)===normDistrict(d);
       const sectorMatch=!s||i.mainCategory===s;
-      const publicEducationResult=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(norm(i.name||""));
-      const subMatch=!sc||(!publicEducationResult&&(i.subCategory===sc||i.category===sc));
+      const publicEducationResult=isPublicEducationInstitution(i);
+      const subMatch=!sc
+        ? true
+        : (sc==="surucu"
+            ? isLikelyDrivingSchool(i)
+            : (!publicEducationResult&&(i.subCategory===sc||i.category===sc)));
       const tourMatch=!(feature360||only360Active)||valid360Url(i.tour360Url);
 
       // Seçilen şehir/ilçe her zaman kesin filtre olarak uygulanır.
