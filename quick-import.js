@@ -395,14 +395,21 @@
     return [parseBlock(raw)].filter(x=>x&&x.name);
   }
   function inferSub(row,main){
-    const t=norm(row.name+" "+row.address);
+    const t=norm([row.name,row.address,row.googleCategory].filter(Boolean).join(" "));
     if(main==="egitim"){
+      if(/halk eğitim|halk egitim/.test(t))return "halk_egitim";
+      if(/ilçe milli eğitim|ilce milli egitim|milli eğitim müdürlüğü|milli egitim mudurlugu|\bmeb\b/.test(t))return "kamu_egitim";
+      if(/mesleki eğitim|mesleki egitim|\bmesem\b/.test(t))return "mesleki_egitim";
       if(/psikoteknik/.test(t))return "psikoteknik";
       if(/\bsrc\b|src kursu|src belgesi/.test(t))return "src";
-      if(/sürücü kursu|surucu kursu|ehliyet|direksiyon/.test(t))return "surucu";
-      if(/anaokulu|ana okulu|kreş|kres/.test(t))return "kres";
+      if(/sürücü kursu|surucu kursu|motorlu taşıt sürücü|motorlu tasit surucu|ehliyet kursu/.test(t))return "surucu";
+      if(/anaokulu|ana okulu|kreş|kres|gündüz bakımevi|gunduz bakimevi/.test(t))return "kres";
       if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(t))return "dershane";
-      if(/yurt/.test(t))return "yurt";
+      if(/öğrenci yurdu|ogrenci yurdu|erkek yurdu|kız yurdu|kiz yurdu/.test(t))return "yurt";
+      if(/dil kursu|ingilizce kursu|almanca kursu/.test(t))return "dil_kursu";
+      if(/özel okul|ozel okul|kolej/.test(t))return "ozel_okul";
+      if(/etüt|etut/.test(t))return "etut";
+      return "diger_egitim";
     }
     return "diger";
   }
