@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /firma-duzenle.html
+Disallow: /firma-ekle.html
+Disallow: /bilgi-al.html
+Sitemap: https://dijiyer.web.app/sitemap.xml
