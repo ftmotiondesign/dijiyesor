@@ -398,6 +398,7 @@
     const t=norm(row.name+" "+row.address);
     if(main==="egitim"){
       if(/psikoteknik/.test(t))return "psikoteknik";
+      if(/\bsrc\b|src kursu|src belgesi/.test(t))return "src";
       if(/sürücü kursu|surucu kursu|ehliyet|direksiyon/.test(t))return "surucu";
       if(/anaokulu|ana okulu|kreş|kres/.test(t))return "kres";
       if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(t))return "dershane";
@@ -426,7 +427,10 @@
       if(sub==="psikoteknik"||/psikoteknik/.test(text)){
         ["psikoteknik","psikoteknik değerlendirme","psikoteknik merkezi","psikoteknik raporu"].forEach(x=>out.add(x));
       }
-      if(sub==="surucu"||(/sürücü|surucu|ehliyet|direksiyon/.test(text)&&!/psikoteknik/.test(text))){
+      if(sub==="src"||/\bsrc\b/.test(text)){
+        ["src","src kursu","src belgesi","src1","src 1","src2","src 2","src3","src 3","src4","src 4"].forEach(x=>out.add(x));
+      }
+      if(sub==="surucu"||(/sürücü|surucu|ehliyet|direksiyon/.test(text)&&!/psikoteknik/.test(text)&&!/\bsrc\b/.test(text))){
         ["sürücü kursu","surucu kursu","ehliyet","direksiyon","ehliyet kursu"].forEach(x=>out.add(x));
         if(/\bsrc\b/.test(text)){
           ["src","src kursu","src1","src 1","src2","src 2","src3","src 3","src4","src 4","src belgesi","psikoteknik"].forEach(x=>out.add(x));
