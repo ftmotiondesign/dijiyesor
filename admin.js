@@ -2438,12 +2438,35 @@ document.addEventListener("DOMContentLoaded",()=>{
   async function saveDrafts(){
     const placeIds=[...selected];
     if(!placeIds.length)return;
+
+    const IMPORT_CHUNK_SIZE=25;
+    const callable=getFunctions().httpsCallable("importPlaceDrafts");
     saveBtn.disabled=true;
     saveBtn.textContent="Taslağa aktarılıyor...";
     hideMessage();
+
     try{
       let created=0;
       let skipped=0;
+      let processed=0;
+
+      async function importChunks(cityName,districtName,ids){
+        for(let i=0;i<ids.length;i+=IMPORT_CHUNK_SIZE){
+          const chunk=ids.slice(i,i+IMPORT_CHUNK_SIZE);
+          showMessage(processed+" / "+placeIds.length+" işlendi · taslağa aktarılıyor...");
+          const res=await callable({
+            city:cityName,
+            district:districtName,
+            category:category.value,
+            placeIds:chunk
+          });
+          created+=Number(res.data?.createdCount||0);
+          skipped+=Number(res.data?.skippedCount||0);
+          processed+=chunk.length;
+          showMessage(processed+" / "+placeIds.length+" işlendi · "+created+" firma taslağa aktarıldı...");
+        }
+      }
+
       if(city.value==="__ALL__"){
         const groups=new Map();
         rows.filter(r=>placeIds.includes(r.placeId)).forEach(r=>{
@@ -2451,28 +2474,26 @@ document.addEventListener("DOMContentLoaded",()=>{
           if(!groups.has(key))groups.set(key,[]);
           groups.get(key).push(r.placeId);
         });
+
         for(const [cityName,ids] of groups.entries()){
           if(!cityName||!ids.length)continue;
-          const res=await getFunctions().httpsCallable("importPlaceDrafts")({
-            city:cityName,
-            district:"",
-            category:category.value,
-            placeIds:ids
-          });
-          created+=Number(res.data?.createdCount||0);
-          skipped+=Number(res.data?.skippedCount||0);
+          await importChunks(cityName,"",ids);
         }
       }else{
-        const res=await getFunctions().httpsCallable("importPlaceDrafts")({
-          city:city.value,
-          district:allDistricts?.checked?"":(district.value||""),
-          category:category.value,
+        await importChunks(
+          city.value,
+          allDistricts?.checked?"":(district.value||""),
           placeIds
-        });
-        created=Number(res.data?.createdCount||0);
-        skipped=Number(res.data?.skippedCount||0);
+        );
       }
-      showMessage(created+" firma taslağa aktarıldı"+(skipped?" · "+skipped+" firma zaten kayıtlı/taslakta":"")+".","success");
+
+      showMessage(
+        created+" firma taslağa aktarıldı"+
+        (skipped?" · "+skipped+" firma zaten kayıtlı/taslakta":"")+
+        ".",
+        "success"
+      );
+
       selected.clear();
       rows=rows.map(r=>placeIds.includes(r.placeId)?{...r,alreadyExists:true}:r);
       renderRows();
@@ -2480,7 +2501,11 @@ document.addEventListener("DOMContentLoaded",()=>{
       renderDraftFirms();
     }catch(err){
       console.error(err);
-      showMessage(err?.message||"Taslağa aktarma sırasında hata oluştu.","error");
+      showMessage(
+        "Taslağa aktarma durdu ("+processed+" / "+placeIds.length+"): "+
+        (err?.message||err?.code||"Bilinmeyen hata"),
+        "error"
+      );
     }finally{
       saveBtn.textContent="Seçilenleri Taslağa Aktar";
       updateSelected();
