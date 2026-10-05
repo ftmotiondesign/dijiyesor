@@ -414,6 +414,7 @@
     if(main==="egitim"){
       if(/halk eğitim|halk egitim/.test(t))return "halk_egitim";
       if(/ilçe milli eğitim|ilce milli egitim|milli eğitim müdürlüğü|milli egitim mudurlugu|\bmeb\b/.test(t))return "kamu_egitim";
+      if(/e[- ]?sınav|e[- ]?sinav|elektronik sınav merkezi|elektronik sinav merkezi/.test(t))return "e_sinav";
       if(/mesleki eğitim|mesleki egitim|\bmesem\b/.test(t))return "mesleki_egitim";
       if(/psikoteknik/.test(t))return "psikoteknik";
       if(/\bsrc\b|src kursu|src belgesi/.test(t))return "src";
