@@ -359,7 +359,7 @@ async function loadAll(){
 }
 
 const defaultSubcategories={
-  egitim:{kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",surucu:"Sürücü Kursu",ozel_ders:"Özel Ders",dil_kursu:"Dil Kursu",etut:"Etüt Merkezi",ozel_okul:"Özel Okul",yurt:"Öğrenci Yurdu"},
+  egitim:{kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",surucu:"Sürücü Kursu",src:"SRC Kursu",psikoteknik:"Psikoteknik",halk_egitim:"Halk Eğitim Merkezi",kamu_egitim:"Kamu Eğitim Kurumu",mesleki_egitim:"Mesleki Eğitim Merkezi",ozel_ders:"Özel Ders",dil_kursu:"Dil Kursu",etut:"Etüt Merkezi",ozel_okul:"Özel Okul",yurt:"Öğrenci Yurdu",diger_egitim:"Diğer Eğitim Kurumu"},
   otomotiv:{oto_servis:"Oto Servis",kaporta_boya:"Kaporta & Boya",oto_elektrik:"Oto Elektrik",lastik_jant:"Lastik & Jant",oto_yikama:"Oto Yıkama",ekspertiz:"Ekspertiz",galeri:"Oto Galeri",rentacar:"Rent a Car",yedek_parca:"Yedek Parça",motosiklet:"Motosiklet"},
   yemeicme:{restoran:"Restoran",kafe:"Kafe",fastfood:"Fast Food",pastane:"Pastane",pizza:"Pizza",doner:"Döner",pide_lahmacun:"Pide & Lahmacun",catering:"Catering",ev_yemekleri:"Ev Yemekleri"},
   saglikguzellik:{dis_klinigi:"Diş Kliniği",klinik:"Klinik",psikolog:"Psikolog",diyetisyen:"Diyetisyen",fizyoterapi:"Fizyoterapi",guzellik:"Güzellik Merkezi",kuafor:"Kuaför",berber:"Berber",spor:"Spor Merkezi"},
