@@ -248,10 +248,15 @@ exports.placePhoto = onRequest(
         return;
       }
 
+      const requestedSize = Math.max(
+        240,
+        Math.min(1200, Number(request.query?.w || request.query?.size || 900))
+      );
+
       const mediaResponse = await fetch(
         "https://places.googleapis.com/v1/" +
           name +
-          "/media?maxWidthPx=900&maxHeightPx=900",
+          "/media?maxWidthPx=" + requestedSize + "&maxHeightPx=" + requestedSize,
         {
           redirect: "follow",
           headers: {
