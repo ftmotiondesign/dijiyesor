@@ -1162,3 +1162,83 @@ exports.publishDraftFirmsBatch = onCall(
     };
   }
 );
+
+
+function xmlEscape(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function sitemapLastmod(value) {
+  if (!value) return "";
+  try {
+    const d = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 10);
+  } catch (_) {
+    return "";
+  }
+}
+
+exports.firmSitemap = onRequest(
+  {
+    region: "europe-west1",
+    timeoutSeconds: 60,
+    memory: "256MiB",
+    cors: false
+  },
+  async (_request, response) => {
+    try {
+      const urls = [];
+      const pageSize = 1000;
+      let lastDoc = null;
+
+      while (urls.length < 50000) {
+        let q = db.collection("institutions")
+          .orderBy(FieldPath.documentId())
+          .limit(pageSize);
+
+        if (lastDoc) q = q.startAfter(lastDoc);
+
+        const snap = await q.get();
+        if (snap.empty) break;
+
+        for (const doc of snap.docs) {
+          const d = doc.data() || {};
+          if (String(d.status || "active") === "passive") continue;
+
+          const loc = "https://dijiyer.web.app/firma.html?id=" + encodeURIComponent(doc.id);
+          const lastmod = sitemapLastmod(d.updatedAt || d.createdAt);
+
+          urls.push(
+            "  <url><loc>" + xmlEscape(loc) + "</loc>" +
+            (lastmod ? "<lastmod>" + lastmod + "</lastmod>" : "") +
+            "<changefreq>weekly</changefreq><priority>0.7</priority></url>"
+          );
+
+          if (urls.length >= 50000) break;
+        }
+
+        lastDoc = snap.docs[snap.docs.length - 1];
+        if (snap.size < pageSize) break;
+      }
+
+      const xml =
+        '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+        urls.join("\n") +
+        '\n</urlset>';
+
+      response.set("Content-Type", "application/xml; charset=utf-8");
+      response.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
+      response.status(200).send(xml);
+    } catch (err) {
+      console.error("firmSitemap error", err);
+      response.status(500).type("text/plain").send("Sitemap oluşturulamadı.");
+    }
+  }
+);
