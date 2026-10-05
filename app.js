@@ -1,7 +1,7 @@
 const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
-const subcategoryMap={"egitim":{"kres":"Kreş / Anaokulu","dershane":"Dershane / Kurs Merkezi","surucu":"Sürücü Kursu","src":"SRC Kursu","psikoteknik":"Psikoteknik","ozel_ders":"Özel Ders","dil_kursu":"Dil Kursu","etut":"Etüt Merkezi","ozel_okul":"Özel Okul","yurt":"Öğrenci Yurdu"},"otomotiv":{"oto_servis":"Oto Servis","kaporta_boya":"Kaporta & Boya","oto_elektrik":"Oto Elektrik","lastik_jant":"Lastik & Jant","oto_yikama":"Oto Yıkama","ekspertiz":"Ekspertiz","galeri":"Oto Galeri","rentacar":"Rent a Car","yedek_parca":"Yedek Parça","motosiklet":"Motosiklet"},"yemeicme":{"restoran":"Restoran","kafe":"Kafe","fastfood":"Fast Food","pastane":"Pastane","pizza":"Pizza","doner":"Döner","pide_lahmacun":"Pide & Lahmacun","catering":"Catering","ev_yemekleri":"Ev Yemekleri"},"saglikguzellik":{"dis_klinigi":"Diş Kliniği","klinik":"Klinik","psikolog":"Psikolog","diyetisyen":"Diyetisyen","fizyoterapi":"Fizyoterapi","guzellik":"Güzellik Merkezi","kuafor":"Kuaför","berber":"Berber","spor":"Spor Merkezi"},"evyapi":{"mobilya":"Mobilya","dekorasyon":"Dekorasyon","insaat":"İnşaat","elektrikci":"Elektrikçi","tesisatci":"Tesisatçı","teknik_servis":"Teknik Servis","klima":"Klima","cam_balkon":"Cam Balkon","temizlik":"Temizlik"},"emlak":{"emlak_ofisi":"Emlak Ofisi","konut":"Konut","arsa":"Arsa","ticari":"Ticari Gayrimenkul","gunluk_kiralik":"Günlük Kiralık"},"turizm":{"otel":"Otel","pansiyon":"Pansiyon","apart":"Apart","bungalov":"Bungalov","seyahat":"Seyahat Acentesi","kamp":"Kamp"},"organizasyonmedya":{"dugun_salonu":"Düğün Salonu","organizasyon":"Organizasyon","fotograf":"Fotoğrafçı","video":"Video Prodüksiyon","drone":"Drone Çekimi","gelinlik":"Gelinlik","cicekci":"Çiçekçi","reklam":"Reklam Ajansı"},"tasimacilik":{"nakliyat":"Nakliyat","kurye":"Kurye","sehirici":"Şehir İçi Taşımacılık","depolama":"Depolama"},"profesyonel":{"hukuk":"Hukuk","muhasebe":"Muhasebe","web":"Web Tasarım","sosyal_medya":"Sosyal Medya","teknoloji":"Teknoloji","bilgisayar":"Bilgisayar","danismanlik":"Danışmanlık","veteriner":"Veteriner","tarim":"Tarım"},"alisveris":{"giyim":"Giyim","ayakkabi":"Ayakkabı","market":"Market","elektronik":"Elektronik","kirtasiye":"Kırtasiye","petshop":"Pet Shop","zuccaciye":"Züccaciye","esnaf":"Yerel Esnaf"},"diger":{"diger":"Diğer"}};
+const subcategoryMap={"egitim":{"kres":"Kreş / Anaokulu","dershane":"Dershane / Kurs Merkezi","surucu":"Sürücü Kursu","src":"SRC Kursu","psikoteknik":"Psikoteknik","halk_egitim":"Halk Eğitim Merkezi","kamu_egitim":"Kamu Eğitim Kurumu","mesleki_egitim":"Mesleki Eğitim Merkezi","ozel_ders":"Özel Ders","dil_kursu":"Dil Kursu","etut":"Etüt Merkezi","ozel_okul":"Özel Okul","yurt":"Öğrenci Yurdu","diger_egitim":"Diğer Eğitim Kurumu"},"otomotiv":{"oto_servis":"Oto Servis","kaporta_boya":"Kaporta & Boya","oto_elektrik":"Oto Elektrik","lastik_jant":"Lastik & Jant","oto_yikama":"Oto Yıkama","ekspertiz":"Ekspertiz","galeri":"Oto Galeri","rentacar":"Rent a Car","yedek_parca":"Yedek Parça","motosiklet":"Motosiklet"},"yemeicme":{"restoran":"Restoran","kafe":"Kafe","fastfood":"Fast Food","pastane":"Pastane","pizza":"Pizza","doner":"Döner","pide_lahmacun":"Pide & Lahmacun","catering":"Catering","ev_yemekleri":"Ev Yemekleri"},"saglikguzellik":{"dis_klinigi":"Diş Kliniği","klinik":"Klinik","psikolog":"Psikolog","diyetisyen":"Diyetisyen","fizyoterapi":"Fizyoterapi","guzellik":"Güzellik Merkezi","kuafor":"Kuaför","berber":"Berber","spor":"Spor Merkezi"},"evyapi":{"mobilya":"Mobilya","dekorasyon":"Dekorasyon","insaat":"İnşaat","elektrikci":"Elektrikçi","tesisatci":"Tesisatçı","teknik_servis":"Teknik Servis","klima":"Klima","cam_balkon":"Cam Balkon","temizlik":"Temizlik"},"emlak":{"emlak_ofisi":"Emlak Ofisi","konut":"Konut","arsa":"Arsa","ticari":"Ticari Gayrimenkul","gunluk_kiralik":"Günlük Kiralık"},"turizm":{"otel":"Otel","pansiyon":"Pansiyon","apart":"Apart","bungalov":"Bungalov","seyahat":"Seyahat Acentesi","kamp":"Kamp"},"organizasyonmedya":{"dugun_salonu":"Düğün Salonu","organizasyon":"Organizasyon","fotograf":"Fotoğrafçı","video":"Video Prodüksiyon","drone":"Drone Çekimi","gelinlik":"Gelinlik","cicekci":"Çiçekçi","reklam":"Reklam Ajansı"},"tasimacilik":{"nakliyat":"Nakliyat","kurye":"Kurye","sehirici":"Şehir İçi Taşımacılık","depolama":"Depolama"},"profesyonel":{"hukuk":"Hukuk","muhasebe":"Muhasebe","web":"Web Tasarım","sosyal_medya":"Sosyal Medya","teknoloji":"Teknoloji","bilgisayar":"Bilgisayar","danismanlik":"Danışmanlık","veteriner":"Veteriner","tarim":"Tarım"},"alisveris":{"giyim":"Giyim","ayakkabi":"Ayakkabı","market":"Market","elektronik":"Elektronik","kirtasiye":"Kırtasiye","petshop":"Pet Shop","zuccaciye":"Züccaciye","esnaf":"Yerel Esnaf"},"diger":{"diger":"Diğer"}};
 const categoryLabels={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
 const searchKeywords={
   surucu:["sürücü kursu","surucu kursu","ehliyet","direksiyon","direksiyon dersi","b ehliyet","a ehliyet","a2 ehliyet","motor ehliyeti","motosiklet ehliyeti","otomobil ehliyeti","kurs ehliyet"],
@@ -11,6 +11,10 @@ const searchKeywords={
   dershane:["dershane","kurs merkezi","lgs","tyt","ayt","yks","deneme kulübü","deneme kulubu","etüt","etut"],
   dil_kursu:["ingilizce kursu","dil kursu","almanca kursu","yabancı dil","yabanci dil"],
   yurt:["öğrenci yurdu","ogrenci yurdu","erkek yurdu","kız yurdu","kiz yurdu","yurt"],
+  halk_egitim:["halk eğitim","halk egitim","halk eğitimi merkezi","halk egitimi merkezi"],
+  kamu_egitim:["milli eğitim","milli egitim","ilçe milli eğitim","ilce milli egitim","meb","eğitim müdürlüğü","egitim mudurlugu"],
+  mesleki_egitim:["mesleki eğitim","mesleki egitim","mesem","mesleki eğitim merkezi","mesleki egitim merkezi"],
+  diger_egitim:["eğitim kurumu","egitim kurumu","eğitim merkezi","egitim merkezi"],
   oto_servis:["oto servis","araç bakım","arac bakim","tamirci","oto tamir","mekanik servis"],
   kaporta_boya:["kaporta","boya","oto boya","göçük","gocuk"],
   oto_elektrik:["oto elektrik","oto elektrikçi","oto elektrikci"],
@@ -64,7 +68,7 @@ function keywordTargets(query){
     }))
     .map(([key])=>key);
 }
-const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",src:"egitim",psikoteknik:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
+const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",src:"egitim",psikoteknik:"egitim",halk_egitim:"egitim",kamu_egitim:"egitim",mesleki_egitim:"egitim",diger_egitim:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
 
 // Türkiye genelinde ilçe alanlarında posta kodunu otomatik temizler.
@@ -86,6 +90,24 @@ const normDistrict=v=>norm(cleanDistrictName(v));
 const searchAscii=v=>norm(v)
   .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i")
   .replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u");
+
+function classifyEducationSubcategoryName(value){
+  const t=searchAscii(value).replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  if(!t)return "";
+  if(/\bhalk egitim(i)?( merkezi)?\b/.test(t))return "halk_egitim";
+  if(/\b(ilce )?milli egitim( mudurlugu)?\b|\bmeb\b/.test(t))return "kamu_egitim";
+  if(/\bmesleki egitim( merkezi)?\b|\bmesem\b/.test(t))return "mesleki_egitim";
+  if(/\bpsikoteknik\b/.test(t))return "psikoteknik";
+  if(/\bsrc\b|src kursu|src belgesi/.test(t))return "src";
+  if(/surucu kursu|motorlu tasit surucu|ehliyet kursu/.test(t))return "surucu";
+  if(/anaokulu|ana okulu|kres|gunduz bakimevi/.test(t))return "kres";
+  if(/dershane|kurs merkezi|tyt|ayt|yks|lgs/.test(t))return "dershane";
+  if(/ogrenci yurdu|erkek yurdu|kiz yurdu/.test(t))return "yurt";
+  if(/dil kursu|ingilizce kursu|almanca kursu/.test(t))return "dil_kursu";
+  if(/ozel okul|kolej/.test(t))return "ozel_okul";
+  if(/etut merkezi|etut/.test(t))return "etut";
+  return "";
+}
 
 const searchRoot=word=>{
   let w=searchAscii(word).replace(/[^a-z0-9]/g,"");
@@ -307,10 +329,11 @@ function companyFromDoc(doc){
   const fixedLoc=resolveSearchLocation(d);
   const fixedCity=fixedLoc.city||"";
   const fixedDistrict=cleanDistrictName(fixedLoc.district||"");
-  const normalizedName=norm(d.name||"");
-  const effectiveSubCategory=/psikoteknik/.test(normalizedName)
-    ?"psikoteknik"
-    :(/\bsrc\b/.test(normalizedName)?"src":(d.subCategory||""));
+  const storedSub=String(d.subCategory||d.category||"").trim();
+  const inferredEducationSub=(mainCategory(d)==="egitim")
+    ? classifyEducationSubcategoryName([d.name,d.googleCategory,d.description].filter(Boolean).join(" "))
+    : "";
+  const effectiveSubCategory=inferredEducationSub||storedSub||(mainCategory(d)==="egitim"?"diger_egitim":"");
   return {
     id:doc.id,
     name:d.name||"Firma",
@@ -478,6 +501,10 @@ function automaticCategoryDescription(i){
     surucu:"Ehliyet eğitimi ve direksiyon dersleri sunar.",
     src:"SRC belgesi eğitimleri ve mesleki sürücü kursu hizmetleri sunar.",
     psikoteknik:"Psikoteknik değerlendirme ve sürücü adaylarına yönelik ölçüm hizmetleri sunar.",
+    halk_egitim:"Halk eğitim kursları ve yaşam boyu öğrenme programları hakkında bilgi sunar.",
+    kamu_egitim:"Kamu eğitim hizmetleri, kurum bilgileri ve iletişim detaylarını sunar.",
+    mesleki_egitim:"Mesleki eğitim ve beceri geliştirme programları hakkında bilgi sunar.",
+    diger_egitim:"Eğitim hizmetleri ve kurum bilgilerini inceleyebilirsiniz.",
     kres:"Okul öncesi eğitim ve çocuk gelişimi hizmetleri sunar.",
     dershane:"Sınav hazırlık ve akademik destek programları sunar.",
     yurt:"Öğrencilere konaklama ve yurt hizmetleri sunar.",
@@ -536,6 +563,10 @@ function resultCardFallback(i){
     kres:{icon:"🧸",label:"Kreş & Anaokulu"},
     dershane:{icon:"📚",label:"Kurs Merkezi"},
     yurt:{icon:"🛏️",label:"Öğrenci Yurdu"},
+    halk_egitim:{icon:"🏫",label:"Halk Eğitim Merkezi"},
+    kamu_egitim:{icon:"🏛️",label:"Kamu Eğitim Kurumu"},
+    mesleki_egitim:{icon:"🧰",label:"Mesleki Eğitim"},
+    diger_egitim:{icon:"🎓",label:"Eğitim Kurumu"},
     oto_servis:{icon:"🔧",label:"Oto Servis"},
     ekspertiz:{icon:"🔎",label:"Oto Ekspertiz"},
     restoran:{icon:"🍽️",label:"Restoran"},
