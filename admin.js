@@ -2020,7 +2020,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function getFunctions(){
     if(functionsInstance)return functionsInstance;
     if(!firebase.functions)throw new Error("Firebase Functions modülü yüklenemedi. Sayfayı Ctrl+F5 ile yenileyin.");
-    functionsInstance=firebase.functions("europe-west1");
+    functionsInstance=firebase.app().functions("europe-west1");
     return functionsInstance;
   }
 
