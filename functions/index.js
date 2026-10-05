@@ -76,7 +76,6 @@ function duplicateReason(candidate, row) {
   if (candidatePhone && rowPhone && candidatePhone === rowPhone) return "phone";
 
   if (sameName && addressLooksSame(candidate.address, row.address)) return "name_address";
-  if (sameName && normText(candidate.city) && normText(candidate.city) === normText(row.city)) return "name_city";
 
   return "";
 }
@@ -168,8 +167,8 @@ exports.searchPlaces = onCall(
       db.collection("institutionDrafts").get()
     ]);
     const existingRows = [
-      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data() })),
-      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutions" })),
+      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutionDrafts" }))
     ];
 
     return {
@@ -193,7 +192,8 @@ exports.searchPlaces = onCall(
           googleMapsUrl: p.googleMapsUri || "",
           businessStatus: p.businessStatus || "",
           alreadyExists: Boolean(duplicate),
-          duplicateReason: duplicate?.reason || ""
+          duplicateReason: duplicate?.reason || "",
+          duplicateSource: duplicate?.row?._collection || ""
         };
       })
     };
