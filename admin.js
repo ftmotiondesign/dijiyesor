@@ -2232,7 +2232,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       const checked=selected.has(r.placeId)?" checked":"";
       const disabled=r.alreadyExists?" disabled":"";
       const status=r.alreadyExists
-        ? '<span class="auto-place-status duplicate">Zaten kayıtlı</span>'
+        ? '<span class="auto-place-status duplicate">'+(r.duplicateSource==="institutionDrafts"?"Taslakta":"Zaten kayıtlı")+'</span>'
         : '<span class="auto-place-status new">Yeni</span>';
       const map=r.googleMapsUrl
         ? '<a class="auto-place-map" href="'+esc(r.googleMapsUrl)+'" target="_blank" rel="noopener">Harita ↗</a>'
