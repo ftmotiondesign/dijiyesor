@@ -405,6 +405,28 @@ function companyFromDoc(doc){
 }
 
 let companiesLoadKey="";
+let sponsorCompaniesCache=null;
+let sponsorCompaniesPromise=null;
+
+async function getSponsorCompaniesCached(){
+  if(sponsorCompaniesCache)return sponsorCompaniesCache;
+  if(sponsorCompaniesPromise)return sponsorCompaniesPromise;
+  sponsorCompaniesPromise=db.collection("institutions")
+    .where("searchPopupActive","==",true)
+    .get()
+    .then(snap=>{
+      const rows=[];
+      snap.forEach(doc=>{
+        const row=companyFromDoc(doc);
+        if(row)rows.push(row);
+      });
+      sponsorCompaniesCache=rows;
+      return rows;
+    })
+    .catch(()=>[])
+    .finally(()=>{sponsorCompaniesPromise=null});
+  return sponsorCompaniesPromise;
+}
 
 async function loadCompanies(filters={}){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
@@ -431,11 +453,8 @@ async function loadCompanies(filters={}){
       key="sector:"+sector;
     }
 
-    const [snap,sponsorSnap]=await Promise.all([
-      query.get(),
-      db.collection("institutions").where("searchPopupActive","==",true).get().catch(()=>null)
-    ]);
-
+    // Önce gerçek arama sonuçlarını getir. Sponsor sorgusu artık ilk sonuçları bekletmez.
+    const snap=await query.get();
     const byId=new Map();
 
     snap.forEach(doc=>{
@@ -443,12 +462,15 @@ async function loadCompanies(filters={}){
       if(row)byId.set(row.id,row);
     });
 
-    // Arama popup reklamları seçilen sorgunun dışında kalsa bile reklam sistemi çalışsın.
-    sponsorSnap?.forEach(doc=>{
-      if(byId.has(doc.id))return;
-      const row=companyFromDoc(doc);
-      if(row)byId.set(row.id,row);
-    });
+    // Sponsor kayıtlarını yalnızca önbellekte varsa anında ekle.
+    // İlk açılışta sponsor sorgusu arka planda hazırlanır; aramayı bloke etmez.
+    if(Array.isArray(sponsorCompaniesCache)){
+      sponsorCompaniesCache.forEach(row=>{
+        if(!byId.has(row.id))byId.set(row.id,row);
+      });
+    }else{
+      getSponsorCompaniesCached();
+    }
 
     companies=[...byId.values()];
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
