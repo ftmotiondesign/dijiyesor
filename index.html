@@ -471,8 +471,8 @@
       }
       allowAllTurkeySearchOnce = false;
 
-      // İl seçili ancak ilçe seçilmediyse, aramadan önce ilçe seçmek isteyip istemediğini sor.
-      if (query && citySelect.value && !districtSelect.value && !allowAllDistrictsOnce) {
+      // İl seçili ancak ilçe seçilmediyse, arama metni olsun olmasın önce ilçe seçimini sor.
+      if (citySelect.value && !districtSelect.value && !allowAllDistrictsOnce) {
         resumeSearchAfterDistrictChoice = true;
         openDistrictPrompt();
         return;
@@ -521,12 +521,12 @@
         return;
       }
 
-      // Popup API yanıtını beklemeden hemen açılsın.
-      resumeSearchAfterDistrictChoice = !!searchInput.value.trim();
-      openDistrictPrompt();
-
       // İlçe listesini arka planda yükle.
       loadDistricts();
+
+      // Native il seçim menüsü kapandıktan hemen sonra popup'ı aç.
+      resumeSearchAfterDistrictChoice = true;
+      setTimeout(()=>openDistrictPrompt(),120);
     });
     districtSelect.addEventListener('change',()=>{
       if(!districtSelect.value) return;
