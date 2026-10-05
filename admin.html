@@ -154,17 +154,14 @@
               <option value="">Önce il seç</option>
             </select>
           </label>
-          <label>Kategori
-            <select id="autoImportCategory">
-              <option value="surucu">Sürücü Kursu</option>
-              <option value="kres">Kreş / Anaokulu</option>
-              <option value="dershane">Dershane / Kurs Merkezi</option>
-              <option value="yurt">Öğrenci Yurdu</option>
-              <option value="oto_servis">Oto Servis</option>
-              <option value="restoran">Restoran</option>
-              <option value="dis_klinigi">Diş Kliniği</option>
-              <option value="emlak_ofisi">Emlak Ofisi</option>
-              <option value="otel">Otel / Konaklama</option>
+          <label>Ana Kategori
+            <select id="autoImportMainCategory">
+              <option value="">Ana kategori seç</option>
+            </select>
+          </label>
+          <label>Alt Kategori
+            <select id="autoImportCategory" disabled>
+              <option value="">Önce ana kategori seç</option>
             </select>
           </label>
         </div>
@@ -1221,7 +1218,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261005-84-photo25"></script>
+<script src="admin.js?v=20261006-85-category-tree"></script>
 <script>
 (function ensureAllCitiesOption(){
   function ensure(){
