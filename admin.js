@@ -391,6 +391,7 @@ async function loadManagedCategories(){
     managedCategoryDocs=snap.docs.map(d=>({key:d.id,...d.data()}));
   }catch(_){managedCategoryDocs=[]}
   renderCategoryAdmin();
+  if(typeof window.refreshAutoImportCategories==="function")window.refreshAutoImportCategories();
 }
 function mergedCategoryRows(){
   const map={};
@@ -2272,6 +2273,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 (function initAutoFirmImport(){
   const city=document.getElementById("autoImportCity");
   const district=document.getElementById("autoImportDistrict");
+  const mainCategory=document.getElementById("autoImportMainCategory");
   const category=document.getElementById("autoImportCategory");
   const allDistricts=document.getElementById("autoImportAllDistricts");
   const searchBtn=document.getElementById("autoImportSearchBtn");
@@ -2285,7 +2287,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const selectedCount=document.getElementById("autoImportSelectedCount");
   const selectAllBtn=document.getElementById("autoImportSelectAllBtn");
   const clearSelectionBtn=document.getElementById("autoImportClearSelectionBtn");
-  if(!city||!district||!category||!results)return;
+  if(!city||!district||!mainCategory||!category||!results)return;
 
   let functionsInstance=null;
   function getFunctions(){
@@ -2295,11 +2297,41 @@ document.addEventListener("DOMContentLoaded",()=>{
     return functionsInstance;
   }
 
-  const categoryLabels={
-    surucu:"Sürücü Kursu",kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",
-    yurt:"Öğrenci Yurdu",oto_servis:"Oto Servis",restoran:"Restoran",
-    dis_klinigi:"Diş Kliniği",emlak_ofisi:"Emlak Ofisi",otel:"Otel / Konaklama"
-  };
+  const categoryLabels={};
+  let autoCategoryRows=[];
+
+  function rebuildCategoryLabels(){
+    Object.keys(categoryLabels).forEach(k=>delete categoryLabels[k]);
+    autoCategoryRows=mergedCategoryRows();
+    autoCategoryRows.forEach(row=>{
+      Object.entries(row.subcategories||{}).forEach(([key,label])=>{categoryLabels[key]=label;});
+    });
+  }
+
+  function fillAutoImportSubcategories(preferred=""){
+    const key=mainCategory.value||"";
+    const row=autoCategoryRows.find(x=>x.key===key);
+    const entries=Object.entries(row?.subcategories||{}).sort((a,b)=>String(a[1]).localeCompare(String(b[1]),"tr"));
+    category.innerHTML=entries.length
+      ? '<option value="">Alt kategori seç</option>'+entries.map(([value,label])=>'<option value="'+esc(value)+'">'+esc(label)+'</option>').join("")
+      : '<option value="">Alt kategori yok</option>';
+    category.disabled=!entries.length;
+    if(preferred && entries.some(([value])=>value===preferred))category.value=preferred;
+    else if(key==="egitim" && entries.some(([value])=>value==="surucu"))category.value="surucu";
+    updatePreview();
+  }
+
+  function fillAutoImportMainCategories(){
+    const previousMain=mainCategory.value||"egitim";
+    const previousSub=category.value||"surucu";
+    rebuildCategoryLabels();
+    mainCategory.innerHTML='<option value="">Ana kategori seç</option>'+autoCategoryRows.map(row=>'<option value="'+esc(row.key)+'">'+esc(row.label)+'</option>').join("");
+    if(autoCategoryRows.some(row=>row.key===previousMain))mainCategory.value=previousMain;
+    else if(autoCategoryRows.some(row=>row.key==="egitim"))mainCategory.value="egitim";
+    fillAutoImportSubcategories(previousSub);
+  }
+
+  window.refreshAutoImportCategories=fillAutoImportMainCategories;
 
   let rows=[];
   let provinceList=[];
@@ -2407,7 +2439,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function updatePreview(){
     const cityLabel=city.value==="__ALL__"?"Tüm İller":(city.value||"İl");
-    const parts=[cityLabel,allDistricts?.checked?"Tüm İlçeler":(district.value||"İlçe"),categoryLabels[category.value]||category.options[category.selectedIndex]?.text].filter(Boolean);
+    const mainLabel=categories[mainCategory.value]||mainCategory.options[mainCategory.selectedIndex]?.text||"Ana Kategori";
+    const subLabel=categoryLabels[category.value]||category.options[category.selectedIndex]?.text||"Alt Kategori";
+    const parts=[cityLabel,allDistricts?.checked?"Tüm İlçeler":(district.value||"İlçe"),mainLabel,subLabel].filter(Boolean);
     preview.textContent=parts.join(" / ");
   }
 
@@ -2423,6 +2457,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   async function runSearch(){
     hideMessage();
     if(!city.value){showMessage("Önce bir il seç.","error");return;}
+    if(!mainCategory.value){showMessage("Önce bir ana kategori seç.","error");return;}
+    if(!category.value){showMessage("Bir alt kategori seç.","error");return;}
 
     searchBtn.disabled=true;
     searchBtn.textContent="Firmalar aranıyor...";
@@ -2568,6 +2604,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   city.addEventListener("change",loadDistricts);
   district.addEventListener("change",updatePreview);
+  mainCategory.addEventListener("change",()=>fillAutoImportSubcategories(""));
   category.addEventListener("change",updatePreview);
   allDistricts?.addEventListener("change",()=>{
     if(city.value==="__ALL__"){
@@ -2596,5 +2633,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     renderRows();
   });
 
+  fillAutoImportMainCategories();
   loadCities();
 })();
