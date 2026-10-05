@@ -7,7 +7,17 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Firma | DijiyeSor</title>
-  <meta name="description" content="DijiyeSor firma tanıtım sayfası.">
+  <meta name="description" content="Firma bilgileri, konum, iletişim, fotoğraflar ve hizmet detayları DijiyeSor'da.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link id="seoCanonical" rel="canonical" href="https://dijiyer.web.app/firma.html">
+  <meta id="seoOgTitle" property="og:title" content="Firma | DijiyeSor">
+  <meta id="seoOgDescription" property="og:description" content="Firma bilgileri, konum ve iletişim detayları DijiyeSor'da.">
+  <meta id="seoOgUrl" property="og:url" content="https://dijiyer.web.app/firma.html">
+  <meta property="og:type" content="business.business">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="DijiyeSor">
+  <meta name="twitter:card" content="summary_large_image">
+  <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
   <link rel="stylesheet" href="firma.css?v=20261004-4">
   <link rel="stylesheet" href="bilgi-modal.css">
@@ -102,6 +112,78 @@
 
     function getTourUrl(d){
       return String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim();
+    }
+
+    function setMetaContent(id,value){
+      const el=document.getElementById(id);
+      if(el)el.setAttribute("content",value);
+    }
+    function updateProfileSeo(d){
+      const name=String(d.name||"Firma").trim();
+      const city=String(d.city||"").trim();
+      const district=String(d.district||"").trim();
+      const category=String(d.subCategory||d.category||d.mainCategory||"").trim();
+      const categoryLabels={
+        surucu:"Sürücü Kursu",src:"SRC Kursu",psikoteknik:"Psikoteknik",
+        kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",yurt:"Öğrenci Yurdu",
+        halk_egitim:"Halk Eğitim Merkezi",kamu_egitim:"Kamu Eğitim Kurumu",mesleki_egitim:"Mesleki Eğitim Merkezi",
+        e_sinav:"E-Sınav Merkezi",oto_servis:"Oto Servis",restoran:"Restoran",dis_klinigi:"Diş Kliniği",
+        emlak_ofisi:"Emlak Ofisi",otel:"Otel",guzellik:"Güzellik Merkezi"
+      };
+      const categoryLabel=categoryLabels[category]||"Firma";
+      const place=[district,city].filter(Boolean).join(" / ");
+      const title=[name,place,categoryLabel,"DijiyeSor"].filter(Boolean).join(" | ").slice(0,160);
+      const desc=(name+(place?" - "+place:"")+". "+categoryLabel+" bilgileri, konum, iletişim, fotoğraflar ve hizmet detaylarını DijiyeSor'da inceleyin.").slice(0,160);
+      const canonical="https://dijiyer.web.app/firma.html?id="+encodeURIComponent(id||"");
+      document.title=title;
+      document.querySelector('meta[name="description"]')?.setAttribute("content",desc);
+      document.getElementById("seoCanonical")?.setAttribute("href",canonical);
+      setMetaContent("seoOgTitle",title);
+      setMetaContent("seoOgDescription",desc);
+      setMetaContent("seoOgUrl",canonical);
+
+      const image=asArray(d.coverUrls)[0]||d.coverUrl||d.cardImageUrl||d.logoUrl||"";
+      if(image){
+        let ogImage=document.querySelector('meta[property="og:image"]');
+        if(!ogImage){ogImage=document.createElement("meta");ogImage.setAttribute("property","og:image");document.head.appendChild(ogImage)}
+        ogImage.setAttribute("content",safeUrl(image));
+      }
+
+      const localBusiness={
+        "@context":"https://schema.org",
+        "@type":"LocalBusiness",
+        "@id":canonical+"#business",
+        "name":name,
+        "url":canonical
+      };
+      if(d.phone)localBusiness.telephone=String(d.phone);
+      if(d.website)localBusiness.sameAs=[safeUrl(d.website)];
+      if(image)localBusiness.image=safeUrl(image);
+      if(d.address||district||city){
+        localBusiness.address={
+          "@type":"PostalAddress",
+          "streetAddress":String(d.address||""),
+          "addressLocality":district||city,
+          "addressRegion":city||"",
+          "addressCountry":"TR"
+        };
+      }
+      const lat=Number(d.latitude||d.lat);
+      const lng=Number(d.longitude||d.lng||d.lon);
+      if(Number.isFinite(lat)&&Number.isFinite(lng)){
+        localBusiness.geo={"@type":"GeoCoordinates","latitude":lat,"longitude":lng};
+      }
+      const breadcrumb={
+        "@context":"https://schema.org",
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"DijiyeSor","item":"https://dijiyer.web.app/"},
+          {"@type":"ListItem","position":2,"name":categoryLabel,"item":"https://dijiyer.web.app/arama.html?sector="+encodeURIComponent(d.mainCategory||"")+"&subCategory="+encodeURIComponent(category)},
+          {"@type":"ListItem","position":3,"name":name,"item":canonical}
+        ]
+      };
+      const jsonLd=document.getElementById("seoJsonLd");
+      if(jsonLd)jsonLd.textContent=JSON.stringify({"@context":"https://schema.org","@graph":[localBusiness,breadcrumb]});
     }
 
     function campaignActive(d){
@@ -519,7 +601,7 @@
         if(!snap.exists) throw new Error("not-found");
 
         const d=normalizeQuickProfileData(snap.data()||{});
-        document.title=(d.name||"Firma")+" | DijiyeSor";
+        updateProfileSeo(d);
 
         const profileImage=d.logoUrl||d.profileImageUrl||d.cardImageUrl||"";
         const logo=profileImage
