@@ -523,6 +523,27 @@ function openDraftFirmModal(id){
   $("draftFirmModal").classList.remove("hidden");
 }
 
+async function publishDraftIdsInChunks(ids,msg){
+  const callable=firebase.app().functions("europe-west1").httpsCallable("publishDraftFirmsBatch");
+  const CHUNK_SIZE=200;
+  let published=0,skipped=0,processed=0;
+
+  for(let i=0;i<ids.length;i+=CHUNK_SIZE){
+    const chunk=ids.slice(i,i+CHUNK_SIZE);
+    if(msg){
+      msg.className="message";
+      msg.textContent=processed+" / "+ids.length+" işlendi · yayınlama devam ediyor...";
+    }
+    const res=await callable({ids:chunk});
+    published+=Number(res.data?.publishedCount||0);
+    skipped+=Number(res.data?.skippedCount||0);
+    processed+=chunk.length;
+    if(msg)msg.textContent=processed+" / "+ids.length+" işlendi...";
+  }
+
+  return {publishedCount:published,skippedCount:skipped};
+}
+
 $("refreshDraftFirmsBtn")?.addEventListener("click",async()=>{
   await loadDraftFirms();renderDraftFirms();
 });
@@ -542,8 +563,8 @@ $("publishSelectedDraftsBtn")?.addEventListener("click",async()=>{
   try{
     btn.disabled=true;btn.textContent="Yayınlanıyor...";
     msg.className="message";msg.textContent=ids.length+" firma yayınlanıyor...";
-    const res=await firebase.app().functions("europe-west1").httpsCallable("publishDraftFirmsBatch")({ids});
-    const published=Number(res.data?.publishedCount||0),skipped=Number(res.data?.skippedCount||0);
+    const res=await publishDraftIdsInChunks(ids,msg);
+    const published=Number(res.publishedCount||0),skipped=Number(res.skippedCount||0);
     selectedDraftFirmIds.clear();
     await Promise.all([loadDraftFirms(),loadFirms()]);
     renderAll();
@@ -588,8 +609,8 @@ $("publishAllDraftsBtn")?.addEventListener("click",async()=>{
   try{
     btn.disabled=true;btn.textContent="Yayınlanıyor...";
     msg.className="message";msg.textContent=ids.length+" firma toplu yayınlanıyor...";
-    const res=await firebase.app().functions("europe-west1").httpsCallable("publishDraftFirmsBatch")({ids});
-    const published=Number(res.data?.publishedCount||0),skipped=Number(res.data?.skippedCount||0);
+    const res=await publishDraftIdsInChunks(ids,msg);
+    const published=Number(res.publishedCount||0),skipped=Number(res.skippedCount||0);
     selectedDraftFirmIds.clear();
     await Promise.all([loadDraftFirms(),loadFirms()]);
     renderAll();
