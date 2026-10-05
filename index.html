@@ -326,8 +326,15 @@
         return;
       }
 
+      if(citySelect.value && !districtSelect.value && !skipLocationPrompt && !allowAllDistrictsOnce){
+        pendingCategorySearch={sector,subCategory};
+        openDistrictPrompt();
+        return;
+      }
+
       if(citySelect.value)params.set('city',citySelect.value);
       if(districtSelect.value)params.set('district',districtSelect.value);
+      allowAllDistrictsOnce = false;
       pendingCategorySearch=null;
       window.location.href='arama.html?'+params.toString();
     }
@@ -378,6 +385,7 @@
     const districtPromptSelectBtn = document.getElementById('districtPromptSelectBtn');
     const districtPromptAllBtn = document.getElementById('districtPromptAllBtn');
     let allowAllTurkeySearchOnce = false;
+    let allowAllDistrictsOnce = false;
     let pendingCategorySearch = null;
     let resumeSearchAfterDistrictChoice = false;
 
@@ -436,6 +444,7 @@
     districtPromptAllBtn?.addEventListener('click',()=>{
       closeDistrictPrompt();
       districtSelect.value = '';
+      allowAllDistrictsOnce = true;
 
       if(pendingCategorySearch){
         const pending={...pendingCategorySearch};
@@ -461,6 +470,14 @@
         return;
       }
       allowAllTurkeySearchOnce = false;
+
+      // İl seçili ancak ilçe seçilmediyse, aramadan önce ilçe seçmek isteyip istemediğini sor.
+      if (query && citySelect.value && !districtSelect.value && !allowAllDistrictsOnce) {
+        resumeSearchAfterDistrictChoice = true;
+        openDistrictPrompt();
+        return;
+      }
+      allowAllDistrictsOnce = false;
 
       // İl veya ilçe seçilmiş olsa da sektör/hizmet yazılmadıysa
       // tüm firmaları dökmek yerine önce "Ne arıyorsunuz?" kategori penceresini aç.
@@ -495,18 +512,21 @@
       window.location.href = 'arama.html' + (params.toString() ? '?' + params.toString() : '');
     }
 
-    citySelect.addEventListener('change', async()=>{
-      await loadDistricts();
-
+    citySelect.addEventListener('change', ()=>{
       if(!citySelect.value){
         districtSelect.value = '';
+        districtSelect.disabled = true;
+        districtSelect.innerHTML = '<option value="">Tüm İlçeler</option>';
         resumeSearchAfterDistrictChoice = false;
         return;
       }
 
-      // İl seçildiğinde doğrudan aramaya gitme; önce ilçe isteyip istemediğini sor.
+      // Popup API yanıtını beklemeden hemen açılsın.
       resumeSearchAfterDistrictChoice = !!searchInput.value.trim();
       openDistrictPrompt();
+
+      // İlçe listesini arka planda yükle.
+      loadDistricts();
     });
     districtSelect.addEventListener('change',()=>{
       if(!districtSelect.value) return;
