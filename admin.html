@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261005-selectall-1">
+  <link rel="stylesheet" href="admin.css?v=20261005-drafts-bulk-1">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -233,9 +233,12 @@
         <div class="draft-firm-toolbar">
           <div>
             <strong id="draftFirmCountText">0 taslak</strong>
-            <small>Yayınladığın firma normal “Firmalar” listesine geçer.</small>
+            <small id="draftFirmSelectedText">0 seçili · Yayınladığın firma normal “Firmalar” listesine geçer.</small>
           </div>
           <div class="draft-firm-toolbar-actions">
+            <button id="selectAllDraftsBtn" type="button" class="secondary">Tümünü Seç</button>
+            <button id="clearDraftSelectionBtn" type="button" class="secondary">Seçimi Kaldır</button>
+            <button id="publishSelectedDraftsBtn" type="button" class="primary" disabled>Seçilenleri Yayınla</button>
             <button id="publishAllDraftsBtn" type="button" class="primary">Tüm Taslakları Yayınla</button>
           </div>
         </div>
@@ -1211,7 +1214,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261005-drafts-callable-2"></script>
+<script src="admin.js?v=20261005-drafts-bulk-1"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
