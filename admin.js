@@ -2283,19 +2283,31 @@ document.addEventListener("DOMContentLoaded",()=>{
       const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
       if(!r.ok)throw new Error("İller alınamadı");
       const j=await r.json();
-      const list=(j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
+      const apiList=Array.isArray(j.data)?j.data:[];
+      const apiByName=new Map(apiList.map(x=>[String(x.name||"").trim(),x]));
+      const list=CITY_BANNER_PROVINCES.map(name=>{
+        const apiRow=apiByName.get(name)||{};
+        return {name,id:apiRow.id||""};
+      }).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
       provinceList=list;
-      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller</option>';
+      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller (81)</option>';
       list.forEach(x=>{
         const o=document.createElement("option");
-        o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
+        o.value=x.name;o.textContent=x.name;
+        if(x.id)o.dataset.id=x.id;
+        city.appendChild(o);
       });
       city.disabled=false;
     }catch(err){
-      console.error("İl listesi yüklenemedi",err);
-      city.innerHTML='<option value="">İl listesi yüklenemedi - sayfayı yenileyin</option>';
+      console.error("İl API listesi yüklenemedi, sabit 81 il listesi kullanılacak",err);
+      provinceList=CITY_BANNER_PROVINCES.map(name=>({name,id:""}));
+      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller (81)</option>';
+      provinceList.forEach(x=>{
+        const o=document.createElement("option");
+        o.value=x.name;o.textContent=x.name;city.appendChild(o);
+      });
       city.disabled=false;
-      showMessage("İl listesi yüklenemedi. Ctrl+F5 ile sayfayı yenileyin.","error");
+      showMessage("81 il sabit listeden yüklendi. İlçe listesi için bağlantı gerekebilir.","success");
     }
     updatePreview();
   }
