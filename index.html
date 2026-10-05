@@ -112,6 +112,21 @@
     </div>
   </div>
 
+
+  <div id="districtPromptModal" class="location-prompt-modal hidden" role="dialog" aria-modal="true" aria-labelledby="districtPromptTitle">
+    <div class="location-prompt-backdrop" data-close-district-prompt></div>
+    <div class="location-prompt-card">
+      <button type="button" class="location-prompt-close" data-close-district-prompt aria-label="Kapat">×</button>
+      <div class="location-prompt-icon">⌖</div>
+      <h2 id="districtPromptTitle">İlçe seçmek ister misiniz?</h2>
+      <p id="districtPromptDescription">Daha yakın sonuçlar için ilçe seçebilirsiniz.</p>
+      <div class="location-prompt-actions">
+        <button id="districtPromptSelectBtn" type="button" class="location-prompt-primary">İlçe Seç</button>
+        <button id="districtPromptAllBtn" type="button" class="location-prompt-secondary">Tüm İlde Ara</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="home-footer">
     <span>© 2026 DijiyeSor</span>
   </footer>
@@ -359,8 +374,12 @@
     const locationPromptModal = document.getElementById('locationPromptModal');
     const locationPromptSelectBtn = document.getElementById('locationPromptSelectBtn');
     const locationPromptAllBtn = document.getElementById('locationPromptAllBtn');
+    const districtPromptModal = document.getElementById('districtPromptModal');
+    const districtPromptSelectBtn = document.getElementById('districtPromptSelectBtn');
+    const districtPromptAllBtn = document.getElementById('districtPromptAllBtn');
     let allowAllTurkeySearchOnce = false;
     let pendingCategorySearch = null;
+    let resumeSearchAfterDistrictChoice = false;
 
     function openLocationPrompt(){
       locationPromptModal?.classList.remove('hidden');
@@ -372,7 +391,23 @@
       document.body.style.overflow='';
     }
 
+    function openDistrictPrompt(){
+      if(!citySelect.value) return;
+      const cityName = citySelect.value;
+      const description = document.getElementById('districtPromptDescription');
+      if(description) description.textContent = cityName + ' içinde ilçe seçerek daha yakın sonuçları görebilirsiniz.';
+      if(districtPromptAllBtn) districtPromptAllBtn.textContent = 'Tüm ' + cityName + '’de Ara';
+      districtPromptModal?.classList.remove('hidden');
+      document.body.style.overflow='hidden';
+    }
+
+    function closeDistrictPrompt(){
+      districtPromptModal?.classList.add('hidden');
+      document.body.style.overflow='';
+    }
+
     document.querySelectorAll('[data-close-location-prompt]').forEach(el=>el.addEventListener('click',closeLocationPrompt));
+    document.querySelectorAll('[data-close-district-prompt]').forEach(el=>el.addEventListener('click',closeDistrictPrompt));
 
     locationPromptSelectBtn?.addEventListener('click',()=>{
       closeLocationPrompt();
@@ -390,6 +425,29 @@
       }
       allowAllTurkeySearchOnce = true;
       goSearch();
+    });
+
+    districtPromptSelectBtn?.addEventListener('click',()=>{
+      closeDistrictPrompt();
+      districtSelect.focus();
+      districtSelect.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+
+    districtPromptAllBtn?.addEventListener('click',()=>{
+      closeDistrictPrompt();
+      districtSelect.value = '';
+
+      if(pendingCategorySearch){
+        const pending={...pendingCategorySearch};
+        pendingCategorySearch=null;
+        goCategorySearch(pending.sector,pending.subCategory,{skipLocationPrompt:true});
+        return;
+      }
+
+      if(resumeSearchAfterDistrictChoice){
+        resumeSearchAfterDistrictChoice = false;
+        goSearch();
+      }
     });
 
     function goSearch() {
@@ -439,12 +497,34 @@
 
     citySelect.addEventListener('change', async()=>{
       await loadDistricts();
-      if(citySelect.value && pendingCategorySearch){
+
+      if(!citySelect.value){
+        districtSelect.value = '';
+        resumeSearchAfterDistrictChoice = false;
+        return;
+      }
+
+      // İl seçildiğinde doğrudan aramaya gitme; önce ilçe isteyip istemediğini sor.
+      resumeSearchAfterDistrictChoice = !!searchInput.value.trim();
+      openDistrictPrompt();
+    });
+    districtSelect.addEventListener('change',()=>{
+      if(!districtSelect.value) return;
+      closeDistrictPrompt();
+
+      if(pendingCategorySearch){
         const pending={...pendingCategorySearch};
         pendingCategorySearch=null;
         goCategorySearch(pending.sector,pending.subCategory,{skipLocationPrompt:true});
+        return;
+      }
+
+      if(resumeSearchAfterDistrictChoice){
+        resumeSearchAfterDistrictChoice = false;
+        goSearch();
       }
     });
+
     searchBtn.addEventListener('click', goSearch);
 
     searchInput.addEventListener('keydown', event => { if (event.key === 'Enter') goSearch(); });
