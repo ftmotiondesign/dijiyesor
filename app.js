@@ -1195,6 +1195,9 @@ async function initHome(){
   const locationSearchLabel=document.getElementById("locationSearchLabel");
   const applyPopupLocation=document.getElementById("applyPopupLocation");
   const allTurkeyBtn=document.getElementById("allTurkeyBtn");
+  const educationSuggestModal=document.getElementById("educationSuggestModal");
+  let educationSuggestShown=false;
+  let educationSuggestScrollBound=false;
   const pickerDescriptions={egitim:"Kurs, sürücü kursu, anaokulu, yurt",otomotiv:"Servis, ekspertiz, galeri, kiralama",yemeicme:"Restoran, kafe, pizza, döner",saglikguzellik:"Diş, psikolog, kuaför, spor",evyapi:"Mobilya, dekorasyon, teknik servis",emlak:"Konut, arsa, emlak ofisi",turizm:"Otel, pansiyon, apart",organizasyonmedya:"Fotoğraf, video, organizasyon",tasimacilik:"Nakliyat, kurye, teslimat",profesyonel:"Hukuk, muhasebe, web, danışmanlık",alisveris:"Market, giyim, elektronik, pet shop",diger:"Diğer kurum ve hizmetler"};
   const pickerCategories=Object.entries(categoryLabels).map(([key,title])=>[key,title,pickerDescriptions[key]||Object.values(subcategoryMap[key]||{}).slice(0,4).join(", ")||"Firma ve hizmetler"]);
   if(categoryGrid){
@@ -1235,12 +1238,44 @@ async function initHome(){
   };
   const closeLocationModal=()=>{
     locationModal?.classList.add("hidden");
-    if(!document.querySelector(".category-modal:not(.hidden),.search-sponsor-popup:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");
+    if(!document.querySelector(".category-modal:not(.hidden),.search-sponsor-popup:not(.hidden),.tour360-modal:not(.hidden),.education-suggest-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");
     document.body.style.overflow="";
+  };
+  const closeEducationSuggest=()=>{
+    educationSuggestModal?.classList.add("hidden");
+    if(!document.querySelector(".category-modal:not(.hidden),.location-picker-modal:not(.hidden),.search-sponsor-popup:not(.hidden),.tour360-modal:not(.hidden)"))document.body.classList.remove("djs-modal-open");
+    document.body.style.overflow="";
+  };
+  const openEducationSuggest=()=>{
+    if(educationSuggestShown||!educationSuggestModal)return;
+    educationSuggestShown=true;
+    educationSuggestModal.classList.remove("hidden");
+    document.body.classList.add("djs-modal-open");
+    document.body.style.overflow="hidden";
+  };
+  const maybeShowEducationSuggest=()=>{
+    if(educationSuggestShown)return;
+    const allProvince=!city.value;
+    const educationOnly=sector.value==="egitim" && !(subCategory?.value||"");
+    if(!allProvince||!educationOnly)return;
+    const doc=document.documentElement;
+    const maxScroll=Math.max(1,doc.scrollHeight-window.innerHeight);
+    const progress=window.scrollY/maxScroll;
+    if(window.scrollY>=420 && progress>=0.28)openEducationSuggest();
   };
   document.querySelectorAll("[data-close-category-modal]").forEach(el=>el.addEventListener("click",closeCategoryModal));
   document.querySelectorAll("[data-close-location]").forEach(el=>el.addEventListener("click",closeLocationModal));
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCategoryModal();closeLocationModal()}});
+  document.querySelectorAll("[data-close-education-suggest]").forEach(el=>el.addEventListener("click",closeEducationSuggest));
+  educationSuggestModal?.querySelectorAll("[data-education-sub]").forEach(el=>el.addEventListener("click",()=>{
+    const chosen=el.dataset.educationSub||"";
+    sector.value="egitim";
+    fillSubcategories();
+    if(subCategory)subCategory.value=chosen;
+    closeEducationSuggest();
+    filter();
+    setTimeout(scrollToResultsTop,80);
+  }));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCategoryModal();closeLocationModal();closeEducationSuggest()}});
   document.addEventListener("click",e=>{
     if(e.target.closest("[data-open-category-search]"))openCategoryModal();
     if(e.target.closest("[data-open-location]"))openLocationModal();
@@ -1442,6 +1477,11 @@ async function initHome(){
     ranked.sort((a,b)=>b.score-a.score||String(a.item.name||"").localeCompare(String(b.item.name||""),"tr"));
     const filtered=ranked.map(x=>x.item);
     render(filtered);
+    if(!educationSuggestScrollBound){
+      educationSuggestScrollBound=true;
+      window.addEventListener("scroll",maybeShowEducationSuggest,{passive:true});
+    }
+    setTimeout(maybeShowEducationSuggest,250);
     setTimeout(()=>maybeShowSearchSponsorPopup(city.value,district.value,sector.value,subCategory?.value||""),180);
     if(feature360){
       const title=document.getElementById("resultsTitle"),context=document.getElementById("resultsContext");
