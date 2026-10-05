@@ -288,3 +288,108 @@ exports.importPlaceDrafts = onCall(
     };
   }
 );
+
+
+exports.listDraftFirms = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const snap = await db.collection("institutionDrafts").get();
+    const drafts = snap.docs.map(d => {
+      const x = d.data() || {};
+      return {
+        id: d.id,
+        name: s(x.name),
+        phone: s(x.phone),
+        city: s(x.city),
+        district: s(x.district),
+        address: s(x.address),
+        website: s(x.website),
+        mapUrl: s(x.mapUrl),
+        googlePlaceId: s(x.googlePlaceId),
+        mainCategory: s(x.mainCategory),
+        subCategory: s(x.subCategory),
+        category: s(x.category),
+        latitude: x.latitude ?? null,
+        longitude: x.longitude ?? null,
+        source: s(x.source),
+        status: s(x.status || "draft")
+      };
+    }).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+    return { drafts, count: drafts.length };
+  }
+);
+
+exports.updateDraftFirm = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const id = s(request.data?.id);
+    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    const ref = db.collection("institutionDrafts").doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) throw new HttpsError("not-found", "Taslak firma bulunamadı.");
+
+    const allowed = ["name","phone","city","district","address","website"];
+    const data = {};
+    for (const key of allowed) {
+      if (request.data?.data && Object.prototype.hasOwnProperty.call(request.data.data,key)) {
+        data[key] = s(request.data.data[key]);
+      }
+    }
+    data.updatedAt = FieldValue.serverTimestamp();
+    await ref.set(data,{merge:true});
+    return { ok:true };
+  }
+);
+
+exports.deleteDraftFirm = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const id = s(request.data?.id);
+    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    await db.collection("institutionDrafts").doc(id).delete();
+    return { ok:true };
+  }
+);
+
+exports.publishDraftFirm = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const id = s(request.data?.id);
+    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+
+    const draftRef = db.collection("institutionDrafts").doc(id);
+    const snap = await draftRef.get();
+    if (!snap.exists) throw new HttpsError("not-found", "Taslak firma bulunamadı.");
+
+    const data = snap.data() || {};
+    const duplicate = findDuplicate(
+      {
+        googlePlaceId: data.googlePlaceId,
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        city: data.city
+      },
+      (await db.collection("institutions").get()).docs.map(d=>({id:d.id,...d.data()}))
+    );
+    if (duplicate) {
+      throw new HttpsError("already-exists", "Bu firma normal firma listesinde zaten bulunuyor.");
+    }
+
+    const publishData = {
+      ...data,
+      status: "active",
+      publishedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    delete publishData.createdAt;
+
+    const ref = await db.collection("institutions").add(publishData);
+    await draftRef.delete();
+    return { ok:true, id:ref.id };
+  }
+);
