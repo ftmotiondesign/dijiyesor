@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://dijiyer.web.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://dijiyer.web.app/sektorler.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/surucu-kursu.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/anaokulu.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/dershane.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/ogrenci-yurdu.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/oto-servis.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/restoran.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/dis-klinigi.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/emlak-ofisi.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/otel.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://dijiyer.web.app/guzellik-merkezi.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://dijiyer.web.app/sitemap-static.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://dijiyer.web.app/sitemap-firmalar.xml</loc>
+  </sitemap>
+</sitemapindex>
