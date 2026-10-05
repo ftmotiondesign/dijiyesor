@@ -20,6 +20,7 @@
     .location-prompt-icon{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;background:#eef6ff;font-size:29px}
     .location-prompt-card h2{margin:0 0 8px;font-size:25px;color:#182033}
     .location-prompt-card p{margin:0 auto 22px;color:#6f7b91;font-size:15px;max-width:320px}
+    .location-prompt-district-select{width:100%;min-height:50px;margin:2px 0 12px;padding:0 14px;border:1px solid #d7e0ec;border-radius:14px;background:#fff;color:#182033;font-size:15px;font-weight:700;outline:none}.location-prompt-district-select:focus{border-color:#0d6efd;box-shadow:0 0 0 3px rgba(13,110,253,.12)}
     .location-prompt-actions{display:grid;gap:10px}
     .location-prompt-actions button{min-height:48px;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer}
     .location-prompt-primary{border:0;background:#0d6efd;color:#fff}
@@ -120,8 +121,11 @@
       <div class="location-prompt-icon">⌖</div>
       <h2 id="districtPromptTitle">İlçe seçmek ister misiniz?</h2>
       <p id="districtPromptDescription">Daha yakın sonuçlar için ilçe seçebilirsiniz.</p>
+      <select id="districtPromptSelect" class="location-prompt-district-select" aria-label="İlçe seç">
+        <option value="">İlçe seçin...</option>
+      </select>
       <div class="location-prompt-actions">
-        <button id="districtPromptSelectBtn" type="button" class="location-prompt-primary">İlçe Seç</button>
+        <button id="districtPromptSelectBtn" type="button" class="location-prompt-primary">Seçili İlçede Ara</button>
         <button id="districtPromptAllBtn" type="button" class="location-prompt-secondary">Tüm İlde Ara</button>
       </div>
     </div>
@@ -195,8 +199,10 @@
           });
 
         districtSelect.disabled = false;
+        syncDistrictPromptOptions();
       } catch (_) {
         districtSelect.disabled = false;
+        syncDistrictPromptOptions();
       }
     }
 
@@ -382,6 +388,7 @@
     const locationPromptSelectBtn = document.getElementById('locationPromptSelectBtn');
     const locationPromptAllBtn = document.getElementById('locationPromptAllBtn');
     const districtPromptModal = document.getElementById('districtPromptModal');
+    const districtPromptSelect = document.getElementById('districtPromptSelect');
     const districtPromptSelectBtn = document.getElementById('districtPromptSelectBtn');
     const districtPromptAllBtn = document.getElementById('districtPromptAllBtn');
     let allowAllTurkeySearchOnce = false;
@@ -399,12 +406,35 @@
       document.body.style.overflow='';
     }
 
+    function syncDistrictPromptOptions(){
+      if(!districtPromptSelect) return;
+      const current = districtPromptSelect.value;
+      districtPromptSelect.innerHTML = '<option value="">İlçe seçin...</option>';
+      [...districtSelect.options].forEach(option=>{
+        if(!option.value) return;
+        const clone=document.createElement('option');
+        clone.value=option.value;
+        clone.textContent=option.textContent;
+        districtPromptSelect.appendChild(clone);
+      });
+      if(current && [...districtPromptSelect.options].some(o=>o.value===current)){
+        districtPromptSelect.value=current;
+      }else if(districtSelect.value){
+        districtPromptSelect.value=districtSelect.value;
+      }
+      districtPromptSelect.disabled = districtSelect.disabled;
+      if(districtPromptSelect.disabled){
+        districtPromptSelect.innerHTML = '<option value="">İlçeler yükleniyor...</option>';
+      }
+    }
+
     function openDistrictPrompt(){
       if(!citySelect.value) return;
       const cityName = citySelect.value;
       const description = document.getElementById('districtPromptDescription');
       if(description) description.textContent = cityName + ' içinde ilçe seçerek daha yakın sonuçları görebilirsiniz.';
       if(districtPromptAllBtn) districtPromptAllBtn.textContent = 'Tüm ' + cityName + '’de Ara';
+      syncDistrictPromptOptions();
       districtPromptModal?.classList.remove('hidden');
       document.body.style.overflow='hidden';
     }
@@ -436,9 +466,30 @@
     });
 
     districtPromptSelectBtn?.addEventListener('click',()=>{
+      const selectedDistrict = districtPromptSelect?.value || '';
+      if(!selectedDistrict){
+        districtPromptSelect?.focus();
+        return;
+      }
+
+      districtSelect.value = selectedDistrict;
       closeDistrictPrompt();
-      districtSelect.focus();
-      districtSelect.scrollIntoView({behavior:'smooth',block:'center'});
+
+      if(pendingCategorySearch){
+        const pending={...pendingCategorySearch};
+        pendingCategorySearch=null;
+        goCategorySearch(pending.sector,pending.subCategory,{skipLocationPrompt:true});
+        return;
+      }
+
+      resumeSearchAfterDistrictChoice = false;
+      goSearch();
+    });
+
+    districtPromptSelect?.addEventListener('change',()=>{
+      if(districtPromptSelect.value){
+        districtSelect.value=districtPromptSelect.value;
+      }
     });
 
     districtPromptAllBtn?.addEventListener('click',()=>{
@@ -517,6 +568,10 @@
         districtSelect.value = '';
         districtSelect.disabled = true;
         districtSelect.innerHTML = '<option value="">Tüm İlçeler</option>';
+        if(districtPromptSelect){
+          districtPromptSelect.innerHTML = '<option value="">İlçe seçin...</option>';
+          districtPromptSelect.disabled = true;
+        }
         resumeSearchAfterDistrictChoice = false;
         return;
       }
