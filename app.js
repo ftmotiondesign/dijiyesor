@@ -308,9 +308,12 @@ function companyFromDoc(doc){
   const fixedCity=fixedLoc.city||"";
   const fixedDistrict=cleanDistrictName(fixedLoc.district||"");
   const normalizedName=norm(d.name||"");
-  const effectiveSubCategory=/psikoteknik/.test(normalizedName)
-    ?"psikoteknik"
-    :(/\bsrc\b/.test(normalizedName)?"src":(d.subCategory||""));
+  const looksPublicEducation=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedName);
+  const effectiveSubCategory=looksPublicEducation
+    ?""
+    :(/psikoteknik/.test(normalizedName)
+      ?"psikoteknik"
+      :(/\bsrc\b/.test(normalizedName)?"src":(d.subCategory||"")));
   return {
     id:doc.id,
     name:d.name||"Firma",
@@ -473,6 +476,10 @@ function campaignCard(i){
   '</article>';
 }
 function automaticCategoryDescription(i){
+  const normalizedName=norm(i.name||"");
+  if(/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedName)){
+    return "Kurum bilgileri, konum ve iletişim detaylarını inceleyebilirsiniz.";
+  }
   const sub=String(i.subCategory||i.category||"").trim();
   const descriptions={
     surucu:"Ehliyet eğitimi ve direksiyon dersleri sunar.",
