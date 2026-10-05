@@ -792,3 +792,10 @@
   .draft-firm-toolbar{flex-direction:column!important;align-items:flex-start!important}
   .draft-firm-toolbar-actions{margin-left:0!important;justify-content:flex-start!important}
 }
+
+.auto-place-name{display:flex;align-items:center;gap:12px;min-width:0}
+.auto-place-name>div{min-width:0}
+.auto-place-photo,.draft-firm-photo{width:54px;height:54px;border-radius:12px;object-fit:cover;flex:0 0 54px;background:#eef2f7;display:grid;place-items:center}
+.auto-place-photo.empty,.draft-firm-photo.empty{font-size:20px;color:#98a2b3}
+.draft-firm-main{display:flex;align-items:center;gap:12px;min-width:0}
+.draft-firm-main>div{min-width:0}
