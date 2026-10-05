@@ -1999,22 +1999,80 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 
-/* Otomatik Firma Topla - arayüz hazırlığı */
+/* Otomatik Firma Topla - Google Places */
 (function initAutoFirmImport(){
   const city=document.getElementById("autoImportCity");
   const district=document.getElementById("autoImportDistrict");
   const category=document.getElementById("autoImportCategory");
   const allDistricts=document.getElementById("autoImportAllDistricts");
   const searchBtn=document.getElementById("autoImportSearchBtn");
+  const saveBtn=document.getElementById("autoImportSaveDraftsBtn");
   const message=document.getElementById("autoImportMessage");
   const preview=document.getElementById("autoImportQueryPreview");
-  if(!city||!district||!category)return;
+  const results=document.getElementById("autoImportResults");
+  const foundCount=document.getElementById("autoImportFoundCount");
+  const newCount=document.getElementById("autoImportNewCount");
+  const duplicateCount=document.getElementById("autoImportDuplicateCount");
+  const selectedCount=document.getElementById("autoImportSelectedCount");
+  if(!city||!district||!category||!results)return;
+
+  const functions=firebase.functions("europe-west1");
+  const searchPlacesFn=functions.httpsCallable("searchPlaces");
+  const importPlaceDraftsFn=functions.httpsCallable("importPlaceDrafts");
 
   const categoryLabels={
     surucu:"Sürücü Kursu",kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",
     yurt:"Öğrenci Yurdu",oto_servis:"Oto Servis",restoran:"Restoran",
     dis_klinigi:"Diş Kliniği",emlak_ofisi:"Emlak Ofisi",otel:"Otel / Konaklama"
   };
+
+  let rows=[];
+  const selected=new Set();
+
+  function showMessage(text,type=""){
+    message.textContent=text;
+    message.className="message"+(type?" "+type:"");
+  }
+  function hideMessage(){
+    message.className="message hidden";
+    message.textContent="";
+  }
+  function updateSelected(){
+    if(selectedCount)selectedCount.textContent=selected.size+" firma seçildi";
+    if(saveBtn)saveBtn.disabled=selected.size===0;
+  }
+  function renderRows(){
+    if(foundCount)foundCount.textContent=rows.length+" firma";
+    const dup=rows.filter(x=>x.alreadyExists).length;
+    if(newCount)newCount.textContent=(rows.length-dup)+" yeni";
+    if(duplicateCount)duplicateCount.textContent=dup+" kayıtlı";
+
+    if(!rows.length){
+      results.innerHTML='<div class="auto-import-empty"><strong>Firma bulunamadı.</strong><span>Konum veya kategoriyi değiştirip tekrar deneyebilirsin.</span></div>';
+      selected.clear();
+      updateSelected();
+      return;
+    }
+
+    results.innerHTML=rows.map((r,i)=>{
+      const checked=selected.has(r.placeId)?" checked":"";
+      const disabled=r.alreadyExists?" disabled":"";
+      const status=r.alreadyExists
+        ? '<span class="auto-place-status duplicate">Zaten kayıtlı</span>'
+        : '<span class="auto-place-status new">Yeni</span>';
+      const map=r.googleMapsUrl
+        ? '<a class="auto-place-map" href="'+esc(r.googleMapsUrl)+'" target="_blank" rel="noopener">Harita ↗</a>'
+        : "";
+      return '<article class="auto-place-row'+(r.alreadyExists?' duplicate':'')+'">'+
+        '<label class="auto-place-check"><input type="checkbox" data-auto-place="'+esc(r.placeId)+'"'+checked+disabled+'></label>'+
+        '<div class="auto-place-name"><strong>'+esc(r.name||"Firma")+'</strong><small>'+esc(r.address||"Adres bilgisi yok")+'</small></div>'+
+        '<div class="auto-place-location"><span>'+esc(city.value)+'</span><small>'+esc(district.value||"Tüm İlçeler")+'</small></div>'+
+        '<div class="auto-place-contact">'+map+'</div>'+
+        '<div>'+status+'</div>'+
+      '</article>';
+    }).join("");
+    updateSelected();
+  }
 
   async function loadCities(){
     city.innerHTML='<option value="">İller yükleniyor...</option>';
@@ -2052,6 +2110,86 @@ document.addEventListener("DOMContentLoaded",()=>{
     preview.textContent=parts.join(" / ");
   }
 
+  async function searchSingleDistrict(districtName){
+    const res=await searchPlacesFn({
+      city:city.value,
+      district:districtName||"",
+      category:category.value
+    });
+    return Array.isArray(res.data?.places)?res.data.places:[];
+  }
+
+  async function runSearch(){
+    hideMessage();
+    if(!city.value){showMessage("Önce bir il seç.","error");return;}
+
+    searchBtn.disabled=true;
+    searchBtn.textContent="Firmalar aranıyor...";
+    results.innerHTML='<div class="auto-import-empty"><strong>Google Places taranıyor...</strong><span>Bu işlem birkaç saniye sürebilir.</span></div>';
+    selected.clear();
+    updateSelected();
+
+    try{
+      let collected=[];
+      if(allDistricts?.checked){
+        const districtNames=[...district.options].map(o=>o.value).filter(Boolean);
+        if(!districtNames.length){
+          collected=await searchSingleDistrict("");
+        }else{
+          for(let i=0;i<districtNames.length;i++){
+            searchBtn.textContent=(i+1)+"/"+districtNames.length+" ilçe taranıyor...";
+            const found=await searchSingleDistrict(districtNames[i]);
+            collected.push(...found);
+          }
+        }
+      }else{
+        collected=await searchSingleDistrict(district.value||"");
+      }
+
+      const dedup=new Map();
+      collected.forEach(x=>{if(x.placeId&&!dedup.has(x.placeId))dedup.set(x.placeId,x)});
+      rows=[...dedup.values()];
+      renderRows();
+      showMessage(rows.length+" firma bulundu. Yeni firmaları seçip taslağa aktarabilirsin.","success");
+    }catch(err){
+      console.error(err);
+      rows=[];
+      renderRows();
+      showMessage(err?.message||"Google Places araması sırasında hata oluştu.","error");
+    }finally{
+      searchBtn.disabled=false;
+      searchBtn.textContent="Firmaları Bul";
+    }
+  }
+
+  async function saveDrafts(){
+    const placeIds=[...selected];
+    if(!placeIds.length)return;
+    saveBtn.disabled=true;
+    saveBtn.textContent="Taslağa aktarılıyor...";
+    hideMessage();
+    try{
+      const res=await importPlaceDraftsFn({
+        city:city.value,
+        district:allDistricts?.checked?"":(district.value||""),
+        category:category.value,
+        placeIds
+      });
+      const created=Number(res.data?.createdCount||0);
+      const skipped=Number(res.data?.skippedCount||0);
+      showMessage(created+" firma taslağa aktarıldı"+(skipped?" · "+skipped+" firma zaten kayıtlı/taslakta":"")+".","success");
+      selected.clear();
+      rows=rows.map(r=>placeIds.includes(r.placeId)?{...r,alreadyExists:true}:r);
+      renderRows();
+    }catch(err){
+      console.error(err);
+      showMessage(err?.message||"Taslağa aktarma sırasında hata oluştu.","error");
+    }finally{
+      saveBtn.textContent="Seçilenleri Taslağa Aktar";
+      updateSelected();
+    }
+  }
+
   city.addEventListener("change",loadDistricts);
   district.addEventListener("change",updatePreview);
   category.addEventListener("change",updatePreview);
@@ -2059,16 +2197,15 @@ document.addEventListener("DOMContentLoaded",()=>{
     district.disabled=allDistricts.checked||!city.value;
     updatePreview();
   });
-
-  searchBtn?.addEventListener("click",()=>{
-    message.classList.remove("hidden","success");
-    message.classList.add("error");
-    if(!city.value){
-      message.textContent="Önce bir il seç.";
-      return;
-    }
-    message.textContent="Arayüz hazır. Sıradaki adım Google Places API bağlantısını kurmak. Bağlantı tamamlandığında bu buton gerçek firmaları otomatik getirecek.";
+  results.addEventListener("change",e=>{
+    const box=e.target.closest("[data-auto-place]");
+    if(!box)return;
+    if(box.checked)selected.add(box.dataset.autoPlace);
+    else selected.delete(box.dataset.autoPlace);
+    updateSelected();
   });
+  searchBtn?.addEventListener("click",runSearch);
+  saveBtn?.addEventListener("click",saveDrafts);
 
   loadCities();
 })();
