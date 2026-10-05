@@ -448,11 +448,13 @@ async function loadFirms(){
 }
 async function loadDraftFirms(){
   try{
-    const snap=await db.collection("institutionDrafts").get();
-    draftFirms=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
+    const res=await firebase.app().functions("europe-west1").httpsCallable("listDraftFirms")({});
+    draftFirms=Array.isArray(res.data?.drafts)?res.data.drafts:[];
   }catch(err){
     console.error("Taslak firmalar yüklenemedi",err);
     draftFirms=[];
+    const msg=$("draftFirmMessage");
+    if(msg){msg.className="message error";msg.textContent=err?.message||"Taslak firmalar yüklenemedi.";}
   }
 }
 function renderDraftFirms(){
@@ -471,15 +473,7 @@ function renderDraftFirms(){
   }).join(""):'<div class="empty">Taslak firma bulunmuyor.</div>';
 }
 async function publishDraftFirm(id){
-  const f=draftFirms.find(x=>x.id===id);
-  if(!f)return;
-  const data={...f};
-  delete data.id;
-  data.status="active";
-  data.publishedAt=new Date().toISOString();
-  data.updatedAt=new Date().toISOString();
-  await db.collection("institutions").add(data);
-  await db.collection("institutionDrafts").doc(id).delete();
+  await firebase.app().functions("europe-west1").httpsCallable("publishDraftFirm")({id});
 }
 function openDraftFirmModal(id){
   const f=draftFirms.find(x=>x.id===id);
@@ -505,15 +499,17 @@ $("saveDraftFirmBtn")?.addEventListener("click",async()=>{
   const msg=$("draftFirmModalMessage");
   try{
     msg.className="message";msg.textContent="Kaydediliyor...";
-    await db.collection("institutionDrafts").doc(id).set({
-      name:$("draftFirmName").value.trim(),
-      phone:$("draftFirmPhone").value.trim(),
-      city:$("draftFirmCity").value.trim(),
-      district:$("draftFirmDistrict").value.trim(),
-      address:$("draftFirmAddress").value.trim(),
-      website:$("draftFirmWebsite").value.trim(),
-      updatedAt:new Date().toISOString()
-    },{merge:true});
+    await firebase.app().functions("europe-west1").httpsCallable("updateDraftFirm")({
+      id,
+      data:{
+        name:$("draftFirmName").value.trim(),
+        phone:$("draftFirmPhone").value.trim(),
+        city:$("draftFirmCity").value.trim(),
+        district:$("draftFirmDistrict").value.trim(),
+        address:$("draftFirmAddress").value.trim(),
+        website:$("draftFirmWebsite").value.trim()
+      }
+    });
     msg.className="message success";msg.textContent="Taslak kaydedildi.";
     await loadDraftFirms();renderDraftFirms();
     setTimeout(()=>$("draftFirmModal").classList.add("hidden"),500);
@@ -557,7 +553,7 @@ document.addEventListener("click",async e=>{
     const f=draftFirms.find(x=>x.id===id);
     if(!confirm((f?.name||"Bu taslak")+" silinsin mi?"))return;
     try{
-      await db.collection("institutionDrafts").doc(id).delete();
+      await firebase.app().functions("europe-west1").httpsCallable("deleteDraftFirm")({id});
       await loadDraftFirms();renderDraftFirms();
     }catch(err){alert(err.message||"Taslak silinemedi.")}
   }
