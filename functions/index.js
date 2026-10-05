@@ -28,7 +28,9 @@ function requireAdmin(request) {
   }
 }
 
-function s(v) { return String(v || "").trim(); }
+function s(v) {
+  return String(v || "").trim();
+}
 
 function normText(v) {
   return s(v)
@@ -65,17 +67,24 @@ function addressLooksSame(a, b) {
 function duplicateReason(candidate, row) {
   const candidatePlaceId = s(candidate.googlePlaceId || candidate.placeId);
   const rowPlaceId = s(row.googlePlaceId || row.placeId);
-  if (candidatePlaceId && rowPlaceId && candidatePlaceId === rowPlaceId) return "google_place_id";
+
+  if (candidatePlaceId && rowPlaceId && candidatePlaceId === rowPlaceId) {
+    return "google_place_id";
+  }
+
+  const candidatePhone = normPhone(candidate.phone || candidate.whatsapp);
+  const rowPhone = normPhone(row.phone || row.whatsapp);
+  if (candidatePhone && rowPhone && candidatePhone === rowPhone) {
+    return "phone";
+  }
 
   const candidateName = normText(candidate.name);
   const rowName = normText(row.name);
   const sameName = candidateName && rowName && candidateName === rowName;
 
-  const candidatePhone = normPhone(candidate.phone || candidate.whatsapp);
-  const rowPhone = normPhone(row.phone || row.whatsapp);
-  if (candidatePhone && rowPhone && candidatePhone === rowPhone) return "phone";
-
-  if (sameName && addressLooksSame(candidate.address, row.address)) return "name_address";
+  if (sameName && addressLooksSame(candidate.address, row.address)) {
+    return "name_address";
+  }
 
   return "";
 }
@@ -88,15 +97,13 @@ function findDuplicate(candidate, rows) {
   return null;
 }
 
-
 async function placesTextSearch(query) {
   const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value(),
-      "X-Goog-FieldMask":
-        "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus"
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus"
     },
     body: JSON.stringify({
       textQuery: query,
@@ -108,24 +115,36 @@ async function placesTextSearch(query) {
 
   const raw = await response.text();
   let data = {};
-  try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch (_) {}
 
   if (!response.ok) {
     console.error("Places error", response.status, raw);
     throw new HttpsError("internal", data?.error?.message || "Google Places araması başarısız oldu.");
   }
+
   return data;
 }
 
 async function getPlaceDetails(placeId) {
   const fields = [
-    "id","displayName","formattedAddress","location",
-    "nationalPhoneNumber","internationalPhoneNumber",
-    "websiteUri","googleMapsUri","businessStatus","types"
+    "id",
+    "displayName",
+    "formattedAddress",
+    "location",
+    "nationalPhoneNumber",
+    "internationalPhoneNumber",
+    "websiteUri",
+    "googleMapsUri",
+    "businessStatus",
+    "types"
   ].join(",");
 
   const response = await fetch(
-    `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=tr&regionCode=TR`,
+    "https://places.googleapis.com/v1/places/" +
+      encodeURIComponent(placeId) +
+      "?languageCode=tr&regionCode=TR",
     {
       headers: {
         "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value(),
@@ -136,17 +155,25 @@ async function getPlaceDetails(placeId) {
 
   const raw = await response.text();
   let data = {};
-  try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch (_) {}
 
   if (!response.ok) {
     console.error("Place Details error", response.status, raw);
     throw new HttpsError("internal", data?.error?.message || "Firma detayları alınamadı.");
   }
+
   return data;
 }
 
 exports.searchPlaces = onCall(
-  { region: "europe-west1", secrets: [GOOGLE_PLACES_API_KEY], timeoutSeconds: 30, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    secrets: [GOOGLE_PLACES_API_KEY],
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
 
@@ -155,25 +182,37 @@ exports.searchPlaces = onCall(
     const categoryKey = s(request.data?.category);
     const category = CATEGORY_MAP[categoryKey];
 
-    if (!city) throw new HttpsError("invalid-argument", "İl seçilmesi gerekiyor.");
-    if (!category) throw new HttpsError("invalid-argument", "Geçersiz kategori.");
+    if (!city) {
+      throw new HttpsError("invalid-argument", "İl seçilmesi gerekiyor.");
+    }
+    if (!category) {
+      throw new HttpsError("invalid-argument", "Geçersiz kategori.");
+    }
 
     const query = [district, city, category.label].filter(Boolean).join(" ");
     const result = await placesTextSearch(query);
-    const placeIds = (result.places || []).map(p => p.id).filter(Boolean);
 
     const [institutionSnap, draftSnap] = await Promise.all([
       db.collection("institutions").get(),
       db.collection("institutionDrafts").get()
     ]);
+
     const existingRows = [
-      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutions" })),
-      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutionDrafts" }))
+      ...institutionSnap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "institutions"
+      })),
+      ...draftSnap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "institutionDrafts"
+      }))
     ];
 
     return {
       query,
-      places: (result.places || []).map(p => {
+      places: (result.places || []).map((p) => {
         const candidate = {
           placeId: p.id || "",
           googlePlaceId: p.id || "",
@@ -182,7 +221,9 @@ exports.searchPlaces = onCall(
           city,
           district
         };
+
         const duplicate = findDuplicate(candidate, existingRows);
+
         return {
           placeId: candidate.placeId,
           name: candidate.name,
@@ -201,7 +242,12 @@ exports.searchPlaces = onCall(
 );
 
 exports.importPlaceDrafts = onCall(
-  { region: "europe-west1", secrets: [GOOGLE_PLACES_API_KEY], timeoutSeconds: 120, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    secrets: [GOOGLE_PLACES_API_KEY],
+    timeoutSeconds: 120,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
 
@@ -213,25 +259,43 @@ exports.importPlaceDrafts = onCall(
       ? [...new Set(request.data.placeIds.map(s).filter(Boolean))]
       : [];
 
-    if (!city) throw new HttpsError("invalid-argument", "İl seçilmesi gerekiyor.");
-    if (!category) throw new HttpsError("invalid-argument", "Geçersiz kategori.");
-    if (!placeIds.length) throw new HttpsError("invalid-argument", "En az bir firma seçmelisin.");
-    if (placeIds.length > 20) throw new HttpsError("invalid-argument", "Tek seferde en fazla 20 firma aktarılabilir.");
-
-    const created = [];
-    const skipped = [];
+    if (!city) {
+      throw new HttpsError("invalid-argument", "İl seçilmesi gerekiyor.");
+    }
+    if (!category) {
+      throw new HttpsError("invalid-argument", "Geçersiz kategori.");
+    }
+    if (!placeIds.length) {
+      throw new HttpsError("invalid-argument", "En az bir firma seçmelisin.");
+    }
+    if (placeIds.length > 20) {
+      throw new HttpsError("invalid-argument", "Tek seferde en fazla 20 firma aktarılabilir.");
+    }
 
     const [institutionSnap, draftSnap] = await Promise.all([
       db.collection("institutions").get(),
       db.collection("institutionDrafts").get()
     ]);
+
     const existingRows = [
-      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutions" })),
-      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutionDrafts" }))
+      ...institutionSnap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "institutions"
+      })),
+      ...draftSnap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "institutionDrafts"
+      }))
     ];
+
+    const created = [];
+    const skipped = [];
 
     for (const placeId of placeIds) {
       const p = await getPlaceDetails(placeId);
+
       const candidate = {
         googlePlaceId: p.id || placeId,
         name: p.displayName?.text || "Firma",
@@ -242,6 +306,7 @@ exports.importPlaceDrafts = onCall(
       };
 
       const duplicate = findDuplicate(candidate, existingRows);
+
       if (duplicate) {
         skipped.push({
           placeId,
@@ -254,14 +319,14 @@ exports.importPlaceDrafts = onCall(
       }
 
       const draft = {
-        name: p.displayName?.text || "Firma",
+        name: candidate.name,
         mainCategory: category.mainCategory,
         subCategory: category.subCategory,
         category: category.subCategory,
         city,
         district,
-        address: p.formattedAddress || "",
-        phone: p.nationalPhoneNumber || p.internationalPhoneNumber || "",
+        address: candidate.address,
+        phone: candidate.phone,
         website: p.websiteUri || "",
         latitude: p.location?.latitude ?? null,
         longitude: p.location?.longitude ?? null,
@@ -277,7 +342,11 @@ exports.importPlaceDrafts = onCall(
 
       const ref = await db.collection("institutionDrafts").add(draft);
       created.push({ id: ref.id, placeId, name: draft.name });
-      existingRows.push({ id: ref.id, ...draft, _collection: "institutionDrafts" });
+      existingRows.push({
+        id: ref.id,
+        ...draft,
+        _collection: "institutionDrafts"
+      });
     }
 
     return {
@@ -289,83 +358,133 @@ exports.importPlaceDrafts = onCall(
   }
 );
 
-
 exports.listDraftFirms = onCall(
-  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
+
     const snap = await db.collection("institutionDrafts").get();
-    const drafts = snap.docs.map(d => {
-      const x = d.data() || {};
-      return {
-        id: d.id,
-        name: s(x.name),
-        phone: s(x.phone),
-        city: s(x.city),
-        district: s(x.district),
-        address: s(x.address),
-        website: s(x.website),
-        mapUrl: s(x.mapUrl),
-        googlePlaceId: s(x.googlePlaceId),
-        mainCategory: s(x.mainCategory),
-        subCategory: s(x.subCategory),
-        category: s(x.category),
-        latitude: x.latitude ?? null,
-        longitude: x.longitude ?? null,
-        source: s(x.source),
-        status: s(x.status || "draft")
-      };
-    }).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+
+    const drafts = snap.docs
+      .map((d) => {
+        const x = d.data() || {};
+        return {
+          id: d.id,
+          name: s(x.name),
+          phone: s(x.phone),
+          city: s(x.city),
+          district: s(x.district),
+          address: s(x.address),
+          website: s(x.website),
+          mapUrl: s(x.mapUrl),
+          googlePlaceId: s(x.googlePlaceId),
+          mainCategory: s(x.mainCategory),
+          subCategory: s(x.subCategory),
+          category: s(x.category),
+          latitude: x.latitude ?? null,
+          longitude: x.longitude ?? null,
+          source: s(x.source),
+          status: s(x.status || "draft")
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "tr"));
+
     return { drafts, count: drafts.length };
   }
 );
 
 exports.updateDraftFirm = onCall(
-  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
+
     const id = s(request.data?.id);
-    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    if (!id) {
+      throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    }
+
     const ref = db.collection("institutionDrafts").doc(id);
     const snap = await ref.get();
-    if (!snap.exists) throw new HttpsError("not-found", "Taslak firma bulunamadı.");
 
-    const allowed = ["name","phone","city","district","address","website"];
+    if (!snap.exists) {
+      throw new HttpsError("not-found", "Taslak firma bulunamadı.");
+    }
+
+    const allowed = ["name", "phone", "city", "district", "address", "website"];
     const data = {};
+
     for (const key of allowed) {
-      if (request.data?.data && Object.prototype.hasOwnProperty.call(request.data.data,key)) {
+      if (
+        request.data?.data &&
+        Object.prototype.hasOwnProperty.call(request.data.data, key)
+      ) {
         data[key] = s(request.data.data[key]);
       }
     }
+
     data.updatedAt = FieldValue.serverTimestamp();
-    await ref.set(data,{merge:true});
-    return { ok:true };
+    await ref.set(data, { merge: true });
+
+    return { ok: true };
   }
 );
 
 exports.deleteDraftFirm = onCall(
-  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
+
     const id = s(request.data?.id);
-    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    if (!id) {
+      throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    }
+
     await db.collection("institutionDrafts").doc(id).delete();
-    return { ok:true };
+
+    return { ok: true };
   }
 );
 
 exports.publishDraftFirm = onCall(
-  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  {
+    region: "europe-west1",
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
   async (request) => {
     requireAdmin(request);
+
     const id = s(request.data?.id);
-    if (!id) throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    if (!id) {
+      throw new HttpsError("invalid-argument", "Taslak kimliği eksik.");
+    }
 
     const draftRef = db.collection("institutionDrafts").doc(id);
     const snap = await draftRef.get();
-    if (!snap.exists) throw new HttpsError("not-found", "Taslak firma bulunamadı.");
+
+    if (!snap.exists) {
+      throw new HttpsError("not-found", "Taslak firma bulunamadı.");
+    }
 
     const data = snap.data() || {};
+    const institutionSnap = await db.collection("institutions").get();
+    const existingRows = institutionSnap.docs.map((d) => ({
+      id: d.id,
+      ...d.data()
+    }));
+
     const duplicate = findDuplicate(
       {
         googlePlaceId: data.googlePlaceId,
@@ -374,10 +493,14 @@ exports.publishDraftFirm = onCall(
         address: data.address,
         city: data.city
       },
-      (await db.collection("institutions").get()).docs.map(d=>({id:d.id,...d.data()}))
+      existingRows
     );
+
     if (duplicate) {
-      throw new HttpsError("already-exists", "Bu firma normal firma listesinde zaten bulunuyor.");
+      throw new HttpsError(
+        "already-exists",
+        "Bu firma normal firma listesinde zaten bulunuyor."
+      );
     }
 
     const publishData = {
@@ -386,38 +509,52 @@ exports.publishDraftFirm = onCall(
       publishedAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp()
     };
-    delete publishData.createdAt;
 
     const ref = await db.collection("institutions").add(publishData);
     await draftRef.delete();
-    return { ok:true, id:ref.id };
+
+    return { ok: true, id: ref.id };
   }
 );
 
-
 exports.publishDraftFirmsBatch = onCall(
-  { region: "europe-west1", timeoutSeconds: 300, memory: "512MiB" },
+  {
+    region: "europe-west1",
+    timeoutSeconds: 300,
+    memory: "512MiB"
+  },
   async (request) => {
     requireAdmin(request);
+
     const ids = Array.isArray(request.data?.ids)
       ? [...new Set(request.data.ids.map(s).filter(Boolean))]
       : [];
-    if (!ids.length) throw new HttpsError("invalid-argument", "En az bir taslak seçmelisin.");
-    if (ids.length > 200) throw new HttpsError("invalid-argument", "Tek seferde en fazla 200 taslak yayınlanabilir.");
 
-    const draftRefs = ids.map(id => db.collection("institutionDrafts").doc(id));
-    const [draftSnaps, institutionSnap] = await Promise.all([
-      db.getAll(...draftRefs),
-      db.collection("institutions").get()
-    ]);
+    if (!ids.length) {
+      throw new HttpsError("invalid-argument", "En az bir taslak seçmelisin.");
+    }
+    if (ids.length > 200) {
+      throw new HttpsError("invalid-argument", "Tek seferde en fazla 200 taslak yayınlanabilir.");
+    }
 
-    const existingRows = institutionSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const draftRefs = ids.map((id) =>
+      db.collection("institutionDrafts").doc(id)
+    );
+
+    const draftSnaps = await db.getAll(...draftRefs);
+    const institutionSnap = await db.collection("institutions").get();
+    const existingRows = institutionSnap.docs.map((d) => ({
+      id: d.id,
+      ...d.data()
+    }));
+
     const batch = db.batch();
     const published = [];
     const skipped = [];
 
     for (const snap of draftSnaps) {
       const id = snap.id;
+
       if (!snap.exists) {
         skipped.push({ id, reason: "not_found" });
         continue;
@@ -436,7 +573,11 @@ exports.publishDraftFirmsBatch = onCall(
       );
 
       if (duplicate) {
-        skipped.push({ id, reason: "duplicate", name: s(data.name) });
+        skipped.push({
+          id,
+          reason: "duplicate",
+          name: s(data.name)
+        });
         continue;
       }
 
@@ -456,10 +597,17 @@ exports.publishDraftFirmsBatch = onCall(
         ...data,
         status: "active"
       });
-      published.push({ id: newRef.id, draftId: id, name: s(data.name) });
+
+      published.push({
+        id: newRef.id,
+        draftId: id,
+        name: s(data.name)
+      });
     }
 
-    if (published.length) await batch.commit();
+    if (published.length) {
+      await batch.commit();
+    }
 
     return {
       published,
