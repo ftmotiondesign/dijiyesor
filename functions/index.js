@@ -396,9 +396,79 @@ exports.publishDraftFirm = onCall(
 
 
 exports.publishDraftFirmsBatch = onCall(
-  { region: "europe-west1", timeoutSeconds: 120, memory: "256MiB" },
+  { region: "europe-west1", timeoutSeconds: 300, memory: "512MiB" },
   async (request) => {
     requireAdmin(request);
+    const ids = Array.isArray(request.data?.ids)
+      ? [...new Set(request.data.ids.map(s).filter(Boolean))]
+      : [];
+    if (!ids.length) throw new HttpsError("invalid-argument", "En az bir taslak seçmelisin.");
+    if (ids.length > 200) throw new HttpsError("invalid-argument", "Tek seferde en fazla 200 taslak yayınlanabilir.");
+
+    const draftRefs = ids.map(id => db.collection("institutionDrafts").doc(id));
+    const [draftSnaps, institutionSnap] = await Promise.all([
+      db.getAll(...draftRefs),
+      db.collection("institutions").get()
+    ]);
+
+    const existingRows = institutionSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const batch = db.batch();
+    const published = [];
+    const skipped = [];
+
+    for (const snap of draftSnaps) {
+      const id = snap.id;
+      if (!snap.exists) {
+        skipped.push({ id, reason: "not_found" });
+        continue;
+      }
+
+      const data = snap.data() || {};
+      const duplicate = findDuplicate(
+        {
+          googlePlaceId: data.googlePlaceId,
+          name: data.name,
+          phone: data.phone,
+          address: data.address,
+          city: data.city
+        },
+        existingRows
+      );
+
+      if (duplicate) {
+        skipped.push({ id, reason: "duplicate", name: s(data.name) });
+        continue;
+      }
+
+      const newRef = db.collection("institutions").doc();
+      const publishData = {
+        ...data,
+        status: "active",
+        publishedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp()
+      };
+
+      batch.set(newRef, publishData);
+      batch.delete(snap.ref);
+
+      existingRows.push({
+        id: newRef.id,
+        ...data,
+        status: "active"
+      });
+      published.push({ id: newRef.id, draftId: id, name: s(data.name) });
+    }
+
+    if (published.length) await batch.commit();
+
+    return {
+      published,
+      skipped,
+      publishedCount: published.length,
+      skippedCount: skipped.length
+    };
+  }
+);
     const ids = Array.isArray(request.data?.ids)
       ? [...new Set(request.data.ids.map(s).filter(Boolean))]
       : [];
