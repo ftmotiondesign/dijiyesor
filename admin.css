@@ -754,3 +754,10 @@
 .auto-import-select-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .auto-import-select-actions .secondary{padding:8px 10px;font-size:9px}
 @media(max-width:760px){.auto-import-footer{align-items:flex-start;gap:10px}.auto-import-select-actions{width:100%}}
+
+.draft-firm-row{grid-template-columns:34px minmax(260px,1.5fr) minmax(190px,1fr) auto}
+.draft-firm-row.selected{border-color:#1677ff;background:#f7fbff}
+.draft-firm-check{display:flex!important;align-items:center;justify-content:center}
+.draft-firm-check input{width:17px;height:17px}
+.draft-firm-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:900px){.draft-firm-row{grid-template-columns:34px 1fr}.draft-firm-contact,.draft-firm-actions{grid-column:2}.draft-firm-toolbar-actions{justify-content:flex-start}}
