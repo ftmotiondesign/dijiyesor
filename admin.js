@@ -2016,9 +2016,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   const selectedCount=document.getElementById("autoImportSelectedCount");
   if(!city||!district||!category||!results)return;
 
-  const functions=firebase.functions("europe-west1");
-  const searchPlacesFn=functions.httpsCallable("searchPlaces");
-  const importPlaceDraftsFn=functions.httpsCallable("importPlaceDrafts");
+  let functionsInstance=null;
+  function getFunctions(){
+    if(functionsInstance)return functionsInstance;
+    if(!firebase.functions)throw new Error("Firebase Functions modülü yüklenemedi. Sayfayı Ctrl+F5 ile yenileyin.");
+    functionsInstance=firebase.functions("europe-west1");
+    return functionsInstance;
+  }
 
   const categoryLabels={
     surucu:"Sürücü Kursu",kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",
@@ -2075,16 +2079,25 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   async function loadCities(){
+    city.disabled=true;
     city.innerHTML='<option value="">İller yükleniyor...</option>';
     try{
-      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
+      if(!r.ok)throw new Error("İller alınamadı");
       const j=await r.json();
+      const list=(j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
       city.innerHTML='<option value="">İl seç</option>';
-      (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(x=>{
+      list.forEach(x=>{
         const o=document.createElement("option");
         o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
       });
-    }catch(_){ city.innerHTML='<option value="">İl seç</option>'; }
+      city.disabled=false;
+    }catch(err){
+      console.error("İl listesi yüklenemedi",err);
+      city.innerHTML='<option value="">İl listesi yüklenemedi - sayfayı yenileyin</option>';
+      city.disabled=false;
+      showMessage("İl listesi yüklenemedi. Ctrl+F5 ile sayfayı yenileyin.","error");
+    }
     updatePreview();
   }
 
@@ -2111,7 +2124,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   async function searchSingleDistrict(districtName){
-    const res=await searchPlacesFn({
+    const res=await getFunctions().httpsCallable("searchPlaces")({
       city:city.value,
       district:districtName||"",
       category:category.value
@@ -2169,7 +2182,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     saveBtn.textContent="Taslağa aktarılıyor...";
     hideMessage();
     try{
-      const res=await importPlaceDraftsFn({
+      const res=await getFunctions().httpsCallable("importPlaceDrafts")({
         city:city.value,
         district:allDistricts?.checked?"":(district.value||""),
         category:category.value,
