@@ -393,3 +393,67 @@ exports.publishDraftFirm = onCall(
     return { ok:true, id:ref.id };
   }
 );
+
+
+exports.publishDraftFirmsBatch = onCall(
+  { region: "europe-west1", timeoutSeconds: 120, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const ids = Array.isArray(request.data?.ids)
+      ? [...new Set(request.data.ids.map(s).filter(Boolean))]
+      : [];
+    if (!ids.length) throw new HttpsError("invalid-argument", "En az bir taslak seçmelisin.");
+    if (ids.length > 200) throw new HttpsError("invalid-argument", "Tek seferde en fazla 200 taslak yayınlanabilir.");
+
+    const institutionSnap = await db.collection("institutions").get();
+    const existingRows = institutionSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const published = [];
+    const skipped = [];
+
+    for (const id of ids) {
+      const draftRef = db.collection("institutionDrafts").doc(id);
+      const snap = await draftRef.get();
+      if (!snap.exists) {
+        skipped.push({ id, reason: "not_found" });
+        continue;
+      }
+
+      const data = snap.data() || {};
+      const duplicate = findDuplicate(
+        {
+          googlePlaceId: data.googlePlaceId,
+          name: data.name,
+          phone: data.phone,
+          address: data.address,
+          city: data.city
+        },
+        existingRows
+      );
+
+      if (duplicate) {
+        skipped.push({ id, reason: "duplicate", name: s(data.name) });
+        continue;
+      }
+
+      const publishData = {
+        ...data,
+        status: "active",
+        publishedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp()
+      };
+      delete publishData.createdAt;
+
+      const ref = await db.collection("institutions").add(publishData);
+      await draftRef.delete();
+      existingRows.push({ id: ref.id, ...publishData });
+      published.push({ id: ref.id, draftId: id, name: s(data.name) });
+    }
+
+    return {
+      published,
+      skipped,
+      publishedCount: published.length,
+      skippedCount: skipped.length
+    };
+  }
+);
