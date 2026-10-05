@@ -318,8 +318,8 @@ function companyFromDoc(doc){
     id:doc.id,
     name:d.name||"Firma",
     mainCategory:mainCategory(d),
-    category:effectiveSubCategory||d.category||"",
-    subCategory:effectiveSubCategory,
+    category:looksPublicEducation?"":(effectiveSubCategory||d.category||""),
+    subCategory:looksPublicEducation?"":effectiveSubCategory,
     city:fixedCity,
     district:fixedDistrict,
     address:d.address||"",
@@ -1346,7 +1346,8 @@ async function initHome(){
       const cityMatch=!c||norm(i.city)===c;
       const districtMatch=!d||normDistrict(i.district)===normDistrict(d);
       const sectorMatch=!s||i.mainCategory===s;
-      const subMatch=!sc||i.subCategory===sc||i.category===sc;
+      const publicEducationResult=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(norm(i.name||""));
+      const subMatch=!sc||(!publicEducationResult&&(i.subCategory===sc||i.category===sc));
       const tourMatch=!(feature360||only360Active)||valid360Url(i.tour360Url);
 
       // Seçilen şehir/ilçe her zaman kesin filtre olarak uygulanır.
