@@ -194,8 +194,9 @@ exports.placePhoto = onRequest(
       const mediaResponse = await fetch(
         "https://places.googleapis.com/v1/" +
           name +
-          "/media?maxWidthPx=900&maxHeightPx=900&skipHttpRedirect=true",
+          "/media?maxWidthPx=900&maxHeightPx=900",
         {
+          redirect: "follow",
           headers: {
             "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value()
           }
@@ -203,19 +204,22 @@ exports.placePhoto = onRequest(
       );
 
       if (!mediaResponse.ok) {
+        console.error("Place photo media error", mediaResponse.status, await mediaResponse.text());
         response.status(404).send("Fotoğraf bulunamadı.");
         return;
       }
 
-      const data = await mediaResponse.json();
-      const photoUri = s(data.photoUri);
-      if (!/^https:\/\//i.test(photoUri)) {
+      const contentType = mediaResponse.headers.get("content-type") || "image/jpeg";
+      if (!contentType.toLowerCase().startsWith("image/")) {
+        console.error("Place photo invalid content type", contentType);
         response.status(404).send("Fotoğraf bulunamadı.");
         return;
       }
 
-      response.set("Cache-Control", "public, max-age=86400");
-      response.redirect(302, photoUri);
+      const bytes = Buffer.from(await mediaResponse.arrayBuffer());
+      response.set("Content-Type", contentType);
+      response.set("Cache-Control", "public, max-age=86400, s-maxage=86400");
+      response.status(200).send(bytes);
     } catch (err) {
       console.error("Place photo error", err);
       response.status(500).send("Fotoğraf alınamadı.");
