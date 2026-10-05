@@ -2227,6 +2227,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 
   let rows=[];
+  let provinceList=[];
   const selected=new Set();
 
   function showMessage(text,type=""){
@@ -2267,7 +2268,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       return '<article class="auto-place-row'+(r.alreadyExists?' duplicate':'')+'">'+
         '<label class="auto-place-check"><input type="checkbox" data-auto-place="'+esc(r.placeId)+'"'+checked+disabled+'></label>'+
         '<div class="auto-place-name">'+photo+'<div><strong>'+esc(r.name||"Firma")+'</strong><small>'+esc(r.address||"Adres bilgisi yok")+'</small></div></div>'+
-        '<div class="auto-place-location"><span>'+esc(city.value)+'</span><small>'+esc(district.value||"Tüm İlçeler")+'</small></div>'+
+        '<div class="auto-place-location"><span>'+esc(r._sourceCity||(city.value==="__ALL__"?"Türkiye":city.value))+'</span><small>'+esc(r._sourceDistrict||(city.value==="__ALL__"?"Tüm İlçeler":(district.value||"Tüm İlçeler")))+'</small></div>'+
         '<div class="auto-place-contact">'+map+'</div>'+
         '<div>'+status+'</div>'+
       '</article>';
@@ -2283,7 +2284,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       if(!r.ok)throw new Error("İller alınamadı");
       const j=await r.json();
       const list=(j.data||[]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
-      city.innerHTML='<option value="">İl seç</option>';
+      provinceList=list;
+      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller</option>';
       list.forEach(x=>{
         const o=document.createElement("option");
         o.value=x.name;o.textContent=x.name;o.dataset.id=x.id;city.appendChild(o);
@@ -2301,6 +2303,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   async function loadDistricts(){
     district.disabled=true;
     district.innerHTML='<option value="">İlçe yükleniyor...</option>';
+    if(city.value==="__ALL__"){
+      district.innerHTML='<option value="">Tüm İlçeler</option>';
+      district.disabled=true;
+      if(allDistricts)allDistricts.checked=true;
+      updatePreview();
+      return;
+    }
     const id=city.options[city.selectedIndex]?.dataset?.id;
     if(!id){district.innerHTML='<option value="">Önce il seç</option>';updatePreview();return;}
     try{
@@ -2316,13 +2325,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   function updatePreview(){
-    const parts=[city.value||"İl",allDistricts?.checked?"Tüm İlçeler":(district.value||"İlçe"),categoryLabels[category.value]||category.options[category.selectedIndex]?.text].filter(Boolean);
+    const cityLabel=city.value==="__ALL__"?"Tüm İller":(city.value||"İl");
+    const parts=[cityLabel,allDistricts?.checked?"Tüm İlçeler":(district.value||"İlçe"),categoryLabels[category.value]||category.options[category.selectedIndex]?.text].filter(Boolean);
     preview.textContent=parts.join(" / ");
   }
 
-  async function searchSingleDistrict(districtName){
+  async function searchSingleDistrict(districtName,cityName=city.value){
     const res=await getFunctions().httpsCallable("searchPlaces")({
-      city:city.value,
+      city:cityName,
       district:districtName||"",
       category:category.value
     });
@@ -2341,7 +2351,16 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     try{
       let collected=[];
-      if(allDistricts?.checked){
+      if(city.value==="__ALL__"){
+        // Tüm Türkiye: 81 ili sırayla il bazında tara.
+        const cities=provinceList.map(x=>x.name).filter(Boolean);
+        if(!cities.length)throw new Error("İl listesi henüz hazır değil.");
+        for(let i=0;i<cities.length;i++){
+          searchBtn.textContent=(i+1)+"/"+cities.length+" il taranıyor...";
+          const found=await searchSingleDistrict("",cities[i]);
+          collected.push(...found.map(x=>({...x,_sourceCity:cities[i],_sourceDistrict:""})));
+        }
+      }else if(allDistricts?.checked){
         const districtNames=[...district.options].map(o=>o.value).filter(Boolean);
         if(!districtNames.length){
           collected=await searchSingleDistrict("");
@@ -2349,11 +2368,12 @@ document.addEventListener("DOMContentLoaded",()=>{
           for(let i=0;i<districtNames.length;i++){
             searchBtn.textContent=(i+1)+"/"+districtNames.length+" ilçe taranıyor...";
             const found=await searchSingleDistrict(districtNames[i]);
-            collected.push(...found);
+            collected.push(...found.map(x=>({...x,_sourceCity:city.value,_sourceDistrict:districtNames[i]})));
           }
         }
       }else{
         collected=await searchSingleDistrict(district.value||"");
+        collected=collected.map(x=>({...x,_sourceCity:city.value,_sourceDistrict:district.value||""}));
       }
 
       const dedup=new Map();
@@ -2379,14 +2399,36 @@ document.addEventListener("DOMContentLoaded",()=>{
     saveBtn.textContent="Taslağa aktarılıyor...";
     hideMessage();
     try{
-      const res=await getFunctions().httpsCallable("importPlaceDrafts")({
-        city:city.value,
-        district:allDistricts?.checked?"":(district.value||""),
-        category:category.value,
-        placeIds
-      });
-      const created=Number(res.data?.createdCount||0);
-      const skipped=Number(res.data?.skippedCount||0);
+      let created=0;
+      let skipped=0;
+      if(city.value==="__ALL__"){
+        const groups=new Map();
+        rows.filter(r=>placeIds.includes(r.placeId)).forEach(r=>{
+          const key=r._sourceCity||"";
+          if(!groups.has(key))groups.set(key,[]);
+          groups.get(key).push(r.placeId);
+        });
+        for(const [cityName,ids] of groups.entries()){
+          if(!cityName||!ids.length)continue;
+          const res=await getFunctions().httpsCallable("importPlaceDrafts")({
+            city:cityName,
+            district:"",
+            category:category.value,
+            placeIds:ids
+          });
+          created+=Number(res.data?.createdCount||0);
+          skipped+=Number(res.data?.skippedCount||0);
+        }
+      }else{
+        const res=await getFunctions().httpsCallable("importPlaceDrafts")({
+          city:city.value,
+          district:allDistricts?.checked?"":(district.value||""),
+          category:category.value,
+          placeIds
+        });
+        created=Number(res.data?.createdCount||0);
+        skipped=Number(res.data?.skippedCount||0);
+      }
       showMessage(created+" firma taslağa aktarıldı"+(skipped?" · "+skipped+" firma zaten kayıtlı/taslakta":"")+".","success");
       selected.clear();
       rows=rows.map(r=>placeIds.includes(r.placeId)?{...r,alreadyExists:true}:r);
@@ -2406,7 +2448,12 @@ document.addEventListener("DOMContentLoaded",()=>{
   district.addEventListener("change",updatePreview);
   category.addEventListener("change",updatePreview);
   allDistricts?.addEventListener("change",()=>{
-    district.disabled=allDistricts.checked||!city.value;
+    if(city.value==="__ALL__"){
+      allDistricts.checked=true;
+      district.disabled=true;
+    }else{
+      district.disabled=allDistricts.checked||!city.value;
+    }
     updatePreview();
   });
   results.addEventListener("change",e=>{
