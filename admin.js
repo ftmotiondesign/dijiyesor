@@ -447,6 +447,31 @@ async function loadFirms(){
   const snap=await db.collection("institutions").get();
   firms=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
 }
+$("backfillFirmPhotosBtn")?.addEventListener("click",async()=>{
+  const btn=$("backfillFirmPhotosBtn");
+  const msg=$("autoImportMessage");
+  if(!confirm("Google Place ID bulunan eski firmaların fotoğrafları getirilsin mi?"))return;
+  try{
+    btn.disabled=true;
+    btn.textContent="Fotoğraflar getiriliyor...";
+    if(msg){msg.className="message";msg.textContent="Eski firmalar ve taslaklar kontrol ediliyor...";}
+    const res=await firebase.app().functions("europe-west1").httpsCallable("backfillFirmPhotos")({includeDrafts:true});
+    const d=res.data||{};
+    if(msg){
+      msg.className="message success";
+      msg.textContent=(d.updated||0)+" firmaya fotoğraf eklendi · "+(d.noPhoto||0)+" firmada Google fotoğrafı yok · "+(d.noPlaceId||0)+" kayıtta Google Place ID yok"+(d.errorCount?" · "+d.errorCount+" hata":"")+".";
+    }
+    await Promise.all([loadFirms(),loadDraftFirms()]);
+    renderAll();
+  }catch(err){
+    console.error(err);
+    if(msg){msg.className="message error";msg.textContent=err?.message||"Fotoğraflar getirilemedi.";}
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Eski Firmalara Fotoğraf Getir";
+  }
+});
+
 async function loadDraftFirms(){
   try{
     const res=await firebase.app().functions("europe-west1").httpsCallable("listDraftFirms")({});
