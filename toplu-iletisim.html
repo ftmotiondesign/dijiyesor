@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toplu İletişim | DijiyeSor</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}.wrap{max-width:1280px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.card{background:#fff;border:1px solid #e5e9f0;border-radius:16px;padding:16px;margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;padding:10px;border:1px solid #d9e0e8;border-radius:10px;box-sizing:border-box}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#fff;border:1px solid #e5e9f0;border-radius:14px;padding:15px}.stat b{font-size:24px;display:block}.stat span{font-size:12px;color:#667085}
+.row{display:grid;grid-template-columns:34px 2fr 1fr 1fr 1.4fr 110px;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #edf0f4}.head{font-size:11px;font-weight:700;color:#667085}
+.badge{padding:5px 8px;border-radius:999px;font-size:11px;font-weight:700}.wa{background:#ecfdf3;color:#067647}.mail{background:#eff6ff;color:#1d4ed8}.none{background:#f2f4f7;color:#667085}
+button,.linkbtn{border:0;border-radius:10px;padding:10px 13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}.primary{background:#1677ff;color:#fff}.secondary{background:#eef2f7;color:#334155}.success{background:#12b76a;color:#fff}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none}.note{font-size:12px;color:#667085}.msg{padding:10px;border-radius:10px;background:#eef6ff;margin-top:10px}
+@media(max-width:850px){.grid,.stats{grid-template-columns:1fr 1fr}.row{grid-template-columns:30px 1fr}.row>*:nth-child(n+3){grid-column:2}.head{display:none}}
+@media(max-width:520px){.grid,.stats{grid-template-columns:1fr}.wrap{padding:10px}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="top"><div><h1>Toplu İletişim Merkezi</h1><div class="note">Firmaları filtrele, iletişim durumunu gör ve kontrollü şekilde mesaj hazırla.</div></div><a class="linkbtn secondary" href="admin.html">← Yönetim Paneli</a></div>
+<div id="auth" class="card">Yetki kontrol ediliyor...</div>
+<div id="app" class="hidden">
+  <div class="card grid">
+    <label>İl<select id="city"><option value="">Tüm iller</option></select></label>
+    <label>İlçe<select id="district"><option value="">Tüm ilçeler</option></select></label>
+    <label>Kategori<select id="category"><option value="">Tüm kategoriler</option></select></label>
+    <label>Kanal<select id="channel"><option value="">Tüm kanallar</option><option value="whatsapp">WhatsApp</option><option value="email">E-posta</option><option value="none">İletişim yok</option></select></label>
+    <label>Ara<input id="search" placeholder="Firma adı / telefon"></label>
+  </div>
+  <div class="stats" style="margin-top:12px">
+    <div class="stat"><b id="st">0</b><span>Firma</span></div><div class="stat"><b id="sw">0</b><span>WhatsApp</span></div><div class="stat"><b id="se">0</b><span>E-posta</span></div><div class="stat"><b id="sn">0</b><span>İletişim yok</span></div>
+  </div>
+  <div class="card">
+    <h3>Mesaj Şablonu</h3>
+    <textarea id="message" rows="7">Merhaba {{firma_adi}},
+
+Firmanız DijiyeSor platformunda yer alıyor. Firma bilgilerinizi kontrol etmek veya güncellemek isterseniz bize ulaşabilirsiniz.
+
+DijiyeSor</textarea>
+    <div class="note">{{firma_adi}} seçilen firmaya göre otomatik değişir.</div>
+  </div>
+  <div class="card">
+    <div id="table"></div>
+  </div>
+</div>
+</div>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore(),ADMIN_EMAIL="ftmotiondesign@gmail.com";
+let firms=[],visible=[];const $=x=>document.getElementById(x),esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const cats={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
+function phone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("90")&&d.length>=12)d=d.slice(2);if(d.startsWith("0")&&d.length===11)d=d.slice(1);return d.length===10?d:""}
+function wa(f){return phone(f.whatsapp)||phone(f.phone)} function mail(f){return String(f.email||f.contactEmail||f.accountEmail||"").trim()} function ch(f){return wa(f)?"whatsapp":mail(f)?"email":"none"}
+function msg(f){return String($("message").value||"").replaceAll("{{firma_adi}}",f.name||"Firma")}
+auth.onAuthStateChanged(async u=>{if(!u||String(u.email||"").toLowerCase()!==ADMIN_EMAIL){$("auth").innerHTML='Yönetici girişi gerekli. <a href="admin.html">Panele dön</a>';return}
+$("auth").classList.add("hidden");$("app").classList.remove("hidden");const s=await db.collection("institutions").get();firms=s.docs.map(d=>({id:d.id,...d.data()}));fill();render()});
+function fill(){const cities=[...new Set(firms.map(f=>f.city).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"tr"));$("city").innerHTML='<option value="">Tüm iller</option>'+cities.map(x=>'<option>'+esc(x)+'</option>').join("");$("category").innerHTML='<option value="">Tüm kategoriler</option>'+Object.entries(cats).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");districts()}
+function districts(){const c=$("city").value,ds=[...new Set(firms.filter(f=>!c||f.city===c).map(f=>f.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"tr"));$("district").innerHTML='<option value="">Tüm ilçeler</option>'+ds.map(x=>'<option>'+esc(x)+'</option>').join("")}
+function render(){const q=String($("search").value||"").toLocaleLowerCase("tr-TR"),c=$("city").value,d=$("district").value,k=$("category").value,cc=$("channel").value;
+visible=firms.filter(f=>(!q||String([f.name,f.phone,f.whatsapp,f.email].join(" ")).toLocaleLowerCase("tr-TR").includes(q))&&(!c||f.city===c)&&(!d||f.district===d)&&(!k||f.mainCategory===k)&&(!cc||ch(f)===cc));
+$("st").textContent=visible.length;$("sw").textContent=visible.filter(f=>ch(f)==="whatsapp").length;$("se").textContent=visible.filter(f=>ch(f)==="email").length;$("sn").textContent=visible.filter(f=>ch(f)==="none").length;
+$("table").innerHTML='<div class="row head"><span></span><span>Firma</span><span>Konum</span><span>Kategori</span><span>İletişim</span><span>İşlem</span></div>'+visible.map(f=>{const c=ch(f),contact=c==="whatsapp"?"+90 "+wa(f):c==="email"?mail(f):"Yok",label=c==="whatsapp"?"WhatsApp":c==="email"?"E-posta":"Eksik";let action='-';if(c==="whatsapp")action='<a class="linkbtn success" target="_blank" rel="noopener" href="https://wa.me/90'+wa(f)+'?text='+encodeURIComponent(msg(f))+'">Mesaj</a>';else if(c==="email")action='<a class="linkbtn primary" href="mailto:'+encodeURIComponent(mail(f))+'?subject='+encodeURIComponent("DijiyeSor firma bilgisi")+'&body='+encodeURIComponent(msg(f))+'">E-posta</a>';return '<div class="row"><span></span><div><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc(f.phone||f.whatsapp||"")+'</small></div><span>'+esc([f.city,f.district].filter(Boolean).join(" / "))+'</span><span>'+esc(cats[f.mainCategory]||f.mainCategory||"Diğer")+'</span><span><b class="badge '+(c==="whatsapp"?"wa":c==="email"?"mail":"none")+'">'+label+'</b><small>'+esc(contact)+'</small></span><span>'+action+'</span></div>'}).join("")}
+["district","category","channel"].forEach(id=>$(id).addEventListener("change",render));$("city").addEventListener("change",()=>{districts();render()});$("search").addEventListener("input",render);$("message").addEventListener("input",render);
+</script></body></html>
