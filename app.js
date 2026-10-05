@@ -239,57 +239,145 @@ async function fillDistricts(city,district){
     district.disabled=false;
   }catch(_){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=false}
 }
-async function loadCompanies(){
+function companyFromDoc(doc){
+  const d=doc.data()||{};
+  if(String(d.status||"active")==="passive")return null;
+  const fixedLoc=resolveSearchLocation(d);
+  const fixedCity=fixedLoc.city||"";
+  const fixedDistrict=cleanDistrictName(fixedLoc.district||"");
+  return {
+    id:doc.id,
+    name:d.name||"Firma",
+    mainCategory:mainCategory(d),
+    category:d.category||"",
+    subCategory:d.subCategory||"",
+    city:fixedCity,
+    district:fixedDistrict,
+    address:d.address||"",
+    location:d.location||"",
+    description:d.description||"",
+    keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],
+    highlights:Array.isArray(d.highlights)?d.highlights:[],
+    programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),
+    logoUrl:d.logoUrl||"",
+    cardImageUrl:d.cardImageUrl||d.profileImageUrl||"",
+    coverUrl:d.coverUrl||"",
+    coverUrls:Array.isArray(d.coverUrls)?d.coverUrls.filter(Boolean):[],
+    phone:d.phone||"",
+    website:d.website||"",
+    whatsapp:d.whatsapp||d.phone||"",
+    vip:Boolean(d.vip),
+    has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),
+    tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",
+    galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    campaignActive:Boolean(d.campaignActive||d.hasCampaign),
+    campaignTitle:d.campaignTitle||d.promotionTitle||"",
+    campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
+    campaignBadge:d.campaignBadge||d.promotionBadge||"Kampanya",
+    campaignEnd:d.campaignEnd||d.campaignEndDate||"",
+    campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
+    campaignUrl:d.campaignUrl||d.promotionUrl||"",
+    sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser),
+    searchPopupActive:Boolean(d.searchPopupActive),
+    searchPopupStartDate:d.searchPopupStartDate||"",
+    searchPopupEndDate:d.searchPopupEndDate||"",
+    searchPopupCity:d.searchPopupCity||"",
+    searchPopupDistrict:d.searchPopupDistrict||"",
+    searchPopupTitle:d.searchPopupTitle||"",
+    searchPopupText:d.searchPopupText||"",
+    searchPopupMediaType:d.searchPopupMediaType||"image",
+    searchPopupFrequency:d.searchPopupFrequency||"session",
+    searchPopupScope:d.searchPopupScope||"search_results",
+    searchPopupPlacements:Array.isArray(d.searchPopupPlacements)?d.searchPopupPlacements:[],
+    searchPopupSector:d.searchPopupSector||"",
+    searchPopupSubCategory:d.searchPopupSubCategory||"",
+    searchPopupMediaUrl:d.searchPopupMediaUrl||"",
+    searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
+    searchPopupTargetUrl:d.searchPopupTargetUrl||"",
+    searchPopupOrder:Number(d.searchPopupOrder||999999),
+    mapUrl:d.mapUrl||d.googleMapsUrl||d.mapsUrl||"",
+    latitude:d.latitude||d.lat||"",
+    longitude:d.longitude||d.lng||d.lon||""
+  };
+}
+
+let companiesLoadKey="";
+
+async function loadCompanies(filters={}){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
-    const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const fixedLoc=resolveSearchLocation(d);const fixedCity=fixedLoc.city||"";const fixedDistrict=cleanDistrictName(fixedLoc.district||"");companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",cardImageUrl:d.cardImageUrl||d.profileImageUrl||"",coverUrl:d.coverUrl||"",coverUrls:Array.isArray(d.coverUrls)?d.coverUrls.filter(Boolean):[],phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
-campaignActive:Boolean(d.campaignActive||d.hasCampaign),
-campaignTitle:d.campaignTitle||d.promotionTitle||"",
-campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
-campaignBadge:d.campaignBadge||d.promotionBadge||"Kampanya",
-campaignEnd:d.campaignEnd||d.campaignEndDate||"",
-campaignImageUrl:d.campaignImageUrl||d.promotionImageUrl||"",
-campaignUrl:d.campaignUrl||d.promotionUrl||"",
-sponsored:Boolean(d.sponsored||d.isSponsored||d.vipSponsored||d.advertiser),
-searchPopupActive:Boolean(d.searchPopupActive),
-searchPopupStartDate:d.searchPopupStartDate||"",
-searchPopupEndDate:d.searchPopupEndDate||"",
-searchPopupCity:d.searchPopupCity||"",
-searchPopupDistrict:d.searchPopupDistrict||"",
-searchPopupTitle:d.searchPopupTitle||"",
-searchPopupText:d.searchPopupText||"",
-searchPopupMediaType:d.searchPopupMediaType||"image",
-searchPopupFrequency:d.searchPopupFrequency||"session",
-searchPopupScope:d.searchPopupScope||"search_results",
-searchPopupPlacements:Array.isArray(d.searchPopupPlacements)?d.searchPopupPlacements:[],
-searchPopupSector:d.searchPopupSector||"",
-searchPopupSubCategory:d.searchPopupSubCategory||"",
-searchPopupMediaUrl:d.searchPopupMediaUrl||"",
-searchPopupButtonText:d.searchPopupButtonText||"Firmayı İncele",
-searchPopupTargetUrl:d.searchPopupTargetUrl||"",
-searchPopupOrder:Number(d.searchPopupOrder||999999),
-mapUrl:d.mapUrl||d.googleMapsUrl||d.mapsUrl||"",
-latitude:d.latitude||d.lat||"",
-longitude:d.longitude||d.lng||d.lon||""
-})});
+    const cityName=String(filters.city||"").trim();
+    const sub=String(filters.subCategory||"").trim();
+    const sector=String(filters.sector||"").trim();
+
+    let query=db.collection("institutions");
+    let key="all";
+
+    // Tek alanlı sorgular kullanıyoruz; ek composite index gerektirmez.
+    if(cityName){
+      query=query.where("city","==",cityName);
+      key="city:"+cityName;
+    }else if(sub){
+      query=query.where("subCategory","==",sub);
+      key="sub:"+sub;
+    }else if(sector){
+      query=query.where("mainCategory","==",sector);
+      key="sector:"+sector;
+    }
+
+    const [snap,sponsorSnap]=await Promise.all([
+      query.get(),
+      db.collection("institutions").where("searchPopupActive","==",true).get().catch(()=>null)
+    ]);
+
+    const byId=new Map();
+
+    snap.forEach(doc=>{
+      const row=companyFromDoc(doc);
+      if(row)byId.set(row.id,row);
+    });
+
+    // Arama popup reklamları seçilen sorgunun dışında kalsa bile reklam sistemi çalışsın.
+    sponsorSnap?.forEach(doc=>{
+      if(byId.has(doc.id))return;
+      const row=companyFromDoc(doc);
+      if(row)byId.set(row.id,row);
+    });
+
+    companies=[...byId.values()];
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
     companiesLoaded=true;
+    companiesLoadKey=key;
   }catch(e){
     companiesLoaded=false;
+    companiesLoadKey="";
     console.error(e);
     if(sum)sum.textContent="Firmalar yüklenemedi";
     if(grid)grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>';
     throw e;
   }
 }
-async function ensureCompaniesLoaded(){
-  if(companiesLoaded)return;
+
+async function ensureCompaniesLoaded(filters={}){
+  const cityName=String(filters.city||"").trim();
+  const sub=String(filters.subCategory||"").trim();
+  const sector=String(filters.sector||"").trim();
+  const wantedKey=cityName?"city:"+cityName:(sub?"sub:"+sub:(sector?"sector:"+sector:"all"));
+
+  if(companiesLoaded && companiesLoadKey===wantedKey)return;
+
   if(!companiesLoadingPromise){
-    companiesLoadingPromise=loadCompanies().finally(()=>{companiesLoadingPromise=null});
+    companiesLoadingPromise=loadCompanies(filters).finally(()=>{companiesLoadingPromise=null});
   }
   await companiesLoadingPromise;
+
+  // Kullanıcı ilk sorgu yüklenirken filtre değiştirdiyse yeni sorguyu da yükle.
+  if(companiesLoadKey!==wantedKey){
+    companiesLoadingPromise=loadCompanies(filters).finally(()=>{companiesLoadingPromise=null});
+    await companiesLoadingPromise;
+  }
 }
+
 function campaignIsActive(i){
   if(!i?.campaignActive || !String(i.campaignTitle||"").trim())return false;
   if(i.campaignEnd){
@@ -1025,7 +1113,7 @@ async function initHome(){
     const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";
     if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}
     setSearchCompactMode(true);
-    await ensureCompaniesLoaded();
+    await ensureCompaniesLoaded({city:city.value,sector:s,subCategory:sc});
     document.getElementById("resultsHead")?.classList.remove("hidden");
 
     const intent=analyzeSearchIntent(search.value);
