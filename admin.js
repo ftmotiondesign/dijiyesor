@@ -450,6 +450,8 @@ async function loadDraftFirms(){
   try{
     const res=await firebase.app().functions("europe-west1").httpsCallable("listDraftFirms")({});
     draftFirms=Array.isArray(res.data?.drafts)?res.data.drafts:[];
+    const msg=$("draftFirmMessage");
+    if(msg){msg.className="message hidden";msg.textContent="";}
   }catch(err){
     console.error("Taslak firmalar yüklenemedi",err);
     draftFirms=[];
