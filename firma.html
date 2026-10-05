@@ -182,7 +182,7 @@
       photos.slice(0,12).forEach((url,index)=>{
         items.push(
           '<button class="media-card photo-card" type="button" data-image="'+esc(url)+'" aria-label="Fotoğrafı büyüt">'+
-            '<img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+" fotoğraf "+(index+1))+'" loading="lazy">'+
+            '<img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+" fotoğraf "+(index+1))+'" loading="lazy" onerror="this.closest(\'[data-image]\')?.remove()">'+
           '</button>'
         );
       });
@@ -404,6 +404,40 @@
       return {icon:detail.icon||base.icon,label:detail.label||base.label,tone:base.tone};
     }
 
+    function profileCoverFallbackMarkup(icon,label,tone){
+      return '<div class="profile-cover category-cover '+esc(tone||"other")+'" aria-label="'+esc(label||"Yerel İşletme")+' kategori görseli">'+
+        '<div class="category-cover-orb orb-a"></div><div class="category-cover-orb orb-b"></div>'+
+        '<div class="category-cover-content"><span class="category-cover-icon">'+(icon||"📍")+'</span><div><small>DİJİYESOR</small><strong>'+esc(label||"Yerel İşletme")+'</strong><span>Firma görseli eklendiğinde bu alan otomatik değişir.</span></div></div>'+
+      '</div>';
+    }
+    function handleProfileCoverError(img){
+      const cover=img?.closest?.(".profile-cover");
+      if(!cover)return;
+      const slide=img.closest?.("[data-cover-slide]");
+      if(slide){
+        slide.remove();
+        const slides=[...cover.querySelectorAll("[data-cover-slide]")];
+        if(slides.length){
+          slides.forEach((el,index)=>{
+            el.dataset.coverSlide=String(index);
+            el.classList.toggle("active",index===0);
+          });
+          const dots=cover.querySelector(".profile-cover-dots");
+          if(dots) dots.innerHTML=slides.map((_,index)=>'<button type="button" class="'+(index===0?'active':'')+'" data-cover-dot="'+index+'" aria-label="'+(index+1)+'. görsel"></button>').join("");
+          if(slides.length===1) cover.querySelectorAll(".profile-cover-nav,.profile-cover-dots").forEach(el=>el.remove());
+          return;
+        }
+      }
+      cover.outerHTML=profileCoverFallbackMarkup(cover.dataset.fallbackIcon,cover.dataset.fallbackLabel,cover.dataset.fallbackTone);
+    }
+    function handleProfileLogoError(img,initialText){
+      const parent=img?.parentElement;
+      if(!parent)return;
+      const span=document.createElement("span");
+      span.textContent=initialText||"D";
+      parent.replaceChildren(span);
+    }
+
     function buildProfileCoverSlider(d){
       let images=asArray(d.coverUrls).map(v=>String(v||"").trim()).filter(Boolean);
       if(!images.length){
@@ -412,13 +446,15 @@
 
       const unique=[...new Set(images)].slice(0,6);
       if(!unique.length)return buildFallbackCover(d);
+      const fb=categoryFallback(d);
+      const meta=' data-fallback-icon="'+esc(fb.icon)+'" data-fallback-label="'+esc(fb.label)+'" data-fallback-tone="'+esc(fb.tone)+'"';
       if(unique.length===1){
-        return '<div class="profile-cover"><img src="'+esc(unique[0])+'" alt="'+esc(d.name||"Firma")+' kapak görseli"></div>';
+        return '<div class="profile-cover"'+meta+'><img src="'+esc(unique[0])+'" alt="'+esc(d.name||"Firma")+' kapak görseli" onerror="handleProfileCoverError(this)"></div>';
       }
 
-      return '<div class="profile-cover profile-cover-slider" data-cover-slider>'+
+      return '<div class="profile-cover profile-cover-slider" data-cover-slider'+meta+'>'+
         '<div class="profile-cover-track">'+
-          unique.map((url,index)=>'<div class="profile-cover-slide'+(index===0?' active':'')+'" data-cover-slide="'+index+'"><img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+' görsel '+(index+1))+'"></div>').join("")+
+          unique.map((url,index)=>'<div class="profile-cover-slide'+(index===0?' active':'')+'" data-cover-slide="'+index+'"><img src="'+esc(url)+'" alt="'+esc((d.name||"Firma")+' görsel '+(index+1))+'" onerror="handleProfileCoverError(this)"></div>').join("")+
         '</div>'+
         '<button type="button" class="profile-cover-nav prev" data-cover-prev aria-label="Önceki görsel">‹</button>'+
         '<button type="button" class="profile-cover-nav next" data-cover-next aria-label="Sonraki görsel">›</button>'+
@@ -430,10 +466,7 @@
 
     function buildFallbackCover(d){
       const c=categoryFallback(d);
-      return '<div class="profile-cover category-cover '+esc(c.tone)+'" aria-label="'+esc(c.label)+' kategori görseli">'+
-        '<div class="category-cover-orb orb-a"></div><div class="category-cover-orb orb-b"></div>'+
-        '<div class="category-cover-content"><span class="category-cover-icon">'+c.icon+'</span><div><small>DİJİYESOR</small><strong>'+esc(c.label)+'</strong><span>Firma görseli eklendiğinde bu alan otomatik değişir.</span></div></div>'+
-      '</div>';
+      return profileCoverFallbackMarkup(c.icon,c.label,c.tone);
     }
 
     function mapsQueryFor(d){
@@ -475,7 +508,7 @@
 
         const profileImage=d.logoUrl||d.profileImageUrl||d.cardImageUrl||"";
         const logo=profileImage
-          ? '<img src="'+esc(profileImage)+'" alt="'+esc(d.name||"Firma")+' profil görseli">'
+          ? '<img src="'+esc(profileImage)+'" alt="'+esc(d.name||"Firma")+' profil görseli" onerror="handleProfileLogoError(this,\''+esc(initials(d.name))+'\')">'
           : '<span>'+esc(initials(d.name))+'</span>';
 
         const cover=buildProfileCoverSlider(d);
