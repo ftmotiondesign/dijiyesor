@@ -30,6 +30,66 @@ function requireAdmin(request) {
 
 function s(v) { return String(v || "").trim(); }
 
+function normText(v) {
+  return s(v)
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/ş/g, "s")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normPhone(v) {
+  const digits = s(v).replace(/\D/g, "");
+  if (!digits) return "";
+  return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+function addressLooksSame(a, b) {
+  const x = normText(a);
+  const y = normText(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  const shorter = x.length <= y.length ? x : y;
+  const longer = x.length > y.length ? x : y;
+  return shorter.length >= 18 && longer.includes(shorter);
+}
+
+function duplicateReason(candidate, row) {
+  const candidatePlaceId = s(candidate.googlePlaceId || candidate.placeId);
+  const rowPlaceId = s(row.googlePlaceId || row.placeId);
+  if (candidatePlaceId && rowPlaceId && candidatePlaceId === rowPlaceId) return "google_place_id";
+
+  const candidateName = normText(candidate.name);
+  const rowName = normText(row.name);
+  const sameName = candidateName && rowName && candidateName === rowName;
+
+  const candidatePhone = normPhone(candidate.phone || candidate.whatsapp);
+  const rowPhone = normPhone(row.phone || row.whatsapp);
+  if (candidatePhone && rowPhone && candidatePhone === rowPhone) return "phone";
+
+  if (sameName && addressLooksSame(candidate.address, row.address)) return "name_address";
+  if (sameName && normText(candidate.city) && normText(candidate.city) === normText(row.city)) return "name_city";
+
+  return "";
+}
+
+function findDuplicate(candidate, rows) {
+  for (const row of rows) {
+    const reason = duplicateReason(candidate, row);
+    if (reason) return { row, reason };
+  }
+  return null;
+}
+
+
 async function placesTextSearch(query) {
   const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
@@ -103,25 +163,39 @@ exports.searchPlaces = onCall(
     const result = await placesTextSearch(query);
     const placeIds = (result.places || []).map(p => p.id).filter(Boolean);
 
-    let existingIds = new Set();
-    if (placeIds.length) {
-      const snap = await db.collection("institutions")
-        .where("googlePlaceId", "in", placeIds.slice(0, 30)).get();
-      existingIds = new Set(snap.docs.map(d => s(d.data()?.googlePlaceId)).filter(Boolean));
-    }
+    const [institutionSnap, draftSnap] = await Promise.all([
+      db.collection("institutions").get(),
+      db.collection("institutionDrafts").get()
+    ]);
+    const existingRows = [
+      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    ];
 
     return {
       query,
-      places: (result.places || []).map(p => ({
-        placeId: p.id || "",
-        name: p.displayName?.text || "",
-        address: p.formattedAddress || "",
-        latitude: p.location?.latitude ?? null,
-        longitude: p.location?.longitude ?? null,
-        googleMapsUrl: p.googleMapsUri || "",
-        businessStatus: p.businessStatus || "",
-        alreadyExists: existingIds.has(p.id)
-      }))
+      places: (result.places || []).map(p => {
+        const candidate = {
+          placeId: p.id || "",
+          googlePlaceId: p.id || "",
+          name: p.displayName?.text || "",
+          address: p.formattedAddress || "",
+          city,
+          district
+        };
+        const duplicate = findDuplicate(candidate, existingRows);
+        return {
+          placeId: candidate.placeId,
+          name: candidate.name,
+          address: candidate.address,
+          latitude: p.location?.latitude ?? null,
+          longitude: p.location?.longitude ?? null,
+          googleMapsUrl: p.googleMapsUri || "",
+          businessStatus: p.businessStatus || "",
+          alreadyExists: Boolean(duplicate),
+          duplicateReason: duplicate?.reason || ""
+        };
+      })
     };
   }
 );
@@ -147,16 +221,37 @@ exports.importPlaceDrafts = onCall(
     const created = [];
     const skipped = [];
 
-    for (const placeId of placeIds) {
-      const existing = await db.collection("institutions").where("googlePlaceId", "==", placeId).limit(1).get();
-      const draftExisting = await db.collection("institutionDrafts").where("googlePlaceId", "==", placeId).limit(1).get();
+    const [institutionSnap, draftSnap] = await Promise.all([
+      db.collection("institutions").get(),
+      db.collection("institutionDrafts").get()
+    ]);
+    const existingRows = [
+      ...institutionSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutions" })),
+      ...draftSnap.docs.map(d => ({ id: d.id, ...d.data(), _collection: "institutionDrafts" }))
+    ];
 
-      if (!existing.empty || !draftExisting.empty) {
-        skipped.push(placeId);
+    for (const placeId of placeIds) {
+      const p = await getPlaceDetails(placeId);
+      const candidate = {
+        googlePlaceId: p.id || placeId,
+        name: p.displayName?.text || "Firma",
+        address: p.formattedAddress || "",
+        phone: p.nationalPhoneNumber || p.internationalPhoneNumber || "",
+        city,
+        district
+      };
+
+      const duplicate = findDuplicate(candidate, existingRows);
+      if (duplicate) {
+        skipped.push({
+          placeId,
+          name: candidate.name,
+          reason: duplicate.reason,
+          existingId: duplicate.row.id || "",
+          collection: duplicate.row._collection || ""
+        });
         continue;
       }
-
-      const p = await getPlaceDetails(placeId);
 
       const draft = {
         name: p.displayName?.text || "Firma",
@@ -182,6 +277,7 @@ exports.importPlaceDrafts = onCall(
 
       const ref = await db.collection("institutionDrafts").add(draft);
       created.push({ id: ref.id, placeId, name: draft.name });
+      existingRows.push({ id: ref.id, ...draft, _collection: "institutionDrafts" });
     }
 
     return {
