@@ -524,7 +524,9 @@ $("publishSelectedDraftsBtn")?.addEventListener("click",async()=>{
     msg.className="message success";
     msg.textContent=published+" firma yayınlandı"+(skipped?" · "+skipped+" firma atlandı":"")+".";
   }catch(err){
-    msg.className="message error";msg.textContent=err?.message||"Seçilen firmalar yayınlanamadı.";
+    console.error("Seçili taslak yayınlama hatası",err);
+    msg.className="message error";
+    msg.textContent="Toplu yayınlama başarısız: "+(err?.message||err?.code||"Bilinmeyen hata");
   }finally{
     btn.textContent="Seçilenleri Yayınla";
     renderDraftFirms();
@@ -553,19 +555,28 @@ $("saveDraftFirmBtn")?.addEventListener("click",async()=>{
   }catch(err){msg.className="message error";msg.textContent=err.message||"Taslak kaydedilemedi."}
 });
 $("publishAllDraftsBtn")?.addEventListener("click",async()=>{
-  if(!draftFirms.length)return;
-  if(!confirm(draftFirms.length+" taslak firma yayınlansın mı?"))return;
+  const ids=draftFirms.map(x=>x.id);
+  if(!ids.length)return;
+  if(!confirm(ids.length+" taslak firma yayınlansın mı?"))return;
   const btn=$("publishAllDraftsBtn"),msg=$("draftFirmMessage");
   try{
     btn.disabled=true;btn.textContent="Yayınlanıyor...";
-    msg.className="message";msg.textContent="Taslaklar yayınlanıyor...";
-    const ids=draftFirms.map(x=>x.id);
-    for(let i=0;i<ids.length;i++)await publishDraftFirm(ids[i]);
+    msg.className="message";msg.textContent=ids.length+" firma toplu yayınlanıyor...";
+    const res=await firebase.app().functions("europe-west1").httpsCallable("publishDraftFirmsBatch")({ids});
+    const published=Number(res.data?.publishedCount||0),skipped=Number(res.data?.skippedCount||0);
+    selectedDraftFirmIds.clear();
     await Promise.all([loadDraftFirms(),loadFirms()]);
     renderAll();
-    msg.className="message success";msg.textContent=ids.length+" firma yayınlandı.";
-  }catch(err){msg.className="message error";msg.textContent=err.message||"Toplu yayınlama sırasında hata oluştu."}
-  finally{btn.textContent="Tüm Taslakları Yayınla";renderDraftFirms()}
+    msg.className="message success";
+    msg.textContent=published+" firma yayınlandı"+(skipped?" · "+skipped+" mükerrer/uygunsuz kayıt atlandı":"")+".";
+  }catch(err){
+    console.error("Toplu yayın hatası",err);
+    msg.className="message error";
+    msg.textContent="Toplu yayınlama başarısız: "+(err?.message||err?.code||"Bilinmeyen hata");
+  }finally{
+    btn.textContent="Tüm Taslakları Yayınla";
+    renderDraftFirms();
+  }
 });
 document.addEventListener("change",e=>{
   const box=e.target.closest("[data-select-draft-firm]");
