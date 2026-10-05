@@ -212,10 +212,12 @@ function resolveSearchLocation(d){
   return {city,district};
 }
 let companies=[];
-const RESULT_PAGE_SIZE=50;
+const RESULT_PAGE_SIZE=24;
 let visibleResultCount=RESULT_PAGE_SIZE;
 let lastRenderedResults=[];
 let resultLoadObserver=null;
+let companiesLoaded=false;
+let companiesLoadingPromise=null;
 
 async function loadProvinces(select,district){
   select.innerHTML='<option value="">İller yükleniyor...</option>';
@@ -272,7 +274,21 @@ latitude:d.latitude||d.lat||"",
 longitude:d.longitude||d.lng||d.lon||""
 })});
     companies.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
-  }catch(e){console.error(e);sum.textContent="Firmalar yüklenemedi";grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>'}
+    companiesLoaded=true;
+  }catch(e){
+    companiesLoaded=false;
+    console.error(e);
+    if(sum)sum.textContent="Firmalar yüklenemedi";
+    if(grid)grid.innerHTML='<div class="state"><strong>Firma kayıtlarına ulaşılamadı.</strong>Sayfayı yenileyip tekrar deneyin.</div>';
+    throw e;
+  }
+}
+async function ensureCompaniesLoaded(){
+  if(companiesLoaded)return;
+  if(!companiesLoadingPromise){
+    companiesLoadingPromise=loadCompanies().finally(()=>{companiesLoadingPromise=null});
+  }
+  await companiesLoadingPromise;
 }
 function campaignIsActive(i){
   if(!i?.campaignActive || !String(i.campaignTitle||"").trim())return false;
@@ -411,7 +427,7 @@ function resultCardVisual(i){
   const fb=resultCardFallback(i);
 
   if(images.length){
-    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy" onerror="handleResultImageError(this)">').join("");
+    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy" decoding="async" fetchpriority="low" onerror="handleResultImageError(this)">').join("");
     return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'" data-fallback-icon="'+esc(fb.icon)+'" data-fallback-label="'+esc(fb.label)+'" data-fallback-tone="'+esc(fb.tone)+'" data-has360="'+(i.has360Tour?'1':'0')+'" data-sponsored="'+(i.sponsored?'1':'0')+'">'+
       slides+
       (images.length>1?'<button type="button" class="result-slide-nav prev" data-result-slide-prev aria-label="Önceki görsel">‹</button><button type="button" class="result-slide-nav next" data-result-slide-next aria-label="Sonraki görsel">›</button><span class="result-slide-count">1 / '+images.length+'</span>':'')+
@@ -584,7 +600,7 @@ function render(data,{keepLimit=false}={}){
 
   const normalCards=visibleData.map(i=>{
     const logo=i.logoUrl
-      ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu" onerror="handleResultLogoError(this,\''+esc(initials(i.name))+'\')">'
+      ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu" loading="lazy" decoding="async" onerror="handleResultLogoError(this,\''+esc(initials(i.name))+'\')">'
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
     const storedDesc=String(i.description||"").trim();
@@ -1004,11 +1020,12 @@ async function initHome(){
     only360Btn.classList.toggle("active",only360Active);
     only360Btn.setAttribute("aria-pressed",String(only360Active));
   };
-  const filter=()=>{
+  const filter=async()=>{
     renderActiveFilters();
     const q=norm(search.value),c=norm(city.value),d=norm(district.value),s=sector.value,sc=subCategory?.value||"";
     if(!q&&!c&&!d&&!s&&!sc&&!feature360&&!only360Active){showInitialState();return}
     setSearchCompactMode(true);
+    await ensureCompaniesLoaded();
     document.getElementById("resultsHead")?.classList.remove("hidden");
 
     const intent=analyzeSearchIntent(search.value);
@@ -1176,10 +1193,9 @@ async function initHome(){
   });
   
   chips.forEach(x=>x.addEventListener("click",()=>{chips.forEach(y=>y.classList.remove("active"));x.classList.add("active");sector.value=x.dataset.sector;filter()}));
-  await loadCompanies();
   const hasInitial=params.get("q")||params.get("city")||params.get("district")||params.get("sector")||params.get("subCategory")||feature360;
   if(hasInitial){
-    filter();
+    await filter();
     requestAnimationFrame(()=>setTimeout(scrollToResultsTop,120));
   }else showInitialState();
 }
