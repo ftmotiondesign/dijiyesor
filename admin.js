@@ -2277,41 +2277,35 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   async function loadCities(){
-    city.disabled=true;
-    city.innerHTML='<option value="">İller yükleniyor...</option>';
+    // İl listesini dış API'ye bağlı bırakma: 81 ilin tamamını anında göster.
+    provinceList=CITY_BANNER_PROVINCES.map(name=>({name,id:""}));
+    city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller (81)</option>';
+    provinceList.forEach(x=>{
+      const o=document.createElement("option");
+      o.value=x.name;
+      o.textContent=x.name;
+      city.appendChild(o);
+    });
+    city.disabled=false;
+    updatePreview();
+
+    // İlçe sorguları için il ID'lerini arka planda tamamla.
     try{
       const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=100");
-      if(!r.ok)throw new Error("İller alınamadı");
+      if(!r.ok)throw new Error("İl kimlikleri alınamadı");
       const j=await r.json();
       const apiList=Array.isArray(j.data)?j.data:[];
       const apiByName=new Map(apiList.map(x=>[String(x.name||"").trim(),x]));
-      const list=CITY_BANNER_PROVINCES.map(name=>{
-        const apiRow=apiByName.get(name)||{};
-        return {name,id:apiRow.id||""};
-      }).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
-      provinceList=list;
-      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller (81)</option>';
-      list.forEach(x=>{
-        const o=document.createElement("option");
-        o.value=x.name;o.textContent=x.name;
-        if(x.id)o.dataset.id=x.id;
-        city.appendChild(o);
+      provinceList=provinceList.map(x=>({...x,id:apiByName.get(x.name)?.id||""}));
+      [...city.options].forEach(o=>{
+        if(!o.value||o.value==="__ALL__")return;
+        const row=provinceList.find(x=>x.name===o.value);
+        if(row?.id)o.dataset.id=row.id;
       });
-      city.disabled=false;
     }catch(err){
-      console.error("İl API listesi yüklenemedi, sabit 81 il listesi kullanılacak",err);
-      provinceList=CITY_BANNER_PROVINCES.map(name=>({name,id:""}));
-      city.innerHTML='<option value="">İl seç</option><option value="__ALL__">Tüm İller (81)</option>';
-      provinceList.forEach(x=>{
-        const o=document.createElement("option");
-        o.value=x.name;o.textContent=x.name;city.appendChild(o);
-      });
-      city.disabled=false;
-      showMessage("81 il sabit listeden yüklendi. İlçe listesi için bağlantı gerekebilir.","success");
+      console.warn("İl ID'leri alınamadı; 81 il listesi yine kullanılabilir.",err);
     }
-    updatePreview();
   }
-
   async function loadDistricts(){
     district.disabled=true;
     district.innerHTML='<option value="">İlçe yükleniyor...</option>';
@@ -2364,13 +2358,24 @@ document.addEventListener("DOMContentLoaded",()=>{
     try{
       let collected=[];
       if(city.value==="__ALL__"){
-        // Tüm Türkiye: 81 ili sırayla il bazında tara.
-        const cities=provinceList.map(x=>x.name).filter(Boolean);
-        if(!cities.length)throw new Error("İl listesi henüz hazır değil.");
+        // Tüm Türkiye: sabit 81 il listesini eksiksiz tara.
+        const cities=[...CITY_BANNER_PROVINCES];
+        let failedCities=0;
+        let citiesWithResults=0;
         for(let i=0;i<cities.length;i++){
-          searchBtn.textContent=(i+1)+"/"+cities.length+" il taranıyor...";
-          const found=await searchSingleDistrict("",cities[i]);
-          collected.push(...found.map(x=>({...x,_sourceCity:cities[i],_sourceDistrict:""})));
+          const cityName=cities[i];
+          searchBtn.textContent=(i+1)+"/81 il taranıyor · "+cityName;
+          try{
+            const found=await searchSingleDistrict("",cityName);
+            if(found.length)citiesWithResults++;
+            collected.push(...found.map(x=>({...x,_sourceCity:cityName,_sourceDistrict:""})));
+          }catch(cityErr){
+            failedCities++;
+            console.warn("İl taraması atlandı:",cityName,cityErr);
+          }
+        }
+        if(failedCities){
+          showMessage("81 il tarandı · "+citiesWithResults+" ilde sonuç bulundu · "+failedCities+" il geçici hata nedeniyle atlandı.","error");
         }
       }else if(allDistricts?.checked){
         const districtNames=[...district.options].map(o=>o.value).filter(Boolean);
@@ -2392,7 +2397,12 @@ document.addEventListener("DOMContentLoaded",()=>{
       collected.forEach(x=>{if(x.placeId&&!dedup.has(x.placeId))dedup.set(x.placeId,x)});
       rows=[...dedup.values()];
       renderRows();
-      showMessage(rows.length+" firma bulundu. Yeni firmaları seçip taslağa aktarabilirsin.","success");
+      if(city.value==="__ALL__"){
+        const resultCityCount=new Set(rows.map(x=>x._sourceCity).filter(Boolean)).size;
+        showMessage("81 il tarandı · "+resultCityCount+" ilde sonuç var · toplam "+rows.length+" firma bulundu.","success");
+      }else{
+        showMessage(rows.length+" firma bulundu. Yeni firmaları seçip taslağa aktarabilirsin.","success");
+      }
     }catch(err){
       console.error(err);
       rows=[];
