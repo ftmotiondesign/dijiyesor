@@ -67,6 +67,7 @@ function setView(name,opts={}){
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
   if(name==="city-banners")initCityBannerAdmin();
+  if(name==="draft-firms")loadDraftFirms().then(renderDraftFirms).catch(console.error);
 }
 document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-view]");if(nav)setView(nav.dataset.view);
@@ -2312,6 +2313,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       selected.clear();
       rows=rows.map(r=>placeIds.includes(r.placeId)?{...r,alreadyExists:true}:r);
       renderRows();
+      await loadDraftFirms();
+      renderDraftFirms();
     }catch(err){
       console.error(err);
       showMessage(err?.message||"Taslağa aktarma sırasında hata oluştu.","error");
