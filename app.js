@@ -1206,6 +1206,13 @@ async function initHome(){
       const hSmart=smartSearchText(h);
       const nameSmart=smartSearchText(i.name);
       const keywordMatch=intent.targets.length>0&&intent.targets.some(t=>i.subCategory===t||i.category===t);
+
+      // Alt kategorileri kesin ayır:
+      // "Sürücü Kursu" aramasında SRC/Psikoteknik kayıtları görünmesin.
+      const wantsSurucu=intent.targets.includes("surucu");
+      const wantsPsikoteknik=intent.targets.includes("psikoteknik");
+      const wantsSrc=intent.targets.includes("src");
+      if(wantsSurucu && !wantsPsikoteknik && !wantsSrc && (i.subCategory==="psikoteknik"||i.subCategory==="src"))return;
       // İl seçildiyse yalnızca o ile kayıtlı firmalar gösterilir.
       // İlçe seçildiyse yalnızca o ilçedeki firmalar gösterilir.
       // İlçe boşsa seçilen ilin tüm ilçeleri gösterilir.
