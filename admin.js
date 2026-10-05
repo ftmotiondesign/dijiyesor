@@ -471,9 +471,10 @@ function renderDraftFirms(){
   if($("publishSelectedDraftsBtn"))$("publishSelectedDraftsBtn").disabled=selectedDraftFirmIds.size===0;
   list.innerHTML=draftFirms.length?draftFirms.map(f=>{
     const map=f.mapUrl?'<a href="'+esc(f.mapUrl)+'" target="_blank" rel="noopener">Harita ↗</a>':"";
+    const photo=f.profileImageUrl?'<img class="draft-firm-photo" src="'+esc(f.profileImageUrl)+'" alt="'+esc(f.name||"Firma")+'">':'<span class="draft-firm-photo empty">📷</span>';
     return '<article class="draft-firm-row'+(selectedDraftFirmIds.has(f.id)?" selected":"")+'">'+
       '<label class="draft-firm-check"><input type="checkbox" data-select-draft-firm="'+esc(f.id)+'" '+(selectedDraftFirmIds.has(f.id)?"checked":"")+'></label>'+
-      '<div class="draft-firm-main"><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small><p>'+esc(f.address||"Adres yok")+'</p></div>'+
+      '<div class="draft-firm-main">'+photo+'<div><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small><p>'+esc(f.address||"Adres yok")+'</p></div></div>'+
       '<div class="draft-firm-contact"><b>'+esc(f.phone||"Telefon yok")+'</b><small>'+esc(f.website||"Web sitesi yok")+'</small>'+map+'</div>'+
       '<div class="draft-firm-actions"><button type="button" data-edit-draft-firm="'+esc(f.id)+'">Düzenle</button><button type="button" class="primary" data-publish-draft-firm="'+esc(f.id)+'">Yayınla</button><button type="button" class="danger" data-delete-draft-firm="'+esc(f.id)+'">Sil</button></div>'+
     '</article>';
@@ -2237,9 +2238,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       const map=r.googleMapsUrl
         ? '<a class="auto-place-map" href="'+esc(r.googleMapsUrl)+'" target="_blank" rel="noopener">Harita ↗</a>'
         : "";
+      const photo=r.profileImageUrl?'<img class="auto-place-photo" src="'+esc(r.profileImageUrl)+'" alt="">':'<span class="auto-place-photo empty">📷</span>';
       return '<article class="auto-place-row'+(r.alreadyExists?' duplicate':'')+'">'+
         '<label class="auto-place-check"><input type="checkbox" data-auto-place="'+esc(r.placeId)+'"'+checked+disabled+'></label>'+
-        '<div class="auto-place-name"><strong>'+esc(r.name||"Firma")+'</strong><small>'+esc(r.address||"Adres bilgisi yok")+'</small></div>'+
+        '<div class="auto-place-name">'+photo+'<div><strong>'+esc(r.name||"Firma")+'</strong><small>'+esc(r.address||"Adres bilgisi yok")+'</small></div></div>'+
         '<div class="auto-place-location"><span>'+esc(city.value)+'</span><small>'+esc(district.value||"Tüm İlçeler")+'</small></div>'+
         '<div class="auto-place-contact">'+map+'</div>'+
         '<div>'+status+'</div>'+
