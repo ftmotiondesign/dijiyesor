@@ -71,7 +71,25 @@
     .result-desc{
       margin-top:14px!important;
     }
+    /* Kaydırma sonrası eğitim alt kategori önerisi */
+    .education-suggest-modal{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px}
+    .education-suggest-modal.hidden{display:none}
+    .education-suggest-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(3px)}
+    .education-suggest-card{position:relative;width:min(520px,100%);background:#fff;border-radius:24px;padding:24px;box-shadow:0 24px 80px rgba(15,23,42,.28)}
+    .education-suggest-close{position:absolute;right:14px;top:12px;width:36px;height:36px;border:0;border-radius:50%;background:#f1f5f9;font-size:24px;line-height:1;cursor:pointer}
+    .education-suggest-kicker{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.08em;color:#0f766e;margin-bottom:8px}
+    .education-suggest-card h2{margin:0 42px 8px 0;font-size:23px;line-height:1.2;color:#0f172a}
+    .education-suggest-card p{margin:0 0 18px;color:#64748b;line-height:1.5}
+    .education-suggest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .education-suggest-btn{border:1px solid #e2e8f0;background:#f8fafc;border-radius:15px;padding:14px 12px;text-align:left;font-weight:800;color:#0f172a;cursor:pointer;transition:.18s ease}
+    .education-suggest-btn:hover{border-color:#14b8a6;background:#f0fdfa;transform:translateY(-1px)}
+    .education-suggest-btn.all{grid-column:1/-1;text-align:center;background:#0f172a;color:#fff;border-color:#0f172a}
     @media (max-width:680px){
+      .education-suggest-modal{align-items:flex-end;padding:0}
+      .education-suggest-card{width:100%;border-radius:24px 24px 0 0;padding:22px 18px 20px}
+      .education-suggest-card h2{font-size:20px}
+      .education-suggest-grid{grid-template-columns:1fr 1fr}
+      .education-suggest-btn{padding:13px 10px;font-size:13px}
       .result-card-top{
         grid-template-columns:46px minmax(0,1fr) 112px!important;
         gap:10px!important;
@@ -229,6 +247,23 @@
     </div>
   </div>
 
+  <div id="educationSuggestModal" class="education-suggest-modal hidden" role="dialog" aria-modal="true" aria-labelledby="educationSuggestTitle">
+    <div class="education-suggest-backdrop" data-close-education-suggest></div>
+    <div class="education-suggest-card">
+      <button type="button" class="education-suggest-close" data-close-education-suggest aria-label="Kapat">×</button>
+      <span class="education-suggest-kicker">SONUÇLARI DARALT</span>
+      <h2 id="educationSuggestTitle">Hangi eğitim kurumunu arıyorsunuz?</h2>
+      <p>Eğitim kategorisindeki sonuçları daha hızlı bulmak için bir alan seçebilirsiniz.</p>
+      <div class="education-suggest-grid">
+        <button type="button" class="education-suggest-btn" data-education-sub="surucu">🚗 Sürücü Kursu</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="dershane">📚 Dershane / Kurs</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="kres">🧸 Kreş / Anaokulu</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="yurt">🏠 Öğrenci Yurdu</button>
+        <button type="button" class="education-suggest-btn all" data-education-sub="">Tüm Eğitim Kurumlarını Gör</button>
+      </div>
+    </div>
+  </div>
+
   <div id="searchSponsorPopup" class="search-sponsor-popup hidden" role="dialog" aria-modal="true" aria-labelledby="searchSponsorTitle">
     <div class="search-sponsor-backdrop" data-close-search-sponsor></div>
     <div class="search-sponsor-card">
@@ -275,7 +310,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=20261006-67-smart-category"></script>
+  <script src="app.js?v=20261006-68-education-suggest"></script>
   <script src="bilgi-modal.js"></script>
 </body>
 </html>
