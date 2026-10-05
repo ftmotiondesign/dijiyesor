@@ -430,6 +430,85 @@ exports.importPlaceDrafts = onCall(
   }
 );
 
+exports.backfillFirmPhotos = onCall(
+  {
+    region: "europe-west1",
+    secrets: [GOOGLE_PLACES_API_KEY],
+    timeoutSeconds: 300,
+    memory: "512MiB"
+  },
+  async (request) => {
+    requireAdmin(request);
+
+    const includeDrafts = request.data?.includeDrafts !== false;
+    const collections = includeDrafts
+      ? ["institutions", "institutionDrafts"]
+      : ["institutions"];
+
+    let scanned = 0;
+    let updated = 0;
+    let skipped = 0;
+    let noPhoto = 0;
+    let noPlaceId = 0;
+    const errors = [];
+
+    for (const collectionName of collections) {
+      const snap = await db.collection(collectionName).get();
+
+      for (const doc of snap.docs) {
+        scanned++;
+        const data = doc.data() || {};
+
+        if (s(data.profileImageUrl || data.cardImageUrl)) {
+          skipped++;
+          continue;
+        }
+
+        const placeId = s(data.googlePlaceId || data.placeId);
+        if (!placeId) {
+          noPlaceId++;
+          continue;
+        }
+
+        try {
+          const place = await getPlaceDetails(placeId);
+          const photoName = s(place.photos?.[0]?.name);
+
+          if (!photoName) {
+            noPhoto++;
+            continue;
+          }
+
+          const imageUrl = googlePhotoProxyUrl(photoName);
+          await doc.ref.set({
+            googlePhotoName: photoName,
+            profileImageUrl: imageUrl,
+            cardImageUrl: imageUrl,
+            galleryUrls: Array.isArray(data.galleryUrls) && data.galleryUrls.length
+              ? data.galleryUrls
+              : [imageUrl],
+            updatedAt: FieldValue.serverTimestamp()
+          }, { merge: true });
+
+          updated++;
+        } catch (err) {
+          console.error("Backfill photo error", collectionName, doc.id, err);
+          errors.push({ collection: collectionName, id: doc.id });
+        }
+      }
+    }
+
+    return {
+      scanned,
+      updated,
+      skipped,
+      noPhoto,
+      noPlaceId,
+      errorCount: errors.length
+    };
+  }
+);
+
 exports.listDraftFirms = onCall(
   {
     region: "europe-west1",
