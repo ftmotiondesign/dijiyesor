@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DijiyeSor Yönetim Paneli</title>
-  <link rel="stylesheet" href="admin.css?v=20261004-50">
+  <link rel="stylesheet" href="admin.css?v=20261005-drafts-1">
 </head>
 <body>
 <div id="loginView" class="login-shell">
@@ -37,6 +37,7 @@
       <button class="nav-item active" data-view="overview">Genel Bakış</button>
       <button class="nav-item" data-view="firms">Firmalar <b id="navFirmCount">0</b></button>
       <button class="nav-item" data-view="auto-firm-import">Otomatik Firma Topla</button>
+      <button class="nav-item" data-view="draft-firms">Taslak Firmalar <b id="navDraftFirmCount">0</b></button>
       <button class="nav-item" data-view="google-import">Hızlı Firma Ekle</button>
       <button class="nav-item" data-view="campaigns">Kampanyalar & Reklamlar <b id="navCampaignCount">0</b></button>
       <button class="nav-item" data-view="keywords">Anahtar Kelimeler</button>
@@ -216,6 +217,28 @@
         <div><strong>2</strong><span>Place ID ile aynı firma tekrar eklenmez.</span></div>
         <div><strong>3</strong><span>Yeni firmalar önce taslakta kontrol edilir.</span></div>
         <div><strong>4</strong><span>Onayladıkların normal firma listesine aktarılır.</span></div>
+      </section>
+    </section>
+
+    <section class="view" data-panel-view="draft-firms">
+      <section class="card draft-firms-card">
+        <div class="card-head">
+          <div><span>TASLAK FİRMALAR</span><h2>Google Places’tan aktarılan firmaları kontrol et.</h2></div>
+          <button id="refreshDraftFirmsBtn" type="button" class="secondary">Yenile</button>
+        </div>
+        <div class="draft-firm-toolbar">
+          <div>
+            <strong id="draftFirmCountText">0 taslak</strong>
+            <small>Yayınladığın firma normal “Firmalar” listesine geçer.</small>
+          </div>
+          <div class="draft-firm-toolbar-actions">
+            <button id="publishAllDraftsBtn" type="button" class="primary">Tüm Taslakları Yayınla</button>
+          </div>
+        </div>
+        <div id="draftFirmMessage" class="message hidden"></div>
+        <div id="draftFirmList" class="draft-firm-list">
+          <div class="empty">Taslak firmalar yükleniyor...</div>
+        </div>
       </section>
     </section>
 
@@ -1157,11 +1180,34 @@ Gerçek mekanda hizmet"></textarea>
   </div>
 </div>
 
+<div id="draftFirmModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div><span>TASLAK DÜZENLE</span><h2 id="draftFirmModalTitle">Firma Taslağı</h2></div>
+      <button type="button" data-close="draftFirmModal">×</button>
+    </div>
+    <input id="draftFirmId" type="hidden">
+    <div class="form-grid two">
+      <label>Firma adı<input id="draftFirmName"></label>
+      <label>Telefon<input id="draftFirmPhone"></label>
+      <label>İl<input id="draftFirmCity"></label>
+      <label>İlçe<input id="draftFirmDistrict"></label>
+      <label class="full">Adres<input id="draftFirmAddress"></label>
+      <label class="full">Web sitesi<input id="draftFirmWebsite"></label>
+    </div>
+    <div id="draftFirmModalMessage" class="message hidden"></div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" data-close="draftFirmModal">Vazgeç</button>
+      <button id="saveDraftFirmBtn" type="button" class="primary">Taslağı Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261005-places-3"></script>
+<script src="admin.js?v=20261005-drafts-1"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
