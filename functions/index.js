@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
@@ -103,7 +103,7 @@ async function placesTextSearch(query) {
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value(),
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus"
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus,places.photos"
     },
     body: JSON.stringify({
       textQuery: query,
@@ -138,7 +138,8 @@ async function getPlaceDetails(placeId) {
     "websiteUri",
     "googleMapsUri",
     "businessStatus",
-    "types"
+    "types",
+    "photos"
   ].join(",");
 
   const response = await fetch(
@@ -166,6 +167,61 @@ async function getPlaceDetails(placeId) {
 
   return data;
 }
+
+function googlePhotoProxyUrl(photoName) {
+  const name = s(photoName);
+  if (!name) return "";
+  return "https://europe-west1-dijiyer.cloudfunctions.net/placePhoto?name=" +
+    encodeURIComponent(name);
+}
+
+exports.placePhoto = onRequest(
+  {
+    region: "europe-west1",
+    secrets: [GOOGLE_PLACES_API_KEY],
+    timeoutSeconds: 30,
+    memory: "256MiB",
+    cors: true
+  },
+  async (request, response) => {
+    try {
+      const name = s(request.query?.name);
+      if (!/^places\/[^/]+\/photos\/[^/]+$/.test(name)) {
+        response.status(400).send("Geçersiz fotoğraf.");
+        return;
+      }
+
+      const mediaResponse = await fetch(
+        "https://places.googleapis.com/v1/" +
+          name +
+          "/media?maxWidthPx=900&maxHeightPx=900&skipHttpRedirect=true",
+        {
+          headers: {
+            "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value()
+          }
+        }
+      );
+
+      if (!mediaResponse.ok) {
+        response.status(404).send("Fotoğraf bulunamadı.");
+        return;
+      }
+
+      const data = await mediaResponse.json();
+      const photoUri = s(data.photoUri);
+      if (!/^https:\/\//i.test(photoUri)) {
+        response.status(404).send("Fotoğraf bulunamadı.");
+        return;
+      }
+
+      response.set("Cache-Control", "public, max-age=86400");
+      response.redirect(302, photoUri);
+    } catch (err) {
+      console.error("Place photo error", err);
+      response.status(500).send("Fotoğraf alınamadı.");
+    }
+  }
+);
 
 exports.searchPlaces = onCall(
   {
@@ -232,6 +288,8 @@ exports.searchPlaces = onCall(
           longitude: p.location?.longitude ?? null,
           googleMapsUrl: p.googleMapsUri || "",
           businessStatus: p.businessStatus || "",
+          googlePhotoName: p.photos?.[0]?.name || "",
+          profileImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
           alreadyExists: Boolean(duplicate),
           duplicateReason: duplicate?.reason || "",
           duplicateSource: duplicate?.row?._collection || ""
@@ -334,6 +392,10 @@ exports.importPlaceDrafts = onCall(
         googlePlaceId: p.id || placeId,
         googleTypes: Array.isArray(p.types) ? p.types : [],
         googleBusinessStatus: p.businessStatus || "",
+        googlePhotoName: p.photos?.[0]?.name || "",
+        profileImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
+        cardImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
+        galleryUrls: p.photos?.[0]?.name ? [googlePhotoProxyUrl(p.photos[0].name)] : [],
         source: "google_places",
         status: "draft",
         createdAt: FieldValue.serverTimestamp(),
@@ -381,6 +443,8 @@ exports.listDraftFirms = onCall(
           address: s(x.address),
           website: s(x.website),
           mapUrl: s(x.mapUrl),
+          profileImageUrl: s(x.profileImageUrl || x.cardImageUrl),
+          googlePhotoName: s(x.googlePhotoName),
           googlePlaceId: s(x.googlePlaceId),
           mainCategory: s(x.mainCategory),
           subCategory: s(x.subCategory),
