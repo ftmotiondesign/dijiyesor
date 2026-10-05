@@ -117,51 +117,122 @@ const CATEGORY_MAP = {
 }
 
 const CATEGORY_SEARCH_TERMS = {
-  // Google Places'ta kurumlar aynı kategoriyi farklı isimlerle kullanabildiği için
-  // tek sorgu yerine güçlü eş anlamlı aramalar birleştirilir.
-  etut: [
-    "Etüt Merkezi",
-    "Etüt Eğitim Merkezi",
-    "Öğrenci Etüt Merkezi",
-    "Eğitim ve Etüt Merkezi",
-    "Özel Öğretim Kursu"
-  ],
-  dil_kursu: [
-    "Dil Kursu",
-    "İngilizce Kursu",
-    "Yabancı Dil Kursu",
-    "Language School",
-    "İngilizce Dil Okulu"
-  ],
-  dershane: [
-    "Dershane",
-    "Kurs Merkezi",
-    "Özel Öğretim Kursu",
-    "LGS Kursu",
-    "YKS Kursu"
-  ],
-  kres: [
-    "Kreş",
-    "Anaokulu",
-    "Gündüz Bakımevi",
-    "Çocuk Gündüz Bakımevi"
-  ],
-  ozel_ders: [
-    "Özel Ders Merkezi",
-    "Özel Ders",
-    "Eğitim Koçluğu",
-    "Birebir Eğitim Merkezi"
-  ],
-  psikoteknik: [
-    "Psikoteknik Merkezi",
-    "Psikoteknik Değerlendirme Merkezi",
-    "Psikoteknik Belgesi"
-  ],
-  surucu: [
-    "Sürücü Kursu",
-    "Motorlu Taşıt Sürücü Kursu",
-    "Ehliyet Kursu"
-  ]
+  // EĞİTİM
+  kres:["Kreş","Anaokulu","Gündüz Bakımevi","Çocuk Gündüz Bakımevi"],
+  dershane:["Dershane","Özel Öğretim Kursu","Kurs Merkezi","LGS YKS Kursu"],
+  surucu:["Sürücü Kursu","Motorlu Taşıt Sürücü Kursu","Ehliyet Kursu"],
+  src:["SRC Kursu","SRC Belgesi Kursu","Mesleki Yeterlilik SRC"],
+  psikoteknik:["Psikoteknik Merkezi","Psikoteknik Değerlendirme Merkezi","Psikoteknik Belgesi"],
+  halk_egitim:["Halk Eğitim Merkezi","Halk Eğitimi Merkezi","Halk Eğitim Kursları"],
+  kamu_egitim:["Kamu Eğitim Kurumu","Milli Eğitim Merkezi","Resmi Eğitim Kurumu"],
+  mesleki_egitim:["Mesleki Eğitim Merkezi","Meslek Eğitim Merkezi","Çıraklık Eğitim Merkezi"],
+  e_sinav:["E-Sınav Merkezi","Elektronik Sınav Merkezi","MEB E-Sınav Merkezi"],
+  ozel_ders:["Özel Ders Merkezi","Özel Ders","Birebir Eğitim Merkezi","Eğitim Koçluğu"],
+  dil_kursu:["Dil Kursu","İngilizce Kursu","Yabancı Dil Kursu","Language School","İngilizce Dil Okulu"],
+  etut:["Etüt Merkezi","Etüt Eğitim Merkezi","Öğrenci Etüt Merkezi","Eğitim ve Etüt Merkezi","Özel Öğretim Kursu"],
+  ozel_okul:["Özel Okul","Özel Kolej","Kolej","Özel Eğitim Kurumu"],
+  yurt:["Öğrenci Yurdu","Özel Öğrenci Yurdu","Kız Öğrenci Yurdu","Erkek Öğrenci Yurdu"],
+  diger_egitim:["Eğitim Kurumu","Eğitim Merkezi","Kurs Merkezi"],
+
+  // OTOMOTİV
+  oto_servis:["Oto Servis","Oto Tamir","Araç Bakım Servisi","Özel Oto Servis"],
+  kaporta_boya:["Kaporta Boya","Oto Kaporta","Oto Boya","Göçük Düzeltme"],
+  oto_elektrik:["Oto Elektrik","Oto Elektrikçi","Araç Elektrik Servisi"],
+  lastik_jant:["Lastikçi","Lastik Jant","Oto Lastik","Jant Lastik"],
+  oto_yikama:["Oto Yıkama","Araç Yıkama","Oto Kuaför","Detaylı Araç Temizliği"],
+  ekspertiz:["Oto Ekspertiz","Araç Ekspertiz","Oto Test Merkezi"],
+  galeri:["Oto Galeri","Otomobil Galerisi","İkinci El Araç Satış"],
+  rentacar:["Rent a Car","Araç Kiralama","Oto Kiralama"],
+  yedek_parca:["Oto Yedek Parça","Otomotiv Yedek Parça","Araç Yedek Parça"],
+  motosiklet:["Motosiklet Bayi","Motosiklet Servisi","Motor Bayi","Motor Servisi"],
+
+  // YEME & İÇME
+  restoran:["Restoran","Lokanta","Restaurant"],
+  kafe:["Kafe","Cafe","Kahve Evi"],
+  fastfood:["Fast Food","Hamburger Restoranı","Burger"],
+  pastane:["Pastane","Patisserie","Tatlı Pastanesi"],
+  pizza:["Pizza","Pizzacı","Pizza Restoranı"],
+  doner:["Dönerci","Döner Restoranı","Döner Kebap"],
+  pide_lahmacun:["Pideci","Lahmacun","Pide Lahmacun Restoranı"],
+  catering:["Catering","Toplu Yemek","Yemek Organizasyonu"],
+  ev_yemekleri:["Ev Yemekleri","Ev Yemekleri Lokantası","Sulu Yemek Lokantası"],
+
+  // SAĞLIK & GÜZELLİK
+  dis_klinigi:["Diş Kliniği","Diş Hekimi","Ağız ve Diş Sağlığı Kliniği"],
+  klinik:["Özel Klinik","Tıp Merkezi","Sağlık Kliniği"],
+  psikolog:["Psikolog","Psikolojik Danışmanlık","Terapi Merkezi"],
+  diyetisyen:["Diyetisyen","Beslenme Danışmanlığı","Diyet Merkezi"],
+  fizyoterapi:["Fizyoterapi Merkezi","Fizik Tedavi Merkezi","Fizyoterapist"],
+  guzellik:["Güzellik Merkezi","Cilt Bakım Merkezi","Beauty Center"],
+  kuafor:["Kuaför","Bayan Kuaförü","Saç Tasarım"],
+  berber:["Berber","Erkek Kuaförü","Barber"],
+  spor:["Spor Salonu","Fitness Salonu","Gym","Pilates Stüdyosu"],
+
+  // EV & YAPI
+  mobilya:["Mobilya Mağazası","Mobilyacı","Ev Mobilyası"],
+  dekorasyon:["Dekorasyon","İç Dekorasyon","İç Mimarlık Dekorasyon"],
+  insaat:["İnşaat Firması","Müteahhit","Yapı İnşaat"],
+  elektrikci:["Elektrikçi","Elektrik Ustası","Elektrik Servisi"],
+  tesisatci:["Tesisatçı","Su Tesisatçısı","Sıhhi Tesisat"],
+  teknik_servis:["Teknik Servis","Beyaz Eşya Servisi","Elektronik Teknik Servis"],
+  klima:["Klima Servisi","Klima Bakım","Klima Montaj"],
+  cam_balkon:["Cam Balkon","Balkon Camlama","Cam Balkon Sistemleri"],
+  temizlik:["Temizlik Şirketi","Temizlik Firması","Ev Temizliği"],
+
+  // EMLAK
+  emlak_ofisi:["Emlak Ofisi","Emlakçı","Gayrimenkul Danışmanlığı"],
+  konut:["Konut Emlak","Satılık Daire","Kiralık Daire"],
+  arsa:["Arsa Emlak","Satılık Arsa","Arsa Gayrimenkul"],
+  ticari:["Ticari Gayrimenkul","İşyeri Emlak","Dükkan Emlak"],
+  gunluk_kiralik:["Günlük Kiralık","Günlük Kiralık Daire","Apart Günlük Kiralık"],
+
+  // TURİZM & KONAKLAMA
+  otel:["Otel","Hotel","Konaklama Tesisi"],
+  pansiyon:["Pansiyon","Guest House","Konukevi"],
+  apart:["Apart Otel","Apart Hotel","Apart Konaklama"],
+  bungalov:["Bungalov","Bungalow","Bungalov Ev"],
+  seyahat:["Seyahat Acentesi","Turizm Acentesi","Tur Operatörü"],
+  kamp:["Kamp Alanı","Camping","Karavan Kamp Alanı"],
+
+  // ORGANİZASYON & MEDYA
+  dugun_salonu:["Düğün Salonu","Davet Salonu","Balo Salonu"],
+  organizasyon:["Organizasyon Firması","Etkinlik Organizasyon","Düğün Organizasyon"],
+  fotograf:["Fotoğrafçı","Fotoğraf Stüdyosu","Profesyonel Fotoğrafçı"],
+  video:["Video Prodüksiyon","Video Çekimi","Prodüksiyon Şirketi"],
+  drone:["Drone Çekimi","Havadan Çekim","Drone Fotoğraf Video"],
+  gelinlik:["Gelinlik Mağazası","Gelinlikçi","Bridal Shop"],
+  cicekci:["Çiçekçi","Çiçekçilik","Flower Shop"],
+  reklam:["Reklam Ajansı","Dijital Reklam Ajansı","Grafik Tasarım Ajansı"],
+
+  // TAŞIMACILIK & TESLİMAT
+  nakliyat:["Nakliyat","Evden Eve Nakliyat","Taşımacılık Firması"],
+  kurye:["Kurye","Moto Kurye","Kurye Hizmeti"],
+  sehirici:["Şehir İçi Taşımacılık","Şehir İçi Nakliye","Yük Taşıma"],
+  depolama:["Depolama","Eşya Depolama","Depo Kiralama"],
+
+  // PROFESYONEL HİZMETLER
+  hukuk:["Avukat","Hukuk Bürosu","Avukatlık Bürosu"],
+  muhasebe:["Muhasebe","Mali Müşavir","Serbest Muhasebeci Mali Müşavir"],
+  web:["Web Tasarım","Web Tasarım Ajansı","Web Yazılım"],
+  sosyal_medya:["Sosyal Medya Ajansı","Sosyal Medya Yönetimi","Dijital Pazarlama Ajansı"],
+  teknoloji:["Teknoloji Firması","Yazılım Şirketi","Bilişim Firması"],
+  bilgisayar:["Bilgisayar Servisi","Bilgisayar Tamiri","Bilgisayar Mağazası"],
+  danismanlik:["Danışmanlık","Danışmanlık Firması","Kurumsal Danışmanlık"],
+  veteriner:["Veteriner","Veteriner Kliniği","Hayvan Hastanesi"],
+  tarim:["Tarım Firması","Zirai Ürünler","Tarım Ürünleri"],
+
+  // ALIŞVERİŞ & YEREL ESNAF
+  giyim:["Giyim Mağazası","Butik","Hazır Giyim"],
+  ayakkabi:["Ayakkabı Mağazası","Ayakkabıcı","Shoe Store"],
+  market:["Market","Süpermarket","Bakkal"],
+  elektronik:["Elektronik Mağazası","Elektronikçi","Teknoloji Mağazası"],
+  kirtasiye:["Kırtasiye","Kırtasiye Mağazası","Ofis Kırtasiye"],
+  petshop:["Pet Shop","Evcil Hayvan Mağazası","Pet Market"],
+  zuccaciye:["Züccaciye","Ev Gereçleri Mağazası","Mutfak Gereçleri"],
+  esnaf:["Yerel Esnaf","Mağaza","Yerel İşletme"],
+
+  // DİĞER
+  diger:["Yerel İşletme","Firma","Hizmet İşletmesi"]
 };
 
 async function searchPlacesForCategory({ city, district, categoryKey, category }) {
