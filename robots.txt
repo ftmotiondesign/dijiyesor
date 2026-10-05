@@ -4,4 +4,6 @@ Disallow: /admin.html
 Disallow: /firma-duzenle.html
 Disallow: /firma-ekle.html
 Disallow: /bilgi-al.html
+Disallow: /toplu-iletisim.html
+
 Sitemap: https://dijiyer.web.app/sitemap.xml
