@@ -116,6 +116,96 @@ const CATEGORY_MAP = {
   diger: { label: "Yerel İşletme", mainCategory: "diger", subCategory: "diger" }
 }
 
+const CATEGORY_SEARCH_TERMS = {
+  // Google Places'ta kurumlar aynı kategoriyi farklı isimlerle kullanabildiği için
+  // tek sorgu yerine güçlü eş anlamlı aramalar birleştirilir.
+  etut: [
+    "Etüt Merkezi",
+    "Etüt Eğitim Merkezi",
+    "Öğrenci Etüt Merkezi",
+    "Eğitim ve Etüt Merkezi",
+    "Özel Öğretim Kursu"
+  ],
+  dil_kursu: [
+    "Dil Kursu",
+    "İngilizce Kursu",
+    "Yabancı Dil Kursu",
+    "Language School",
+    "İngilizce Dil Okulu"
+  ],
+  dershane: [
+    "Dershane",
+    "Kurs Merkezi",
+    "Özel Öğretim Kursu",
+    "LGS Kursu",
+    "YKS Kursu"
+  ],
+  kres: [
+    "Kreş",
+    "Anaokulu",
+    "Gündüz Bakımevi",
+    "Çocuk Gündüz Bakımevi"
+  ],
+  ozel_ders: [
+    "Özel Ders Merkezi",
+    "Özel Ders",
+    "Eğitim Koçluğu",
+    "Birebir Eğitim Merkezi"
+  ],
+  psikoteknik: [
+    "Psikoteknik Merkezi",
+    "Psikoteknik Değerlendirme Merkezi",
+    "Psikoteknik Belgesi"
+  ],
+  surucu: [
+    "Sürücü Kursu",
+    "Motorlu Taşıt Sürücü Kursu",
+    "Ehliyet Kursu"
+  ]
+};
+
+async function searchPlacesForCategory({ city, district, categoryKey, category }) {
+  const terms = CATEGORY_SEARCH_TERMS[categoryKey] || [category.label];
+  const uniqueTerms = [...new Set(terms.map(s).filter(Boolean))];
+
+  const settled = await Promise.allSettled(
+    uniqueTerms.map((term) => {
+      const query = [district, city, term].filter(Boolean).join(" ");
+      return placesTextSearch(query).then((result) => ({
+        query,
+        places: Array.isArray(result?.places) ? result.places : []
+      }));
+    })
+  );
+
+  const placeMap = new Map();
+  const queries = [];
+  let successfulQueries = 0;
+
+  for (const item of settled) {
+    if (item.status !== "fulfilled") {
+      console.warn("Kategori alternatif sorgusu başarısız:", item.reason?.message || item.reason);
+      continue;
+    }
+    successfulQueries++;
+    queries.push(item.value.query);
+    for (const place of item.value.places) {
+      const id = s(place?.id);
+      if (id && !placeMap.has(id)) placeMap.set(id, place);
+    }
+  }
+
+  if (!successfulQueries) {
+    throw new HttpsError("internal", "Google Places kategori aramaları başarısız oldu.");
+  }
+
+  return {
+    query: queries[0] || [district, city, category.label].filter(Boolean).join(" "),
+    queries,
+    places: [...placeMap.values()]
+  };
+}
+
 function requireAdmin(request) {
   const email = String(request.auth?.token?.email || "").toLowerCase();
   if (!request.auth || email !== ADMIN_EMAIL) {
@@ -421,8 +511,13 @@ exports.searchPlaces = onCall(
       throw new HttpsError("invalid-argument", "Geçersiz kategori.");
     }
 
-    const query = [district, city, category.label].filter(Boolean).join(" ");
-    const result = await placesTextSearch(query);
+    const result = await searchPlacesForCategory({
+      city,
+      district,
+      categoryKey,
+      category
+    });
+    const query = result.query;
 
     const [institutionSnap, draftSnap] = await Promise.all([
       db.collection("institutions").get(),
@@ -444,6 +539,8 @@ exports.searchPlaces = onCall(
 
     return {
       query,
+      queries: result.queries || [query],
+      searchedTerms: (CATEGORY_SEARCH_TERMS[categoryKey] || [category.label]),
       places: (result.places || []).map((p) => {
         const candidate = {
           placeId: p.id || "",
