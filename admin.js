@@ -451,21 +451,75 @@ $("backfillFirmPhotosBtn")?.addEventListener("click",async()=>{
   const btn=$("backfillFirmPhotosBtn");
   const msg=$("autoImportMessage");
   if(!confirm("Google Place ID bulunan eski firmaların fotoğrafları getirilsin mi?"))return;
+
   try{
     btn.disabled=true;
     btn.textContent="Fotoğraflar getiriliyor...";
-    if(msg){msg.className="message";msg.textContent="Eski firmalar ve taslaklar kontrol ediliyor...";}
-    const res=await firebase.app().functions("europe-west1").httpsCallable("backfillFirmPhotos")({includeDrafts:true});
-    const d=res.data||{};
+
+    const callable=firebase.app().functions("europe-west1").httpsCallable("backfillFirmPhotos");
+    const collections=["institutions","institutionDrafts"];
+
+    let totalScanned=0;
+    let totalUpdated=0;
+    let totalSkipped=0;
+    let totalNoPhoto=0;
+    let totalNoPlaceId=0;
+    let totalErrors=0;
+
+    for(const collection of collections){
+      let afterId="";
+      let done=false;
+
+      while(!done){
+        if(msg){
+          msg.className="message";
+          msg.textContent=
+            totalScanned+" kayıt kontrol edildi · "+
+            totalUpdated+" fotoğraf eklendi · işlem devam ediyor...";
+        }
+
+        const res=await callable({
+          collection,
+          afterId,
+          limit:25
+        });
+
+        const d=res.data||{};
+        totalScanned+=Number(d.scanned||0);
+        totalUpdated+=Number(d.updated||0);
+        totalSkipped+=Number(d.skipped||0);
+        totalNoPhoto+=Number(d.noPhoto||0);
+        totalNoPlaceId+=Number(d.noPlaceId||0);
+        totalErrors+=Number(d.errorCount||0);
+
+        afterId=String(d.nextAfterId||"");
+        done=Boolean(d.done);
+
+        if(!done && !afterId){
+          throw new Error("Fotoğraf taraması devam bilgisi alınamadı.");
+        }
+      }
+    }
+
     if(msg){
       msg.className="message success";
-      msg.textContent=(d.updated||0)+" firmaya fotoğraf eklendi · "+(d.noPhoto||0)+" firmada Google fotoğrafı yok · "+(d.noPlaceId||0)+" kayıtta Google Place ID yok"+(d.errorCount?" · "+d.errorCount+" hata":"")+".";
+      msg.textContent=
+        totalUpdated+" firmaya fotoğraf eklendi · "+
+        totalScanned+" kayıt kontrol edildi · "+
+        totalNoPhoto+" firmada Google fotoğrafı yok · "+
+        totalNoPlaceId+" kayıtta Google Place ID yok"+
+        (totalErrors?" · "+totalErrors+" hata":"")+
+        ".";
     }
+
     await Promise.all([loadFirms(),loadDraftFirms()]);
     renderAll();
   }catch(err){
     console.error(err);
-    if(msg){msg.className="message error";msg.textContent=err?.message||"Fotoğraflar getirilemedi.";}
+    if(msg){
+      msg.className="message error";
+      msg.textContent=err?.message||"Fotoğraflar getirilemedi.";
+    }
   }finally{
     btn.disabled=false;
     btn.textContent="Eski Firmalara Fotoğraf Getir";
