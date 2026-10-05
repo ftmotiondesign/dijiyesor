@@ -707,6 +707,119 @@ async function updateCityHero(){
     }
   }
 }
+const compareSelectedIds=new Set();
+let compareNoticeTimer=null;
+
+function compareFirmKey(firm){
+  return String(firm?.subCategory||firm?.category||firm?.mainCategory||"").trim();
+}
+function compareFirmById(id){
+  return (lastRenderedResults||[]).find(x=>String(x.id)===String(id)) || (companies||[]).find(x=>String(x.id)===String(id));
+}
+function ensureCompareUi(){
+  if(!document.getElementById("compareDock")){
+    document.body.insertAdjacentHTML("beforeend",
+      '<div id="compareDock" class="compare-dock hidden" aria-live="polite">'+
+        '<div class="compare-dock-copy"><strong id="compareDockTitle">Karşılaştır</strong><span id="compareDockText">2 firma seçebilirsiniz.</span></div>'+
+        '<div class="compare-dock-actions"><button type="button" id="compareClearBtn" class="compare-clear-btn">Temizle</button><button type="button" id="compareOpenBtn" class="compare-open-btn" disabled>Karşılaştır</button></div>'+
+      '</div>'+
+      '<div id="compareModal" class="compare-modal hidden" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle">'+
+        '<div class="compare-modal-backdrop" data-close-compare></div>'+
+        '<div class="compare-modal-card">'+
+          '<div class="compare-modal-head"><div><small>DİJİYESOR</small><h2 id="compareModalTitle">Firma Karşılaştırma</h2></div><button type="button" class="compare-modal-close" data-close-compare aria-label="Kapat">×</button></div>'+
+          '<div id="compareModalBody" class="compare-modal-body"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div id="compareToast" class="compare-toast hidden"></div>'
+    );
+  }
+}
+function compareSelectedFirms(){
+  return [...compareSelectedIds].map(compareFirmById).filter(Boolean);
+}
+function syncCompareUi(){
+  ensureCompareUi();
+  const firms=compareSelectedFirms();
+  const dock=document.getElementById("compareDock");
+  const title=document.getElementById("compareDockTitle");
+  const textEl=document.getElementById("compareDockText");
+  const open=document.getElementById("compareOpenBtn");
+  dock?.classList.toggle("hidden",firms.length===0);
+  if(title)title.textContent=firms.length===2 ? "2 firma hazır" : "1 firma seçildi";
+  if(textEl)textEl.textContent=firms.length===2 ? firms.map(x=>x.name).join(" + ") : "Karşılaştırmak için 1 firma daha seçin.";
+  if(open)open.disabled=firms.length!==2;
+  document.querySelectorAll("[data-compare-firm]").forEach(btn=>{
+    const active=compareSelectedIds.has(String(btn.dataset.compareFirm));
+    btn.classList.toggle("active",active);
+    btn.setAttribute("aria-pressed",active?"true":"false");
+    const mark=btn.querySelector(".result-compare-check");
+    if(mark)mark.textContent=active?"✓":"＋";
+  });
+}
+function showCompareToast(message){
+  ensureCompareUi();
+  const toast=document.getElementById("compareToast");
+  if(!toast)return;
+  toast.textContent=message;
+  toast.classList.remove("hidden");
+  clearTimeout(compareNoticeTimer);
+  compareNoticeTimer=setTimeout(()=>toast.classList.add("hidden"),2200);
+}
+function toggleCompareFirm(id){
+  const key=String(id);
+  if(compareSelectedIds.has(key)){
+    compareSelectedIds.delete(key);
+    syncCompareUi();
+    return;
+  }
+  const firm=compareFirmById(key);
+  if(!firm)return;
+  const selected=compareSelectedFirms();
+  if(selected.length>=2){
+    showCompareToast("En fazla 2 firma karşılaştırabilirsiniz.");
+    return;
+  }
+  if(selected.length && compareFirmKey(selected[0])!==compareFirmKey(firm)){
+    showCompareToast("Karşılaştırma için aynı sektörden firma seçin.");
+    return;
+  }
+  compareSelectedIds.add(key);
+  syncCompareUi();
+}
+function compareValue(value,empty="—"){
+  const text=String(value??"").trim();
+  return text||empty;
+}
+function openCompareModal(){
+  const firms=compareSelectedFirms();
+  if(firms.length!==2)return;
+  ensureCompareUi();
+  const body=document.getElementById("compareModalBody");
+  const modal=document.getElementById("compareModal");
+  const rows=[
+    ["Konum",f=>[f.city,f.district].filter(Boolean).join(" · ")],
+    ["Kategori",f=>categoryLabels[f.mainCategory]||f.subCategory||f.category||"—"],
+    ["360° Mekân",f=>f.has360Tour?"Var":"Yok"],
+    ["Fotoğraf",f=>{const n=(Array.isArray(f.coverUrls)?f.coverUrls.length:0)+(Array.isArray(f.galleryUrls)?f.galleryUrls.length:0);return n?String(n)+" görsel":"Yok"}],
+    ["Telefon",f=>f.phone||"—"],
+    ["Web sitesi",f=>f.website?"Var":"—"]
+  ];
+  body.innerHTML=
+    '<div class="compare-table">'+
+      '<div class="compare-grid compare-grid-head"><div></div>'+
+        firms.map(f=>'<div><strong>'+esc(f.name)+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small></div>').join("")+
+      '</div>'+
+      rows.map(([label,get])=>'<div class="compare-grid"><div class="compare-label">'+esc(label)+'</div>'+firms.map(f=>'<div class="compare-cell">'+esc(compareValue(get(f)))+'</div>').join("")+'</div>').join("")+
+      '<div class="compare-grid compare-grid-actions"><div></div>'+firms.map(f=>'<div><a href="firma.html?id='+encodeURIComponent(f.id)+'">Firmayı İncele</a></div>').join("")+'</div>'+
+    '</div>';
+  modal.classList.remove("hidden");
+  document.body.style.overflow="hidden";
+}
+function closeCompareModal(){
+  document.getElementById("compareModal")?.classList.add("hidden");
+  document.body.style.overflow="";
+}
+
 function render(data,{keepLimit=false}={}){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   if(!grid||!sum)return;
@@ -795,6 +908,7 @@ function render(data,{keepLimit=false}={}){
         resultCardVisual(i)+
       '</div>'+
       '<p class="result-desc">'+esc(desc)+'</p>'+
+      '<div class="result-compare-row"><button type="button" class="result-compare-btn'+(compareSelectedIds.has(String(i.id))?' active':'')+'" data-compare-firm="'+esc(i.id)+'" aria-pressed="'+(compareSelectedIds.has(String(i.id))?'true':'false')+'"><span class="result-compare-check">'+(compareSelectedIds.has(String(i.id))?'✓':'＋')+'</span> Karşılaştır</button></div>'+
       (i.has360Tour&&i.tour360Url?'<button type="button" class="result-360-btn" data-open-360 data-tour-url="'+esc(i.tour360Url)+'" data-tour-name="'+esc(i.name)+'"><span>360°</span> Mekânı Gez</button>':'')+
       '<div class="result-actions">'+
         '<a class="result-primary" href="firma.html?id='+encodeURIComponent(i.id)+'">Firmayı İncele</a>'+
@@ -1541,3 +1655,28 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(hero){hero.classList.add("hidden");hero.setAttribute("aria-hidden","true")}
   });
 });
+
+
+/* Firma karşılaştırma - V3 deneme */
+document.addEventListener("DOMContentLoaded",()=>{ensureCompareUi();syncCompareUi()});
+document.addEventListener("click",e=>{
+  const compareBtn=e.target.closest("[data-compare-firm]");
+  if(compareBtn){
+    e.preventDefault();
+    toggleCompareFirm(compareBtn.dataset.compareFirm);
+    return;
+  }
+  if(e.target.closest("#compareClearBtn")){
+    compareSelectedIds.clear();
+    syncCompareUi();
+    return;
+  }
+  if(e.target.closest("#compareOpenBtn")){
+    openCompareModal();
+    return;
+  }
+  if(e.target.closest("[data-close-compare]")){
+    closeCompareModal();
+  }
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCompareModal()});
