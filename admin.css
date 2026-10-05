@@ -750,3 +750,7 @@
 .draft-firm-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.draft-firm-actions button{padding:8px 10px;font-size:9px}
 #draftFirmModal .modal-card{max-width:720px}
 @media(max-width:900px){.draft-firm-row{grid-template-columns:1fr}.draft-firm-actions{justify-content:flex-start}.draft-firm-toolbar{align-items:flex-start;flex-direction:column}}
+
+.auto-import-select-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.auto-import-select-actions .secondary{padding:8px 10px;font-size:9px}
+@media(max-width:760px){.auto-import-footer{align-items:flex-start;gap:10px}.auto-import-select-actions{width:100%}}
