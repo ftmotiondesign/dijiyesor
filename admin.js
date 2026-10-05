@@ -11,6 +11,7 @@ const CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
 let firms=[],draftFirms=[],applications=[],members=[],tourLeads=[],campaignFilter="all",managedCategoryDocs=[];
+const selectedDraftFirmIds=new Set();
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
 const selectedFirmIds=new Set();
@@ -462,12 +463,16 @@ async function loadDraftFirms(){
 function renderDraftFirms(){
   const list=$("draftFirmList");
   if(!list)return;
+  [...selectedDraftFirmIds].forEach(id=>{if(!draftFirms.some(x=>x.id===id))selectedDraftFirmIds.delete(id)});
   if($("navDraftFirmCount"))$("navDraftFirmCount").textContent=draftFirms.length;
   if($("draftFirmCountText"))$("draftFirmCountText").textContent=draftFirms.length+" taslak";
+  if($("draftFirmSelectedText"))$("draftFirmSelectedText").textContent=selectedDraftFirmIds.size+" seçili · Yayınladığın firma normal “Firmalar” listesine geçer.";
   if($("publishAllDraftsBtn"))$("publishAllDraftsBtn").disabled=draftFirms.length===0;
+  if($("publishSelectedDraftsBtn"))$("publishSelectedDraftsBtn").disabled=selectedDraftFirmIds.size===0;
   list.innerHTML=draftFirms.length?draftFirms.map(f=>{
     const map=f.mapUrl?'<a href="'+esc(f.mapUrl)+'" target="_blank" rel="noopener">Harita ↗</a>':"";
-    return '<article class="draft-firm-row">'+
+    return '<article class="draft-firm-row'+(selectedDraftFirmIds.has(f.id)?" selected":"")+'">'+
+      '<label class="draft-firm-check"><input type="checkbox" data-select-draft-firm="'+esc(f.id)+'" '+(selectedDraftFirmIds.has(f.id)?"checked":"")+'></label>'+
       '<div class="draft-firm-main"><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small><p>'+esc(f.address||"Adres yok")+'</p></div>'+
       '<div class="draft-firm-contact"><b>'+esc(f.phone||"Telefon yok")+'</b><small>'+esc(f.website||"Web sitesi yok")+'</small>'+map+'</div>'+
       '<div class="draft-firm-actions"><button type="button" data-edit-draft-firm="'+esc(f.id)+'">Düzenle</button><button type="button" class="primary" data-publish-draft-firm="'+esc(f.id)+'">Yayınla</button><button type="button" class="danger" data-delete-draft-firm="'+esc(f.id)+'">Sil</button></div>'+
@@ -494,6 +499,36 @@ function openDraftFirmModal(id){
 
 $("refreshDraftFirmsBtn")?.addEventListener("click",async()=>{
   await loadDraftFirms();renderDraftFirms();
+});
+$("selectAllDraftsBtn")?.addEventListener("click",()=>{
+  draftFirms.forEach(f=>selectedDraftFirmIds.add(f.id));
+  renderDraftFirms();
+});
+$("clearDraftSelectionBtn")?.addEventListener("click",()=>{
+  selectedDraftFirmIds.clear();
+  renderDraftFirms();
+});
+$("publishSelectedDraftsBtn")?.addEventListener("click",async()=>{
+  const ids=[...selectedDraftFirmIds];
+  if(!ids.length)return;
+  if(!confirm(ids.length+" seçili taslak firma yayınlansın mı?"))return;
+  const btn=$("publishSelectedDraftsBtn"),msg=$("draftFirmMessage");
+  try{
+    btn.disabled=true;btn.textContent="Yayınlanıyor...";
+    msg.className="message";msg.textContent=ids.length+" firma yayınlanıyor...";
+    const res=await firebase.app().functions("europe-west1").httpsCallable("publishDraftFirmsBatch")({ids});
+    const published=Number(res.data?.publishedCount||0),skipped=Number(res.data?.skippedCount||0);
+    selectedDraftFirmIds.clear();
+    await Promise.all([loadDraftFirms(),loadFirms()]);
+    renderAll();
+    msg.className="message success";
+    msg.textContent=published+" firma yayınlandı"+(skipped?" · "+skipped+" firma atlandı":"")+".";
+  }catch(err){
+    msg.className="message error";msg.textContent=err?.message||"Seçilen firmalar yayınlanamadı.";
+  }finally{
+    btn.textContent="Seçilenleri Yayınla";
+    renderDraftFirms();
+  }
 });
 $("saveDraftFirmBtn")?.addEventListener("click",async()=>{
   const id=$("draftFirmId")?.value;
@@ -531,6 +566,13 @@ $("publishAllDraftsBtn")?.addEventListener("click",async()=>{
     msg.className="message success";msg.textContent=ids.length+" firma yayınlandı.";
   }catch(err){msg.className="message error";msg.textContent=err.message||"Toplu yayınlama sırasında hata oluştu."}
   finally{btn.textContent="Tüm Taslakları Yayınla";renderDraftFirms()}
+});
+document.addEventListener("change",e=>{
+  const box=e.target.closest("[data-select-draft-firm]");
+  if(!box)return;
+  if(box.checked)selectedDraftFirmIds.add(box.dataset.selectDraftFirm);
+  else selectedDraftFirmIds.delete(box.dataset.selectDraftFirm);
+  renderDraftFirms();
 });
 document.addEventListener("click",async e=>{
   const edit=e.target.closest("[data-edit-draft-firm]");
