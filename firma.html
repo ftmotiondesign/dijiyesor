@@ -473,8 +473,9 @@
         const d=normalizeQuickProfileData(snap.data()||{});
         document.title=(d.name||"Firma")+" | DijiyeSor";
 
-        const logo=d.logoUrl
-          ? '<img src="'+esc(d.logoUrl)+'" alt="'+esc(d.name||"Firma")+' logosu">'
+        const profileImage=d.logoUrl||d.profileImageUrl||d.cardImageUrl||"";
+        const logo=profileImage
+          ? '<img src="'+esc(profileImage)+'" alt="'+esc(d.name||"Firma")+' profil görseli">'
           : '<span>'+esc(initials(d.name))+'</span>';
 
         const cover=buildProfileCoverSlider(d);
