@@ -70,6 +70,20 @@ function keywordTargets(query){
 }
 const legacyMain={kres:"egitim",dershane:"egitim",surucu:"egitim",src:"egitim",psikoteknik:"egitim",halk_egitim:"egitim",kamu_egitim:"egitim",mesleki_egitim:"egitim",diger_egitim:"egitim",ozel_ders:"egitim",dil_kursu:"egitim",etut:"egitim",ozel_okul:"egitim",yurt:"egitim",egitim:"egitim",oto:"otomotiv",oto_servis:"otomotiv",kaporta_boya:"otomotiv",oto_elektrik:"otomotiv",lastik_jant:"otomotiv",oto_yikama:"otomotiv",ekspertiz:"otomotiv",galeri:"otomotiv",rentacar:"otomotiv",yedek_parca:"otomotiv",motosiklet:"otomotiv",restoran:"yemeicme",kafe:"yemeicme",fastfood:"yemeicme",pastane:"yemeicme",pizza:"yemeicme",doner:"yemeicme",pide_lahmacun:"yemeicme",catering:"yemeicme",ev_yemekleri:"yemeicme",saglik:"saglikguzellik",dis_klinigi:"saglikguzellik",klinik:"saglikguzellik",psikolog:"saglikguzellik",diyetisyen:"saglikguzellik",fizyoterapi:"saglikguzellik",guzellik:"saglikguzellik",kuafor:"saglikguzellik",berber:"saglikguzellik",spor:"saglikguzellik",mobilya:"evyapi",dekorasyon:"evyapi",insaat:"evyapi",elektrikci:"evyapi",tesisatci:"evyapi",teknik_servis:"evyapi",evteknik:"evyapi",klima:"evyapi",cam_balkon:"evyapi",temizlik:"evyapi",emlak:"emlak",emlak_ofisi:"emlak",konut:"emlak",arsa:"emlak",ticari:"emlak",gunluk_kiralik:"emlak",turizm:"turizm",otel:"turizm",pansiyon:"turizm",apart:"turizm",bungalov:"turizm",seyahat:"turizm",kamp:"turizm",dugun:"organizasyonmedya",dugun_salonu:"organizasyonmedya",organizasyon:"organizasyonmedya",fotograf:"organizasyonmedya",medya:"organizasyonmedya",video:"organizasyonmedya",drone:"organizasyonmedya",gelinlik:"organizasyonmedya",cicekci:"organizasyonmedya",reklam:"organizasyonmedya",nakliyat:"tasimacilik",kurye:"tasimacilik",sehirici:"tasimacilik",depolama:"tasimacilik",hukuk:"profesyonel",muhasebe:"profesyonel",web:"profesyonel",sosyal_medya:"profesyonel",teknoloji:"profesyonel",bilgisayar:"profesyonel",danismanlik:"profesyonel",veteriner:"profesyonel",tarim:"profesyonel",perakende:"alisveris",giyim:"alisveris",ayakkabi:"alisveris",market:"alisveris",elektronik:"alisveris",kirtasiye:"alisveris",petshop:"alisveris",zuccaciye:"alisveris",esnaf:"alisveris",diger:"diger"};
 const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").trim();
+function formatFirmTitle(value){
+  const text=String(value||"").replace(/\s+/g," ").trim();
+  if(!text)return "";
+  const keepUpper=new Set(["SRC","MEB","LGS","TYT","AYT","YKS","KPSS","DGS","AÖF","MYO","VIP","A1","A2","B","B1","C","C1","D","D1","BE","CE","DE"]);
+  return text.split(" ").map((word,index)=>{
+    const raw=word.trim();
+    if(!raw)return raw;
+    const bare=raw.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
+    if(keepUpper.has(bare.toLocaleUpperCase("tr-TR"))) return raw.replace(bare,bare.toLocaleUpperCase("tr-TR"));
+    const low=bare.toLocaleLowerCase("tr-TR");
+    const fixed=low ? low.charAt(0).toLocaleUpperCase("tr-TR")+low.slice(1) : low;
+    return bare ? raw.replace(bare,fixed) : raw;
+  }).join(" ");
+}
 
 // Türkiye genelinde ilçe alanlarında posta kodunu otomatik temizler.
 // Örn: "17200 Biga" -> "Biga", "34000 Kadıköy" -> "Kadıköy".
@@ -336,7 +350,7 @@ function companyFromDoc(doc){
   const effectiveSubCategory=inferredEducationSub||storedSub||(mainCategory(d)==="egitim"?"diger_egitim":"");
   return {
     id:doc.id,
-    name:d.name||"Firma",
+    name:formatFirmTitle(d.name||"Firma"),
     mainCategory:mainCategory(d),
     category:effectiveSubCategory||d.category||"",
     subCategory:effectiveSubCategory,
