@@ -11,9 +11,15 @@ const ADMIN_EMAIL = "ftmotiondesign@gmail.com";
 
 const CATEGORY_MAP = {
   surucu: { label: "Sürücü Kursu", mainCategory: "egitim", subCategory: "surucu" },
+  src: { label: "SRC Kursu", mainCategory: "egitim", subCategory: "src" },
+  psikoteknik: { label: "Psikoteknik", mainCategory: "egitim", subCategory: "psikoteknik" },
+  halk_egitim: { label: "Halk Eğitim Merkezi", mainCategory: "egitim", subCategory: "halk_egitim" },
+  kamu_egitim: { label: "Kamu Eğitim Kurumu", mainCategory: "egitim", subCategory: "kamu_egitim" },
+  mesleki_egitim: { label: "Mesleki Eğitim Merkezi", mainCategory: "egitim", subCategory: "mesleki_egitim" },
   kres: { label: "Kreş Anaokulu", mainCategory: "egitim", subCategory: "kres" },
   dershane: { label: "Dershane Kurs Merkezi", mainCategory: "egitim", subCategory: "dershane" },
   yurt: { label: "Öğrenci Yurdu", mainCategory: "egitim", subCategory: "yurt" },
+  diger_egitim: { label: "Diğer Eğitim Kurumu", mainCategory: "egitim", subCategory: "diger_egitim" },
   oto_servis: { label: "Oto Servis", mainCategory: "otomotiv", subCategory: "oto_servis" },
   restoran: { label: "Restoran", mainCategory: "yemeicme", subCategory: "restoran" },
   dis_klinigi: { label: "Diş Kliniği", mainCategory: "saglikguzellik", subCategory: "dis_klinigi" },
