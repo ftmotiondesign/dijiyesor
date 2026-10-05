@@ -97,6 +97,63 @@ function findDuplicate(candidate, rows) {
   return null;
 }
 
+function placeSearchMatchScore(row, place) {
+  const rowName = normText(row.name);
+  const placeName = normText(place.displayName?.text || "");
+  if (!rowName || !placeName) return 0;
+
+  let score = 0;
+
+  if (rowName === placeName) score += 100;
+  else if (rowName.includes(placeName) || placeName.includes(rowName)) score += 55;
+
+  const rowAddress = normText(row.address);
+  const placeAddress = normText(place.formattedAddress || "");
+  if (rowAddress && placeAddress) {
+    if (rowAddress === placeAddress) score += 70;
+    else if (addressLooksSame(rowAddress, placeAddress)) score += 45;
+  }
+
+  const city = normText(row.city);
+  const district = normText(row.district);
+  if (city && placeAddress.includes(city)) score += 20;
+  if (district && placeAddress.includes(district)) score += 20;
+
+  return score;
+}
+
+async function findPlaceForLegacyFirm(row) {
+  const query = [row.name, row.district, row.city, row.address]
+    .map(s)
+    .filter(Boolean)
+    .join(" ");
+
+  if (!s(row.name) || !query) return null;
+
+  const result = await placesTextSearch(query);
+  const candidates = Array.isArray(result.places) ? result.places : [];
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const place of candidates) {
+    const score = placeSearchMatchScore(row, place);
+    if (score > bestScore) {
+      best = place;
+      bestScore = score;
+    }
+  }
+
+  // Güvenli otomatik eşleşme eşiği:
+  // tam isim + konum/adres veya güçlü isim/adres benzerliği.
+  if (!best || bestScore < 100) return null;
+
+  return {
+    placeId: s(best.id),
+    score: bestScore
+  };
+}
+
 async function placesTextSearch(query) {
   const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
@@ -483,23 +540,44 @@ exports.backfillFirmPhotos = onCall(
         continue;
       }
 
-      const placeId = s(data.googlePlaceId || data.placeId);
-      if (!placeId) {
-        noPlaceId++;
-        continue;
-      }
+      let placeId = s(data.googlePlaceId || data.placeId);
+      let placeIdRecovered = false;
 
       try {
+        if (!placeId) {
+          const found = await findPlaceForLegacyFirm({
+            name: data.name,
+            city: data.city,
+            district: data.district,
+            address: data.address
+          });
+
+          if (!found?.placeId) {
+            noPlaceId++;
+            continue;
+          }
+
+          placeId = found.placeId;
+          placeIdRecovered = true;
+        }
+
         const place = await getPlaceDetails(placeId);
         const photoName = s(place.photos?.[0]?.name);
 
         if (!photoName) {
+          if (placeIdRecovered) {
+            await doc.ref.set({
+              googlePlaceId: placeId,
+              updatedAt: FieldValue.serverTimestamp()
+            }, { merge: true });
+          }
           noPhoto++;
           continue;
         }
 
         const imageUrl = googlePhotoProxyUrl(photoName);
         await doc.ref.set({
+          googlePlaceId: placeId,
           googlePhotoName: photoName,
           profileImageUrl: imageUrl,
           cardImageUrl: imageUrl,
