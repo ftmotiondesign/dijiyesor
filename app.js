@@ -212,6 +212,10 @@ function resolveSearchLocation(d){
   return {city,district};
 }
 let companies=[];
+const RESULT_PAGE_SIZE=50;
+let visibleResultCount=RESULT_PAGE_SIZE;
+let lastRenderedResults=[];
+let resultLoadObserver=null;
 
 async function loadProvinces(select,district){
   select.innerHTML='<option value="">İller yükleniyor...</option>';
@@ -484,9 +488,13 @@ async function updateCityHero(){
     }
   }
 }
-function render(data){
+function render(data,{keepLimit=false}={}){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   if(!grid||!sum)return;
+
+  lastRenderedResults=data;
+  if(!keepLimit)visibleResultCount=RESULT_PAGE_SIZE;
+  const visibleData=data.slice(0,visibleResultCount);
 
   sum.textContent=data.length+" firma";
   const title=document.getElementById("resultsTitle");
@@ -539,7 +547,7 @@ function render(data){
     return;
   }
 
-  const normalCards=data.map(i=>{
+  const normalCards=visibleData.map(i=>{
     const logo=i.logoUrl
       ? '<img src="'+esc(i.logoUrl)+'" alt="'+esc(i.name)+' logosu">'
       : '<span>'+esc(initials(i.name))+'</span>';
@@ -576,7 +584,7 @@ function render(data){
       '</div>'+
     '</article>';
   });
-  const sponsored=data.filter(campaignIsActive).map(campaignCard);
+  const sponsored=visibleData.filter(campaignIsActive).map(campaignCard);
   const merged=[];
   normalCards.forEach((card,index)=>{
     merged.push(card);
@@ -584,8 +592,35 @@ function render(data){
     if(index===5 && sponsored.length>1)merged.push(sponsored[1]);
   });
   if(!normalCards.length && sponsored.length)merged.push(...sponsored);
+
+  const hasMore=visibleData.length<data.length;
+  if(hasMore){
+    merged.push('<div class="results-load-more" data-results-sentinel><button type="button" data-load-more-results>Daha fazla firma göster</button><span>'+visibleData.length+' / '+data.length+' gösteriliyor</span></div>');
+  }
   grid.innerHTML=merged.join("");
+
+  if(resultLoadObserver){
+    resultLoadObserver.disconnect();
+    resultLoadObserver=null;
+  }
+  const sentinel=grid.querySelector("[data-results-sentinel]");
+  if(sentinel&&"IntersectionObserver" in window){
+    resultLoadObserver=new IntersectionObserver(entries=>{
+      if(!entries.some(entry=>entry.isIntersecting))return;
+      resultLoadObserver?.disconnect();
+      visibleResultCount=Math.min(visibleResultCount+RESULT_PAGE_SIZE,lastRenderedResults.length);
+      render(lastRenderedResults,{keepLimit:true});
+    },{rootMargin:"500px 0px"});
+    resultLoadObserver.observe(sentinel);
+  }
 }
+
+document.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-load-more-results]");
+  if(!btn)return;
+  visibleResultCount=Math.min(visibleResultCount+RESULT_PAGE_SIZE,lastRenderedResults.length);
+  render(lastRenderedResults,{keepLimit:true});
+});
 async function loadManagedSearchCategories(){
   try{
     const snap=await db.collection("siteCategories").get();
