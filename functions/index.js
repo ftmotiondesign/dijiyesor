@@ -38,6 +38,21 @@ function s(v) {
   return String(v || "").trim();
 }
 
+function formatFirmTitle(value) {
+  const text = s(value).replace(/\s+/g, " ");
+  if (!text) return "";
+  const keepUpper = new Set(["SRC","MEB","LGS","TYT","AYT","YKS","KPSS","DGS","AÖF","MYO","VIP","A1","A2","B","B1","C","C1","D","D1","BE","CE","DE"]);
+  return text.split(" ").map((word) => {
+    const bare = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+    if (!bare) return word;
+    const upper = bare.toLocaleUpperCase("tr-TR");
+    if (keepUpper.has(upper)) return word.replace(bare, upper);
+    const low = bare.toLocaleLowerCase("tr-TR");
+    const fixed = low.charAt(0).toLocaleUpperCase("tr-TR") + low.slice(1);
+    return word.replace(bare, fixed);
+  }).join(" ");
+}
+
 function normText(v) {
   return s(v)
     .toLocaleLowerCase("tr-TR")
@@ -639,7 +654,7 @@ exports.listDraftFirms = onCall(
         const x = d.data() || {};
         return {
           id: d.id,
-          name: s(x.name),
+          name: formatFirmTitle(x.name),
           phone: s(x.phone),
           city: s(x.city),
           district: s(x.district),
