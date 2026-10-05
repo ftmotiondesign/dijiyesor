@@ -1215,10 +1215,13 @@ async function initHome(){
     }
   });
   popupCity?.addEventListener("change",async()=>{await fillDistricts(popupCity,popupDistrict)});
-  applyPopupLocation?.addEventListener("click",async()=>{
+  applyPopupLocation?.addEventListener("click",()=>{
     city.value=popupCity?.value||"";
     if(city.value){
-      await fillDistricts(city,district);
+      // İlçe listesi popup içinde zaten yüklenmiş durumda.
+      // Aynı API çağrısını ikinci kez beklemek yerine seçenekleri anında ana filtreye kopyala.
+      district.innerHTML=popupDistrict?.innerHTML||'<option value="">Tüm İlçeler</option>';
+      district.disabled=Boolean(popupDistrict?.disabled);
       district.value=popupDistrict?.value||"";
     }else{
       district.value="";
