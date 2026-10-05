@@ -390,6 +390,9 @@ exports.importPlaceDrafts = onCall(
         continue;
       }
 
+      const photoName = s(p.photos?.[0]?.name);
+      const imageUrl = googlePhotoProxyUrl(photoName);
+
       const draft = {
         name: candidate.name,
         mainCategory: category.mainCategory,
@@ -406,6 +409,10 @@ exports.importPlaceDrafts = onCall(
         googlePlaceId: p.id || placeId,
         googleTypes: Array.isArray(p.types) ? p.types : [],
         googleBusinessStatus: p.businessStatus || "",
+        googlePhotoName: photoName,
+        profileImageUrl: imageUrl,
+        cardImageUrl: imageUrl,
+        galleryUrls: imageUrl ? [imageUrl] : [],
         source: "google_places",
         status: "draft",
         createdAt: FieldValue.serverTimestamp(),
