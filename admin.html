@@ -178,7 +178,10 @@
             <strong id="autoImportQueryPreview">Arama hazırlanıyor</strong>
             <small>Örnek: Çanakkale / Merkez / Sürücü Kursu</small>
           </div>
-          <button id="autoImportSearchBtn" type="button" class="primary">Firmaları Bul</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <button id="backfillFirmPhotosBtn" type="button" class="secondary">Eski Firmalara Fotoğraf Getir</button>
+            <button id="autoImportSearchBtn" type="button" class="primary">Firmaları Bul</button>
+          </div>
         </div>
         <div id="autoImportMessage" class="message hidden"></div>
       </section>
@@ -1214,7 +1217,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261005-google-photo-1"></script>
+<script src="admin.js?v=20261005-photo-backfill-1"></script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
