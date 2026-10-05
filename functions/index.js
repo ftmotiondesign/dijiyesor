@@ -1,7 +1,7 @@
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, FieldPath } = require("firebase-admin/firestore");
 
 initializeApp();
 
@@ -445,77 +445,91 @@ exports.backfillFirmPhotos = onCall(
   {
     region: "europe-west1",
     secrets: [GOOGLE_PLACES_API_KEY],
-    timeoutSeconds: 300,
+    timeoutSeconds: 120,
     memory: "512MiB"
   },
   async (request) => {
     requireAdmin(request);
 
-    const includeDrafts = request.data?.includeDrafts !== false;
-    const collections = includeDrafts
-      ? ["institutions", "institutionDrafts"]
-      : ["institutions"];
+    const collectionName = s(request.data?.collection || "institutions");
+    if (!["institutions", "institutionDrafts"].includes(collectionName)) {
+      throw new HttpsError("invalid-argument", "Geçersiz koleksiyon.");
+    }
+
+    const pageSize = Math.max(1, Math.min(50, Number(request.data?.limit || 25)));
+    const afterId = s(request.data?.afterId);
+
+    let query = db.collection(collectionName)
+      .orderBy(FieldPath.documentId())
+      .limit(pageSize);
+
+    if (afterId) query = query.startAfter(afterId);
+
+    const snap = await query.get();
 
     let scanned = 0;
     let updated = 0;
     let skipped = 0;
     let noPhoto = 0;
     let noPlaceId = 0;
-    const errors = [];
+    let errorCount = 0;
 
-    for (const collectionName of collections) {
-      const snap = await db.collection(collectionName).get();
+    for (const doc of snap.docs) {
+      scanned++;
+      const data = doc.data() || {};
 
-      for (const doc of snap.docs) {
-        scanned++;
-        const data = doc.data() || {};
+      if (s(data.profileImageUrl || data.cardImageUrl)) {
+        skipped++;
+        continue;
+      }
 
-        if (s(data.profileImageUrl || data.cardImageUrl)) {
-          skipped++;
+      const placeId = s(data.googlePlaceId || data.placeId);
+      if (!placeId) {
+        noPlaceId++;
+        continue;
+      }
+
+      try {
+        const place = await getPlaceDetails(placeId);
+        const photoName = s(place.photos?.[0]?.name);
+
+        if (!photoName) {
+          noPhoto++;
           continue;
         }
 
-        const placeId = s(data.googlePlaceId || data.placeId);
-        if (!placeId) {
-          noPlaceId++;
-          continue;
-        }
+        const imageUrl = googlePhotoProxyUrl(photoName);
+        await doc.ref.set({
+          googlePhotoName: photoName,
+          profileImageUrl: imageUrl,
+          cardImageUrl: imageUrl,
+          galleryUrls: Array.isArray(data.galleryUrls) && data.galleryUrls.length
+            ? data.galleryUrls
+            : [imageUrl],
+          updatedAt: FieldValue.serverTimestamp()
+        }, { merge: true });
 
-        try {
-          const place = await getPlaceDetails(placeId);
-          const photoName = s(place.photos?.[0]?.name);
-
-          if (!photoName) {
-            noPhoto++;
-            continue;
-          }
-
-          const imageUrl = googlePhotoProxyUrl(photoName);
-          await doc.ref.set({
-            googlePhotoName: photoName,
-            profileImageUrl: imageUrl,
-            cardImageUrl: imageUrl,
-            galleryUrls: Array.isArray(data.galleryUrls) && data.galleryUrls.length
-              ? data.galleryUrls
-              : [imageUrl],
-            updatedAt: FieldValue.serverTimestamp()
-          }, { merge: true });
-
-          updated++;
-        } catch (err) {
-          console.error("Backfill photo error", collectionName, doc.id, err);
-          errors.push({ collection: collectionName, id: doc.id });
-        }
+        updated++;
+      } catch (err) {
+        console.error("Backfill photo error", collectionName, doc.id, err);
+        errorCount++;
       }
     }
 
+    const nextAfterId = snap.docs.length
+      ? snap.docs[snap.docs.length - 1].id
+      : "";
+
     return {
+      collection: collectionName,
       scanned,
       updated,
       skipped,
       noPhoto,
       noPlaceId,
-      errorCount: errors.length
+      errorCount,
+      nextAfterId,
+      done: snap.docs.length < pageSize
     };
   }
 );
