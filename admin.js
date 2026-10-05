@@ -10,7 +10,7 @@ const CLOUDINARY_CLOUD_NAME="okefpzsy";
 const CLOUDINARY_UPLOAD_PRESET="dijiyer_upload";
 
 const categories={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
-let firms=[],applications=[],members=[],tourLeads=[],campaignFilter="all",managedCategoryDocs=[];
+let firms=[],draftFirms=[],applications=[],members=[],tourLeads=[],campaignFilter="all",managedCategoryDocs=[];
 const selectedMemberIds=new Set();
 let visibleMemberIds=[];
 const selectedFirmIds=new Set();
@@ -62,7 +62,7 @@ function setView(name,opts={}){
   }
   document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===name));
   document.querySelectorAll("[data-panel-view]").forEach(x=>x.classList.toggle("active",x.dataset.panelView===name));
-  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"auto-firm-import":["Otomatik Firma Topla","Şehir ve kategori seçerek firmaları taslak olarak içe aktar"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],"city-banners":["Şehir Görselleri","81 il görsellerini ve şehir sponsorlarını yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
+  const titles={overview:["Genel Bakış","DijiyeSor yönetim merkezi"],firms:["Firmalar","Profil, görünürlük ve sponsor ayarları"],"auto-firm-import":["Otomatik Firma Topla","Şehir ve kategori seçerek firmaları taslak olarak içe aktar"],"draft-firms":["Taslak Firmalar","Google Places’tan gelen firmaları kontrol et ve yayınla"],"google-import":["Hızlı Firma Ekle","Google’da gördüğün firmaları API kullanmadan toplu kaydet"],campaigns:["Kampanyalar & Reklamlar","Sponsorlu içerikleri yönet"],keywords:["Anahtar Kelimeler","Google arama önerilerini incele ve DijiyeSor’a ekle"],categories:["Kategori Yönetimi","Arama kategorileri ve alt kategorileri yönet"],"city-banners":["Şehir Görselleri","81 il görsellerini ve şehir sponsorlarını yönet"],qr:["QR / NFC Kartlar","Kart siparişlerini ve firma kartlarını yönet"],"menu-qr":["Menü QR","Menü QR siparişlerini yönet"],"google-qr":["Google QR","Google Yorum Kartı siparişlerini yönet"],applications:["Başvurular","Yeni firma başvurularını incele"],members:["Üyeler","Kurum hesaplarını ve onaylanan üyeleri yönet"],revenue:["Gelir Alanları","NFC / QR Kart, 360° mekan ve diğer gelir modülleri"],"sponsor-ads":["Sponsor Reklam Alanları","İlk arama popup reklamını yönet"],media:["360° Mekan","360° çekim taleplerini ve medya fırsatlarını takip et"],settings:["Ayarlar","Panel seçenekleri"]};
   $("pageTitle").textContent=titles[name]?.[0]||"Yönetim";
   $("pageSubtitle").textContent=titles[name]?.[1]||"";
   document.querySelector(".sidebar").classList.remove("open");
@@ -332,7 +332,7 @@ async function addKeywordToDijiyesor(keyword,sector,button){
 }
 
 async function loadAll(){
-  await Promise.all([loadFirms(),loadApplications(),loadMembers(),loadTourLeads(),loadManagedCategories()]);
+  await Promise.all([loadFirms(),loadDraftFirms(),loadApplications(),loadMembers(),loadTourLeads(),loadManagedCategories()]);
   const existingAppIds=new Set(tourLeads.map(x=>String(x.applicationId||"")).filter(Boolean));
   const application360=applications
     .filter(a=>Boolean(a.wants360Tour) && !existingAppIds.has(String(a.id)))
@@ -445,6 +445,122 @@ async function loadFirms(){
   const snap=await db.collection("institutions").get();
   firms=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
 }
+async function loadDraftFirms(){
+  try{
+    const snap=await db.collection("institutionDrafts").get();
+    draftFirms=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"tr"));
+  }catch(err){
+    console.error("Taslak firmalar yüklenemedi",err);
+    draftFirms=[];
+  }
+}
+function renderDraftFirms(){
+  const list=$("draftFirmList");
+  if(!list)return;
+  if($("navDraftFirmCount"))$("navDraftFirmCount").textContent=draftFirms.length;
+  if($("draftFirmCountText"))$("draftFirmCountText").textContent=draftFirms.length+" taslak";
+  if($("publishAllDraftsBtn"))$("publishAllDraftsBtn").disabled=draftFirms.length===0;
+  list.innerHTML=draftFirms.length?draftFirms.map(f=>{
+    const map=f.mapUrl?'<a href="'+esc(f.mapUrl)+'" target="_blank" rel="noopener">Harita ↗</a>':"";
+    return '<article class="draft-firm-row">'+
+      '<div class="draft-firm-main"><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc([f.city,f.district].filter(Boolean).join(" · "))+'</small><p>'+esc(f.address||"Adres yok")+'</p></div>'+
+      '<div class="draft-firm-contact"><b>'+esc(f.phone||"Telefon yok")+'</b><small>'+esc(f.website||"Web sitesi yok")+'</small>'+map+'</div>'+
+      '<div class="draft-firm-actions"><button type="button" data-edit-draft-firm="'+esc(f.id)+'">Düzenle</button><button type="button" class="primary" data-publish-draft-firm="'+esc(f.id)+'">Yayınla</button><button type="button" class="danger" data-delete-draft-firm="'+esc(f.id)+'">Sil</button></div>'+
+    '</article>';
+  }).join(""):'<div class="empty">Taslak firma bulunmuyor.</div>';
+}
+async function publishDraftFirm(id){
+  const f=draftFirms.find(x=>x.id===id);
+  if(!f)return;
+  const data={...f};
+  delete data.id;
+  data.status="active";
+  data.publishedAt=new Date().toISOString();
+  data.updatedAt=new Date().toISOString();
+  await db.collection("institutions").add(data);
+  await db.collection("institutionDrafts").doc(id).delete();
+}
+function openDraftFirmModal(id){
+  const f=draftFirms.find(x=>x.id===id);
+  if(!f)return;
+  $("draftFirmId").value=f.id;
+  $("draftFirmModalTitle").textContent=f.name||"Firma Taslağı";
+  $("draftFirmName").value=f.name||"";
+  $("draftFirmPhone").value=f.phone||"";
+  $("draftFirmCity").value=f.city||"";
+  $("draftFirmDistrict").value=f.district||"";
+  $("draftFirmAddress").value=f.address||"";
+  $("draftFirmWebsite").value=f.website||"";
+  $("draftFirmModalMessage").className="message hidden";
+  $("draftFirmModal").classList.remove("hidden");
+}
+
+$("refreshDraftFirmsBtn")?.addEventListener("click",async()=>{
+  await loadDraftFirms();renderDraftFirms();
+});
+$("saveDraftFirmBtn")?.addEventListener("click",async()=>{
+  const id=$("draftFirmId")?.value;
+  if(!id)return;
+  const msg=$("draftFirmModalMessage");
+  try{
+    msg.className="message";msg.textContent="Kaydediliyor...";
+    await db.collection("institutionDrafts").doc(id).set({
+      name:$("draftFirmName").value.trim(),
+      phone:$("draftFirmPhone").value.trim(),
+      city:$("draftFirmCity").value.trim(),
+      district:$("draftFirmDistrict").value.trim(),
+      address:$("draftFirmAddress").value.trim(),
+      website:$("draftFirmWebsite").value.trim(),
+      updatedAt:new Date().toISOString()
+    },{merge:true});
+    msg.className="message success";msg.textContent="Taslak kaydedildi.";
+    await loadDraftFirms();renderDraftFirms();
+    setTimeout(()=>$("draftFirmModal").classList.add("hidden"),500);
+  }catch(err){msg.className="message error";msg.textContent=err.message||"Taslak kaydedilemedi."}
+});
+$("publishAllDraftsBtn")?.addEventListener("click",async()=>{
+  if(!draftFirms.length)return;
+  if(!confirm(draftFirms.length+" taslak firma yayınlansın mı?"))return;
+  const btn=$("publishAllDraftsBtn"),msg=$("draftFirmMessage");
+  try{
+    btn.disabled=true;btn.textContent="Yayınlanıyor...";
+    msg.className="message";msg.textContent="Taslaklar yayınlanıyor...";
+    const ids=draftFirms.map(x=>x.id);
+    for(let i=0;i<ids.length;i++)await publishDraftFirm(ids[i]);
+    await Promise.all([loadDraftFirms(),loadFirms()]);
+    renderAll();
+    msg.className="message success";msg.textContent=ids.length+" firma yayınlandı.";
+  }catch(err){msg.className="message error";msg.textContent=err.message||"Toplu yayınlama sırasında hata oluştu."}
+  finally{btn.textContent="Tüm Taslakları Yayınla";renderDraftFirms()}
+});
+document.addEventListener("click",async e=>{
+  const edit=e.target.closest("[data-edit-draft-firm]");
+  if(edit){openDraftFirmModal(edit.dataset.editDraftFirm);return;}
+  const publish=e.target.closest("[data-publish-draft-firm]");
+  if(publish){
+    const id=publish.dataset.publishDraftFirm;
+    try{
+      publish.disabled=true;publish.textContent="Yayınlanıyor...";
+      await publishDraftFirm(id);
+      await Promise.all([loadDraftFirms(),loadFirms()]);
+      renderAll();
+      const msg=$("draftFirmMessage");if(msg){msg.className="message success";msg.textContent="Firma yayınlandı ve normal Firma listesine aktarıldı."}
+    }catch(err){
+      const msg=$("draftFirmMessage");if(msg){msg.className="message error";msg.textContent=err.message||"Firma yayınlanamadı."}
+    }
+    return;
+  }
+  const del=e.target.closest("[data-delete-draft-firm]");
+  if(del){
+    const id=del.dataset.deleteDraftFirm;
+    const f=draftFirms.find(x=>x.id===id);
+    if(!confirm((f?.name||"Bu taslak")+" silinsin mi?"))return;
+    try{
+      await db.collection("institutionDrafts").doc(id).delete();
+      await loadDraftFirms();renderDraftFirms();
+    }catch(err){alert(err.message||"Taslak silinemedi.")}
+  }
+});
 async function loadApplications(){
   const snap=await db.collection("institutionApplications").get();
   applications=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
@@ -482,7 +598,7 @@ function renderAll(){
   if($("navTourLeadCount"))$("navTourLeadCount").textContent=newTourLeads.length;
   if($("revenueTourBadge"))$("revenueTourBadge").textContent=newTourLeads.length+" yeni";
   $("navMemberCount").textContent=getMemberRows().length;
-  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();renderSponsorPopupManager();
+  renderRecentApplications();renderOverviewCampaigns();renderFirmFilters();renderFirms();renderDraftFirms();renderCampaigns();renderApplications();renderMembers();renderMedia();fillCampaignFirmSelect();renderSponsorPopupManager();
 }
 function renderRecentApplications(){
   const list=applications.filter(a=>String(a.status||"new")==="new").slice(0,5);
