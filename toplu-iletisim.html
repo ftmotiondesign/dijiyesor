@@ -23,10 +23,11 @@ button,.linkbtn{border:0;border-radius:10px;padding:10px 13px;font-weight:700;cu
 <div class="top"><div><h1>Toplu İletişim Merkezi</h1><div class="note">Firmaları filtrele, iletişim durumunu gör ve kontrollü şekilde mesaj hazırla.</div></div><a class="linkbtn secondary" href="admin.html">← Yönetim Paneli</a></div>
 <div id="auth" class="card">Yetki kontrol ediliyor...</div>
 <div id="app" class="hidden">
-  <div class="card grid">
+  <div class="card grid" style="grid-template-columns:repeat(6,1fr)">
     <label>İl<select id="city"><option value="">Tüm iller</option></select></label>
     <label>İlçe<select id="district"><option value="">Tüm ilçeler</option></select></label>
     <label>Kategori<select id="category"><option value="">Tüm kategoriler</option></select></label>
+    <label>Alt Kategori<select id="subcategory"><option value="">Tüm alt kategoriler</option></select></label>
     <label>Kanal<select id="channel"><option value="">Tüm kanallar</option><option value="whatsapp">WhatsApp</option><option value="email">E-posta</option><option value="none">İletişim yok</option></select></label>
     <label>Ara<input id="search" placeholder="Firma adı / telefon"></label>
   </div>
@@ -53,16 +54,41 @@ if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(),db=firebase.firestore(),ADMIN_EMAIL="ftmotiondesign@gmail.com";
 let firms=[],visible=[];const $=x=>document.getElementById(x),esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const cats={egitim:"Eğitim",otomotiv:"Otomotiv",yemeicme:"Yeme & İçme",saglikguzellik:"Sağlık & Güzellik",evyapi:"Ev & Yapı",emlak:"Emlak",turizm:"Turizm & Konaklama",organizasyonmedya:"Organizasyon & Medya",tasimacilik:"Taşımacılık & Teslimat",profesyonel:"Profesyonel Hizmetler",alisveris:"Alışveriş & Yerel Esnaf",diger:"Diğer"};
+const subcats={
+egitim:{kres:"Kreş / Anaokulu",dershane:"Dershane / Kurs Merkezi",surucu:"Sürücü Kursu",ozel_ders:"Özel Ders",dil_kursu:"Dil Kursu",etut:"Etüt Merkezi",ozel_okul:"Özel Okul",yurt:"Öğrenci Yurdu"},
+otomotiv:{oto_servis:"Oto Servis",kaporta_boya:"Kaporta & Boya",oto_elektrik:"Oto Elektrik",lastik_jant:"Lastik & Jant",oto_yikama:"Oto Yıkama",ekspertiz:"Ekspertiz",galeri:"Oto Galeri",rentacar:"Rent a Car",yedek_parca:"Yedek Parça",motosiklet:"Motosiklet"},
+yemeicme:{restoran:"Restoran",kafe:"Kafe",fastfood:"Fast Food",pastane:"Pastane",pizza:"Pizza",doner:"Döner",pide_lahmacun:"Pide & Lahmacun",catering:"Catering",ev_yemekleri:"Ev Yemekleri"},
+saglikguzellik:{dis_klinigi:"Diş Kliniği",klinik:"Klinik",psikolog:"Psikolog",diyetisyen:"Diyetisyen",fizyoterapi:"Fizyoterapi",guzellik:"Güzellik Merkezi",kuafor:"Kuaför",berber:"Berber",spor:"Spor Merkezi"},
+evyapi:{mobilya:"Mobilya",dekorasyon:"Dekorasyon",insaat:"İnşaat",elektrikci:"Elektrikçi",tesisatci:"Tesisatçı",teknik_servis:"Teknik Servis",klima:"Klima",cam_balkon:"Cam Balkon",temizlik:"Temizlik"},
+emlak:{emlak_ofisi:"Emlak Ofisi",konut:"Konut",arsa:"Arsa",ticari:"Ticari Gayrimenkul",gunluk_kiralik:"Günlük Kiralık"},
+turizm:{otel:"Otel",pansiyon:"Pansiyon",apart:"Apart",bungalov:"Bungalov",seyahat:"Seyahat Acentesi",kamp:"Kamp"},
+organizasyonmedya:{dugun_salonu:"Düğün Salonu",organizasyon:"Organizasyon",fotograf:"Fotoğrafçı",video:"Video Prodüksiyon",drone:"Drone Çekimi",gelinlik:"Gelinlik",cicekci:"Çiçekçi",reklam:"Reklam Ajansı"},
+tasimacilik:{nakliyat:"Nakliyat",kurye:"Kurye",sehirici:"Şehir İçi Taşımacılık",depolama:"Depolama"},
+profesyonel:{hukuk:"Hukuk",muhasebe:"Muhasebe",web:"Web Tasarım",sosyal_medya:"Sosyal Medya",teknoloji:"Teknoloji",bilgisayar:"Bilgisayar",danismanlik:"Danışmanlık",veteriner:"Veteriner",tarim:"Tarım"},
+alisveris:{giyim:"Giyim",ayakkabi:"Ayakkabı",market:"Market",elektronik:"Elektronik",kirtasiye:"Kırtasiye",petshop:"Pet Shop",zuccaciye:"Züccaciye",esnaf:"Yerel Esnaf"},
+diger:{diger:"Diğer"}};
 function phone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("90")&&d.length>=12)d=d.slice(2);if(d.startsWith("0")&&d.length===11)d=d.slice(1);return d.length===10?d:""}
 function wa(f){return phone(f.whatsapp)||phone(f.phone)} function mail(f){return String(f.email||f.contactEmail||f.accountEmail||"").trim()} function ch(f){return wa(f)?"whatsapp":mail(f)?"email":"none"}
 function msg(f){return String($("message").value||"").replaceAll("{{firma_adi}}",f.name||"Firma")}
 auth.onAuthStateChanged(async u=>{if(!u||String(u.email||"").toLowerCase()!==ADMIN_EMAIL){$("auth").innerHTML='Yönetici girişi gerekli. <a href="admin.html">Panele dön</a>';return}
 $("auth").classList.add("hidden");$("app").classList.remove("hidden");const s=await db.collection("institutions").get();firms=s.docs.map(d=>({id:d.id,...d.data()}));fill();render()});
-function fill(){const cities=[...new Set(firms.map(f=>f.city).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"tr"));$("city").innerHTML='<option value="">Tüm iller</option>'+cities.map(x=>'<option>'+esc(x)+'</option>').join("");$("category").innerHTML='<option value="">Tüm kategoriler</option>'+Object.entries(cats).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");districts()}
+function fill(){const cities=[...new Set(firms.map(f=>f.city).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"tr"));$("city").innerHTML='<option value="">Tüm iller</option>'+cities.map(x=>'<option>'+esc(x)+'</option>').join("");$("category").innerHTML='<option value="">Tüm kategoriler</option>'+Object.entries(cats).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");districts();subcategories()}
+
+function subcategories(){
+  const k=$("category").value;
+  let rows=[];
+  if(k && subcats[k]) rows=Object.entries(subcats[k]);
+  else {
+    const seen=new Map();
+    Object.values(subcats).forEach(obj=>Object.entries(obj).forEach(([key,label])=>{if(!seen.has(key))seen.set(key,label)}));
+    rows=[...seen.entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),"tr"));
+  }
+  $("subcategory").innerHTML='<option value="">Tüm alt kategoriler</option>'+rows.map(([key,label])=>'<option value="'+key+'">'+esc(label)+'</option>').join("");
+}
 function districts(){const c=$("city").value,ds=[...new Set(firms.filter(f=>!c||f.city===c).map(f=>f.district).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"tr"));$("district").innerHTML='<option value="">Tüm ilçeler</option>'+ds.map(x=>'<option>'+esc(x)+'</option>').join("")}
-function render(){const q=String($("search").value||"").toLocaleLowerCase("tr-TR"),c=$("city").value,d=$("district").value,k=$("category").value,cc=$("channel").value;
-visible=firms.filter(f=>(!q||String([f.name,f.phone,f.whatsapp,f.email].join(" ")).toLocaleLowerCase("tr-TR").includes(q))&&(!c||f.city===c)&&(!d||f.district===d)&&(!k||f.mainCategory===k)&&(!cc||ch(f)===cc));
+function render(){const q=String($("search").value||"").toLocaleLowerCase("tr-TR"),c=$("city").value,d=$("district").value,k=$("category").value,sk=$("subcategory").value,cc=$("channel").value;
+visible=firms.filter(f=>(!q||String([f.name,f.phone,f.whatsapp,f.email].join(" ")).toLocaleLowerCase("tr-TR").includes(q))&&(!c||f.city===c)&&(!d||f.district===d)&&(!k||f.mainCategory===k)&&(!sk||String(f.subCategory||f.category||"")===sk)&&(!cc||ch(f)===cc));
 $("st").textContent=visible.length;$("sw").textContent=visible.filter(f=>ch(f)==="whatsapp").length;$("se").textContent=visible.filter(f=>ch(f)==="email").length;$("sn").textContent=visible.filter(f=>ch(f)==="none").length;
 $("table").innerHTML='<div class="row head"><span></span><span>Firma</span><span>Konum</span><span>Kategori</span><span>İletişim</span><span>İşlem</span></div>'+visible.map(f=>{const c=ch(f),contact=c==="whatsapp"?"+90 "+wa(f):c==="email"?mail(f):"Yok",label=c==="whatsapp"?"WhatsApp":c==="email"?"E-posta":"Eksik";let action='-';if(c==="whatsapp")action='<a class="linkbtn success" target="_blank" rel="noopener" href="https://wa.me/90'+wa(f)+'?text='+encodeURIComponent(msg(f))+'">Mesaj</a>';else if(c==="email")action='<a class="linkbtn primary" href="mailto:'+encodeURIComponent(mail(f))+'?subject='+encodeURIComponent("DijiyeSor firma bilgisi")+'&body='+encodeURIComponent(msg(f))+'">E-posta</a>';return '<div class="row"><span></span><div><strong>'+esc(f.name||"Firma")+'</strong><small>'+esc(f.phone||f.whatsapp||"")+'</small></div><span>'+esc([f.city,f.district].filter(Boolean).join(" / "))+'</span><span>'+esc(cats[f.mainCategory]||f.mainCategory||"Diğer")+'</span><span><b class="badge '+(c==="whatsapp"?"wa":c==="email"?"mail":"none")+'">'+label+'</b><small>'+esc(contact)+'</small></span><span>'+action+'</span></div>'}).join("")}
-["district","category","channel"].forEach(id=>$(id).addEventListener("change",render));$("city").addEventListener("change",()=>{districts();render()});$("search").addEventListener("input",render);$("message").addEventListener("input",render);
+["district","subcategory","channel"].forEach(id=>$(id).addEventListener("change",render));$("category").addEventListener("change",()=>{subcategories();render()});$("city").addEventListener("change",()=>{districts();render()});$("search").addEventListener("input",render);$("message").addEventListener("input",render);
 </script></body></html>
