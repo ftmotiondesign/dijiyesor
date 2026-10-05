@@ -145,6 +145,7 @@
           <label>İl
             <select id="autoImportCity">
               <option value="">İl seç</option>
+              <option value="__ALL__">Tüm İller (81)</option>
             </select>
           </label>
           <label>İlçe
@@ -1219,7 +1220,30 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261005-81-il-2"></script>
+<script src="admin.js?v=20261005-81-il-3"></script>
+<script>
+(function ensureAllCitiesOption(){
+  function ensure(){
+    var select=document.getElementById("autoImportCity");
+    if(!select)return;
+    if(!select.querySelector('option[value="__ALL__"]')){
+      var option=document.createElement("option");
+      option.value="__ALL__";
+      option.textContent="Tüm İller (81)";
+      if(select.options.length>0) select.insertBefore(option,select.options[1]||null);
+      else select.appendChild(option);
+    }
+  }
+  ensure();
+  document.addEventListener("DOMContentLoaded",ensure);
+  setTimeout(ensure,300);
+  setTimeout(ensure,1000);
+  var target=document.getElementById("autoImportCity");
+  if(target){
+    new MutationObserver(ensure).observe(target,{childList:true});
+  }
+})();
+</script>
 <!-- pages-redeploy -->
   <script src="quick-import.js?v=20261003-29"></script>
 </body>
