@@ -213,32 +213,92 @@ function resolveSearchLocation(d){
   return {city,district};
 }
 let companies=[];
-const RESULT_PAGE_SIZE=24;
+const RESULT_PAGE_SIZE=12;
 let visibleResultCount=RESULT_PAGE_SIZE;
 let lastRenderedResults=[];
 let resultLoadObserver=null;
 let companiesLoaded=false;
 let companiesLoadingPromise=null;
 
+let provinceOptionsCache=null;
+const districtOptionsCache=new Map();
+
 async function loadProvinces(select,district){
   select.innerHTML='<option value="">İller yükleniyor...</option>';
   try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");const j=await r.json();
+    let rows=provinceOptionsCache;
+    if(!rows){
+      try{
+        const stored=sessionStorage.getItem("djs_province_rows");
+        if(stored)rows=JSON.parse(stored);
+      }catch(_){}
+    }
+    if(!rows){
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+      const j=await r.json();
+      rows=(j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+      try{sessionStorage.setItem("djs_province_rows",JSON.stringify(rows));}catch(_){}
+    }
+    provinceOptionsCache=rows;
     select.innerHTML='<option value="">Tüm İller</option>';
-    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(c=>{const o=document.createElement("option");o.value=c.name;o.textContent=c.name;o.dataset.id=c.id;select.appendChild(o)});
-  }catch(_){select.innerHTML='<option value="">Tüm İller</option>'}
-  if(district){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=true}
+    rows.forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.name;
+      o.textContent=c.name;
+      o.dataset.id=c.id;
+      select.appendChild(o);
+    });
+  }catch(_){
+    select.innerHTML='<option value="">Tüm İller</option>';
+  }
+  if(district){
+    district.innerHTML='<option value="">Tüm İlçeler</option>';
+    district.disabled=true;
+  }
 }
 async function fillDistricts(city,district){
-  district.disabled=true;district.innerHTML='<option value="">İlçeler yükleniyor...</option>';
-  const o=city.options[city.selectedIndex],id=o?.dataset?.id;
-  if(!city.value){district.innerHTML='<option value="">Tüm İlçeler</option>';return}
-  try{
-    const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");const j=await r.json();
+  const o=city.options[city.selectedIndex];
+  const id=o?.dataset?.id;
+  const cityName=String(city.value||"").trim();
+
+  if(!cityName){
     district.innerHTML='<option value="">Tüm İlçeler</option>';
-    (j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr")).forEach(d=>{const x=document.createElement("option");x.value=d.name;x.textContent=d.name;district.appendChild(x)});
-    district.disabled=false;
-  }catch(_){district.innerHTML='<option value="">Tüm İlçeler</option>';district.disabled=false}
+    district.disabled=true;
+    return;
+  }
+
+  const cacheKey=cityName+"|"+String(id||"");
+  let rows=districtOptionsCache.get(cacheKey);
+
+  if(!rows){
+    try{
+      const stored=sessionStorage.getItem("djs_district_rows_"+cacheKey);
+      if(stored)rows=JSON.parse(stored);
+    }catch(_){}
+  }
+
+  if(!rows){
+    district.disabled=true;
+    district.innerHTML='<option value="">İlçeler yükleniyor...</option>';
+    try{
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces/"+encodeURIComponent(id)+"/districts?fields=id,name&limit=100");
+      const j=await r.json();
+      rows=(j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+      try{sessionStorage.setItem("djs_district_rows_"+cacheKey,JSON.stringify(rows));}catch(_){}
+    }catch(_){
+      rows=[];
+    }
+  }
+
+  districtOptionsCache.set(cacheKey,rows);
+  district.innerHTML='<option value="">Tüm İlçeler</option>';
+  rows.forEach(d=>{
+    const x=document.createElement("option");
+    x.value=d.name;
+    x.textContent=d.name;
+    district.appendChild(x);
+  });
+  district.disabled=false;
 }
 function companyFromDoc(doc){
   const d=doc.data()||{};
@@ -939,7 +999,9 @@ document.addEventListener("DOMContentLoaded",initSearchSponsorPopup);
 async function initHome(){
   const search=document.getElementById("searchInput"),city=document.getElementById("citySelect"),district=document.getElementById("districtSelect"),sector=document.getElementById("sectorSelect"),subCategory=document.getElementById("subCategorySelect"),btn=document.getElementById("searchBtn"),chips=[...document.querySelectorAll(".chip")];
   if(!search)return;
-  await loadManagedSearchCategories();
+  const categoryLoadPromise=loadManagedSearchCategories();
+  const provinceLoadPromise=loadProvinces(city,district);
+  await categoryLoadPromise;
   if(sector){const current=sector.value;sector.innerHTML='<option value="">Tüm Sektörler</option>'+Object.entries(categoryLabels).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");sector.value=current;}
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
 
@@ -1238,7 +1300,7 @@ async function initHome(){
     renderActiveFilters();
   });
 
-  await loadProvinces(city,district);
+  await provinceLoadPromise;
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
     city.value=params.get("city");
