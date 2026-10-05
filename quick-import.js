@@ -79,6 +79,21 @@
   cityInput?.addEventListener("change",loadQuickImportDistricts);
 
   const norm=v=>String(v||"").toLocaleLowerCase("tr-TR").replace(/\s+/g," ").trim();
+  function formatFirmTitle(value){
+    const text=String(value||"").replace(/\s+/g," ").trim();
+    if(!text)return "";
+    const keepUpper=new Set(["SRC","MEB","LGS","TYT","AYT","YKS","KPSS","DGS","AÖF","MYO","VIP","A1","A2","B","B1","C","C1","D","D1","BE","CE","DE"]);
+    return text.split(" ").map(word=>{
+      const raw=word.trim();
+      if(!raw)return raw;
+      const bare=raw.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
+      const upper=bare.toLocaleUpperCase("tr-TR");
+      if(keepUpper.has(upper))return raw.replace(bare,upper);
+      const low=bare.toLocaleLowerCase("tr-TR");
+      const fixed=low?low.charAt(0).toLocaleUpperCase("tr-TR")+low.slice(1):low;
+      return bare?raw.replace(bare,fixed):raw;
+    }).join(" ");
+  }
   const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 
   function show(text,type=""){
