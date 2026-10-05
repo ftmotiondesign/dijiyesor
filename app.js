@@ -243,7 +243,7 @@ async function loadCompanies(){
   const grid=document.getElementById("companyGrid"),sum=document.getElementById("resultSummary");
   try{
     const snap=await db.collection("institutions").get();companies=[];
-    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const fixedLoc=resolveSearchLocation(d);const fixedCity=fixedLoc.city||"";const fixedDistrict=cleanDistrictName(fixedLoc.district||"");companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||d.profileImageUrl||"",cardImageUrl:d.cardImageUrl||d.profileImageUrl||"",coverUrl:d.coverUrl||"",coverUrls:Array.isArray(d.coverUrls)?d.coverUrls.filter(Boolean):[],phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
+    snap.forEach(doc=>{const d=doc.data()||{};if(String(d.status||"active")==="passive")return;const fixedLoc=resolveSearchLocation(d);const fixedCity=fixedLoc.city||"";const fixedDistrict=cleanDistrictName(fixedLoc.district||"");companies.push({id:doc.id,name:d.name||"Firma",mainCategory:mainCategory(d),category:d.category||"",subCategory:d.subCategory||"",city:fixedCity,district:fixedDistrict,address:d.address||"",location:d.location||"",description:d.description||"",keywords:Array.isArray(d.searchKeywords)?d.searchKeywords:[],highlights:Array.isArray(d.highlights)?d.highlights:[],programs:Array.isArray(d.programs)?d.programs:(d.programs?[d.programs]:[]),logoUrl:d.logoUrl||"",cardImageUrl:d.cardImageUrl||d.profileImageUrl||"",coverUrl:d.coverUrl||"",coverUrls:Array.isArray(d.coverUrls)?d.coverUrls.filter(Boolean):[],phone:d.phone||"",website:d.website||"",whatsapp:d.whatsapp||d.phone||"",vip:Boolean(d.vip),has360Tour:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl),tour360Url:valid360Url(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl)?String(d.tour360Url||d.virtualTourUrl||d.tour360||d.panoramaUrl||"").trim():"",galleryUrls:Array.isArray(d.galleryUrls)?d.galleryUrls:[],
 campaignActive:Boolean(d.campaignActive||d.hasCampaign),
 campaignTitle:d.campaignTitle||d.promotionTitle||"",
 campaignText:d.campaignText||d.campaignDescription||d.promotionText||"",
@@ -301,7 +301,7 @@ function campaignIsActive(i){
 function campaignCard(i){
   const link=i.campaignUrl||("firma.html?id="+encodeURIComponent(i.id)+"#kampanya");
   const image=i.campaignImageUrl
-    ? '<img class="sponsored-image" src="'+esc(i.campaignImageUrl)+'" alt="'+esc(i.campaignTitle)+'">'
+    ? '<img class="sponsored-image" src="'+esc(i.campaignImageUrl)+'" alt="'+esc(i.campaignTitle)+'" loading="lazy" decoding="async" fetchpriority="low">'
     : '';
   return '<article class="sponsored-card">'+
     '<div class="sponsored-top"><span class="sponsored-label">SPONSORLU</span><span class="sponsored-brand">'+esc(i.name)+'</span></div>'+
