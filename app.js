@@ -892,11 +892,14 @@ function render(data,{keepLimit=false}={}){
       : '<span>'+esc(initials(i.name))+'</span>';
     const loc=[i.city,i.district].filter(Boolean).join(" · ")||i.location||"Konum bilgisi";
     const storedDesc=String(i.description||"").trim();
+    const normalizedFirmName=norm(i.name||"");
+    const publicEducationLike=/\b(halk egitimi|halk egitim|milli egitim|mudurlugu|meb|belediye|kaymakamlik|universite|fakulte|meslek yuksekokulu|ilce milli egitim)\b/.test(normalizedFirmName);
     const autoStored=/\bbölgesinde\s+hizmet\s+veren\b/i.test(storedDesc)
-      || /\bişletmesidir\.?\s*$/i.test(storedDesc);
-    const desc=(storedDesc && !autoStored)
-      ? storedDesc
-      : automaticCategoryDescription(i);
+      || /\bişletmesidir\.?\s*$/i.test(storedDesc)
+      || /^ehliyet eğitimi ve direksiyon dersleri sunar\.?$/i.test(storedDesc);
+    const desc=publicEducationLike
+      ? "Kurum bilgileri, konum ve iletişim detaylarını inceleyebilirsiniz."
+      : ((storedDesc && !autoStored) ? storedDesc : automaticCategoryDescription(i));
     const badges=[
       i.vip?'<span class="result-badge vip">VIP</span>':'',
       i.has360Tour?'<span class="result-badge">360° Tur</span>':'',
