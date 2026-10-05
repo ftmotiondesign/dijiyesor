@@ -68,7 +68,10 @@ profesyonel:{hukuk:"Hukuk",muhasebe:"Muhasebe",web:"Web Tasarım",sosyal_medya:"
 alisveris:{giyim:"Giyim",ayakkabi:"Ayakkabı",market:"Market",elektronik:"Elektronik",kirtasiye:"Kırtasiye",petshop:"Pet Shop",zuccaciye:"Züccaciye",esnaf:"Yerel Esnaf"},
 diger:{diger:"Diğer"}};
 function phone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("90")&&d.length>=12)d=d.slice(2);if(d.startsWith("0")&&d.length===11)d=d.slice(1);return d.length===10?d:""}
-function wa(f){return phone(f.whatsapp)||phone(f.phone)} function mail(f){return String(f.email||f.contactEmail||f.accountEmail||"").trim()} function ch(f){return wa(f)?"whatsapp":mail(f)?"email":"none"}
+function mobilePhone(v){const d=phone(v);return /^5\d{9}$/.test(d)?d:""}
+function wa(f){return mobilePhone(f.whatsapp)||mobilePhone(f.phone)}
+function mail(f){return String(f.email||f.contactEmail||f.accountEmail||"").trim()}
+function ch(f){return wa(f)?"whatsapp":mail(f)?"email":"none"}
 function msg(f){return String($("message").value||"").replaceAll("{{firma_adi}}",f.name||"Firma")}
 auth.onAuthStateChanged(async u=>{if(!u||String(u.email||"").toLowerCase()!==ADMIN_EMAIL){$("auth").innerHTML='Yönetici girişi gerekli. <a href="admin.html">Panele dön</a>';return}
 $("auth").classList.add("hidden");$("app").classList.remove("hidden");const s=await db.collection("institutions").get();firms=s.docs.map(d=>({id:d.id,...d.data()}));fill();render()});
