@@ -501,6 +501,15 @@ function automaticCategoryDescription(i){
   return descriptions[sub]||"İhtiyacınıza yönelik hizmet ve çözümler sunar.";
 }
 
+function resultCardImageUrl(url){
+  const raw=String(url||"").trim();
+  if(!raw)return "";
+  if(raw.includes("cloudfunctions.net/placePhoto")){
+    return raw+(raw.includes("?")?"&":"?")+"w=480";
+  }
+  return raw;
+}
+
 function resultCardFallback(i){
   const main=String(i.mainCategory||"diger");
   const sub=String(i.subCategory||i.category||"");
@@ -582,7 +591,7 @@ function resultCardVisual(i){
   const fb=resultCardFallback(i);
 
   if(images.length){
-    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(url)+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy" decoding="async" fetchpriority="low" onerror="handleResultImageError(this)">').join("");
+    const slides=images.map((url,index)=>'<img class="result-visual-slide'+(index===0?' active':'')+'" data-result-slide="'+index+'" data-result-image-open src="'+esc(resultCardImageUrl(url))+'" alt="'+esc(i.name)+' görseli '+(index+1)+'" loading="lazy" decoding="async" fetchpriority="low" onerror="handleResultImageError(this)">').join("");
     return '<div class="result-visual result-visual-slider" data-result-slider data-result-index="0" data-result-firm-id="'+esc(i.id)+'" data-result-firm-name="'+esc(i.name)+'" data-fallback-icon="'+esc(fb.icon)+'" data-fallback-label="'+esc(fb.label)+'" data-fallback-tone="'+esc(fb.tone)+'" data-has360="'+(i.has360Tour?'1':'0')+'" data-sponsored="'+(i.sponsored?'1':'0')+'">'+
       slides+
       (images.length>1?'<button type="button" class="result-slide-nav prev" data-result-slide-prev aria-label="Önceki görsel">‹</button><button type="button" class="result-slide-nav next" data-result-slide-next aria-label="Sonraki görsel">›</button><span class="result-slide-count">1 / '+images.length+'</span>':'')+
@@ -1324,7 +1333,15 @@ async function initHome(){
   district.addEventListener("change",filter);
   sector.addEventListener("change",()=>{chips.forEach(x=>x.classList.toggle("active",x.dataset.sector===sector.value));fillSubcategories();filter()});
   subCategory?.addEventListener("change",filter);
-  search.addEventListener("input",()=>{if(search.value.trim())filter();else if(!city.value&&!sector.value)showInitialState()});
+  let searchInputTimer=null;
+  search.addEventListener("input",()=>{
+    clearTimeout(searchInputTimer);
+    if(!search.value.trim()){
+      if(!city.value&&!sector.value)showInitialState();
+      return;
+    }
+    searchInputTimer=setTimeout(filter,220);
+  });
 
   const submitSearch=()=>{
     if(!search.value.trim()){
