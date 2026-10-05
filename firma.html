@@ -253,6 +253,21 @@
       return descriptions[sub]||"İhtiyacınıza yönelik hizmet ve çözümler sunar.";
     }
 
+    function formatFirmTitle(value){
+      const text=String(value||"").replace(/\s+/g," ").trim();
+      if(!text)return "";
+      const keepUpper=new Set(["SRC","MEB","LGS","TYT","AYT","YKS","KPSS","DGS","AÖF","MYO","VIP","A1","A2","B","B1","C","C1","D","D1","BE","CE","DE"]);
+      return text.split(" ").map(word=>{
+        const bare=word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
+        if(!bare)return word;
+        const upper=bare.toLocaleUpperCase("tr-TR");
+        if(keepUpper.has(upper))return word.replace(bare,upper);
+        const low=bare.toLocaleLowerCase("tr-TR");
+        const fixed=low.charAt(0).toLocaleUpperCase("tr-TR")+low.slice(1);
+        return word.replace(bare,fixed);
+      }).join(" ");
+    }
+
     function normalizeQuickProfileData(data){
       const d={...data};
       let name=String(d.name||"Firma").trim();
@@ -289,7 +304,7 @@
         address="";
       }
 
-      d.name=name||d.name||"Firma";
+      d.name=formatFirmTitle(name||d.name||"Firma");
       d.phone=phone;
       const addrLoc=locationFromAddress(address);
       if(addrLoc){
