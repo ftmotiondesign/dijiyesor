@@ -105,30 +105,30 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
             <div class="actions"><button type="submit" class="btn primary">Değişiklikleri Kaydet</button></div>
           </form>
         </section>
-      </section>
 
-      <section id="driverProfileSection" class="card driver-special hidden">
-        <div class="card-head"><div><span class="kicker">SÜRÜCÜ KURSUNA ÖZEL</span><h2>Sürücü Kursu Web Profili</h2><p>Bu alanlar yalnızca sürücü kursu profilinizde gösterilir.</p></div></div>
-        <form id="driverProfileForm">
-          <label>Verilen ehliyet sınıfları</label>
-          <div class="license-grid">
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A1">A1</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A2">A2</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A">A</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="B">B</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="BE">BE</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="C">C</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="CE">CE</label>
-            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="D">D</label>
-          </div>
-          <div class="form-grid">
-            <label>Kayıt / dönem bilgisi<input id="driverRegistrationNote" placeholder="Örn. Ekim dönemi kayıtları devam ediyor"></label>
-            <label>Direksiyon eğitimi<input id="driverTrainingNote" placeholder="Örn. Birebir direksiyon eğitimi"></label>
-          </div>
-          <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Manuel ve otomatik araç seçenekleri"></label>
-          <div id="driverProfileMessage" class="notice hidden"></div>
-          <div class="actions"><button type="submit" class="btn primary">Sürücü Kursu Bilgilerini Kaydet</button></div>
-        </form>
+        <section id="driverProfileSection" class="card driver-special hidden">
+          <div class="card-head"><div><span class="kicker">SÜRÜCÜ KURSUNA ÖZEL</span><h2>Sürücü Kursu Web Profili</h2><p>Bu alanlar yalnızca sürücü kursu profilinizde gösterilir.</p></div></div>
+          <form id="driverProfileForm">
+            <label>Verilen ehliyet sınıfları</label>
+            <div class="license-grid">
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A1">A1</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A2">A2</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A">A</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="B">B</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="BE">BE</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="C">C</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="CE">CE</label>
+              <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="D">D</label>
+            </div>
+            <div class="form-grid">
+              <label>Kayıt / dönem bilgisi<input id="driverRegistrationNote" placeholder="Örn. Ekim dönemi kayıtları devam ediyor"></label>
+              <label>Direksiyon eğitimi<input id="driverTrainingNote" placeholder="Örn. Birebir direksiyon eğitimi"></label>
+            </div>
+            <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Manuel ve otomatik araç seçenekleri"></label>
+            <div id="driverProfileMessage" class="notice hidden"></div>
+            <div class="actions"><button type="submit" class="btn primary">Sürücü Kursu Bilgilerini Kaydet</button></div>
+          </form>
+        </section>
       </section>
 
       <section class="view" data-panel="visuals">
@@ -229,7 +229,11 @@ function fill(){
  $("sideFirmName").textContent=name;$("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
  $("welcomeTitle").textContent=name+" paneli";$("statStatus").textContent=String(institution?.status||"active")==="passive"?"Pasif":"Aktif";$("statLocation").textContent=[institution?.city,institution?.district].filter(Boolean).join(" / ")||"-";
  $("name").value=name;$("phone").value=institution?.phone||"";$("whatsapp").value=institution?.whatsapp||"";$("website").value=institution?.website||"";$("instagram").value=institution?.instagram||"";$("locationReadonly").value=[institution?.city,institution?.district].filter(Boolean).join(" / ");$("address").value=institution?.address||"";$("description").value=institution?.description||"";
- const isDriver=String(institution?.subCategory||institution?.category||"")==="surucu";
+ const driverHaystack=[institution?.subCategory,institution?.category,institution?.mainCategory,institution?.name,institution?.googleCategory]
+   .filter(Boolean).join(" ").toLocaleLowerCase("tr-TR");
+ const isDriver=String(institution?.subCategory||"")==="surucu"
+   || String(institution?.category||"")==="surucu"
+   || /sürücü kurs|surucu kurs|motorlu taşıt sürücü|motorlu tasit surucu|ehliyet kurs/.test(driverHaystack);
  $("driverProfileSection")?.classList.toggle("hidden",!isDriver);
  if(isDriver){
    const selected=Array.isArray(institution?.driverLicenseClasses)?institution.driverLicenseClasses:[];
