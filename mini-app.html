@@ -60,7 +60,7 @@ const instaHref=v=>{let x=String(v||"").trim();if(!x)return"";if(/instagram\.com
 const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
 const idParam=new URLSearchParams(location.search).get("id");
 
-function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
+function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}\nfunction displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}
 
 async function findFirm(){
   if(idParam){const s=await db.collection("institutions").doc(idParam).get();if(s.exists)return{id:s.id,...s.data()}}
@@ -119,7 +119,7 @@ function render(d){
   $("heroImg").src=hero;$("heroImg").alt=(d.name||"Firma")+" kapak";
   const logo=d.logoUrl||d.profileImageUrl||"";
   $("logo").innerHTML=logo?'<img src="'+esc(logo)+'" alt="'+esc(d.name||"Firma")+' logo">':'<span class="logo-fallback">'+esc((d.name||"D").trim().charAt(0).toLocaleUpperCase("tr-TR"))+'</span>';
-  $("name").textContent=d.name||"Firma";
+  $("name").textContent=displayFirmName(d);
   $("subtitle").textContent=d.shortDescription||d.categoryLabel||d.description||"";
   $("place").textContent=[d.district,d.city].filter(Boolean).join(" · ");
   const phone=phoneHref(d.phone),wa=waHref(d.whatsapp||d.phone),ig=instaHref(d.instagram),map=mapUrl(d),web=safeUrl(d.website),review=reviewUrl(d);
@@ -135,8 +135,8 @@ function render(d){
   const photos=[...(Array.isArray(d.galleryUrls)?d.galleryUrls:[]),...(Array.isArray(d.photos)?d.photos:[])].filter(Boolean).slice(0,9);
   if(photos.length){$("gallery").innerHTML=photos.map((u,i)=>'<img src="'+esc(u)+'" loading="lazy" alt="'+esc((d.name||"Firma")+" fotoğraf "+(i+1))+'">').join("");$("gallerySec").classList.remove("hidden")}
   $("saveContact").onclick=()=>{const blob=new Blob([vcard(d)],{type:"text/vcard;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=slugify(d.name||"firma")+".vcf";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
-  $("shareBtn").onclick=async()=>{const data={title:d.name||"DijiyeSor",text:(d.name||"Firma")+" iletişim bilgileri",url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert("Bağlantı kopyalandı.")}}catch(_){}};
-  document.title=(d.name||"Firma")+" | DijiyeSor";
+  $("shareBtn").onclick=async()=>{const data={title:displayFirmName(d)||"DijiyeSor",text:displayFirmName(d)+" iletişim bilgileri",url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert("Bağlantı kopyalandı.")}}catch(_){}};
+  document.title=displayFirmName(d)+" | DijiyeSor";
   $("loading").classList.add("hidden");$("app").classList.remove("hidden");
 }
 (async()=>{try{const d=await findFirm();if(!d)throw new Error("not-found");render(d)}catch(e){$("loading").className="error";$("loading").innerHTML='<div><strong>Firma bulunamadı.</strong><p>Bu firma bağlantısı henüz oluşturulmamış olabilir.</p><a href="/">DijiyeSor ana sayfasına dön</a></div>'}})();
