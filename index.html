@@ -316,6 +316,9 @@
 
     const searchSuggestions = document.getElementById('searchSuggestions');
     let activeSuggestionIndex = -1;
+    let firmSuggestionTimer = null;
+    let firmSuggestionRequest = 0;
+    const firmSuggestionCache = new Map();
 
     function normalizeSuggestionText(value){
       return String(value||'').toLocaleLowerCase('tr-TR')
@@ -343,40 +346,114 @@
       searchInput.setAttribute('aria-expanded','false');
     }
 
-    function renderSearchSuggestions(){
+    function titleCaseSearchPrefix(value){
+      return String(value||'').trim().toLocaleLowerCase('tr-TR').replace(/(^|\s)\S/g,m=>m.toLocaleUpperCase('tr-TR'));
+    }
+
+    async function fetchFirmSuggestions(raw){
+      const cacheKey=normalizeSuggestionText(raw);
+      if(firmSuggestionCache.has(cacheKey))return firmSuggestionCache.get(cacheKey);
+
+      const prefixes=[raw.trim(),titleCaseSearchPrefix(raw)].filter((v,i,a)=>v&&a.indexOf(v)===i);
+      const rows=new Map();
+
+      await Promise.all(prefixes.map(prefix=>
+        db.collection('institutions')
+          .orderBy('name')
+          .startAt(prefix)
+          .endAt(prefix+'\uf8ff')
+          .limit(8)
+          .get()
+          .then(snap=>{
+            snap.forEach(doc=>{
+              const d=doc.data()||{};
+              if(String(d.status||'active')==='passive')return;
+              rows.set(doc.id,{
+                type:'firm',
+                id:doc.id,
+                label:String(d.name||'Firma'),
+                city:String(d.city||''),
+                district:String(d.district||''),
+                category:String(d.subCategory||d.category||d.mainCategory||'Firma')
+              });
+            });
+          })
+          .catch(()=>{})
+      ));
+
+      const q=normalizeSuggestionText(raw);
+      const result=[...rows.values()]
+        .filter(item=>normalizeSuggestionText(item.label).includes(q))
+        .sort((a,b)=>{
+          const an=normalizeSuggestionText(a.label),bn=normalizeSuggestionText(b.label);
+          const as=an.startsWith(q)?0:1,bs=bn.startsWith(q)?0:1;
+          return as-bs||a.label.localeCompare(b.label,'tr');
+        })
+        .slice(0,6);
+
+      firmSuggestionCache.set(cacheKey,result);
+      if(firmSuggestionCache.size>60)firmSuggestionCache.delete(firmSuggestionCache.keys().next().value);
+      return result;
+    }
+
+    async function renderSearchSuggestions(){
       if(!searchSuggestions)return;
       const raw=searchInput.value.trim();
       const q=normalizeSuggestionText(raw);
       if(q.length<2){closeSearchSuggestions();return}
 
-      const matches=searchSuggestionData
+      const requestId=++firmSuggestionRequest;
+      const firms=await fetchFirmSuggestions(raw);
+      if(requestId!==firmSuggestionRequest || normalizeSuggestionText(searchInput.value)!==q)return;
+
+      const categoryMatches=searchSuggestionData
         .map(item=>{
           const label=normalizeSuggestionText(item.label);
           let score=0;
           if(label.startsWith(q))score=300;
           else if(label.split(' ').some(word=>word.startsWith(q)))score=220;
           else if(label.includes(q))score=150;
-          return {...item,score};
+          return {...item,type:'category',score};
         })
         .filter(item=>item.score>0)
         .sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label,'tr'))
-        .slice(0,6);
+        .slice(0,Math.max(0,6-firms.length));
 
+      const matches=[...firms,...categoryMatches];
       if(!matches.length){closeSearchSuggestions();return}
 
-      searchSuggestions.innerHTML=matches.map((item,index)=>
-        '<button type="button" class="search-suggestion-item" role="option" data-suggestion-index="'+index+'" data-sector="'+item.sector+'" data-sub="'+item.sub+'" data-label="'+item.label.replace(/"/g,'&quot;')+'">'+
+      searchSuggestions.innerHTML=matches.map((item,index)=>{
+        if(item.type==='firm'){
+          const location=[item.city,item.district].filter(Boolean).join(' / ');
+          return '<button type="button" class="search-suggestion-item" role="option" data-suggestion-index="'+index+'" data-type="firm" data-firm-id="'+item.id+'">'+
+            '<span class="search-suggestion-icon">🏢</span>'+
+            '<span class="search-suggestion-copy"><strong>'+item.label.replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))+'</strong><small>'+(location||'Firma profili')+'</small></span>'+
+          '</button>';
+        }
+        return '<button type="button" class="search-suggestion-item" role="option" data-suggestion-index="'+index+'" data-type="category" data-sector="'+item.sector+'" data-sub="'+item.sub+'" data-label="'+item.label.replace(/"/g,'&quot;')+'">'+
           '<span class="search-suggestion-icon">⌕</span>'+
           '<span class="search-suggestion-copy"><strong>'+item.label+'</strong><small>'+item.sectorTitle+'</small></span>'+
-        '</button>'
-      ).join('');
+        '</button>';
+      }).join('');
       searchSuggestions.classList.remove('hidden');
       searchInput.setAttribute('aria-expanded','true');
       activeSuggestionIndex=-1;
     }
 
+    function scheduleSearchSuggestions(){
+      clearTimeout(firmSuggestionTimer);
+      const q=normalizeSuggestionText(searchInput.value);
+      if(q.length<2){closeSearchSuggestions();return}
+      firmSuggestionTimer=setTimeout(renderSearchSuggestions,180);
+    }
+
     function chooseSearchSuggestion(button){
       if(!button)return;
+      if(button.dataset.type==='firm' && button.dataset.firmId){
+        closeSearchSuggestions();
+        window.location.href='firma.html?id='+encodeURIComponent(button.dataset.firmId);
+        return;
+      }
       const label=button.dataset.label||button.querySelector('strong')?.textContent||'';
       searchInput.value=label;
       closeSearchSuggestions();
@@ -724,8 +801,8 @@
 
     searchBtn.addEventListener('click', ()=>{ closeSearchSuggestions(); goSearch(); });
 
-    searchInput.addEventListener('input', renderSearchSuggestions);
-    searchInput.addEventListener('focus', renderSearchSuggestions);
+    searchInput.addEventListener('input', scheduleSearchSuggestions);
+    searchInput.addEventListener('focus', scheduleSearchSuggestions);
     searchInput.addEventListener('keydown', event => {
       const items=[...document.querySelectorAll('.search-suggestion-item')];
       if(event.key==='ArrowDown' && items.length){
