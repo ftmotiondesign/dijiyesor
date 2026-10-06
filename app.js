@@ -988,6 +988,7 @@ function render(data,{keepLimit=false}={}){
         '<div class="result-card-copy">'+
           '<div class="result-name-row"><h2>'+esc(i.name)+'</h2>'+(i.sponsored?'<span class="mini-sponsor">Sponsor</span>':'')+badges+'</div>'+
           '<div class="result-location">📍 '+esc(loc)+'</div>'+
+          (i.phone?'<a class="result-phone" href="tel:'+esc(String(i.phone).replace(/\s+/g,""))+'">☎ '+esc(i.phone)+'</a>':'')+
           '<span class="result-category">'+esc(categoryLabels[i.mainCategory]||"Diğer")+'</span>'+
         '</div>'+
         resultCardVisual(i)+
