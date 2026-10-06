@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profili Sahiplen | DijiyeSor</title>
+<meta name="robots" content="noindex,follow">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f7f9fc;color:#172139}
+.top{height:64px;background:#fff;border-bottom:1px solid #e7edf5;display:flex;align-items:center;padding:0 22px}
+.brand{display:flex;align-items:center;gap:9px;color:#172139;text-decoration:none;font-weight:900}.mark{width:34px;height:34px;border-radius:10px;background:#1677ff;color:#fff;display:grid;place-items:center}
+.wrap{width:min(760px,calc(100% - 28px));margin:34px auto 60px}.card{background:#fff;border:1px solid #e3e9f1;border-radius:22px;padding:26px;box-shadow:0 10px 30px rgba(25,50,80,.06)}
+.kicker{font-size:11px;font-weight:900;color:#1677ff;letter-spacing:.12em}.card h1{margin:8px 0 8px;font-size:28px}.lead{margin:0 0 20px;color:#6f7b91;line-height:1.6}
+.firm{padding:14px;border-radius:14px;background:#f7faff;border:1px solid #e1ebf8;margin-bottom:20px}.firm strong{display:block}.firm span{display:block;margin-top:4px;color:#768297;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#4b5870}input,select{height:44px;border:1px solid #dce4ef;border-radius:11px;padding:0 12px;font:inherit;outline:none}input:focus,select:focus{border-color:#1677ff;box-shadow:0 0 0 3px rgba(22,119,255,.08)}
+button{width:100%;height:46px;border:0;border-radius:12px;background:#1677ff;color:#fff;font-weight:900;cursor:pointer}.note{margin-top:12px;color:#8792a4;font-size:11px;line-height:1.5}.msg{margin-top:14px;padding:12px;border-radius:10px;background:#f3f6fa;color:#56637a;font-size:13px}.msg.success{background:#edf9f1;color:#166534}.msg.error{background:#fff1f2;color:#b42318}
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}.benefit{padding:12px;border:1px solid #edf1f5;border-radius:12px;background:#fbfcfe}.benefit strong{font-size:12px}.benefit span{display:block;margin-top:4px;color:#8a94a6;font-size:11px;line-height:1.4}
+@media(max-width:640px){.grid,.benefits{grid-template-columns:1fr}.full{grid-column:auto}.card{padding:20px}.card h1{font-size:24px}}
+</style>
+</head>
+<body>
+<header class="top"><a class="brand" href="index.html"><span class="mark">D</span><span>DijiyeSor</span></a></header>
+<main class="wrap">
+<section class="card">
+<span class="kicker">PROFİL SAHİPLENME</span>
+<h1>Firmanızın kontrolünü alın</h1>
+<p class="lead">Profilinizi doğrulayın; firma bilgilerinizi yönetin, doğrulanmış firma rozeti alın ve ileride görüntülenme/iletişim istatistiklerinizi takip edin.</p>
+<div id="firmBox" class="firm"><strong>Firma bilgileri yükleniyor...</strong></div>
+<div class="benefits">
+<div class="benefit"><strong>✓ Doğrulanmış Firma</strong><span>Profilinizde güven rozeti görünür.</span></div>
+<div class="benefit"><strong>✎ Bilgileri yönetin</strong><span>Telefon, fotoğraf, açıklama ve kampanyaları güncelleyin.</span></div>
+<div class="benefit"><strong>◉ Performansı görün</strong><span>Görüntülenme ve iletişim hareketlerini takip etmeye hazırlanın.</span></div>
+</div>
+<form id="claimForm" class="grid">
+<label>Yetkili adı<input id="contactName" required></label>
+<label>Telefon<input id="phone" inputmode="tel" required></label>
+<label class="full">E-posta<input id="email" type="email" required></label>
+<label class="full">Şifre<input id="password" type="password" minlength="8" required placeholder="En az 8 karakter"></label>
+<label class="full">İşletmedeki göreviniz<select id="role"><option>İşletme sahibi</option><option>Yetkili yönetici</option><option>Çalışan / temsilci</option></select></label>
+<div class="full"><button id="submitBtn" type="submit">Profili Sahiplenme Talebi Gönder</button></div>
+</form>
+<div id="message" class="msg">Talep yönetici kontrolünden sonra aktif edilir. Onay sonrası bu hesapla kurum paneline giriş yapabilirsiniz.</div>
+<p class="note">Doğrulama sırasında işletmeyle bağlantınızı teyit etmek için telefon veya e-posta üzerinden iletişime geçilebilir.</p>
+</section>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const app=firebase.apps.find(a=>a.name==="dijiyesorClaim")||firebase.initializeApp(firebaseConfig,"dijiyesorClaim");
+const auth=app.auth(),db=app.firestore();
+const id=new URLSearchParams(location.search).get("id")||"";
+const box=document.getElementById("firmBox"),msg=document.getElementById("message"),btn=document.getElementById("submitBtn");
+let firm=null;
+const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+async function loadFirm(){
+ if(!id){box.innerHTML="<strong>Firma seçilmedi.</strong>";btn.disabled=true;return}
+ try{
+  const snap=await db.collection("institutions").doc(id).get();
+  if(!snap.exists)throw new Error("Firma bulunamadı.");
+  firm={id:snap.id,...snap.data()};
+  box.innerHTML="<strong>"+esc(firm.name||"Firma")+"</strong><span>"+esc([firm.city,firm.district,firm.phone].filter(Boolean).join(" · "))+"</span>";
+ }catch(e){box.innerHTML="<strong>Firma bilgisine ulaşılamadı.</strong>";btn.disabled=true}
+}
+document.getElementById("claimForm").addEventListener("submit",async e=>{
+ e.preventDefault(); if(!firm)return;
+ const email=document.getElementById("email").value.trim().toLowerCase();
+ const password=document.getElementById("password").value;
+ const contactName=document.getElementById("contactName").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const role=document.getElementById("role").value;
+ btn.disabled=true;btn.textContent="Gönderiliyor...";msg.className="msg";msg.textContent="Hesabınız ve sahiplenme talebiniz oluşturuluyor...";
+ let user=null;
+ try{
+  if(auth.currentUser)await auth.signOut();
+  const cred=await auth.createUserWithEmailAndPassword(email,password);user=cred.user;
+  const ref=db.collection("institutionApplications").doc();
+  const date=new Date().toISOString();
+  await ref.set({
+    applicationType:"claim",
+    source:"profile-claim",
+    requestedInstitutionId:id,
+    name:firm.name||"Firma",
+    mainCategory:firm.mainCategory||"diger",
+    subCategory:firm.subCategory||firm.category||"",
+    category:firm.category||firm.subCategory||"",
+    city:firm.city||"",
+    district:firm.district||"",
+    address:firm.address||"",
+    phone:phone||firm.phone||"",
+    contactName,
+    accountEmail:email,
+    authUid:user.uid,
+    claimRole:role,
+    status:"new",
+    date
+  });
+  await db.collection("institutionUsers").doc(user.uid).set({
+    email,
+    institutionId:id,
+    institutionName:firm.name||"Firma",
+    contactName,
+    status:"pending",
+    applicationId:ref.id,
+    date
+  });
+  await auth.signOut();
+  msg.className="msg success";
+  msg.innerHTML="<strong>Talebiniz alındı.</strong><br>Doğrulama tamamlandığında hesabınız aktif edilecek.";
+  e.target.reset();btn.textContent="Talep Gönderildi";
+ }catch(err){
+  console.error(err);
+  if(user){try{await user.delete()}catch(_){}}
+  msg.className="msg error";
+  const map={"auth/email-already-in-use":"Bu e-posta ile daha önce hesap oluşturulmuş.","auth/invalid-email":"Geçerli bir e-posta girin.","auth/weak-password":"Şifre en az 8 karakter olmalı."};
+  msg.textContent=map[err.code]||err.message||"Talep gönderilemedi.";
+  btn.disabled=false;btn.textContent="Profili Sahiplenme Talebi Gönder";
+ }
+});
+loadFirm();
+</script>
+</body>
+</html>
