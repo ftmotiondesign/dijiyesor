@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-7-driver-web">
+  <link rel="stylesheet" href="firma.css?v=20261006-8-no-auto-about">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -363,34 +363,7 @@
     }
 
     function automaticProfileDescription(d){
-      const sub=String(d.subCategory||d.category||"").trim();
-      const descriptions={
-        surucu:"Ehliyet eğitimi ve direksiyon dersleri sunar.",
-        kres:"Okul öncesi eğitim ve çocuk gelişimi hizmetleri sunar.",
-        dershane:"Sınav hazırlık ve akademik destek programları sunar.",
-        yurt:"Öğrencilere konaklama ve yurt hizmetleri sunar.",
-        oto_servis:"Araç bakım, onarım ve teknik servis hizmetleri sunar.",
-        ekspertiz:"Araç ekspertiz ve kontrol hizmetleri sunar.",
-        kafe:"Kafe ve yiyecek-içecek hizmetleri sunar.",
-        restoran:"Yeme-içme ve restoran hizmetleri sunar.",
-        dis_klinigi:"Ağız ve diş sağlığı hizmetleri sunar.",
-        psikolog:"Psikolojik danışmanlık ve destek hizmetleri sunar.",
-        guzellik:"Güzellik ve kişisel bakım hizmetleri sunar.",
-        kuafor:"Saç bakım ve kuaförlük hizmetleri sunar.",
-        mobilya:"Mobilya ve yaşam alanı çözümleri sunar.",
-        emlak_ofisi:"Gayrimenkul danışmanlığı ve emlak hizmetleri sunar.",
-        otel:"Konaklama ve misafir ağırlama hizmetleri sunar.",
-        fotograf:"Fotoğraf çekimi ve görsel hizmetler sunar.",
-        video:"Video çekimi ve prodüksiyon hizmetleri sunar.",
-        nakliyat:"Taşımacılık ve nakliye hizmetleri sunar.",
-        hukuk:"Hukuki danışmanlık ve avukatlık hizmetleri sunar.",
-        muhasebe:"Muhasebe ve mali müşavirlik hizmetleri sunar.",
-        web:"Web tasarım ve dijital çözümler sunar.",
-        sosyal_medya:"Sosyal medya yönetimi ve dijital iletişim hizmetleri sunar.",
-        veteriner:"Veterinerlik ve hayvan sağlığı hizmetleri sunar.",
-        market:"Market ve günlük ihtiyaç ürünleri sunar."
-      };
-      return descriptions[sub]||"İhtiyacınıza yönelik hizmet ve çözümler sunar.";
+      return "";
     }
 
     function formatFirmTitle(value){
@@ -487,8 +460,8 @@
         && /\bişletmesidir\.?\s*$/i.test(storedDescription);
       const loc=[d.district,d.city].filter(Boolean).join(", ");
 
-      if(!storedDescription || autoDescription){
-        d.description=automaticProfileDescription(d);
+      if(autoDescription){
+        d.description="";
       }
 
       const storedWa=String(d.whatsapp||"").trim();
@@ -736,10 +709,10 @@
 
           '<div class="profile-layout">'+
             '<div class="profile-content">'+
-              '<section class="section-card">'+
+              (String(d.description||"").trim()?'<section class="section-card">'+
                 '<div class="section-title"><div><span>HAKKINDA</span><h2>Firma hakkında</h2></div></div>'+
-                '<p class="about-text">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p>'+
-              '</section>'+
+                '<p class="about-text">'+esc(d.description)+'</p>'+
+              '</section>':'')+
 
               buildDriverCourseSection(d)+
               buildCampaignSection(d)+
