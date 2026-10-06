@@ -124,7 +124,18 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
               <label>Kayıt / dönem bilgisi<input id="driverRegistrationNote" placeholder="Örn. Ekim dönemi kayıtları devam ediyor"></label>
               <label>Direksiyon eğitimi<input id="driverTrainingNote" placeholder="Örn. Birebir direksiyon eğitimi"></label>
             </div>
-            <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Manuel ve otomatik araç seçenekleri"></label>
+            <div class="form-grid">
+              <label>Vites seçeneği
+                <select id="driverTransmission">
+                  <option value="">Belirtilmedi</option>
+                  <option value="manual">Manuel</option>
+                  <option value="automatic">Otomatik</option>
+                  <option value="both">Manuel + Otomatik</option>
+                </select>
+              </label>
+              <label>Teorik / E-sınav eğitimi<input id="driverTheoryNote" placeholder="Örn. E-sınav hazırlık desteği verilir"></label>
+            </div>
+            <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Yeni model eğitim araçları"></label>
             <div id="driverProfileMessage" class="notice hidden"></div>
             <div class="actions"><button type="submit" class="btn primary">Sürücü Kursu Bilgilerini Kaydet</button></div>
           </form>
@@ -240,6 +251,8 @@ function fill(){
    document.querySelectorAll('input[name="driverLicenseClass"]').forEach(x=>x.checked=selected.includes(x.value));
    $("driverRegistrationNote").value=institution?.driverRegistrationNote||"";
    $("driverTrainingNote").value=institution?.driverTrainingNote||"";
+   $("driverTransmission").value=institution?.driverTransmission||"";
+   $("driverTheoryNote").value=institution?.driverTheoryNote||"";
    $("driverVehicleInfo").value=institution?.driverVehicleInfo||"";
  }
  renderImage("logoPreview",institution?.logoUrl,"Logo yok");renderImage("coverPreview",institution?.coverUrl,"Kapak yok");
@@ -303,6 +316,8 @@ $("driverProfileForm")?.addEventListener("submit",async e=>{
     driverLicenseClasses,
     driverRegistrationNote:$("driverRegistrationNote").value.trim(),
     driverTrainingNote:$("driverTrainingNote").value.trim(),
+    driverTransmission:$("driverTransmission").value,
+    driverTheoryNote:$("driverTheoryNote").value.trim(),
     driverVehicleInfo:$("driverVehicleInfo").value.trim()
   });
   setNotice("driverProfileMessage","Sürücü kursuna özel bilgiler kaydedildi.","success");
