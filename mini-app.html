@@ -57,7 +57,8 @@ const safeUrl=v=>{let x=String(v||"").trim();if(!x)return"";return /^https?:\/\/
 const phoneHref=v=>{const x=String(v||"").replace(/[^\d+]/g,"");return x?"tel:"+x:""};
 const waHref=v=>{let x=String(v||"").replace(/\D/g,"").replace(/^90/,"").replace(/^0/,"");return x?"https://wa.me/90"+x:""};
 const instaHref=v=>{let x=String(v||"").trim();if(!x)return"";if(/instagram\.com/i.test(x))return safeUrl(x);return"https://instagram.com/"+x.replace(/^@/,"")};
-const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
+const rawRoute=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
+const routeSlug=rawRoute.replace(/^qr\//i,"");
 const idParam=new URLSearchParams(location.search).get("id");
 
 function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
