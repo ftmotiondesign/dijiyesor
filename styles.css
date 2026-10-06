@@ -559,3 +559,69 @@ button,input,select{font:inherit}
   .home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .home-quick-chip{justify-content:flex-start;padding:10px 11px;font-size:10px}
 }
+
+
+/* Popüler sektörler - profesyonel kart görünümü */
+.seo-sector-links{
+  max-width:980px!important;
+  margin:32px auto 0!important;
+  padding:0 18px 34px!important;
+}
+.seo-sector-links h2{
+  margin:0 0 5px!important;
+  font-size:19px!important;
+  font-weight:800!important;
+  color:#182033!important;
+  letter-spacing:-.2px;
+}
+.seo-sector-links p{
+  margin:0 0 16px!important;
+  color:#8491a7!important;
+  font-size:13px!important;
+}
+.seo-sector-links nav{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:9px!important;
+}
+.seo-sector-links nav a{
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  border:1px solid #e4eaf2;
+  border-radius:12px;
+  background:#fff;
+  color:#27364b;
+  font-size:13px;
+  font-weight:700;
+  text-decoration:none;
+  position:relative;
+  transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease;
+}
+.seo-sector-links nav a::after{
+  content:"›";
+  margin-left:auto;
+  color:#aab5c6;
+  font-size:20px;
+  font-weight:400;
+  line-height:1;
+}
+.seo-sector-links nav a:hover{
+  border-color:#bcd6ff;
+  background:#fbfdff;
+  box-shadow:0 6px 18px rgba(26,84,160,.07);
+  transform:translateY(-2px);
+}
+.seo-sector-links nav a:hover::after{
+  color:#1677ff;
+}
+@media(max-width:800px){
+  .seo-sector-links{margin-top:28px!important;padding:0 16px 28px!important}
+  .seo-sector-links nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:430px){
+  .seo-sector-links nav a{min-height:50px;padding:0 11px;font-size:12px}
+  .seo-sector-links h2{font-size:18px!important}
+  .seo-sector-links p{font-size:12px!important}
+}
