@@ -3,7 +3,7 @@
     {
       "source": "functions",
       "codebase": "default",
-      "runtime": "nodejs24",
+      "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
         ".git",
@@ -18,27 +18,28 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/sitemap-firmalar.xml",
-        "function": {
-          "functionId": "firmSitemap",
-          "region": "europe-west1"
-        }
-      }
-    ],
-    "headers": [
-      {
-        "source": "**/*.@(png|jpg|jpeg|webp|gif|svg)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public,max-age=604800"
-          }
-        ]
-      }
+      "**/node_modules/**",
+      "functions/**",
+      "android/**",
+      "ios/**",
+      "windows/**",
+      "linux/**",
+      "macos/**",
+      "build/**",
+      ".dart_tool/**",
+      ".idea/**",
+      "*.exe",
+      "**/*.exe",
+      "*.bat",
+      "**/*.bat",
+      "*.cmd",
+      "**/*.cmd",
+      "*.com",
+      "**/*.com",
+      "*.msi",
+      "**/*.msi",
+      "*.ps1",
+      "**/*.ps1"
     ]
   }
 }
