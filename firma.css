@@ -504,3 +504,18 @@ button{font:inherit}
 @media(max-width:720px){
   .driver-course-info{grid-template-columns:1fr}
 }
+
+
+.driver-register-cta{
+  width:100%;
+  margin-top:16px;
+  border:0;
+  border-radius:12px;
+  padding:13px 16px;
+  background:#1677ff;
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+}
+.driver-register-cta:hover{filter:brightness(.96)}
