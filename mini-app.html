@@ -60,7 +60,8 @@ const instaHref=v=>{let x=String(v||"").trim();if(!x)return"";if(/instagram\.com
 const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
 const idParam=new URLSearchParams(location.search).get("id");
 
-function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}\nfunction displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}
+function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
+function displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}
 
 async function findFirm(){
   if(idParam){
