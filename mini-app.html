@@ -61,8 +61,24 @@ const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
 const idParam=new URLSearchParams(location.search).get("id");
 
 function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
-function baseFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const cityEsc=city.replace(/[.*+?^${}()|[\]\\]/g,"\\function displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}");return base.replace(new RegExp("\\s*[-–—|/]?\\s*"+cityEsc+"\\s*$","i"),"").trim()||base}
-function displayFirmName(d){const base=baseFirmName(d);const city=String(d.city||"").trim();return city?base+" - "+city:base}
+function baseFirmName(d){
+  const base=String(d.name||"Firma").trim();
+  const city=String(d.city||"").trim();
+  if(!city)return base;
+  const baseSlug=slugify(base);
+  const citySlug=slugify(city);
+  if(baseSlug===citySlug)return base;
+  if(baseSlug.endsWith("-"+citySlug)){
+    const cut=base.replace(/\s*[-–—|/]?\s*[^-–—|/]+\s*$/,"").trim();
+    return cut||base;
+  }
+  return base;
+}
+function displayFirmName(d){
+  const base=baseFirmName(d);
+  const city=String(d.city||"").trim();
+  return city?base+" - "+city:base;
+}
 
 async function findFirm(){
   if(idParam){
