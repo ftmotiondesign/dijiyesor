@@ -11,10 +11,10 @@
 :root{--bg:#050505;--card:#141414;--line:#343434;--text:#fff;--muted:#b7b7b7;--accent:#ff6b00;--accent2:#ff8a00}
 *{box-sizing:border-box}html{background:#050505}body{margin:0;background:#050505;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
 button,a{font:inherit}.app{width:min(100%,520px);margin:0 auto;min-height:100vh;background:linear-gradient(180deg,#090909 0,#050505 100%);box-shadow:0 0 70px #000}
-.hero{position:relative;height:310px;overflow:hidden;background:#151515}.hero-img{width:100%;height:100%;object-fit:cover;display:block}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03) 20%,rgba(0,0,0,.25) 55%,#050505 100%)}
+.hero{position:relative;height:310px;overflow:hidden;background:radial-gradient(circle at 70% 20%,rgba(255,107,0,.24),transparent 32%),linear-gradient(135deg,#1a1a1a,#080808 65%)}.hero-img{width:100%;height:100%;object-fit:cover;display:none}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03) 20%,rgba(0,0,0,.25) 55%,#050505 100%)}
 .topbar{position:absolute;z-index:3;top:0;left:0;right:0;padding:max(16px,env(safe-area-inset-top)) 18px 0;display:flex;justify-content:space-between;align-items:center}.back,.share{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.34);backdrop-filter:blur(10px);color:#fff;text-decoration:none;display:grid;place-items:center;font-size:22px}
 .brand{position:relative;z-index:2;margin-top:-76px;padding:0 20px 8px;text-align:center}.logo{width:92px;height:92px;margin:0 auto 10px;border-radius:22px;border:3px solid #fff;background:#111;display:grid;place-items:center;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.4)}.logo img{width:100%;height:100%;object-fit:contain;background:#fff}.logo-fallback{font-size:28px;font-weight:950;color:#fff;letter-spacing:-1px}.logo:has(.logo-fallback){background:linear-gradient(135deg,#1b1b1b,#0d0d0d);border-color:#3a3a3a;box-shadow:0 12px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.03)}
-h1{margin:0;font-size:27px;line-height:1.08;font-weight:950;letter-spacing:-.6px;text-transform:uppercase;word-break:normal}.subtitle{margin:9px auto 0;color:#e0e0e0;font-size:14px;line-height:1.45;max-width:430px}.place{margin-top:8px;color:#c7c7c7;font-size:13px;font-weight:700}
+h1{margin:0;font-size:25px;line-height:1.08;font-weight:950;letter-spacing:-.5px;text-transform:uppercase;word-break:normal}.subtitle{margin:9px auto 0;color:#e0e0e0;font-size:14px;line-height:1.45;max-width:430px}.place{margin-top:8px;color:#c7c7c7;font-size:13px;font-weight:700}
 .grid{padding:14px 18px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}.action{min-height:92px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(180deg,#191919,#101010);padding:13px 12px;color:#fff;text-decoration:none;display:flex;align-items:center;gap:11px;box-shadow:inset 0 1px rgba(255,255,255,.03)}.action:active{transform:scale(.985)}.ico{flex:0 0 51px;width:51px;height:51px;border-radius:15px;display:grid;place-items:center;font-weight:900;font-size:25px;color:#fff}.ico.phone,.ico.wa{background:#08c84b}.ico.ig{background:linear-gradient(135deg,#7b2cff,#f51b75,#ff9700)}.ico.map{background:#ef2d2d}.ico.web{background:#1887ee}.ico.review{background:#fff;color:#4285f4;font-size:27px}.copy{min-width:0}.copy strong{display:block;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy small{display:block;margin-top:3px;color:#bcbcbc;font-size:12.5px}
 .save{margin:16px 18px 0;width:calc(100% - 36px);border:0;border-radius:20px;padding:18px 18px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:19px;font-weight:900;box-shadow:0 12px 28px rgba(255,107,0,.24);cursor:pointer}.save span{margin-right:8px}
 .section{padding:22px 18px 0}.section-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}.section-title h2{font-size:19px;margin:0}.section-title small{color:#888}.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.gallery img{width:100%;aspect-ratio:1/1.08;object-fit:cover;border-radius:17px;border:1px solid #2b2b2b;background:#171717}.about{margin:0;color:#c9c9c9;line-height:1.65;font-size:14px;background:#111;border:1px solid #242424;border-radius:18px;padding:16px}
@@ -61,7 +61,8 @@ const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
 const idParam=new URLSearchParams(location.search).get("id");
 
 function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
-function displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}
+function baseFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const cityEsc=city.replace(/[.*+?^${}()|[\]\\]/g,"\\function displayFirmName(d){const base=String(d.name||"Firma").trim();const city=String(d.city||"").trim();if(!city)return base;const b=slugify(base),c=slugify(city);return b.endsWith("-"+c)||b===c?base:base+" - "+city}");return base.replace(new RegExp("\\s*[-–—|/]?\\s*"+cityEsc+"\\s*$","i"),"").trim()||base}
+function displayFirmName(d){const base=baseFirmName(d);const city=String(d.city||"").trim();return city?base+" - "+city:base}
 
 async function findFirm(){
   if(idParam){
@@ -140,27 +141,28 @@ function vcard(d){
 function render(d){
   const hero=[...(Array.isArray(d.coverUrls)?d.coverUrls:[]),d.coverUrl,d.cardImageUrl,...(Array.isArray(d.galleryUrls)?d.galleryUrls:[])].filter(Boolean)[0]||"";
   if(hero){
-    $("heroImg").src=hero;
     $("heroImg").alt=(d.name||"Firma")+" kapak";
+    $("heroImg").onload=()=>{$("heroImg").style.display="block"};
     $("heroImg").onerror=()=>{
       $("heroImg").removeAttribute("src");
       $("heroImg").style.display="none";
       $("heroImg").parentElement.style.background="radial-gradient(circle at 70% 20%,rgba(255,107,0,.24),transparent 32%),linear-gradient(135deg,#1a1a1a,#080808 65%)";
     };
+    $("heroImg").src=hero;
   }else{
     $("heroImg").style.display="none";
     $("heroImg").parentElement.style.background="radial-gradient(circle at 70% 20%,rgba(255,107,0,.24),transparent 32%),linear-gradient(135deg,#1a1a1a,#080808 65%)";
   }
   const logo=d.logoUrl||d.profileImageUrl||"";
-  const initials=String(d.name||"Firma").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
+  const initials=baseFirmName(d).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr-TR");
+  $("logo").innerHTML='<span class="logo-fallback">'+esc(initials||"D")+'</span>';
   if(logo){
-    $("logo").innerHTML='<img id="firmLogoImg" src="'+esc(logo)+'" alt="'+esc(d.name||"Firma")+' logo">';
-    const li=$("firmLogoImg");
-    li.onerror=()=>{$("logo").innerHTML='<span class="logo-fallback">'+esc(initials||"D")+'</span>'};
-  }else{
-    $("logo").innerHTML='<span class="logo-fallback">'+esc(initials||"D")+'</span>';
+    const testImg=new Image();
+    testImg.onload=()=>{$("logo").innerHTML='<img src="'+esc(logo)+'" alt="'+esc(baseFirmName(d))+' logo">'};
+    testImg.onerror=()=>{};
+    testImg.src=logo;
   }
-  $("name").textContent=d.name||"Firma";
+  $("name").textContent=baseFirmName(d);
   $("subtitle").textContent=d.shortDescription||d.categoryLabel||d.description||"";
   $("place").textContent=[d.district,d.city].filter(Boolean).join(" · ");
   const phone=phoneHref(d.phone),wa=waHref(d.whatsapp||d.phone),ig=instaHref(d.instagram),map=mapUrl(d),web=safeUrl(d.website),review=reviewUrl(d);
@@ -175,9 +177,21 @@ function render(d){
   if(d.locationVideoUrl){$("locationVideo").src=safeUrl(d.locationVideoUrl);$("videoSec").classList.remove("hidden")}
   const photos=[...(Array.isArray(d.galleryUrls)?d.galleryUrls:[]),...(Array.isArray(d.photos)?d.photos:[])].filter(Boolean).slice(0,9);
   if(photos.length){
-    $("gallery").innerHTML=photos.map((u,i)=>'<img src="'+esc(u)+'" loading="lazy" alt="'+esc((d.name||"Firma")+" fotoğraf "+(i+1))+'" onerror="this.remove()">').join("");
-    $("gallerySec").classList.remove("hidden");
-    setTimeout(()=>{if(!$("gallery").querySelector("img"))$("gallerySec").classList.add("hidden")},1200);
+    let loadedPhotos=0;
+    $("gallery").innerHTML="";
+    photos.forEach((u,i)=>{
+      const img=new Image();
+      img.loading="lazy";
+      img.alt=baseFirmName(d)+" fotoğraf "+(i+1);
+      img.onload=()=>{
+        loadedPhotos++;
+        $("gallery").appendChild(img);
+        $("gallerySec").classList.remove("hidden");
+      };
+      img.onerror=()=>{};
+      img.src=u;
+    });
+    setTimeout(()=>{if(!loadedPhotos)$("gallerySec").classList.add("hidden")},1800);
   }
   $("saveContact").onclick=()=>{const blob=new Blob([vcard(d)],{type:"text/vcard;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=slugify(d.name||"firma")+".vcf";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
   $("shareBtn").onclick=async()=>{const data={title:displayFirmName(d)||"DijiyeSor",text:displayFirmName(d)+" iletişim bilgileri",url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert("Bağlantı kopyalandı.")}}catch(_){}};
