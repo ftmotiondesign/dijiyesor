@@ -120,3 +120,47 @@
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
+
+/* Home lower content */
+(function(){
+  function addHomeLower(){
+    const page=location.pathname.split("/").pop()||"index.html";
+    if(page!=="index.html" && page!=="") return;
+    const anchor=document.querySelector(".seo-sector-links");
+    if(!anchor || document.querySelector(".home-lower")) return;
+
+    const section=document.createElement("section");
+    section.className="home-lower";
+    section.setAttribute("aria-label","DijiyeSor'u keşfet");
+    section.innerHTML=
+      '<div class="home-lower-intro">'+
+        '<span class="home-lower-kicker">DİJİYESOR</span>'+
+        '<h2>Aradığın işletmeye daha kolay ulaş</h2>'+
+        '<p>Konumunu seç, uygun işletmeleri incele ve ihtiyacına göre karar ver.</p>'+
+      '</div>'+
+      '<div class="home-lower-steps">'+
+        '<div class="home-lower-step"><span class="home-lower-step-no">01</span><div><strong>Konumuna göre ara</strong><p>İl ve ilçe seçerek sana yakın işletmeleri görüntüle.</p></div></div>'+
+        '<div class="home-lower-step"><span class="home-lower-step-no">02</span><div><strong>Kurumları incele</strong><p>Firma bilgileri, konum, fotoğraf ve hizmet detaylarına göz at.</p></div></div>'+
+        '<div class="home-lower-step"><span class="home-lower-step-no">03</span><div><strong>Karşılaştır ve bilgi al</strong><p>Seçenekleri karşılaştır, sana uygun kuruma doğrudan ulaş.</p></div></div>'+
+      '</div>'+
+      '<div class="home-city-strip">'+
+        '<div class="home-city-strip-head"><div><strong>Popüler şehirler</strong><span>Şehrindeki işletmeleri keşfet</span></div></div>'+
+        '<nav class="home-city-links" aria-label="Popüler şehirler">'+
+          '<a href="arama.html?city=%C4%B0stanbul">İstanbul</a>'+
+          '<a href="arama.html?city=Ankara">Ankara</a>'+
+          '<a href="arama.html?city=%C4%B0zmir">İzmir</a>'+
+          '<a href="arama.html?city=Bursa">Bursa</a>'+
+          '<a href="arama.html?city=Antalya">Antalya</a>'+
+          '<a href="arama.html?city=%C3%87anakkale">Çanakkale</a>'+
+        '</nav>'+
+      '</div>'+
+      '<div class="home-business-cta">'+
+        '<div><span>İşletme sahibi misiniz?</span><strong>DijiyeSor’da işletmenizi görünür hale getirin.</strong></div>'+
+        '<a href="firma-ekle.html">İşletme Ekle <span>→</span></a>'+
+      '</div>';
+
+    anchor.insertAdjacentElement("afterend",section);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",addHomeLower);
+  else addHomeLower();
+})();
