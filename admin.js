@@ -842,6 +842,17 @@ function renderFirms(){
 }
 ["firmSearch","firmSector","firmStatus","firmCompleteness"].forEach(id=>$(id)?.addEventListener(id==="firmSearch"?"input":"change",renderFirms));
 
+function isDriverCourseAdminSelection(){
+  const sub=String($("editSubCategory")?.value||"").toLocaleLowerCase("tr-TR");
+  const name=String($("editName")?.value||"").toLocaleLowerCase("tr-TR");
+  return sub==="surucu" || sub.includes("sürücü") || sub.includes("surucu") || name.includes("sürücü kurs") || name.includes("surucu kurs");
+}
+function syncDriverCourseAdminVisibility(){
+  const box=$("driverCourseAdminFields");
+  if(!box)return;
+  box.style.display=isDriverCourseAdminSelection()?"block":"none";
+}
+
 function openFirmModal(id){
   const f=firms.find(x=>x.id===id)||{};
   $("firmModalTitle").textContent=id?"Hızlı Düzenle":"Yeni Firma Ekle";$("firmId").value=id||"";
@@ -853,6 +864,14 @@ function openFirmModal(id){
   $("editCity").value=f.city||"";$("editDistrict").value=f.district||"";$("editPhone").value=f.phone||"";$("editAddress").value=f.address||"";
   $("editWhatsapp").value=f.whatsapp||"";$("editWebsite").value=f.website||"";$("editInstagram").value=f.instagram||"";$("editDescription").value=f.description||"";
   $("editLogoUrl").value=f.logoUrl||"";$("editCoverUrl").value=f.coverUrl||"";$("editTourUrl").value=f.tour360Url||f.virtualTourUrl||f.tour360||"";$("editVideoUrl").value=f.videoUrl||f.youtubeUrl||"";
+  syncDriverCourseAdminVisibility();
+  const selectedDriverClasses=new Set(Array.isArray(f.driverLicenseClasses)?f.driverLicenseClasses.map(x=>String(x).toUpperCase()):[]);
+  document.querySelectorAll("#editDriverLicenseClasses input[type=checkbox]").forEach(cb=>cb.checked=selectedDriverClasses.has(String(cb.value).toUpperCase()));
+  if($("editDriverTransmission"))$("editDriverTransmission").value=f.driverTransmission||"";
+  if($("editDriverRegistrationNote"))$("editDriverRegistrationNote").value=f.driverRegistrationNote||"";
+  if($("editDriverTrainingNote"))$("editDriverTrainingNote").value=f.driverTrainingNote||"";
+  if($("editDriverTheoryNote"))$("editDriverTheoryNote").value=f.driverTheoryNote||"";
+  if($("editDriverVehicleInfo"))$("editDriverVehicleInfo").value=f.driverVehicleInfo||"";
   editingCoverUrls=Array.isArray(f.coverUrls)?f.coverUrls.filter(Boolean):[];
   renderCoverSliderPreview();
   updateFirmLogoPreview(f.logoUrl||"");
@@ -862,7 +881,12 @@ function openFirmModal(id){
   ["logoUploadMessage","coverUploadMessage","videoUploadMessage"].forEach(x=>{if($(x)){ $(x).className="message hidden"; $(x).textContent=""; }});
   $("editVip").checked=Boolean(f.vip);$("editSponsored").checked=Boolean(f.sponsored||f.isSponsored||f.vipSponsored||f.advertiser);
   $("firmFormMessage").className="message hidden";$("firmModal").classList.remove("hidden");
+  syncDriverCourseAdminVisibility();
 }
+$("editSubCategory")?.addEventListener("input",syncDriverCourseAdminVisibility);
+$("editMainCategory")?.addEventListener("change",syncDriverCourseAdminVisibility);
+$("editName")?.addEventListener("input",syncDriverCourseAdminVisibility);
+
 $("quickFirmStatusBtn")?.addEventListener("click",async()=>{
   const id=$("firmId")?.value||"";
   if(!id)return;
@@ -1017,7 +1041,8 @@ $("newFirmBtn").addEventListener("click",()=>openFirmModal());
 
 $("firmForm").addEventListener("submit",async e=>{
   e.preventDefault();const id=$("firmId").value;const msg=$("firmFormMessage");
-  const data={name:$("editName").value.trim(),status:$("editStatus").value,mainCategory:$("editMainCategory").value,subCategory:$("editSubCategory").value.trim(),category:$("editSubCategory").value.trim()||$("editMainCategory").value,city:$("editCity").value.trim(),district:$("editDistrict").value.trim(),phone:$("editPhone").value.trim(),address:$("editAddress").value.trim(),whatsapp:$("editWhatsapp").value.trim(),website:$("editWebsite").value.trim(),instagram:$("editInstagram").value.trim(),description:$("editDescription").value.trim(),logoUrl:$("editLogoUrl").value.trim(),coverUrl:$("editCoverUrl").value.trim(),coverUrls:[...editingCoverUrls],tour360Url:$("editTourUrl").value.trim(),videoUrl:$("editVideoUrl").value.trim(),has360Tour:Boolean($("editTourUrl").value.trim()),vip:$("editVip").checked,sponsored:$("editSponsored").checked,updatedAt:new Date().toISOString()};
+  const driverLicenseClasses=[...document.querySelectorAll("#editDriverLicenseClasses input[type=checkbox]:checked")].map(cb=>cb.value);
+  const data={name:$("editName").value.trim(),status:$("editStatus").value,mainCategory:$("editMainCategory").value,subCategory:$("editSubCategory").value.trim(),category:$("editSubCategory").value.trim()||$("editMainCategory").value,city:$("editCity").value.trim(),district:$("editDistrict").value.trim(),phone:$("editPhone").value.trim(),address:$("editAddress").value.trim(),whatsapp:$("editWhatsapp").value.trim(),website:$("editWebsite").value.trim(),instagram:$("editInstagram").value.trim(),description:$("editDescription").value.trim(),logoUrl:$("editLogoUrl").value.trim(),coverUrl:$("editCoverUrl").value.trim(),coverUrls:[...editingCoverUrls],tour360Url:$("editTourUrl").value.trim(),videoUrl:$("editVideoUrl").value.trim(),has360Tour:Boolean($("editTourUrl").value.trim()),vip:$("editVip").checked,sponsored:$("editSponsored").checked,driverLicenseClasses,driverTransmission:$("editDriverTransmission")?.value||"",driverRegistrationNote:$("editDriverRegistrationNote")?.value.trim()||"",driverTrainingNote:$("editDriverTrainingNote")?.value.trim()||"",driverTheoryNote:$("editDriverTheoryNote")?.value.trim()||"",driverVehicleInfo:$("editDriverVehicleInfo")?.value.trim()||"",updatedAt:new Date().toISOString()};
   try{
     if(id)await db.collection("institutions").doc(id).set(data,{merge:true});
     else await db.collection("institutions").add({...data,createdAt:new Date().toISOString()});
