@@ -1606,3 +1606,18 @@ body.djs-modal-open #resultsHead{
   }
   .compare-table{overflow-x:auto}
 }
+
+
+.result-phone{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin-top:6px;
+  color:#2563eb;
+  font-size:12px;
+  font-weight:800;
+  text-decoration:none;
+}
+.result-phone:hover{
+  text-decoration:underline;
+}
