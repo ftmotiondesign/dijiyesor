@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-12-driver-guide">
+  <link rel="stylesheet" href="firma.css?v=20261006-13-license-details">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -666,22 +666,23 @@
       if(!isDriverCourse(d)) return "";
       const offered=new Set((Array.isArray(d.driverLicenseClasses)?d.driverLicenseClasses:[]).map(x=>String(x||"").toUpperCase().trim()));
       const cards=[
-        ["B","Otomobil ve kamyonet","18 yaş"],
-        ["A1","125 cc’ye kadar motosiklet","16 yaş"],
-        ["A2","35 kW’a kadar motosiklet","18 yaş"],
-        ["M","Motorlu bisiklet (moped)","16 yaş"],
-        ["BE","Otomobil + römork","18 yaş"],
-        ["B1","Dört tekerlekli motosiklet","16 yaş"],
-        ["C1","7.500 kg’a kadar kamyon","18 yaş"],
-        ["F","Lastik tekerlekli traktör","18 yaş"]
+        {code:"B",title:"Otomobil ve kamyonet",age:"18 yaş",scope:"M · B1 · F",req:""},
+        {code:"A1",title:"125 cc’ye kadar motosiklet",age:"16 yaş",scope:"M",req:""},
+        {code:"A2",title:"35 kW’a kadar motosiklet",age:"18 yaş",scope:"M · A1",req:""},
+        {code:"M",title:"Motorlu bisiklet (moped)",age:"16 yaş",scope:"M",req:""},
+        {code:"BE",title:"Otomobil ve kamyonet + römork",age:"18 yaş",scope:"M · B · B1 · F",req:"B ehliyeti"},
+        {code:"B1",title:"Dört tekerlekli motosiklet",age:"16 yaş",scope:"M",req:""},
+        {code:"C1",title:"7.500 kg’a kadar kamyon ve çekici",age:"18 yaş",scope:"M · B · B1 · F",req:"B ehliyeti"},
+        {code:"F",title:"Lastik tekerlekli traktör",age:"18 yaş",scope:"F",req:""}
       ];
-      const cardHtml=cards.map(([code,title,age])=>{
-        const active=!offered.size||offered.has(code);
+      const cardHtml=cards.map(item=>{
+        const active=!offered.size||offered.has(item.code);
         return '<div class="license-guide-card '+(active?'active':'muted')+'">'+
-          '<div class="license-guide-code">'+esc(code)+'</div>'+
-          '<strong>'+esc(title)+'</strong>'+
-          '<span>Min. '+esc(age)+'</span>'+
-          (offered.size?'<small>'+(active?'Bu kurumda mevcut':'Bu kurumda belirtilmemiş')+'</small>':'')+
+          '<div class="license-guide-top"><div class="license-guide-code">'+esc(item.code)+'</div>'+(item.req?'<em>'+esc(item.req)+'</em>':'')+'</div>'+
+          '<strong>'+esc(item.title)+'</strong>'+
+          '<span>Min. '+esc(item.age)+'</span>'+
+          '<div class="license-guide-scope"><small>Kapsadığı</small><b>'+esc(item.scope)+'</b></div>'+
+          (offered.size?'<small class="license-guide-status">'+(active?'Bu kurumda mevcut':'Bu kurumda belirtilmemiş')+'</small>':'')+
         '</div>';
       }).join("");
 
