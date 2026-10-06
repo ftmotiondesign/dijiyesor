@@ -185,11 +185,11 @@
   <div class="head">
     <div class="eyebrow">MİNİ UYGULAMA</div>
     <h2>Firma mini uygulamasını yönet</h2>
-    <p>dijiyesor.com/firma-adi-sehir adresinde açılan mobil sayfanın tüm içeriklerini buradan düzenle.</p>
+    <p>dijiyesor.com/qr/firma-adi-sehir adresinde açılan QR/NFC mini uygulamasının içeriklerini buradan düzenle.</p>
   </div>
   <div class="body">
     <div class="mini-app-urlbox">
-      <code id="miniAppUrl">dijiyesor.com/firma-adi-sehir</code>
+      <code id="miniAppUrl">dijiyesor.com/qr/firma-adi-sehir</code>
       <a id="miniAppOpen" class="btn soft" href="#" target="_blank" rel="noopener">Uygulamayı Aç ↗</a>
     </div>
 
@@ -617,7 +617,7 @@ function fillMiniAppFields(){
   $("miniLocationVideoUrl").value=firm.locationVideoUrl||"";
   $("googleReviewUrl").value=firm.googleReviewUrl||"";
   const slug=firm.slug||makeProfileSlug(firm.name||"",firm.city||"");
-  const url=location.origin+"/"+slug;
+  const url=location.origin+"/qr/"+slug;
   $("miniAppUrl").textContent=url;
   $("miniAppOpen").href=url;
   $("miniAppPreviewBtn").href=url;
