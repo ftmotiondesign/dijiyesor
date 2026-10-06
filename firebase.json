@@ -43,8 +43,12 @@
     ],
     "rewrites": [
       {
-        "source": "/**",
+        "source": "/qr/**",
         "destination": "/mini-app.html"
+      },
+      {
+        "source": "/**",
+        "destination": "/profile-router.html"
       }
     ]
   }
