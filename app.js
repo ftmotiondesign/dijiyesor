@@ -638,6 +638,9 @@ function resultCardVisual(i){
     const legacy=String(i.cardImageUrl||i.coverUrl||"").trim();
     if(legacy)images=[legacy];
   }
+  if(!images.length && Array.isArray(i.galleryUrls)){
+    images=i.galleryUrls.map(x=>String(x||"").trim()).filter(Boolean);
+  }
   images=[...new Set(images)].slice(0,6);
   const fb=resultCardFallback(i);
 
