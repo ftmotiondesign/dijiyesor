@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-6-driver">
+  <link rel="stylesheet" href="firma.css?v=20261006-7-driver-web">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -649,7 +649,8 @@
     }
 
     function isDriverCourse(d){
-      return String(d?.subCategory||d?.category||"")==="surucu";
+      const raw=[d?.subCategory,d?.category,d?.mainCategory,d?.name].filter(Boolean).join(" ").toLocaleLowerCase("tr-TR");
+      return String(d?.subCategory||"")==="surucu" || String(d?.category||"")==="surucu" || raw.includes("sürücü kurs") || raw.includes("surucu kurs") || raw.includes("ehliyet kurs");
     }
 
     function buildDriverCourseSection(d){
@@ -659,16 +660,20 @@
         ? '<div class="driver-license-list">'+classes.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>'
         : '<div class="driver-empty">Ehliyet sınıfları henüz eklenmedi.</div>';
 
+      const transmissionLabel={manual:"Manuel",automatic:"Otomatik",both:"Manuel + Otomatik"}[String(d.driverTransmission||"")]||"";
       const infoRows=[
         d.driverRegistrationNote?'<div><span>KAYIT</span><strong>'+esc(d.driverRegistrationNote)+'</strong></div>':"",
         d.driverTrainingNote?'<div><span>DİREKSİYON EĞİTİMİ</span><strong>'+esc(d.driverTrainingNote)+'</strong></div>':"",
-        d.driverVehicleInfo?'<div><span>ARAÇLAR / EK BİLGİ</span><strong>'+esc(d.driverVehicleInfo)+'</strong></div>':""
+        transmissionLabel?'<div><span>VİTES SEÇENEĞİ</span><strong>'+esc(transmissionLabel)+'</strong></div>':"",
+        d.driverTheoryNote?'<div><span>TEORİK / E-SINAV</span><strong>'+esc(d.driverTheoryNote)+'</strong></div>':"",
+        d.driverVehicleInfo?'<div><span>EĞİTİM ARAÇLARI</span><strong>'+esc(d.driverVehicleInfo)+'</strong></div>':""
       ].filter(Boolean).join("");
 
       return '<section class="section-card driver-course-section">'+
         '<div class="section-title"><div><span>SÜRÜCÜ KURSUNA ÖZEL</span><h2>Ehliyet & Eğitim Bilgileri</h2></div></div>'+
         '<div class="driver-course-intro"><strong>Verilen ehliyet sınıfları</strong>'+chips+'</div>'+
         (infoRows?'<div class="driver-course-info">'+infoRows+'</div>':'')+
+        '<button type="button" class="driver-register-cta bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Kayıt Bilgisi Al</button>'+
       '</section>';
     }
 
