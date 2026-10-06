@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firma Profili | DijiyeSor</title>
+<meta name="robots" content="noindex,follow">
+<style>
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f7f9fc;color:#172033}
+main{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}
+.card{background:#fff;border:1px solid #e5eaf2;border-radius:18px;padding:24px;max-width:420px;width:100%;box-shadow:0 12px 30px rgba(15,23,42,.06)}
+strong{display:block;font-size:18px}.muted{margin-top:7px;color:#7b8798;font-size:13px}.error a{display:inline-block;margin-top:14px;color:#1677ff;font-weight:800;text-decoration:none}
+</style>
+</head>
+<body>
+<main><div id="state" class="card"><strong>Firma profili açılıyor...</strong><div class="muted">DijiyeSor</div></div></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
+const slugify=s=>String(s||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const cities=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
+
+async function findFirm(){
+ if(!routeSlug||routeSlug.includes("/"))return null;
+ for(const field of ["slug","seoSlug","profileSlug"]){
+   try{
+     const q=await db.collection("institutions").where(field,"==",routeSlug).limit(1).get();
+     if(!q.empty)return q.docs[0];
+   }catch(_){}
+ }
+ const city=cities.find(x=>routeSlug.endsWith("-"+slugify(x))||routeSlug===slugify(x));
+ if(city){
+   const citySlug=slugify(city);
+   const baseSlug=routeSlug.endsWith("-"+citySlug)?routeSlug.slice(0,-(citySlug.length+1)):routeSlug;
+   try{
+     const q=await db.collection("institutions").where("city","==",city).get();
+     const hit=q.docs.find(doc=>{
+       const d=doc.data()||{};
+       const nameSlug=slugify(d.name||"");
+       const fullSlug=slugify([d.name,d.city].filter(Boolean).join(" "));
+       return nameSlug===routeSlug||nameSlug===baseSlug||fullSlug===routeSlug;
+     });
+     if(hit)return hit;
+   }catch(_){}
+ }
+ return null;
+}
+
+(async()=>{
+ try{
+  const doc=await findFirm();
+  if(!doc)throw new Error("not-found");
+  location.replace("/firma.html?id="+encodeURIComponent(doc.id));
+ }catch(_){
+  document.getElementById("state").className="card error";
+  document.getElementById("state").innerHTML='<strong>Firma bulunamadı.</strong><div class="muted">Bu firma bağlantısı henüz oluşturulmamış olabilir.</div><a href="/">DijiyeSor ana sayfasına dön</a>';
+ }
+})();
+</script>
+</body>
+</html>
