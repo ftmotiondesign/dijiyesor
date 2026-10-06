@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-11-unified-background">
+  <link rel="stylesheet" href="firma.css?v=20261006-12-driver-guide">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -662,6 +662,62 @@
       '</section>';
     }
 
+    function buildDriverLicenseGuide(d){
+      if(!isDriverCourse(d)) return "";
+      const offered=new Set((Array.isArray(d.driverLicenseClasses)?d.driverLicenseClasses:[]).map(x=>String(x||"").toUpperCase().trim()));
+      const cards=[
+        ["B","Otomobil ve kamyonet","18 yaş"],
+        ["A1","125 cc’ye kadar motosiklet","16 yaş"],
+        ["A2","35 kW’a kadar motosiklet","18 yaş"],
+        ["M","Motorlu bisiklet (moped)","16 yaş"],
+        ["BE","Otomobil + römork","18 yaş"],
+        ["B1","Dört tekerlekli motosiklet","16 yaş"],
+        ["C1","7.500 kg’a kadar kamyon","18 yaş"],
+        ["F","Lastik tekerlekli traktör","18 yaş"]
+      ];
+      const cardHtml=cards.map(([code,title,age])=>{
+        const active=!offered.size||offered.has(code);
+        return '<div class="license-guide-card '+(active?'active':'muted')+'">'+
+          '<div class="license-guide-code">'+esc(code)+'</div>'+
+          '<strong>'+esc(title)+'</strong>'+
+          '<span>Min. '+esc(age)+'</span>'+
+          (offered.size?'<small>'+(active?'Bu kurumda mevcut':'Bu kurumda belirtilmemiş')+'</small>':'')+
+        '</div>';
+      }).join("");
+
+      const phone=telUrl(d.phone);
+      return '<section class="section-card driver-guide-section">'+
+        '<div class="driver-guide-head">'+
+          '<div class="section-title"><div><span>EHLIYET SINIFLARI</span><h2>Hangi ehliyet sana göre?</h2></div></div>'+
+          '<p>En çok tercih edilen sınıfları tek bakışta karşılaştır.</p>'+
+        '</div>'+
+        '<div class="license-guide-grid">'+cardHtml+'</div>'+
+        '<div class="driver-guide-cta">'+
+          '<div><strong>Hangi sınıfın sana uygun olduğundan emin değil misin?</strong><span>Kurumdan kısa bilgi al.</span></div>'+
+          (phone?'<a href="'+esc(phone)+'">☎ Ara</a>':'<button type="button" class="bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'">Bilgi Al</button>')+
+        '</div>'+
+        '<small class="driver-guide-note">* Yaş ve kapsam bilgileri genel bilgilendirme amaçlıdır. Güncel mevzuat ve özel şartlar için kurumdan bilgi alın.</small>'+
+      '</section>';
+    }
+
+    function buildDriverJourneySection(d){
+      if(!isDriverCourse(d)) return "";
+      const steps=[
+        ["1","Ön Kayıt","İhtiyacına uygun sınıfı belirle."],
+        ["2","Evrak & Sağlık","Gerekli belgeleri tamamla."],
+        ["3","Teorik Dersler","Trafik ve araç bilgisini öğren."],
+        ["4","E-Sınav","Teorik sınavı tamamla."],
+        ["5","Direksiyon Eğitimi","Uygulamalı sürüş eğitimini al."],
+        ["6","Sınav & Ehliyet","Direksiyon sınavını geç, ehliyetini al."]
+      ];
+      return '<section class="section-card driver-journey-section">'+
+        '<div class="driver-journey-head"><span>ADIM ADIM EHLİYET</span><h2>Ehliyete giden yol: 6 durak</h2><p>Kayıttan ehliyetine kadar süreç, sade ve anlaşılır şekilde.</p></div>'+
+        '<div class="driver-journey-line">'+steps.map(([n,title,text])=>
+          '<div class="driver-journey-step"><div class="driver-step-number">'+n+'</div><strong>'+title+'</strong><span>'+text+'</span></div>'
+        ).join("")+'</div>'+
+      '</section>';
+    }
+
     async function loadProfile(){
       if(!id){
         root.innerHTML='<section class="profile-error"><strong>Firma bulunamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
@@ -727,6 +783,8 @@
               '</section>':'')+
 
               buildDriverCourseSection(d)+
+              buildDriverLicenseGuide(d)+
+              buildDriverJourneySection(d)+
               buildCampaignSection(d)+
               (getTourUrl(d)?buildTourSection(d):buildMapSection(d))+
               '<section class="section-card">'+
