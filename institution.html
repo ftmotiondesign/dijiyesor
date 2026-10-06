@@ -27,6 +27,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
 .view{display:none}.view.active{display:block}.empty{color:var(--muted);padding:20px 0}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.service{border:1px solid var(--line);border-radius:14px;padding:16px}.service strong,.service small{display:block}.service small{color:var(--muted);margin-top:5px;line-height:1.45}.service .mini-status{margin-top:10px;display:inline-block;padding:5px 8px;border-radius:999px;background:#eef4ff;color:#225fb6;font-size:10px;font-weight:850}
 .preview-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:16px}.upload-box{border:1px dashed #cbd5e1;border-radius:16px;padding:14px;background:#fafcff}.preview{height:150px;border-radius:13px;background:#eef2f7;display:grid;place-items:center;overflow:hidden;margin-bottom:12px;color:#8490a2;font-size:12px}.preview.cover{height:180px}.preview img{width:100%;height:100%;object-fit:cover}.preview.logo img{object-fit:contain;background:#fff}.file{display:none}.upload-actions{display:flex;gap:8px}.upload-actions .btn{flex:1}.upload-msg{font-size:11px;color:var(--muted);min-height:16px;margin-top:8px}
 .media-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:12px}.media-row .btn{height:43px}.media-preview{margin-top:8px;font-size:11px;color:var(--muted);word-break:break-all}
+.driver-vehicle-gallery{margin-top:16px;padding-top:16px;border-top:1px solid #dfe7f2}.driver-vehicle-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.driver-vehicle-head strong{font-size:13px}.driver-vehicle-head small{color:var(--muted);font-size:11px}.driver-vehicle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.driver-vehicle-item{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#eef2f7;border:1px solid #dde5ef}.driver-vehicle-item img{width:100%;height:100%;object-fit:cover}.driver-vehicle-item button{position:absolute;right:6px;top:6px;width:28px;height:28px;border:0;border-radius:8px;background:rgba(15,23,42,.78);color:#fff;cursor:pointer;font-weight:900}.driver-vehicle-empty{padding:14px;border:1px dashed #cbd5e1;border-radius:12px;background:#fff;color:var(--muted);font-size:12px}.driver-gallery-actions{display:flex;gap:8px;align-items:center;margin-top:10px}.driver-gallery-actions .btn{flex:0 0 auto}@media(max-width:700px){.driver-vehicle-grid{grid-template-columns:repeat(2,1fr)}}
 .driver-special{border:1px solid #dbe7fb;background:#f8fbff}.driver-special .license-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.driver-special .license-option{display:flex;align-items:center;gap:7px;border:1px solid #dfe7f2;border-radius:11px;padding:10px;background:#fff;font-size:12px;font-weight:800}.driver-special .license-option input{width:16px;height:16px;margin:0}@media(max-width:700px){.driver-special .license-grid{grid-template-columns:repeat(2,1fr)}}
 .campaign-state{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;background:#fafcff}.campaign-state strong,.campaign-state small{display:block}.campaign-state small{color:var(--muted);margin-top:4px}
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.product{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer}.product input{width:17px;height:17px;margin:1px 0 0}.product b,.product small{display:block}.product small{color:var(--muted);font-size:10px;margin-top:3px}.product .price{margin-top:7px;font-size:12px;color:var(--brand);font-weight:900}
@@ -136,6 +137,19 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
               <label>Teorik / E-sınav eğitimi<input id="driverTheoryNote" placeholder="Örn. E-sınav hazırlık desteği verilir"></label>
             </div>
             <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Yeni model eğitim araçları"></label>
+
+            <div class="driver-vehicle-gallery">
+              <div class="driver-vehicle-head">
+                <div><strong>Araç Galerisi</strong><small>En fazla 8 araç fotoğrafı ekleyebilirsiniz.</small></div>
+              </div>
+              <div id="driverVehicleGallery" class="driver-vehicle-grid"></div>
+              <input id="driverVehicleFiles" class="file" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+              <div class="driver-gallery-actions">
+                <button type="button" class="btn secondary" data-pick="driverVehicleFiles">Araç Fotoğrafı Ekle</button>
+                <span id="driverVehicleGalleryMsg" class="upload-msg"></span>
+              </div>
+            </div>
+
             <div id="driverProfileMessage" class="notice hidden"></div>
             <div class="actions"><button type="submit" class="btn primary">Sürücü Kursu Bilgilerini Kaydet</button></div>
           </form>
@@ -235,6 +249,13 @@ function campaignState(){
  if(institution?.campaignTitle)return ["Hazır / Kapalı",institution.campaignTitle,"draft"];
  return ["Kampanya yok","Henüz kampanya oluşturulmadı.","none"];
 }
+function renderDriverVehicleGallery(){
+ const host=$("driverVehicleGallery");if(!host)return;
+ const urls=Array.isArray(institution?.driverVehicleGalleryUrls)?institution.driverVehicleGalleryUrls.filter(Boolean):[];
+ host.innerHTML=urls.length
+  ? urls.map((url,index)=>'<div class="driver-vehicle-item"><img src="'+esc(url)+'" alt="Eğitim aracı" loading="lazy"><button type="button" data-remove-driver-vehicle="'+index+'" aria-label="Fotoğrafı sil">×</button></div>').join("")
+  : '<div class="driver-vehicle-empty" style="grid-column:1/-1">Henüz araç fotoğrafı eklenmedi.</div>';
+}
 function fill(){
  const name=institution?.name||account?.institutionName||"Kurum";
  $("sideFirmName").textContent=name;$("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
@@ -254,6 +275,7 @@ function fill(){
    $("driverTransmission").value=institution?.driverTransmission||"";
    $("driverTheoryNote").value=institution?.driverTheoryNote||"";
    $("driverVehicleInfo").value=institution?.driverVehicleInfo||"";
+   renderDriverVehicleGallery();
  }
  renderImage("logoPreview",institution?.logoUrl,"Logo yok");renderImage("coverPreview",institution?.coverUrl,"Kapak yok");
  $("visualMiniStatus").textContent=(institution?.logoUrl||institution?.coverUrl)?"Görseller hazır":"Eksik";
@@ -322,6 +344,40 @@ $("driverProfileForm")?.addEventListener("submit",async e=>{
   });
   setNotice("driverProfileMessage","Sürücü kursuna özel bilgiler kaydedildi.","success");
  }catch(err){setNotice("driverProfileMessage",err.message||"Bilgiler kaydedilemedi.","error")}
+});
+
+$("driverVehicleFiles")?.addEventListener("change",async e=>{
+ const files=[...(e.target.files||[])];
+ if(!files.length)return;
+ const existing=Array.isArray(institution?.driverVehicleGalleryUrls)?institution.driverVehicleGalleryUrls.filter(Boolean):[];
+ const remaining=Math.max(0,8-existing.length);
+ if(remaining<=0){$("driverVehicleGalleryMsg").textContent="En fazla 8 fotoğraf eklenebilir.";e.target.value="";return}
+ const selected=files.slice(0,remaining);
+ $("driverVehicleGalleryMsg").textContent=selected.length+" fotoğraf yükleniyor...";
+ try{
+  const uploaded=[];
+  for(let i=0;i<selected.length;i++){
+    const url=await uploadCloudinary(selected[i],"image","driverVehicleGalleryMsg");
+    if(url)uploaded.push(url);
+  }
+  await saveInstitution({driverVehicleGalleryUrls:[...existing,...uploaded].slice(0,8)});
+  $("driverVehicleGalleryMsg").textContent=uploaded.length+" fotoğraf eklendi ✓";
+  renderDriverVehicleGallery();
+ }catch(err){$("driverVehicleGalleryMsg").textContent=err.message||"Fotoğraflar yüklenemedi."}
+ e.target.value="";
+});
+
+document.addEventListener("click",async e=>{
+ const btn=e.target.closest("[data-remove-driver-vehicle]");if(!btn)return;
+ const index=Number(btn.dataset.removeDriverVehicle);
+ const urls=Array.isArray(institution?.driverVehicleGalleryUrls)?[...institution.driverVehicleGalleryUrls]:[];
+ if(!Number.isInteger(index)||index<0||index>=urls.length)return;
+ urls.splice(index,1);
+ try{
+  await saveInstitution({driverVehicleGalleryUrls:urls});
+  $("driverVehicleGalleryMsg").textContent="Fotoğraf kaldırıldı.";
+  renderDriverVehicleGallery();
+ }catch(err){$("driverVehicleGalleryMsg").textContent=err.message||"Fotoğraf kaldırılamadı."}
 });
 
 $("logoFile").addEventListener("change",async e=>{
