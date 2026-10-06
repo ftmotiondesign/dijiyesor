@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-8-no-auto-about">
+  <link rel="stylesheet" href="firma.css?v=20261006-9-driver-gallery">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -634,6 +634,7 @@
         : "";
 
       const transmissionLabel={manual:"Manuel",automatic:"Otomatik",both:"Manuel + Otomatik"}[String(d.driverTransmission||"")]||"";
+      const vehicleGallery=Array.isArray(d.driverVehicleGalleryUrls)?d.driverVehicleGalleryUrls.filter(Boolean).slice(0,8):[];
       const infoRows=[
         d.driverRegistrationNote?'<div><span>KAYIT</span><strong>'+esc(d.driverRegistrationNote)+'</strong></div>':"",
         d.driverTrainingNote?'<div><span>DİREKSİYON EĞİTİMİ</span><strong>'+esc(d.driverTrainingNote)+'</strong></div>':"",
@@ -646,6 +647,7 @@
         '<div class="section-title"><div><span>SÜRÜCÜ KURSUNA ÖZEL</span><h2>Ehliyet & Eğitim Bilgileri</h2></div></div>'+
         (chips?'<div class="driver-course-intro"><strong>Verilen ehliyet sınıfları</strong>'+chips+'</div>':'')+
         (infoRows?'<div class="driver-course-info">'+infoRows+'</div>':'')+
+        (vehicleGallery.length?'<div class="driver-profile-gallery"><div class="driver-profile-gallery-head"><strong>Eğitim Araçları</strong><span>'+vehicleGallery.length+' fotoğraf</span></div><div class="driver-profile-gallery-grid">'+vehicleGallery.map(url=>'<button type="button" data-image="'+esc(url)+'"><img src="'+esc(url)+'" alt="Sürücü kursu eğitim aracı" loading="lazy"></button>').join("")+'</div></div>':'')+
         '<button type="button" class="driver-register-cta bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Kayıt Bilgisi Al</button>'+
       '</section>';
     }
