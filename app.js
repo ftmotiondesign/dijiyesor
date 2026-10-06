@@ -544,41 +544,7 @@ function campaignCard(i){
   '</article>';
 }
 function automaticCategoryDescription(i){
-  const sub=String(i.subCategory||i.category||"").trim();
-  const descriptions={
-    surucu:"",
-    src:"SRC belgesi eğitimleri ve mesleki sürücü kursu hizmetleri sunar.",
-    psikoteknik:"Psikoteknik değerlendirme ve sürücü adaylarına yönelik ölçüm hizmetleri sunar.",
-    halk_egitim:"Halk eğitim kursları ve yaşam boyu öğrenme programları hakkında bilgi sunar.",
-    kamu_egitim:"Kamu eğitim hizmetleri, kurum bilgileri ve iletişim detaylarını sunar.",
-    mesleki_egitim:"Mesleki eğitim ve beceri geliştirme programları hakkında bilgi sunar.",
-    e_sinav:"Elektronik sınav merkezi bilgileri, konum ve iletişim detaylarını sunar.",
-    diger_egitim:"Eğitim hizmetleri ve kurum bilgilerini inceleyebilirsiniz.",
-    kres:"Okul öncesi eğitim ve çocuk gelişimi hizmetleri sunar.",
-    dershane:"Sınav hazırlık ve akademik destek programları sunar.",
-    yurt:"Öğrencilere konaklama ve yurt hizmetleri sunar.",
-    oto_servis:"Araç bakım, onarım ve teknik servis hizmetleri sunar.",
-    ekspertiz:"Araç ekspertiz ve kontrol hizmetleri sunar.",
-    kafe:"Kafe ve yiyecek-içecek hizmetleri sunar.",
-    restoran:"Yeme-içme ve restoran hizmetleri sunar.",
-    dis_klinigi:"Ağız ve diş sağlığı hizmetleri sunar.",
-    psikolog:"Psikolojik danışmanlık ve destek hizmetleri sunar.",
-    guzellik:"Güzellik ve kişisel bakım hizmetleri sunar.",
-    kuafor:"Saç bakım ve kuaförlük hizmetleri sunar.",
-    mobilya:"Mobilya ve yaşam alanı çözümleri sunar.",
-    emlak_ofisi:"Gayrimenkul danışmanlığı ve emlak hizmetleri sunar.",
-    otel:"Konaklama ve misafir ağırlama hizmetleri sunar.",
-    fotograf:"Fotoğraf çekimi ve görsel hizmetler sunar.",
-    video:"Video çekimi ve prodüksiyon hizmetleri sunar.",
-    nakliyat:"Taşımacılık ve nakliye hizmetleri sunar.",
-    hukuk:"Hukuki danışmanlık ve avukatlık hizmetleri sunar.",
-    muhasebe:"Muhasebe ve mali müşavirlik hizmetleri sunar.",
-    web:"Web tasarım ve dijital çözümler sunar.",
-    sosyal_medya:"Sosyal medya yönetimi ve dijital iletişim hizmetleri sunar.",
-    veteriner:"Veterinerlik ve hayvan sağlığı hizmetleri sunar.",
-    market:"Market ve günlük ihtiyaç ürünleri sunar."
-  };
-  return descriptions[sub]||"İhtiyacınıza yönelik hizmet ve çözümler sunar.";
+  return "";
 }
 
 function resultCardImageUrl(url){
