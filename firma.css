@@ -1,5 +1,5 @@
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f7f9fc;color:#172139}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f4f7fb;color:#172139}
 a{text-decoration:none;color:inherit}
 button{font:inherit}
 
@@ -598,3 +598,8 @@ button{font:inherit}
     width:100%;
   }
 }
+
+
+/* Profil sayfasında tek parça zemin */
+html,body,.profile-page{background-color:#f4f7fb!important;}
+.profile-page{background-image:none!important;}
