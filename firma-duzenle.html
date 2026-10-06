@@ -81,6 +81,14 @@
 .mini-cover-preview{height:120px;border:1px dashed #cbd5e1;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#fff;color:#94a3b8}
 .mini-cover-preview img{width:100%;height:100%;object-fit:cover}
 @media(max-width:650px){.mini-preview-grid{grid-template-columns:1fr}.mini-logo-preview,.mini-cover-preview{height:150px}}
+.mini-qr-box{border:1px solid #dbe3ef;border-radius:14px;padding:16px;background:#fbfdff;margin-top:16px}
+.mini-qr-layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:18px;align-items:center;margin-top:14px}
+.mini-qr-preview{width:190px;height:190px;border:1px solid #dbe3ef;border-radius:16px;background:#fff;display:grid;place-items:center;padding:12px;overflow:hidden}
+.mini-qr-preview canvas,.mini-qr-preview img{max-width:100%;max-height:100%;width:auto!important;height:auto!important}
+.mini-qr-info code{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:10px 12px;color:#1d4ed8;overflow-wrap:anywhere;margin-bottom:10px}
+.mini-qr-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mini-qr-note{margin:10px 0 0;color:#64748b;font-size:12px;line-height:1.5}
+@media(max-width:650px){.mini-qr-layout{grid-template-columns:1fr}.mini-qr-preview{width:180px;height:180px;margin:auto}}
 @media(max-width:650px){.topin{align-items:flex-start;flex-direction:column}.layout{padding:0 10px}.g2,.g3,.g4,.checks{grid-template-columns:1fr}.body,.head{padding:15px}.savebar{flex-direction:column;align-items:stretch}}
 </style>
 </head>
@@ -193,6 +201,21 @@
       <a id="miniAppOpen" class="btn soft" href="#" target="_blank" rel="noopener">Uygulamayı Aç ↗</a>
     </div>
 
+    <div class="mini-qr-box">
+      <div class="mini-media-head"><div><h3>QR Kod & NFC</h3><p>Aynı mini uygulama adresi hem karekodda hem NFC kartta kullanılır.</p></div></div>
+      <div class="mini-qr-layout">
+        <div id="miniQrPreview" class="mini-qr-preview"><span>QR hazırlanıyor...</span></div>
+        <div class="mini-qr-info">
+          <code id="miniQrUrl">https://dijiyesor.com/qr/firma-adi-sehir</code>
+          <div class="mini-qr-actions">
+            <button id="miniQrDownloadBtn" type="button" class="btn primary">QR PNG İndir</button>
+            <button id="miniQrCopyBtn" type="button" class="btn soft">NFC Adresini Kopyala</button>
+          </div>
+          <p class="mini-qr-note">NFC Tools gibi bir uygulamada URL/URI kaydı olarak bu adresi karta yaz. Firma bilgileri sonradan değişse bile aynı QR/NFC adresi çalışmaya devam eder.</p>
+          <div id="miniQrStatus" class="upload-status"></div>
+        </div>
+      </div>
+    </div>
     <div class="g2">
       <label>Telefon<input id="miniPhone" placeholder="0 5xx xxx xx xx"><span class="mini-app-note">Boş bırakırsan Telefon butonu görünmez.</span></label>
       <label>WhatsApp<input id="miniWhatsapp" placeholder="0 5xx xxx xx xx"><span class="mini-app-note">Boş bırakırsan WhatsApp butonu görünmez.</span></label>
@@ -346,6 +369,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
 <script>
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),id=params.get("id"),urlFirmName=params.get("name")||"",ADMIN_EMAIL="ftmotiondesign@gmail.com";
@@ -617,15 +641,39 @@ function fillMiniAppFields(){
   $("miniLocationVideoUrl").value=firm.locationVideoUrl||"";
   $("googleReviewUrl").value=firm.googleReviewUrl||"";
   const slug=firm.slug||makeProfileSlug(firm.name||"",firm.city||"");
-  const url=location.origin+"/qr/"+slug;
+  const url="https://dijiyesor.com/qr/"+slug;
   $("miniAppUrl").textContent=url;
   $("miniAppOpen").href=url;
   $("miniAppPreviewBtn").href=url;
   refreshMiniPreviews();
+  refreshMiniQr(url);
 }
 function refreshMiniPreviews(){
   setPreview("miniLogoPreview",val("miniLogoUrl"),"Logo","500 × 500 px","contain");
   setPreview("miniCoverPreview",val("miniCoverUrl"),"Kapak","1600 × 900 px","cover");
+}
+function refreshMiniQr(url){
+  const box=$("miniQrPreview"),code=$("miniQrUrl");
+  if(!box||!code)return;
+  code.textContent=url||"";
+  box.innerHTML="";
+  if(typeof QRCode==="undefined"){box.innerHTML="<span>QR kütüphanesi yüklenemedi.</span>";return}
+  new QRCode(box,{text:url,width:164,height:164,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+}
+function currentMiniQrUrl(){return $("miniQrUrl")?.textContent?.trim()||$("miniAppUrl")?.textContent?.trim()||""}
+async function copyMiniNfcUrl(){
+  const url=currentMiniQrUrl();if(!url)return;
+  try{await navigator.clipboard.writeText(url)}catch(_){const t=document.createElement("textarea");t.value=url;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
+  $("miniQrStatus").className="upload-status success";$("miniQrStatus").textContent="NFC adresi kopyalandı ✓";
+}
+function downloadMiniQr(){
+  const box=$("miniQrPreview");if(!box)return;
+  const canvas=box.querySelector("canvas"),img=box.querySelector("img");
+  let href="";if(canvas)href=canvas.toDataURL("image/png");else if(img)href=img.src;
+  if(!href){$("miniQrStatus").className="upload-status error";$("miniQrStatus").textContent="QR kod henüz hazır değil.";return}
+  const slug=(currentMiniQrUrl().split("/").filter(Boolean).pop()||"firma")+"-qr";
+  const a=document.createElement("a");a.href=href;a.download=slug+".png";document.body.appendChild(a);a.click();a.remove();
+  $("miniQrStatus").className="upload-status success";$("miniQrStatus").textContent="QR PNG indirildi ✓";
 }
 function miniGalleryMsg(text,type=""){
   const box=$("miniGalleryMsg");if(!box)return;
@@ -646,6 +694,8 @@ wireDirectUpload("videoUploadBtn","videoFile","videoUrl","videoUploadStatus","vi
 wireDirectUpload("locationVideoUploadBtn","locationVideoFile","locationVideoUrl","locationVideoUploadStatus","video");
 wireDirectUpload("campaignVideoUploadBtn","campaignVideoFile","campaignVideoUrl","campaignVideoUploadStatus","video");
 
+if($("miniQrDownloadBtn"))$("miniQrDownloadBtn").onclick=downloadMiniQr;
+if($("miniQrCopyBtn"))$("miniQrCopyBtn").onclick=copyMiniNfcUrl;
 if($("miniLogoUrl"))$("miniLogoUrl").oninput=refreshMiniPreviews;
 if($("miniCoverUrl"))$("miniCoverUrl").oninput=refreshMiniPreviews;
 
