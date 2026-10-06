@@ -27,6 +27,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
 .view{display:none}.view.active{display:block}.empty{color:var(--muted);padding:20px 0}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.service{border:1px solid var(--line);border-radius:14px;padding:16px}.service strong,.service small{display:block}.service small{color:var(--muted);margin-top:5px;line-height:1.45}.service .mini-status{margin-top:10px;display:inline-block;padding:5px 8px;border-radius:999px;background:#eef4ff;color:#225fb6;font-size:10px;font-weight:850}
 .preview-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:16px}.upload-box{border:1px dashed #cbd5e1;border-radius:16px;padding:14px;background:#fafcff}.preview{height:150px;border-radius:13px;background:#eef2f7;display:grid;place-items:center;overflow:hidden;margin-bottom:12px;color:#8490a2;font-size:12px}.preview.cover{height:180px}.preview img{width:100%;height:100%;object-fit:cover}.preview.logo img{object-fit:contain;background:#fff}.file{display:none}.upload-actions{display:flex;gap:8px}.upload-actions .btn{flex:1}.upload-msg{font-size:11px;color:var(--muted);min-height:16px;margin-top:8px}
 .media-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:12px}.media-row .btn{height:43px}.media-preview{margin-top:8px;font-size:11px;color:var(--muted);word-break:break-all}
+.driver-special{border:1px solid #dbe7fb;background:#f8fbff}.driver-special .license-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.driver-special .license-option{display:flex;align-items:center;gap:7px;border:1px solid #dfe7f2;border-radius:11px;padding:10px;background:#fff;font-size:12px;font-weight:800}.driver-special .license-option input{width:16px;height:16px;margin:0}@media(max-width:700px){.driver-special .license-grid{grid-template-columns:repeat(2,1fr)}}
 .campaign-state{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;background:#fafcff}.campaign-state strong,.campaign-state small{display:block}.campaign-state small{color:var(--muted);margin-top:4px}
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.product{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer}.product input{width:17px;height:17px;margin:1px 0 0}.product b,.product small{display:block}.product small{color:var(--muted);font-size:10px;margin-top:3px}.product .price{margin-top:7px;font-size:12px;color:var(--brand);font-weight:900}
 .order-summary{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:8px}.order-summary div{display:flex;justify-content:space-between;gap:12px;font-size:12px}.order-summary span{color:var(--muted)}.order-list{display:grid;gap:8px}.order-row{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:1.1fr .8fr .6fr;gap:12px;align-items:center}.order-row strong,.order-row small{display:block}.order-row small{color:var(--muted);margin-top:3px}.order-pill{justify-self:end;padding:5px 8px;border-radius:999px;background:#eef4ff;color:#235fac;font-size:10px;font-weight:900}
@@ -104,6 +105,30 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}a{text-
             <div class="actions"><button type="submit" class="btn primary">Değişiklikleri Kaydet</button></div>
           </form>
         </section>
+      </section>
+
+      <section id="driverProfileSection" class="card driver-special hidden">
+        <div class="card-head"><div><span class="kicker">SÜRÜCÜ KURSUNA ÖZEL</span><h2>Sürücü Kursu Web Profili</h2><p>Bu alanlar yalnızca sürücü kursu profilinizde gösterilir.</p></div></div>
+        <form id="driverProfileForm">
+          <label>Verilen ehliyet sınıfları</label>
+          <div class="license-grid">
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A1">A1</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A2">A2</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="A">A</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="B">B</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="BE">BE</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="C">C</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="CE">CE</label>
+            <label class="license-option"><input type="checkbox" name="driverLicenseClass" value="D">D</label>
+          </div>
+          <div class="form-grid">
+            <label>Kayıt / dönem bilgisi<input id="driverRegistrationNote" placeholder="Örn. Ekim dönemi kayıtları devam ediyor"></label>
+            <label>Direksiyon eğitimi<input id="driverTrainingNote" placeholder="Örn. Birebir direksiyon eğitimi"></label>
+          </div>
+          <label>Eğitim araçları / ek bilgi<input id="driverVehicleInfo" placeholder="Örn. Manuel ve otomatik araç seçenekleri"></label>
+          <div id="driverProfileMessage" class="notice hidden"></div>
+          <div class="actions"><button type="submit" class="btn primary">Sürücü Kursu Bilgilerini Kaydet</button></div>
+        </form>
       </section>
 
       <section class="view" data-panel="visuals">
@@ -204,6 +229,15 @@ function fill(){
  $("sideFirmName").textContent=name;$("sideEmail").textContent=account?.email||auth.currentUser?.email||"";
  $("welcomeTitle").textContent=name+" paneli";$("statStatus").textContent=String(institution?.status||"active")==="passive"?"Pasif":"Aktif";$("statLocation").textContent=[institution?.city,institution?.district].filter(Boolean).join(" / ")||"-";
  $("name").value=name;$("phone").value=institution?.phone||"";$("whatsapp").value=institution?.whatsapp||"";$("website").value=institution?.website||"";$("instagram").value=institution?.instagram||"";$("locationReadonly").value=[institution?.city,institution?.district].filter(Boolean).join(" / ");$("address").value=institution?.address||"";$("description").value=institution?.description||"";
+ const isDriver=String(institution?.subCategory||institution?.category||"")==="surucu";
+ $("driverProfileSection")?.classList.toggle("hidden",!isDriver);
+ if(isDriver){
+   const selected=Array.isArray(institution?.driverLicenseClasses)?institution.driverLicenseClasses:[];
+   document.querySelectorAll('input[name="driverLicenseClass"]').forEach(x=>x.checked=selected.includes(x.value));
+   $("driverRegistrationNote").value=institution?.driverRegistrationNote||"";
+   $("driverTrainingNote").value=institution?.driverTrainingNote||"";
+   $("driverVehicleInfo").value=institution?.driverVehicleInfo||"";
+ }
  renderImage("logoPreview",institution?.logoUrl,"Logo yok");renderImage("coverPreview",institution?.coverUrl,"Kapak yok");
  $("visualMiniStatus").textContent=(institution?.logoUrl||institution?.coverUrl)?"Görseller hazır":"Eksik";
  $("campaignBadge").value=institution?.campaignBadge||"Kampanya";$("campaignEnd").value=String(institution?.campaignEnd||"").slice(0,10);$("campaignTitle").value=institution?.campaignTitle||"";$("campaignText").value=institution?.campaignText||"";$("campaignUrl").value=institution?.campaignUrl||"";$("campaignSponsorRequest").checked=Boolean(institution?.campaignSponsorRequested);
@@ -254,6 +288,21 @@ $("profileForm").addEventListener("submit",async e=>{
   const data={name:$("name").value.trim(),phone:$("phone").value.trim(),whatsapp:$("whatsapp").value.trim(),website:$("website").value.trim(),instagram:$("instagram").value.trim(),address:$("address").value.trim(),description:$("description").value.trim()};
   await saveInstitution(data);await db.collection("institutionUsers").doc(auth.currentUser.uid).set({institutionName:data.name},{merge:true});account={...account,institutionName:data.name};setNotice("profileMessage","Kaydedildi. Firma bilgileriniz güncellendi.","success");
  }catch(err){setNotice("profileMessage",err.message||"Bilgiler kaydedilemedi.","error")}
+});
+
+$("driverProfileForm")?.addEventListener("submit",async e=>{
+ e.preventDefault();
+ setNotice("driverProfileMessage","Kaydediliyor...");
+ try{
+  const driverLicenseClasses=[...document.querySelectorAll('input[name="driverLicenseClass"]:checked')].map(x=>x.value);
+  await saveInstitution({
+    driverLicenseClasses,
+    driverRegistrationNote:$("driverRegistrationNote").value.trim(),
+    driverTrainingNote:$("driverTrainingNote").value.trim(),
+    driverVehicleInfo:$("driverVehicleInfo").value.trim()
+  });
+  setNotice("driverProfileMessage","Sürücü kursuna özel bilgiler kaydedildi.","success");
+ }catch(err){setNotice("driverProfileMessage",err.message||"Bilgiler kaydedilemedi.","error")}
 });
 
 $("logoFile").addEventListener("change",async e=>{
