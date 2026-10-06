@@ -1089,6 +1089,39 @@ Gerçek mekanda hizmet"></textarea>
           <div id="videoUploadMessage" class="message hidden"></div>
         </div>
       </div>
+      <section id="driverCourseAdminFields" class="card" style="margin:18px 0;padding:18px;background:#f8fbff;border:1px solid #dce8fb;display:none">
+        <div class="card-head" style="margin-bottom:12px">
+          <div><span>SÜRÜCÜ KURSUNA ÖZEL</span><h2 style="font-size:18px;margin:4px 0 0">Ehliyet & Eğitim Bilgileri</h2></div>
+        </div>
+
+        <label style="display:block;margin-bottom:8px;font-weight:800">Verilen ehliyet sınıfları</label>
+        <div id="editDriverLicenseClasses" class="admin-checks" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <label><input type="checkbox" value="M"><span>M</span></label><label><input type="checkbox" value="A1"><span>A1</span></label><label><input type="checkbox" value="A2"><span>A2</span></label><label><input type="checkbox" value="A"><span>A</span></label><label><input type="checkbox" value="B1"><span>B1</span></label><label><input type="checkbox" value="B"><span>B</span></label><label><input type="checkbox" value="BE"><span>BE</span></label><label><input type="checkbox" value="C1"><span>C1</span></label><label><input type="checkbox" value="C1E"><span>C1E</span></label><label><input type="checkbox" value="C"><span>C</span></label><label><input type="checkbox" value="CE"><span>CE</span></label><label><input type="checkbox" value="D1"><span>D1</span></label><label><input type="checkbox" value="D1E"><span>D1E</span></label><label><input type="checkbox" value="D"><span>D</span></label><label><input type="checkbox" value="DE"><span>DE</span></label><label><input type="checkbox" value="F"><span>F</span></label><label><input type="checkbox" value="G"><span>G</span></label>
+        </div>
+
+        <div class="form-grid two">
+          <label>Vites seçeneği
+            <select id="editDriverTransmission">
+              <option value="">Belirtilmedi</option>
+              <option value="manual">Manuel</option>
+              <option value="automatic">Otomatik</option>
+              <option value="both">Manuel + Otomatik</option>
+            </select>
+          </label>
+          <label>Kayıt bilgisi<input id="editDriverRegistrationNote" placeholder="Örn. Kayıtlarımız devam ediyor"></label>
+        </div>
+
+        <div class="form-grid two">
+          <label>Direksiyon eğitimi<input id="editDriverTrainingNote" placeholder="Örn. Birebir direksiyon eğitimi"></label>
+          <label>Teorik / E-Sınav<input id="editDriverTheoryNote" placeholder="Örn. E-sınav hazırlık desteği"></label>
+        </div>
+
+        <label>Eğitim araçları / araç özellikleri
+          <textarea id="editDriverVehicleInfo" rows="3" placeholder="Örn. Manuel ve otomatik araçlar, motosiklet eğitim araçları..."></textarea>
+        </label>
+        <small style="display:block;margin-top:6px;color:#7c8799">Bu bilgiler sürücü kursu profilindeki “Sürücü Kursu Bilgileri” alanında gösterilir.</small>
+      </section>
+
       <div class="admin-checks">
         <label><input id="editVip" type="checkbox"><span>VIP firma</span></label>
         <label><input id="editSponsored" type="checkbox"><span>Sponsor firma</span></label>
@@ -1218,7 +1251,7 @@ Gerçek mekanda hizmet"></textarea>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
-<script src="admin.js?v=20261006-85-category-tree"></script>
+<script src="admin.js?v=20261006-86-driver-fields"></script>
 <script>
 (function ensureAllCitiesOption(){
   function ensure(){
