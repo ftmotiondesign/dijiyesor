@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261006-5-claim">
+  <link rel="stylesheet" href="firma.css?v=20261006-6-driver">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -648,6 +648,30 @@
       '</section>';
     }
 
+    function isDriverCourse(d){
+      return String(d?.subCategory||d?.category||"")==="surucu";
+    }
+
+    function buildDriverCourseSection(d){
+      if(!isDriverCourse(d)) return "";
+      const classes=Array.isArray(d.driverLicenseClasses)?d.driverLicenseClasses.filter(Boolean):[];
+      const chips=classes.length
+        ? '<div class="driver-license-list">'+classes.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>'
+        : '<div class="driver-empty">Ehliyet sınıfları henüz eklenmedi.</div>';
+
+      const infoRows=[
+        d.driverRegistrationNote?'<div><span>KAYIT</span><strong>'+esc(d.driverRegistrationNote)+'</strong></div>':"",
+        d.driverTrainingNote?'<div><span>DİREKSİYON EĞİTİMİ</span><strong>'+esc(d.driverTrainingNote)+'</strong></div>':"",
+        d.driverVehicleInfo?'<div><span>ARAÇLAR / EK BİLGİ</span><strong>'+esc(d.driverVehicleInfo)+'</strong></div>':""
+      ].filter(Boolean).join("");
+
+      return '<section class="section-card driver-course-section">'+
+        '<div class="section-title"><div><span>SÜRÜCÜ KURSUNA ÖZEL</span><h2>Ehliyet & Eğitim Bilgileri</h2></div></div>'+
+        '<div class="driver-course-intro"><strong>Verilen ehliyet sınıfları</strong>'+chips+'</div>'+
+        (infoRows?'<div class="driver-course-info">'+infoRows+'</div>':'')+
+      '</section>';
+    }
+
     async function loadProfile(){
       if(!id){
         root.innerHTML='<section class="profile-error"><strong>Firma bulunamadı.</strong><a href="arama.html">Aramaya dön</a></section>';
@@ -712,6 +736,7 @@
                 '<p class="about-text">'+esc(d.description||"Firma açıklaması henüz eklenmedi.")+'</p>'+
               '</section>'+
 
+              buildDriverCourseSection(d)+
               buildCampaignSection(d)+
               (getTourUrl(d)?buildTourSection(d):buildMapSection(d))+
               '<section class="section-card">'+
