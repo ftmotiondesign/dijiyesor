@@ -440,3 +440,67 @@ button{font:inherit}
   .profile-owner-state{align-items:flex-start;flex-direction:column}
   .profile-owner-state>a{width:100%;text-align:center}
 }
+
+
+/* Sürücü kursu özel profil */
+.driver-course-section{
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  border-color:#dce8fb;
+}
+.driver-course-intro>strong{
+  display:block;
+  margin-bottom:10px;
+  font-size:13px;
+  color:#334155;
+}
+.driver-license-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.driver-license-list span{
+  min-width:44px;
+  padding:8px 11px;
+  border-radius:10px;
+  background:#1677ff;
+  color:#fff;
+  text-align:center;
+  font-size:12px;
+  font-weight:900;
+}
+.driver-empty{
+  padding:12px;
+  border-radius:10px;
+  background:#f1f5f9;
+  color:#7c8797;
+  font-size:12px;
+}
+.driver-course-info{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+.driver-course-info>div{
+  padding:14px;
+  border:1px solid #e4ebf5;
+  border-radius:12px;
+  background:#fff;
+}
+.driver-course-info span{
+  display:block;
+  margin-bottom:6px;
+  color:#7c8aa0;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.driver-course-info strong{
+  display:block;
+  color:#24324a;
+  font-size:12px;
+  line-height:1.45;
+}
+@media(max-width:720px){
+  .driver-course-info{grid-template-columns:1fr}
+}
