@@ -21,7 +21,7 @@
   <meta id="seoTwitterImage" name="twitter:image" content="https://dijiyer.web.app/assets/diji-mascot-v2.png">
   <script id="seoJsonLd" type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Firma"}</script>
   <!-- firma-profile-fix: 20261004-5 -->
-  <link rel="stylesheet" href="firma.css?v=20261004-4">
+  <link rel="stylesheet" href="firma.css?v=20261006-5-claim">
   <link rel="stylesheet" href="bilgi-modal.css">
   <link rel="stylesheet" href="sponsor-global.css?v=20261004-1">
 </head>
@@ -685,6 +685,7 @@
               '<div class="profile-title-row">'+
                 '<h1>'+esc(d.name||"Firma")+'</h1>'+
                 (d.vip?'<span class="profile-badge">VIP</span>':'')+
+                ((d.verified===true||d.ownerVerified===true||d.claimStatus==="verified")?'<span class="profile-badge verified">✓ Doğrulanmış Firma</span>':'')+
                 (getTourUrl(d)?'<span class="profile-badge tour">360° TUR</span>':'')+
                 (campaignActive(d)?'<span class="profile-badge campaign">KAMPANYA</span>':'')+
               '</div>'+
@@ -700,6 +701,9 @@
               '<button type="button" class="hero-btn info bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Bilgi Al</button>'+
             '</div>'+
           '</section>'+
+          ((d.verified===true||d.ownerVerified===true||d.claimStatus==="verified")
+            ? '<section class="profile-owner-state verified"><div><span>✓ DOĞRULANMIŞ İŞLETME</span><strong>Bu profil işletme sahibi tarafından doğrulandı.</strong><small>İletişim ve profil bilgileri kurum tarafından yönetilebilir.</small></div></section>'
+            : '<section class="profile-owner-state"><div><span>İŞLETME SAHİBİ MİSİNİZ?</span><strong>Bu profili ücretsiz sahiplenin.</strong><small>Bilgilerinizi yönetin, doğrulanmış firma rozeti alın ve profil performansınızı takip edin.</small></div><a href="profil-sahiplen.html?id='+encodeURIComponent(id)+'">Profili Sahiplen</a></section>')+
 
           '<div class="profile-layout">'+
             '<div class="profile-content">'+
