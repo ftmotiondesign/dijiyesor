@@ -9,6 +9,14 @@ const db = getFirestore();
 const GOOGLE_PLACES_API_KEY = defineSecret("GOOGLE_PLACES_API_KEY");
 const ADMIN_EMAIL = "ftmotiondesign@gmail.com";
 
+// Google Places maliyet koruması.
+// Arama başına yalnızca tek Google Text Search çağrısı yapılır.
+// Telefon/web/fotoğraf gibi pahalı Place Details alanları toplu içe aktarmada otomatik çekilmez.
+const MAX_CATEGORY_SEARCH_TERMS = 1;
+const PLACE_SEARCH_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const PLACE_PHOTO_API_ENABLED = false;
+const PHOTO_BACKFILL_ENABLED = false;
+
 const CATEGORY_MAP = {
   kres: { label: "Kreş Anaokulu", mainCategory: "egitim", subCategory: "kres" },
   dershane: { label: "Dershane Kurs Merkezi", mainCategory: "egitim", subCategory: "dershane" },
@@ -237,7 +245,7 @@ const CATEGORY_SEARCH_TERMS = {
 
 async function searchPlacesForCategory({ city, district, categoryKey, category }) {
   const terms = CATEGORY_SEARCH_TERMS[categoryKey] || [category.label];
-  const uniqueTerms = [...new Set(terms.map(s).filter(Boolean))];
+  const uniqueTerms = [...new Set(terms.map(s).filter(Boolean))].slice(0, MAX_CATEGORY_SEARCH_TERMS);
 
   const settled = await Promise.allSettled(
     uniqueTerms.map((term) => {
@@ -431,7 +439,7 @@ async function placesTextSearch(query) {
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY.value(),
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus,places.photos"
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.businessStatus"
     },
     body: JSON.stringify({
       textQuery: query,
@@ -496,9 +504,13 @@ async function getPlaceDetails(placeId) {
   return data;
 }
 
+function placeCacheId(placeId) {
+  return Buffer.from(s(placeId), "utf8").toString("base64url");
+}
+
 function googlePhotoProxyUrl(photoName) {
   const name = s(photoName);
-  if (!name) return "";
+  if (!name || !PLACE_PHOTO_API_ENABLED) return "";
   return "https://europe-west1-dijiyer.cloudfunctions.net/placePhoto?name=" +
     encodeURIComponent(name);
 }
@@ -513,6 +525,12 @@ exports.placePhoto = onRequest(
   },
   async (request, response) => {
     try {
+      if (!PLACE_PHOTO_API_ENABLED) {
+        response.set("Cache-Control", "public, max-age=3600, s-maxage=3600");
+        response.status(410).send("Google Places fotoğraf servisi maliyet koruması nedeniyle kapalı.");
+        return;
+      }
+
       const name = s(request.query?.name);
       if (!/^places\/[^/]+\/photos\/[^/]+$/.test(name)) {
         response.status(400).send("Geçersiz fotoğraf.");
@@ -590,6 +608,33 @@ exports.searchPlaces = onCall(
     });
     const query = result.query;
 
+    // Arama sonucunu kısa süreli Firestore önbelleğine al.
+    // Böylece "Taslağa aktar" aşamasında her firma için pahalı Place Details çağrısı yapılmaz.
+    if (Array.isArray(result.places) && result.places.length) {
+      const cacheBatch = db.batch();
+      const now = Date.now();
+      for (const p of result.places) {
+        const placeId = s(p?.id);
+        if (!placeId) continue;
+        const cacheRef = db.collection("placeSearchCache").doc(placeCacheId(placeId));
+        cacheBatch.set(cacheRef, {
+          placeId,
+          name: s(p.displayName?.text),
+          address: s(p.formattedAddress),
+          latitude: p.location?.latitude ?? null,
+          longitude: p.location?.longitude ?? null,
+          googleMapsUrl: s(p.googleMapsUri),
+          businessStatus: s(p.businessStatus),
+          city,
+          district,
+          categoryKey,
+          cachedAtMs: now,
+          expiresAtMs: now + PLACE_SEARCH_CACHE_TTL_MS
+        }, { merge: true });
+      }
+      await cacheBatch.commit();
+    }
+
     const [institutionSnap, draftSnap] = await Promise.all([
       db.collection("institutions").get(),
       db.collection("institutionDrafts").get()
@@ -632,8 +677,8 @@ exports.searchPlaces = onCall(
           longitude: p.location?.longitude ?? null,
           googleMapsUrl: p.googleMapsUri || "",
           businessStatus: p.businessStatus || "",
-          googlePhotoName: p.photos?.[0]?.name || "",
-          profileImageUrl: googlePhotoProxyUrl(p.photos?.[0]?.name || ""),
+          googlePhotoName: "",
+          profileImageUrl: "",
           alreadyExists: Boolean(duplicate),
           duplicateReason: duplicate?.reason || "",
           duplicateSource: duplicate?.row?._collection || ""
@@ -691,32 +736,43 @@ exports.importPlaceDrafts = onCall(
     const created = [];
     const skipped = [];
 
-    // Uygulama tarafında adet sınırı yok. Google Place detaylarını küçük gruplar
-    // halinde paralel alarak yüksek sayıda seçimi daha hızlı işle.
-    const detailRows = [];
-    const DETAIL_CONCURRENCY = 10;
+    // MALİYET KORUMASI:
+    // Toplu içe aktarmada Place Details çağrısı YAPILMAZ.
+    // searchPlaces sırasında kaydedilen ucuz temel sonuçlar kullanılır.
+    const cacheRefs = placeIds.map((placeId) =>
+      db.collection("placeSearchCache").doc(placeCacheId(placeId))
+    );
+    const cacheSnaps = cacheRefs.length ? await db.getAll(...cacheRefs) : [];
 
-    for (let i = 0; i < placeIds.length; i += DETAIL_CONCURRENCY) {
-      const chunk = placeIds.slice(i, i + DETAIL_CONCURRENCY);
-      const chunkResults = await Promise.all(
-        chunk.map(async (placeId) => ({
-          placeId,
-          place: await getPlaceDetails(placeId)
-        }))
-      );
-      detailRows.push(...chunkResults);
-    }
+    const detailRows = cacheSnaps.map((snap, index) => {
+      const placeId = placeIds[index];
+      const data = snap.exists ? (snap.data() || {}) : {};
+      const fresh = Number(data.expiresAtMs || 0) > Date.now();
+      return {
+        placeId,
+        place: fresh ? data : null
+      };
+    });
 
     // Tekrarlı firma kontrolü güvenilir kalsın diye kayıt aşamasını sırayla yap.
     for (const item of detailRows) {
       const placeId = item.placeId;
       const p = item.place;
 
+      if (!p) {
+        skipped.push({
+          placeId,
+          name: "",
+          reason: "search_cache_expired"
+        });
+        continue;
+      }
+
       const candidate = {
-        googlePlaceId: p.id || placeId,
-        name: p.displayName?.text || "Firma",
-        address: p.formattedAddress || "",
-        phone: p.nationalPhoneNumber || p.internationalPhoneNumber || "",
+        googlePlaceId: p.placeId || placeId,
+        name: p.name || "Firma",
+        address: p.address || "",
+        phone: "",
         city,
         district
       };
@@ -734,8 +790,8 @@ exports.importPlaceDrafts = onCall(
         continue;
       }
 
-      const photoName = s(p.photos?.[0]?.name);
-      const imageUrl = googlePhotoProxyUrl(photoName);
+      const photoName = "";
+      const imageUrl = "";
 
       const draft = {
         name: candidate.name,
@@ -746,12 +802,12 @@ exports.importPlaceDrafts = onCall(
         district,
         address: candidate.address,
         phone: candidate.phone,
-        website: p.websiteUri || "",
-        latitude: p.location?.latitude ?? null,
-        longitude: p.location?.longitude ?? null,
-        mapUrl: p.googleMapsUri || "",
-        googlePlaceId: p.id || placeId,
-        googleTypes: Array.isArray(p.types) ? p.types : [],
+        website: "",
+        latitude: p.latitude ?? null,
+        longitude: p.longitude ?? null,
+        mapUrl: p.googleMapsUrl || "",
+        googlePlaceId: p.placeId || placeId,
+        googleTypes: [],
         googleBusinessStatus: p.businessStatus || "",
         googlePhotoName: photoName,
         profileImageUrl: imageUrl,
@@ -790,6 +846,13 @@ exports.backfillFirmPhotos = onCall(
   },
   async (request) => {
     requireAdmin(request);
+
+    if (!PHOTO_BACKFILL_ENABLED) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Google fotoğraf toplu güncellemesi maliyet koruması nedeniyle kapalı."
+      );
+    }
 
     const collectionName = s(request.data?.collection || "institutions");
     if (!["institutions", "institutionDrafts"].includes(collectionName)) {
