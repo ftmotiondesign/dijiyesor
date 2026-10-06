@@ -546,7 +546,7 @@ function campaignCard(i){
 function automaticCategoryDescription(i){
   const sub=String(i.subCategory||i.category||"").trim();
   const descriptions={
-    surucu:"Ehliyet eğitimi ve direksiyon dersleri sunar.",
+    surucu:"",
     src:"SRC belgesi eğitimleri ve mesleki sürücü kursu hizmetleri sunar.",
     psikoteknik:"Psikoteknik değerlendirme ve sürücü adaylarına yönelik ölçüm hizmetleri sunar.",
     halk_egitim:"Halk eğitim kursları ve yaşam boyu öğrenme programları hakkında bilgi sunar.",
@@ -993,7 +993,7 @@ function render(data,{keepLimit=false}={}){
         '</div>'+
         resultCardVisual(i)+
       '</div>'+
-      '<p class="result-desc">'+esc(desc)+'</p>'+
+      (desc?'<p class="result-desc">'+esc(desc)+'</p>':'')+
       '<div class="result-compare-row"><button type="button" class="result-compare-btn'+(compareSelectedIds.has(String(i.id))?' active':'')+'" data-compare-firm="'+esc(i.id)+'" aria-pressed="'+(compareSelectedIds.has(String(i.id))?'true':'false')+'"><span class="result-compare-check">'+(compareSelectedIds.has(String(i.id))?'✓':'＋')+'</span> Karşılaştır</button></div>'+
       (i.has360Tour&&i.tour360Url?'<button type="button" class="result-360-btn" data-open-360 data-tour-url="'+esc(i.tour360Url)+'" data-tour-name="'+esc(i.name)+'"><span>360°</span> Mekânı Gez</button>':'')+
       '<div class="result-actions">'+
