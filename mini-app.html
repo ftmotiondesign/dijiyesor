@@ -81,10 +81,31 @@ async function findFirm(){
   const cities=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"];
   const city=cities.find(x=>routeSlug.endsWith("-"+slugify(x))||routeSlug===slugify(x));
   if(city){
-    const q=await db.collection("institutions").where("city","==",city).limit(500).get();
-    const hit=q.docs.find(doc=>slugify(doc.data()?.name||"")===routeSlug);
-    if(hit)return{id:hit.id,...hit.data()};
+    const citySlug=slugify(city);
+    const baseSlug=routeSlug.endsWith("-"+citySlug)?routeSlug.slice(0,-(citySlug.length+1)):routeSlug;
+    const cityVariants=[city,citySlug,city.toLocaleLowerCase("tr-TR"),city.toLocaleUpperCase("tr-TR")];
+    for(const cv of [...new Set(cityVariants)]){
+      const q=await db.collection("institutions").where("city","==",cv).limit(1000).get();
+      const hit=q.docs.find(doc=>{
+        const d=doc.data()||{};
+        const nameSlug=slugify(d.name||"");
+        const fullSlug=slugify([d.name,d.city].filter(Boolean).join(" "));
+        return nameSlug===routeSlug||nameSlug===baseSlug||fullSlug===routeSlug;
+      });
+      if(hit)return{id:hit.id,...hit.data()};
+    }
   }
+
+  // Son çare: eski kayıtlarda şehir alanı boş/yanlış olabilir. Sınırlı sayıda kaydı
+  // tarayıp firma adını normalize ederek eşleştir.
+  const fallback=await db.collection("institutions").limit(1500).get();
+  const broadHit=fallback.docs.find(doc=>{
+    const d=doc.data()||{};
+    const nameSlug=slugify(d.name||"");
+    const fullSlug=slugify([d.name,d.city].filter(Boolean).join(" "));
+    return nameSlug===routeSlug||fullSlug===routeSlug;
+  });
+  if(broadHit)return{id:broadHit.id,...broadHit.data()};
 
   return null;
 }
