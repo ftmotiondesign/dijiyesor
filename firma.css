@@ -380,3 +380,63 @@ button{font:inherit}
   .profile-cover-nav.next{right:8px}
   .profile-cover-dots{bottom:8px}
 }
+
+
+/* Profil sahiplenme / doğrulama */
+.profile-badge.verified{
+  background:#eaf8ef;
+  color:#15803d;
+  border:1px solid #bde8ca;
+}
+.profile-owner-state{
+  max-width:1180px;
+  margin:12px auto 0;
+  padding:14px 16px;
+  border:1px solid #dfe8f5;
+  border-radius:15px;
+  background:#f8fbff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+}
+.profile-owner-state>div{min-width:0}
+.profile-owner-state span{
+  display:block;
+  margin-bottom:3px;
+  color:#1677ff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.profile-owner-state strong{
+  display:block;
+  color:#22304a;
+  font-size:14px;
+}
+.profile-owner-state small{
+  display:block;
+  margin-top:4px;
+  color:#7c8799;
+  font-size:12px;
+  line-height:1.4;
+}
+.profile-owner-state>a{
+  flex:0 0 auto;
+  padding:10px 14px;
+  border-radius:10px;
+  background:#1677ff;
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+  text-decoration:none;
+}
+.profile-owner-state.verified{
+  background:#f5fbf7;
+  border-color:#d5eadc;
+}
+.profile-owner-state.verified span{color:#15803d}
+@media(max-width:680px){
+  .profile-owner-state{align-items:flex-start;flex-direction:column}
+  .profile-owner-state>a{width:100%;text-align:center}
+}
