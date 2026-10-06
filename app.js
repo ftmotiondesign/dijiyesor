@@ -258,6 +258,8 @@ let lastRenderedResults=[];
 let resultLoadObserver=null;
 let companiesLoaded=false;
 let companiesLoadingPromise=null;
+let companiesLoadTruncated=false;
+const NATIONAL_QUERY_LIMIT=180;
 
 let provinceOptionsCache=null;
 const districtOptionsCache=new Map();
@@ -453,6 +455,14 @@ async function loadCompanies(filters={}){
     }else if(sector){
       query=query.where("mainCategory","==",sector);
       key="sector:"+sector;
+    }
+
+    // Türkiye geneli sorgularda binlerce kaydı ilk açılışta indirmek yerine
+    // hızlı bir ilk paket getiriyoruz. Şehir seçildiğinde tam şehir sorgusu çalışır.
+    companiesLoadTruncated=false;
+    if(!cityName){
+      query=query.limit(NATIONAL_QUERY_LIMIT);
+      companiesLoadTruncated=true;
     }
 
     // Önce gerçek arama sonuçlarını getir. Sponsor sorgusu artık ilk sonuçları bekletmez.
@@ -899,7 +909,7 @@ function render(data,{keepLimit=false}={}){
   if(!keepLimit)visibleResultCount=RESULT_PAGE_SIZE;
   const visibleData=data.slice(0,visibleResultCount);
 
-  sum.textContent=data.length+" firma";
+  sum.textContent=(companiesLoadTruncated ? data.length+" firma gösteriliyor" : data.length+" firma");
   const title=document.getElementById("resultsTitle");
   const context=document.getElementById("resultsContext");
   const search=document.getElementById("searchInput");
@@ -939,9 +949,13 @@ function render(data,{keepLimit=false}={}){
     locationNotice.classList.toggle("hidden",hasCity);
     const noticeTitle=locationNotice.querySelector("strong");
     const noticeText=locationNotice.querySelector(".location-notice-left span");
-    if(noticeTitle)noticeTitle.textContent=data.length>0 ? "Türkiye geneli sonuçlar" : "Konum seçerek tekrar deneyin";
+    if(noticeTitle)noticeTitle.textContent=data.length>0
+      ? (companiesLoadTruncated ? "Türkiye geneli hızlı sonuçlar" : "Türkiye geneli sonuçlar")
+      : "Konum seçerek tekrar deneyin";
     if(noticeText)noticeText.innerHTML=data.length>0
-      ? '<strong class="location-prefix">Yakınındaki firmalar için</strong> konum seç.'
+      ? (companiesLoadTruncated
+          ? 'Sonuçları hızlı açmak için ilk uygun firmalar gösteriliyor. <strong class="location-prefix">Daha net sonuç için</strong> il seç.'
+          : '<strong class="location-prefix">Yakınındaki firmalar için</strong> konum seç.')
       : "İl veya ilçe seçerek aramanı daraltabilirsin.";
   }
 
