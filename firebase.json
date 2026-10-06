@@ -40,6 +40,12 @@
       "**/*.msi",
       "*.ps1",
       "**/*.ps1"
+    ],
+    "rewrites": [
+      {
+        "source": "/**",
+        "destination": "/mini-app.html"
+      }
     ]
   }
 }
