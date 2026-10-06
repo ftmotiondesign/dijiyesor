@@ -631,7 +631,7 @@
       const classes=Array.isArray(d.driverLicenseClasses)?d.driverLicenseClasses.filter(Boolean):[];
       const chips=classes.length
         ? '<div class="driver-license-list">'+classes.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>'
-        : '<div class="driver-empty">Ehliyet sınıfları henüz eklenmedi.</div>';
+        : "";
 
       const transmissionLabel={manual:"Manuel",automatic:"Otomatik",both:"Manuel + Otomatik"}[String(d.driverTransmission||"")]||"";
       const infoRows=[
@@ -644,7 +644,7 @@
 
       return '<section class="section-card driver-course-section">'+
         '<div class="section-title"><div><span>SÜRÜCÜ KURSUNA ÖZEL</span><h2>Ehliyet & Eğitim Bilgileri</h2></div></div>'+
-        '<div class="driver-course-intro"><strong>Verilen ehliyet sınıfları</strong>'+chips+'</div>'+
+        (chips?'<div class="driver-course-intro"><strong>Verilen ehliyet sınıfları</strong>'+chips+'</div>':'')+
         (infoRows?'<div class="driver-course-info">'+infoRows+'</div>':'')+
         '<button type="button" class="driver-register-cta bilgi-al-open" data-bilgi-al data-institution-id="'+esc(id)+'" data-institution-name="'+esc(d.name||'')+'" data-main-category="'+esc(d.mainCategory||'')+'" data-sub-category="'+esc(d.subCategory||d.category||'')+'" data-city="'+esc(d.city||'')+'" data-district="'+esc(d.district||'')+'">Kayıt Bilgisi Al</button>'+
       '</section>';
