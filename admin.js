@@ -2065,6 +2065,46 @@ document.addEventListener("click",async e=>{
       if(m){m.className="message error";m.textContent="Önce bu başvuru için Kurum Hesabı Oluştur. Sonra onaylayabilirsin."}
       return;
     }
+
+    // Mevcut profil sahiplenme başvurularında yeni firma oluşturma; mevcut kaydı doğrula.
+    if(a.applicationType==="claim" && a.requestedInstitutionId){
+      const existingRef=db.collection("institutions").doc(a.requestedInstitutionId);
+      const existingSnap=await existingRef.get();
+      if(!existingSnap.exists){
+        alert("Sahiplenilmek istenen firma kaydı bulunamadı.");
+        return;
+      }
+      await existingRef.set({
+        verified:true,
+        ownerVerified:true,
+        claimStatus:"verified",
+        claimedAt:new Date().toISOString(),
+        claimedByUid:a.authUid,
+        status:"active"
+      },{merge:true});
+
+      await db.collection("institutionApplications").doc(a.id).set({
+        status:"approved",
+        approvedInstitutionId:a.requestedInstitutionId,
+        approvedAt:new Date().toISOString()
+      },{merge:true});
+
+      await db.collection("institutionUsers").doc(a.authUid).set({
+        email:a.accountEmail||"",
+        institutionId:a.requestedInstitutionId,
+        institutionName:a.name||"Firma",
+        contactName:a.contactName||"",
+        status:"approved",
+        approvedAt:new Date().toISOString(),
+        date:a.date||new Date().toISOString()
+      },{merge:true});
+
+      await Promise.all([loadFirms(),loadApplications(),loadMembers()]);
+      renderAll();
+      $("applicationDetailModal")?.classList.add("hidden");
+      return;
+    }
+
     const data={name:a.name||"Firma",mainCategory:a.mainCategory||"diger",subCategory:a.subCategory||a.category||"",category:a.subCategory||a.category||a.mainCategory||"diger",city:a.city||"",district:a.district||"",address:a.address||"",phone:a.phone||"",whatsapp:a.whatsapp||"",website:a.website||"",instagram:a.instagram||"",description:a.description||"",status:"active",createdAt:new Date().toISOString(),vip:false,sponsored:false};
     const ref=await db.collection("institutions").add(data);
     await db.collection("institutionApplications").doc(a.id).set({status:"approved",approvedInstitutionId:ref.id,approvedAt:new Date().toISOString()},{merge:true});
