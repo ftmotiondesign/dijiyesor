@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Firma | DijiyeSor</title>
+<meta name="theme-color" content="#080808">
+<meta name="description" content="Firmanın iletişim, konum, sosyal medya ve Google yorum bilgileri.">
+<link rel="icon" href="/assets/diji-mascot-v2.png">
+<style>
+:root{--bg:#050505;--card:#141414;--line:#343434;--text:#fff;--muted:#b7b7b7;--accent:#ff6b00;--accent2:#ff8a00}
+*{box-sizing:border-box}html{background:#050505}body{margin:0;background:#050505;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+button,a{font:inherit}.app{width:min(100%,520px);margin:0 auto;min-height:100vh;background:linear-gradient(180deg,#090909 0,#050505 100%);box-shadow:0 0 70px #000}
+.hero{position:relative;height:310px;overflow:hidden;background:#151515}.hero-img{width:100%;height:100%;object-fit:cover;display:block}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03) 20%,rgba(0,0,0,.25) 55%,#050505 100%)}
+.topbar{position:absolute;z-index:3;top:0;left:0;right:0;padding:max(16px,env(safe-area-inset-top)) 18px 0;display:flex;justify-content:space-between;align-items:center}.back,.share{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.34);backdrop-filter:blur(10px);color:#fff;text-decoration:none;display:grid;place-items:center;font-size:22px}
+.brand{position:relative;z-index:2;margin-top:-76px;padding:0 20px 8px;text-align:center}.logo{width:92px;height:92px;margin:0 auto 10px;border-radius:22px;border:3px solid #fff;background:#111;display:grid;place-items:center;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.4)}.logo img{width:100%;height:100%;object-fit:contain;background:#fff}.logo-fallback{font-size:34px;font-weight:900;color:var(--accent)}
+h1{margin:0;font-size:31px;line-height:1.02;font-weight:950;letter-spacing:-.8px;text-transform:uppercase}.subtitle{margin:9px auto 0;color:#e0e0e0;font-size:14px;line-height:1.45;max-width:430px}.place{margin-top:7px;color:#9f9f9f;font-size:13px}
+.grid{padding:14px 18px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}.action{min-height:92px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(180deg,#191919,#101010);padding:13px 12px;color:#fff;text-decoration:none;display:flex;align-items:center;gap:11px;box-shadow:inset 0 1px rgba(255,255,255,.03)}.action:active{transform:scale(.985)}.ico{flex:0 0 51px;width:51px;height:51px;border-radius:15px;display:grid;place-items:center;font-weight:900;font-size:25px;color:#fff}.ico.phone,.ico.wa{background:#08c84b}.ico.ig{background:linear-gradient(135deg,#7b2cff,#f51b75,#ff9700)}.ico.map{background:#ef2d2d}.ico.web{background:#1887ee}.ico.review{background:#fff;color:#4285f4;font-size:27px}.copy{min-width:0}.copy strong{display:block;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy small{display:block;margin-top:3px;color:#bcbcbc;font-size:12.5px}
+.save{margin:16px 18px 0;width:calc(100% - 36px);border:0;border-radius:20px;padding:18px 18px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:19px;font-weight:900;box-shadow:0 12px 28px rgba(255,107,0,.24);cursor:pointer}.save span{margin-right:8px}
+.section{padding:22px 18px 0}.section-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}.section-title h2{font-size:19px;margin:0}.section-title small{color:#888}.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.gallery img{width:100%;aspect-ratio:1/1.08;object-fit:cover;border-radius:17px;border:1px solid #2b2b2b;background:#171717}.about{margin:0;color:#c9c9c9;line-height:1.65;font-size:14px;background:#111;border:1px solid #242424;border-radius:18px;padding:16px}
+.location-video{width:100%;border-radius:18px;background:#111;border:1px solid #262626;overflow:hidden}.location-video video{display:block;width:100%;max-height:310px;background:#000}
+.footer{padding:30px 18px max(28px,env(safe-area-inset-bottom));text-align:center;color:#777;font-size:11px}.footer b{color:#aaa}
+.loading,.error{min-height:100vh;display:grid;place-items:center;text-align:center;padding:30px;color:#ddd}.error a{color:#ff7a00}
+.hidden{display:none!important}
+@media(max-width:360px){.grid{gap:9px;padding-left:12px;padding-right:12px}.action{padding:10px 8px}.ico{width:45px;height:45px;flex-basis:45px}.copy strong{font-size:14px}.copy small{font-size:11px}.save{margin-left:12px;margin-right:12px;width:calc(100% - 24px)}}
+</style>
+</head>
+<body>
+<div id="loading" class="loading"><div><strong>Firma uygulaması yükleniyor...</strong><br><small>DijiyeSor</small></div></div>
+<main id="app" class="app hidden">
+  <section class="hero">
+    <img id="heroImg" class="hero-img" alt="">
+    <div class="topbar"><a class="back" href="/" aria-label="Ana sayfa">‹</a><button id="shareBtn" class="share" type="button" aria-label="Paylaş">↗</button></div>
+  </section>
+  <section class="brand">
+    <div id="logo" class="logo"></div>
+    <h1 id="name"></h1>
+    <div id="subtitle" class="subtitle"></div>
+    <div id="place" class="place"></div>
+  </section>
+  <section id="actions" class="grid"></section>
+  <button id="saveContact" class="save" type="button"><span>＋</span>Rehbere Kaydet</button>
+  <section id="aboutSec" class="section hidden"><div class="section-title"><h2>Firma Hakkında</h2></div><p id="about" class="about"></p></section>
+  <section id="videoSec" class="section hidden"><div class="section-title"><h2>Konum Videosu</h2></div><div class="location-video"><video id="locationVideo" controls playsinline preload="metadata"></video></div></section>
+  <section id="gallerySec" class="section hidden"><div class="section-title"><h2>Fotoğraflar</h2><small>DijiyeSor</small></div><div id="gallery" class="gallery"></div></section>
+  <footer class="footer"><b>DijiyeSor</b> · Türkiye'nin Dijital Rehberi</footer>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",authDomain:"dijiyer.firebaseapp.com",projectId:"dijiyer",storageBucket:"dijiyer.firebasestorage.app",messagingSenderId:"847787778815",appId:"1:847787778815:web:57058aa8dcc4143ec5a2ca"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore(),$=id=>document.getElementById(id);
+const esc=s=>String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const slugify=s=>String(s||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const safeUrl=v=>{let x=String(v||"").trim();if(!x)return"";return /^https?:\/\//i.test(x)?x:"https://"+x};
+const phoneHref=v=>{const x=String(v||"").replace(/[^\d+]/g,"");return x?"tel:"+x:""};
+const waHref=v=>{let x=String(v||"").replace(/\D/g,"").replace(/^90/,"").replace(/^0/,"");return x?"https://wa.me/90"+x:""};
+const instaHref=v=>{let x=String(v||"").trim();if(!x)return"";if(/instagram\.com/i.test(x))return safeUrl(x);return"https://instagram.com/"+x.replace(/^@/,"")};
+const routeSlug=decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,""));
+const idParam=new URLSearchParams(location.search).get("id");
+
+function titleCaseSlug(s){return s.split("-").filter(Boolean).map(w=>w.charAt(0).toLocaleUpperCase("tr-TR")+w.slice(1)).join(" ")}
+
+async function findFirm(){
+  if(idParam){const s=await db.collection("institutions").doc(idParam).get();if(s.exists)return{id:s.id,...s.data()}}
+  if(!routeSlug||routeSlug.includes("/"))return null;
+  for(const field of ["slug","seoSlug","profileSlug"]){
+    const q=await db.collection("institutions").where(field,"==",routeSlug).limit(1).get();
+    if(!q.empty){const s=q.docs[0];return{id:s.id,...s.data()}}
+  }
+  const candidates=[routeSlug.replace(/-/g," "),titleCaseSlug(routeSlug)];
+  for(const name of candidates){
+    const q=await db.collection("institutions").where("name","==",name).limit(1).get();
+    if(!q.empty){const s=q.docs[0];return{id:s.id,...s.data()}}
+  }
+  return null;
+}
+function addAction(html){$("actions").insertAdjacentHTML("beforeend",html)}
+function action(cls,icon,label,sub,href){
+  if(!href)return"";
+  return '<a class="action" href="'+esc(href)+'" '+(/^https?:/i.test(href)?'target="_blank" rel="noopener"':'')+'><span class="ico '+cls+'">'+icon+'</span><span class="copy"><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></a>';
+}
+function reviewUrl(d){
+  if(d.googleReviewUrl)return safeUrl(d.googleReviewUrl);
+  if(d.googleMapsUrl)return safeUrl(d.googleMapsUrl);
+  if(d.placeId)return"https://search.google.com/local/writereview?placeid="+encodeURIComponent(d.placeId);
+  const q=[d.name,d.district,d.city].filter(Boolean).join(" ");
+  return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+}
+function mapUrl(d){
+  if(d.googleMapsUrl)return safeUrl(d.googleMapsUrl);
+  const q=d.address||d.location||[d.name,d.district,d.city].filter(Boolean).join(" ");
+  return q?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q):"";
+}
+function vcard(d){
+  const lines=["BEGIN:VCARD","VERSION:3.0","FN:"+String(d.name||"Firma").replace(/\n/g," "),"ORG:"+String(d.name||"").replace(/\n/g," ")];
+  if(d.phone)lines.push("TEL;TYPE=WORK,VOICE:"+String(d.phone).replace(/\s/g,""));
+  if(d.whatsapp&&d.whatsapp!==d.phone)lines.push("TEL;TYPE=CELL:"+String(d.whatsapp).replace(/\s/g,""));
+  if(d.website)lines.push("URL:"+safeUrl(d.website));
+  if(d.address)lines.push("ADR;TYPE=WORK:;;"+String(d.address).replace(/;/g,",")+";;;;");
+  lines.push("NOTE:DijiyeSor - Türkiye'nin Dijital Rehberi","END:VCARD");
+  return lines.join("\r\n");
+}
+function render(d){
+  const hero=[...(Array.isArray(d.coverUrls)?d.coverUrls:[]),d.coverUrl,d.cardImageUrl,...(Array.isArray(d.galleryUrls)?d.galleryUrls:[])].filter(Boolean)[0]||"/assets/diji-mascot-v2.png";
+  $("heroImg").src=hero;$("heroImg").alt=(d.name||"Firma")+" kapak";
+  const logo=d.logoUrl||d.profileImageUrl||"";
+  $("logo").innerHTML=logo?'<img src="'+esc(logo)+'" alt="'+esc(d.name||"Firma")+' logo">':'<span class="logo-fallback">'+esc((d.name||"D").trim().charAt(0).toLocaleUpperCase("tr-TR"))+'</span>';
+  $("name").textContent=d.name||"Firma";
+  $("subtitle").textContent=d.shortDescription||d.categoryLabel||d.description||"";
+  $("place").textContent=[d.district,d.city].filter(Boolean).join(" · ");
+  const phone=phoneHref(d.phone),wa=waHref(d.whatsapp||d.phone),ig=instaHref(d.instagram),map=mapUrl(d),web=safeUrl(d.website),review=reviewUrl(d);
+  $("actions").innerHTML=
+    action("phone","☎","Telefon","Hemen Ara",phone)+
+    action("wa","◉","WhatsApp","Mesaj Gönder",wa)+
+    action("ig","◎","Instagram","Takip Et",ig)+
+    action("map","●","Konum","Haritada Gör",map)+
+    action("web","◎","Web Sitesi","Ziyaret Et",web)+
+    action("review","G","Google Yorum","Yorumları Gör",review);
+  if(d.description){$("about").textContent=d.description;$("aboutSec").classList.remove("hidden")}
+  if(d.locationVideoUrl){$("locationVideo").src=safeUrl(d.locationVideoUrl);$("videoSec").classList.remove("hidden")}
+  const photos=[...(Array.isArray(d.galleryUrls)?d.galleryUrls:[]),...(Array.isArray(d.photos)?d.photos:[])].filter(Boolean).slice(0,9);
+  if(photos.length){$("gallery").innerHTML=photos.map((u,i)=>'<img src="'+esc(u)+'" loading="lazy" alt="'+esc((d.name||"Firma")+" fotoğraf "+(i+1))+'">').join("");$("gallerySec").classList.remove("hidden")}
+  $("saveContact").onclick=()=>{const blob=new Blob([vcard(d)],{type:"text/vcard;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=slugify(d.name||"firma")+".vcf";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+  $("shareBtn").onclick=async()=>{const data={title:d.name||"DijiyeSor",text:(d.name||"Firma")+" iletişim bilgileri",url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert("Bağlantı kopyalandı.")}}catch(_){}};
+  document.title=(d.name||"Firma")+" | DijiyeSor";
+  $("loading").classList.add("hidden");$("app").classList.remove("hidden");
+}
+(async()=>{try{const d=await findFirm();if(!d)throw new Error("not-found");render(d)}catch(e){$("loading").className="error";$("loading").innerHTML='<div><strong>Firma bulunamadı.</strong><p>Bu firma bağlantısı henüz oluşturulmamış olabilir.</p><a href="/">DijiyeSor ana sayfasına dön</a></div>'}})();
+</script>
+</body>
+</html>
