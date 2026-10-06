@@ -653,3 +653,10 @@ html,body,.profile-page{background-color:#f4f7fb!important;}
   .driver-journey-head h2{font-size:20px}
   .driver-journey-line{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}
 }
+
+.license-guide-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.license-guide-top em{font-style:normal;font-size:8.5px;font-weight:900;color:#8a6200;background:#fff4c7;border-radius:999px;padding:4px 6px;white-space:nowrap}
+.license-guide-scope{width:100%;margin-top:10px;padding-top:8px;border-top:1px dashed #d9e1eb}
+.license-guide-scope small{display:block;color:#98a1af;font-size:8.5px;margin-bottom:3px}
+.license-guide-scope b{display:block;color:#536176;font-size:9px;line-height:1.35}
+.license-guide-status{display:block!important;margin-top:7px!important;padding-top:0!important;color:#7f8b9d!important;font-size:8.5px!important}
