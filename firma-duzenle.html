@@ -69,6 +69,18 @@
 .upload-status{font-size:12px;color:#64748b;margin-top:6px}
 .upload-status.success{color:#166534}.upload-status.error{color:#b91c1c}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.tab{min-width:150px}.g4{grid-template-columns:1fr 1fr}.media{grid-template-columns:1fr}}
+.mini-app-urlbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px;border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;margin-bottom:16px}
+.mini-app-urlbox code{flex:1;min-width:220px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:10px 12px;color:#1d4ed8;overflow:auto}
+.mini-app-note{font-size:12px;color:#64748b;margin-top:5px;font-weight:400}
+.mini-media-box{border:1px solid #dbe3ef;border-radius:14px;padding:16px;background:#fbfdff;margin-top:16px}
+.mini-media-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.mini-media-head h3{margin:0 0 4px;font-size:15px}.mini-media-head p{margin:0;color:#64748b;font-size:12px}
+.mini-preview-grid{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;margin-top:14px}
+.mini-logo-preview{height:120px;border:1px dashed #cbd5e1;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#fff;color:#94a3b8}
+.mini-logo-preview img{width:100%;height:100%;object-fit:contain}
+.mini-cover-preview{height:120px;border:1px dashed #cbd5e1;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#fff;color:#94a3b8}
+.mini-cover-preview img{width:100%;height:100%;object-fit:cover}
+@media(max-width:650px){.mini-preview-grid{grid-template-columns:1fr}.mini-logo-preview,.mini-cover-preview{height:150px}}
 @media(max-width:650px){.topin{align-items:flex-start;flex-direction:column}.layout{padding:0 10px}.g2,.g3,.g4,.checks{grid-template-columns:1fr}.body,.head{padding:15px}.savebar{flex-direction:column;align-items:stretch}}
 </style>
 </head>
@@ -86,6 +98,7 @@
 <button class="tab active" data-tab="general">Genel Bilgiler<small>Firma, iletişim, adres</small></button>
 <button class="tab" data-tab="media">Görseller<small>Logo ve firma görseli</small></button>
 <button class="tab" data-tab="video">Video & 360°<small>Tur ve videolar</small></button>
+<button class="tab" data-tab="miniapp">Mini Uygulama<small>Link, görsel, video, butonlar</small></button>
 <button class="tab" data-tab="requests">Bilgi Al<small>Talep yönlendirme</small></button>
 <button class="tab" data-tab="sponsor">Sponsor & VIP<small>Öne çıkarma</small></button>
 <button class="tab" data-tab="qr">QR Hizmetleri<small>NFC, Menü, Google QR</small></button>
@@ -166,6 +179,82 @@
 </div>
 <div class="checks" style="margin-top:14px"><label class="check"><input id="prefer360" type="checkbox"><span><b>360° öncelikli</b><small>Harita alanında 360° içerik önce gelir.</small></span></label><label class="check"><input id="fallbackMap" type="checkbox"><span><b>360° yoksa harita</b><small>Bağlantı boşsa harita gösterilir.</small></span></label></div>
 </div></div></section>
+
+<section class="panel" data-panel="miniapp">
+<div class="card">
+  <div class="head">
+    <div class="eyebrow">MİNİ UYGULAMA</div>
+    <h2>Firma mini uygulamasını yönet</h2>
+    <p>dijiyesor.com/firma-adi-sehir adresinde açılan mobil sayfanın tüm içeriklerini buradan düzenle.</p>
+  </div>
+  <div class="body">
+    <div class="mini-app-urlbox">
+      <code id="miniAppUrl">dijiyesor.com/firma-adi-sehir</code>
+      <a id="miniAppOpen" class="btn soft" href="#" target="_blank" rel="noopener">Uygulamayı Aç ↗</a>
+    </div>
+
+    <div class="g2">
+      <label>Telefon<input id="miniPhone" placeholder="0 5xx xxx xx xx"><span class="mini-app-note">Boş bırakırsan Telefon butonu görünmez.</span></label>
+      <label>WhatsApp<input id="miniWhatsapp" placeholder="0 5xx xxx xx xx"><span class="mini-app-note">Boş bırakırsan WhatsApp butonu görünmez.</span></label>
+      <label>Instagram<input id="miniInstagram" placeholder="@kullaniciadi veya link"><span class="mini-app-note">Boş bırakırsan Instagram butonu görünmez.</span></label>
+      <label>Web Sitesi<input id="miniWebsite" placeholder="https://..."><span class="mini-app-note">Boş bırakırsan Web Sitesi butonu görünmez.</span></label>
+      <label>Google Yorum Linki<input id="googleReviewUrl" placeholder="https://g.page/r/.../review"><span class="mini-app-note">Direkt yorum ekranına giden Google linkini ekle.</span></label>
+      <label>360° Mekan Linki<input id="miniTour360Url" placeholder="https://..."><span class="mini-app-note">Link varsa mini uygulamada 360° alanı kullanılabilir.</span></label>
+    </div>
+
+    <label style="margin-top:14px">Firma Hakkında<textarea id="miniDescription" rows="4" placeholder="Mini uygulamada gösterilecek kısa açıklama..."></textarea></label>
+
+    <div class="mini-media-box">
+      <div class="mini-media-head">
+        <div><h3>Logo & Kapak</h3><p>URL yapıştırabilir veya bilgisayardan yükleyebilirsin.</p></div>
+      </div>
+      <div class="g2" style="margin-top:14px">
+        <label>Logo URL<input id="miniLogoUrl" placeholder="https://...">
+          <div class="direct-upload-row"><input id="miniLogoFile" type="file" accept="image/jpeg,image/png,image/webp"><button id="miniLogoUploadBtn" type="button" class="btn soft">Logo Yükle</button></div>
+          <div id="miniLogoUploadStatus" class="upload-status"></div>
+        </label>
+        <label>Kapak Görseli URL<input id="miniCoverUrl" placeholder="https://...">
+          <div class="direct-upload-row"><input id="miniCoverFile" type="file" accept="image/jpeg,image/png,image/webp"><button id="miniCoverUploadBtn" type="button" class="btn soft">Kapak Yükle</button></div>
+          <div id="miniCoverUploadStatus" class="upload-status"></div>
+        </label>
+      </div>
+      <div class="mini-preview-grid">
+        <div id="miniLogoPreview" class="mini-logo-preview"><strong>Logo</strong></div>
+        <div id="miniCoverPreview" class="mini-cover-preview"><strong>Kapak</strong></div>
+      </div>
+    </div>
+
+    <div class="mini-media-box">
+      <div class="mini-media-head">
+        <div><h3>Konum Videosu</h3><p>URL ekle veya MP4 / MOV / WEBM yükle. Boş bırakırsan bu bölüm görünmez.</p></div>
+      </div>
+      <label style="margin-top:14px">Konum Video URL<input id="miniLocationVideoUrl" placeholder="https://...">
+        <div class="direct-upload-row"><input id="miniLocationVideoFile" type="file" accept="video/mp4,video/quicktime,video/webm"><button id="miniLocationVideoUploadBtn" type="button" class="btn soft">Video Yükle</button><button id="miniLocationVideoClear" type="button" class="btn">Kaldır</button></div>
+        <div id="miniLocationVideoUploadStatus" class="upload-status"></div>
+      </label>
+    </div>
+
+    <div class="mini-media-box">
+      <div class="mini-media-head">
+        <div><h3>Fotoğraf & Video Galerisi</h3><p>Mini uygulamanın altındaki galeri. Fotoğraf ve videoları ekle veya tek tek kaldır.</p></div>
+        <div class="gallery-upload-actions">
+          <input id="miniGalleryPhotoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+          <input id="miniGalleryVideoFiles" type="file" accept="video/mp4,video/quicktime,video/webm" multiple>
+          <button id="miniGalleryPhotoUploadBtn" type="button" class="btn soft">Fotoğraf Ekle</button>
+          <button id="miniGalleryVideoUploadBtn" type="button" class="btn soft">Video Ekle</button>
+        </div>
+      </div>
+      <div id="miniGalleryGrid" class="gallery-admin-grid"></div>
+      <div id="miniGalleryMsg" class="message" style="display:none"></div>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+      <button id="miniAppSaveBtn" type="button" class="btn primary">Mini Uygulamayı Kaydet</button>
+      <a id="miniAppPreviewBtn" class="btn soft" href="#" target="_blank" rel="noopener">Önizle ↗</a>
+    </div>
+  </div>
+</div>
+</section>
 
 <section class="panel" data-panel="requests"><div class="card"><div class="head"><div class="eyebrow">BİLGİ AL</div><h2>Talep yönlendirme</h2><p>Bilgi Al butonunun çalışma biçimini belirle.</p></div><div class="body">
 <div class="checks"><label class="check"><input id="infoRequestEnabled" type="checkbox"><span><b>Bilgi Al aktif</b><small>Firma sayfasında buton görünür.</small></span></label><label class="check"><input id="infoNotifyPanel" type="checkbox"><span><b>Firma paneline bildir</b><small>Talep kurum hesabında da görünür.</small></span></label></div>
@@ -488,21 +577,143 @@ async function load(){
  coverSliderPreviewIndex=0;
  const resolvedName=firm.name||firm.institutionName||firm.companyName||firm.businessName||firm.title||urlFirmName||"";
  firm.name=resolvedName;
- ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","locationVideoUrl","campaignVideoUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
+ ["name","status","mainCategory","city","district","phone","address","whatsapp","website","instagram","description","logoUrl","locationVideoUrl","campaignVideoUrl","googleReviewUrl","sponsorStart","sponsorEnd","adminNotes","internalTag","nextActionDate"].forEach(k=>{if($(k))$(k).value=firm[k]||""});
  $("status").value=firm.status||"active";$("mainCategory").value=firm.mainCategory||"diger";$("subCategory").value=firm.subCategory||firm.category||"";$("tour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";$("videoUrl").value=firm.videoUrl||firm.youtubeUrl||"";
  ["vip","homeFeatured","searchFeatured","opportunityFeatured"].forEach(k=>$(k).checked=!!firm[k]);$("sponsored").checked=!!(firm.sponsored||firm.isSponsored||firm.vipSponsored||firm.advertiser);$("prefer360").checked=firm.prefer360!==false;$("fallbackMap").checked=firm.fallbackMap!==false;$("infoRequestEnabled").checked=firm.infoRequestEnabled!==false;$("infoNotifyPanel").checked=firm.infoNotifyPanel!==false;$("infoRequestTarget").value=firm.infoRequestTarget||"both";$("infoRequestPhone").value=firm.infoRequestPhone||firm.whatsapp||firm.phone||"";
- $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="/"+(firm.slug||makeProfileSlug(firm.name||"",firm.city||""));refreshPreviews();renderCoverSliderAdmin();renderGalleryAdmin();
+ $("pageName").textContent=firm.name||"Firma Düzenle";$("pageMeta").textContent=(categories[firm.mainCategory]||"Diğer")+" · "+[firm.city,firm.district].filter(Boolean).join(" / ");$("viewFirm").href="/"+(firm.slug||makeProfileSlug(firm.name||"",firm.city||""));refreshPreviews();renderCoverSliderAdmin();renderGalleryAdmin();fillMiniAppFields();renderMiniGallery();
  const q="?firma="+encodeURIComponent(firm.name||"")+"&phone="+encodeURIComponent(firm.phone||"")+"&id="+encodeURIComponent(id);$("qrCardLink").href="https://ftmotiondesign.github.io/dijiyer/qr-kart-siparis.html"+q;$("menuQrLink").href="https://ftmotiondesign.github.io/dijiyer/menu-qr.html"+q;$("googleQrLink").href="https://ftmotiondesign.github.io/dijiyer/google-qr.html"+q;
  $("statViews").textContent=Number(firm.profileViews||firm.views||0).toLocaleString("tr-TR");$("statWhatsapp").textContent=Number(firm.whatsappClicks||0).toLocaleString("tr-TR");$("statRequests").textContent=Number(firm.infoRequestCount||firm.requestCount||0).toLocaleString("tr-TR");$("statTour").textContent=Number(firm.tourViews||firm.tour360Views||0).toLocaleString("tr-TR");$("statInstagram").textContent=Number(firm.instagramClicks||0).toLocaleString("tr-TR");$("statDirections").textContent=Number(firm.directionsClicks||0).toLocaleString("tr-TR");$("toggleStatus").textContent=(firm.status||"active")==="passive"?"Firmayı Aktif Yap":"Firmayı Pasife Al";
 }
 function makeProfileSlug(value,city=""){const norm=v=>String(v||"").trim().toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");const base=norm(value),loc=norm(city);if(!loc)return base;return base===loc||base.endsWith("-"+loc)?base:base+"-"+loc}
-function data(){return{name:val("name"),slug:makeProfileSlug(val("name"),val("city")),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:coverSliderUrls[0]||"",coverUrl:coverSliderUrls[0]||"",coverUrls:[...coverSliderUrls],galleryUrls:[...galleryPhotoUrls],videoUrls:[...galleryVideoUrls],tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
-async function save(){if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
+function data(){return{name:val("name"),slug:makeProfileSlug(val("name"),val("city")),status:val("status")||"active",mainCategory:val("mainCategory")||"diger",subCategory:val("subCategory"),category:val("subCategory")||val("mainCategory")||"diger",city:val("city"),district:val("district"),phone:val("phone"),address:val("address"),whatsapp:val("whatsapp"),website:val("website"),instagram:val("instagram"),googleReviewUrl:val("googleReviewUrl"),description:val("description"),logoUrl:val("logoUrl"),cardImageUrl:coverSliderUrls[0]||"",coverUrl:coverSliderUrls[0]||"",coverUrls:[...coverSliderUrls],galleryUrls:[...galleryPhotoUrls],videoUrls:[...galleryVideoUrls],tour360Url:val("tour360Url"),videoUrl:val("videoUrl"),locationVideoUrl:val("locationVideoUrl"),campaignVideoUrl:val("campaignVideoUrl"),has360Tour:!!val("tour360Url"),prefer360:chk("prefer360"),fallbackMap:chk("fallbackMap"),infoRequestEnabled:chk("infoRequestEnabled"),infoNotifyPanel:chk("infoNotifyPanel"),infoRequestTarget:val("infoRequestTarget")||"both",infoRequestPhone:val("infoRequestPhone"),vip:chk("vip"),sponsored:chk("sponsored"),homeFeatured:chk("homeFeatured"),searchFeatured:chk("searchFeatured"),opportunityFeatured:chk("opportunityFeatured"),sponsorStart:val("sponsorStart"),sponsorEnd:val("sponsorEnd"),adminNotes:val("adminNotes"),internalTag:val("internalTag"),nextActionDate:val("nextActionDate"),updatedAt:new Date().toISOString()}}
+function syncMiniToMain(){
+  if($("miniPhone"))$("phone").value=val("miniPhone");
+  if($("miniWhatsapp"))$("whatsapp").value=val("miniWhatsapp");
+  if($("miniInstagram"))$("instagram").value=val("miniInstagram");
+  if($("miniWebsite"))$("website").value=val("miniWebsite");
+  if($("miniDescription"))$("description").value=val("miniDescription");
+  if($("miniLogoUrl"))$("logoUrl").value=val("miniLogoUrl");
+  if($("miniTour360Url"))$("tour360Url").value=val("miniTour360Url");
+  if($("miniLocationVideoUrl"))$("locationVideoUrl").value=val("miniLocationVideoUrl");
+  if($("miniCoverUrl")){
+    const cv=val("miniCoverUrl");
+    if(cv){
+      if(coverSliderUrls.length)coverSliderUrls[0]=cv; else coverSliderUrls=[cv];
+    }else if(coverSliderUrls.length===1){
+      coverSliderUrls=[];
+    }
+  }
+}
+function fillMiniAppFields(){
+  if(!$("miniPhone"))return;
+  $("miniPhone").value=firm.phone||"";
+  $("miniWhatsapp").value=firm.whatsapp||"";
+  $("miniInstagram").value=firm.instagram||"";
+  $("miniWebsite").value=firm.website||"";
+  $("miniDescription").value=firm.description||"";
+  $("miniLogoUrl").value=firm.logoUrl||"";
+  $("miniCoverUrl").value=coverSliderUrls[0]||firm.coverUrl||firm.cardImageUrl||"";
+  $("miniTour360Url").value=firm.tour360Url||firm.virtualTourUrl||firm.tour360||"";
+  $("miniLocationVideoUrl").value=firm.locationVideoUrl||"";
+  $("googleReviewUrl").value=firm.googleReviewUrl||"";
+  const slug=firm.slug||makeProfileSlug(firm.name||"",firm.city||"");
+  const url=location.origin+"/"+slug;
+  $("miniAppUrl").textContent=url;
+  $("miniAppOpen").href=url;
+  $("miniAppPreviewBtn").href=url;
+  refreshMiniPreviews();
+}
+function refreshMiniPreviews(){
+  setPreview("miniLogoPreview",val("miniLogoUrl"),"Logo","500 × 500 px","contain");
+  setPreview("miniCoverPreview",val("miniCoverUrl"),"Kapak","1600 × 900 px","cover");
+}
+function miniGalleryMsg(text,type=""){
+  const box=$("miniGalleryMsg");if(!box)return;
+  box.style.display="block";box.className="message"+(type?" "+type:"");box.textContent=text;
+}
+function renderMiniGallery(){
+  const grid=$("miniGalleryGrid");if(!grid)return;
+  const items=[
+    ...galleryPhotoUrls.map((url,index)=>'<div class="gallery-admin-item"><img src="'+String(url).replace(/"/g,"&quot;")+'" alt="Mini uygulama fotoğrafı"><button type="button" data-mini-remove-photo="'+index+'">×</button><span>Fotoğraf</span></div>'),
+    ...galleryVideoUrls.map((url,index)=>'<div class="gallery-admin-item"><video src="'+String(url).replace(/"/g,"&quot;")+'" muted preload="metadata"></video><button type="button" data-mini-remove-video="'+index+'">×</button><span>Video</span></div>')
+  ];
+  grid.innerHTML=items.length?items.join(""):'<div class="gallery-empty">Henüz fotoğraf veya video eklenmedi.</div>';
+}
+async function save(){syncMiniToMain();if(!val("name")){msg("Firma adı boş bırakılamaz.","error");return}try{msg("Kaydediliyor...");await db.collection("institutions").doc(id).set(data(),{merge:true});msg("Kaydedildi ✓","success");await load()}catch(e){msg("Kaydedilemedi: "+(e.message||""),"error")}}
 $("saveBtn").onclick=save;$("topSave").onclick=save;$("logoUrl").oninput=refreshPreviews;
 wireDirectUpload("logoUploadBtn","logoFile","logoUrl","logoUploadStatus","image");
 wireDirectUpload("videoUploadBtn","videoFile","videoUrl","videoUploadStatus","video");
 wireDirectUpload("locationVideoUploadBtn","locationVideoFile","locationVideoUrl","locationVideoUploadStatus","video");
 wireDirectUpload("campaignVideoUploadBtn","campaignVideoFile","campaignVideoUrl","campaignVideoUploadStatus","video");
+
+if($("miniLogoUrl"))$("miniLogoUrl").oninput=refreshMiniPreviews;
+if($("miniCoverUrl"))$("miniCoverUrl").oninput=refreshMiniPreviews;
+
+if($("miniLogoUploadBtn"))$("miniLogoUploadBtn").onclick=()=>$("miniLogoFile").click();
+if($("miniLogoFile"))$("miniLogoFile").onchange=async()=>{
+  const file=$("miniLogoFile").files?.[0];if(!file)return;
+  try{
+    $("miniLogoUploadStatus").textContent="Yükleniyor...";
+    const url=await uploadDirectMedia(file,"image","");
+    $("miniLogoUrl").value=url;refreshMiniPreviews();
+    $("miniLogoUploadStatus").className="upload-status success";$("miniLogoUploadStatus").textContent="Logo yüklendi ✓ Kaydet'e basın.";
+  }catch(err){$("miniLogoUploadStatus").className="upload-status error";$("miniLogoUploadStatus").textContent=err.message||"Yüklenemedi."}
+  finally{$("miniLogoFile").value=""}
+};
+
+if($("miniCoverUploadBtn"))$("miniCoverUploadBtn").onclick=()=>$("miniCoverFile").click();
+if($("miniCoverFile"))$("miniCoverFile").onchange=async()=>{
+  const file=$("miniCoverFile").files?.[0];if(!file)return;
+  try{
+    $("miniCoverUploadStatus").textContent="Yükleniyor...";
+    const url=await uploadDirectMedia(file,"image","");
+    $("miniCoverUrl").value=url;
+    if(coverSliderUrls.length)coverSliderUrls[0]=url;else coverSliderUrls=[url];
+    refreshMiniPreviews();renderCoverSliderAdmin();
+    $("miniCoverUploadStatus").className="upload-status success";$("miniCoverUploadStatus").textContent="Kapak yüklendi ✓ Kaydet'e basın.";
+  }catch(err){$("miniCoverUploadStatus").className="upload-status error";$("miniCoverUploadStatus").textContent=err.message||"Yüklenemedi."}
+  finally{$("miniCoverFile").value=""}
+};
+
+if($("miniLocationVideoUploadBtn"))$("miniLocationVideoUploadBtn").onclick=()=>$("miniLocationVideoFile").click();
+if($("miniLocationVideoFile"))$("miniLocationVideoFile").onchange=async()=>{
+  const file=$("miniLocationVideoFile").files?.[0];if(!file)return;
+  try{
+    $("miniLocationVideoUploadStatus").textContent="Yükleniyor...";
+    const url=await uploadDirectMedia(file,"video","");
+    $("miniLocationVideoUrl").value=url;
+    $("miniLocationVideoUploadStatus").className="upload-status success";$("miniLocationVideoUploadStatus").textContent="Video yüklendi ✓ Kaydet'e basın.";
+  }catch(err){$("miniLocationVideoUploadStatus").className="upload-status error";$("miniLocationVideoUploadStatus").textContent=err.message||"Yüklenemedi."}
+  finally{$("miniLocationVideoFile").value=""}
+};
+if($("miniLocationVideoClear"))$("miniLocationVideoClear").onclick=()=>{$("miniLocationVideoUrl").value="";$("miniLocationVideoUploadStatus").textContent="Video kaldırıldı. Kaydet'e basın."};
+
+if($("miniGalleryPhotoUploadBtn"))$("miniGalleryPhotoUploadBtn").onclick=()=>$("miniGalleryPhotoFiles").click();
+if($("miniGalleryVideoUploadBtn"))$("miniGalleryVideoUploadBtn").onclick=()=>$("miniGalleryVideoFiles").click();
+if($("miniGalleryPhotoFiles"))$("miniGalleryPhotoFiles").onchange=async e=>{
+  const files=[...(e.target.files||[])].slice(0,12);if(!files.length)return;
+  try{
+    for(let i=0;i<files.length;i++){miniGalleryMsg("Fotoğraf yükleniyor... "+(i+1)+" / "+files.length);const url=await uploadDirectMedia(files[i],"image","");if(url)galleryPhotoUrls.push(url);renderMiniGallery()}
+    galleryPhotoUrls=[...new Set(galleryPhotoUrls)].slice(0,24);
+    await saveGalleryOnly();renderGalleryAdmin();renderMiniGallery();miniGalleryMsg("Fotoğraflar kaydedildi ✓","success");
+  }catch(err){miniGalleryMsg("Fotoğraf yükleme hatası: "+(err.message||""),"error")}
+  finally{e.target.value=""}
+};
+if($("miniGalleryVideoFiles"))$("miniGalleryVideoFiles").onchange=async e=>{
+  const files=[...(e.target.files||[])].slice(0,4);if(!files.length)return;
+  try{
+    for(let i=0;i<files.length;i++){miniGalleryMsg("Video yükleniyor... "+(i+1)+" / "+files.length);const url=await uploadDirectMedia(files[i],"video","");if(url)galleryVideoUrls.push(url);renderMiniGallery()}
+    galleryVideoUrls=[...new Set(galleryVideoUrls)].slice(0,8);
+    await saveGalleryOnly();renderGalleryAdmin();renderMiniGallery();miniGalleryMsg("Videolar kaydedildi ✓","success");
+  }catch(err){miniGalleryMsg("Video yükleme hatası: "+(err.message||""),"error")}
+  finally{e.target.value=""}
+};
+if($("miniGalleryGrid"))$("miniGalleryGrid").onclick=async e=>{
+  const p=e.target.closest("[data-mini-remove-photo]"),v=e.target.closest("[data-mini-remove-video]");
+  if(p){galleryPhotoUrls.splice(Number(p.dataset.miniRemovePhoto),1);await saveGalleryOnly();renderGalleryAdmin();renderMiniGallery();miniGalleryMsg("Fotoğraf kaldırıldı ✓","success")}
+  if(v){galleryVideoUrls.splice(Number(v.dataset.miniRemoveVideo),1);await saveGalleryOnly();renderGalleryAdmin();renderMiniGallery();miniGalleryMsg("Video kaldırıldı ✓","success")}
+};
+if($("miniAppSaveBtn"))$("miniAppSaveBtn").onclick=async()=>{await save();fillMiniAppFields();};
 
 function openSitePreview(e){
   if(e)e.preventDefault();
