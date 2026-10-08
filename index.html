@@ -76,6 +76,15 @@
     .search-suggestion-copy{min-width:0;display:flex;flex-direction:column}
     .search-suggestion-copy strong{font-size:14px;line-height:1.25}
     .search-suggestion-copy small{font-size:11px;color:#8a94a6;margin-top:2px}
+
+  /* İşletme giriş menüsü */
+  .djs-business-menu{position:relative;margin-left:auto;display:flex;align-items:center;z-index:220}
+  .djs-business-menu>button{width:42px;height:42px;display:grid;place-items:center;border:1px solid #d9e5f5;border-radius:12px;background:#fff;color:#1768e9;font-size:24px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .djs-business-menu>button:hover{background:#f0f6ff}
+  .djs-business-dropdown{position:absolute;right:0;top:calc(100% + 9px);width:225px;background:#fff;border:1px solid #d9e5f5;border-radius:14px;padding:7px;box-shadow:0 12px 32px rgba(23,42,81,.15);z-index:250}
+  .djs-business-dropdown[hidden]{display:none!important}
+  .djs-business-dropdown a{display:block;padding:12px 11px;color:#1c3151;text-decoration:none;font-size:14px;font-weight:700;border-radius:9px}
+  .djs-business-dropdown a:hover{background:#eef5ff;color:#1264e9}
   </style>
 
 </head>
@@ -85,6 +94,7 @@
       <span class="mini-brand-mark">D</span>
       <span class="mini-brand-copy" style="display:flex!important;flex-direction:column!important;align-items:flex-start!important;line-height:1.05!important;"><strong style="display:block!important;font-size:14px!important;font-weight:900!important;">DijiyeSor</strong><small style="display:block!important;margin-top:3px!important;font-size:8px!important;font-weight:700!important;color:#8a94a6!important;white-space:nowrap!important;">Türkiye’nin Dijital Rehberi</small></span></a>
     <div class="top-actions">
+      <div class="djs-business-menu" id="djsBusinessMenu"><button type="button" aria-label="İşletme menüsünü aç" aria-expanded="false" aria-controls="djsBusinessDropdown" id="djsBusinessMenuToggle">☰</button><nav class="djs-business-dropdown" id="djsBusinessDropdown" hidden><a href="isletme-giris.html">İşletme Paneline Giriş</a><a href="isletme-kayit.html">İşletme Kaydı Oluştur</a></nav></div>
     </div>
   </header>
 
@@ -838,5 +848,16 @@
     loadCities();
   </script>
   <script src="sponsor-global.js?v=20261004-2"></script>
+
+<script>
+(function(){
+ const b=document.getElementById("djsBusinessMenuToggle"),m=document.getElementById("djsBusinessDropdown");
+ if(!b||!m)return;
+ function close(){m.hidden=true;b.setAttribute("aria-expanded","false")}
+ b.addEventListener("click",function(e){e.stopPropagation();m.hidden=!m.hidden;b.setAttribute("aria-expanded",String(!m.hidden))});
+ document.addEventListener("click",function(e){if(!e.target.closest("#djsBusinessMenu"))close()});
+ document.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+})();
+</script>
 </body>
 </html>
