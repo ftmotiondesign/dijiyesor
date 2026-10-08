@@ -120,6 +120,7 @@
 <div class="g3" style="margin-top:14px"><label>İl<input id="city"></label><label>İlçe<input id="district"></label><label>Telefon<input id="phone"></label></div>
 <label style="margin-top:14px">Adres<input id="address"></label>
 <div class="g3" style="margin-top:14px"><label>WhatsApp<input id="whatsapp"></label><label>Web sitesi<input id="website"></label><label>Instagram<input id="instagram"></label></div>
+<div style="margin-top:14px"><label>Kayıtlı E-posta Adresi<input id="registeredAccountEmail" type="email" readonly autocomplete="off" placeholder="Kontrol ediliyor..." style="background:#f4f7fc;color:#334155;cursor:default"></label><small id="registeredEmailHelp" style="display:block;margin-top:5px;color:#64748b;font-size:12px">İşletmenin giriş hesabına ait e-posta; bu alandan değiştirilemez.</small></div>
 <label style="margin-top:14px">Firma Hakkında Metni <span style="display:block;font-weight:400;color:#64748b;font-size:12px;margin-top:4px">Buraya yazdığın açıklama firma sayfasındaki “Firma hakkında” bölümünde görünür.</span><textarea id="description" rows="5" placeholder="Firma hakkında kısa ve açıklayıcı bilgi yazın..."></textarea></label>
 </div></div></section>
 
@@ -587,10 +588,42 @@ async function saveGalleryOnly(){
   firm.galleryUrls=[...galleryPhotoUrls];
   firm.videoUrls=[...galleryVideoUrls];
 }
+async function loadRegisteredEmail(currentFirm){
+ const input=$("registeredAccountEmail"),hint=$("registeredEmailHelp");
+ if(!input)return;
+ input.value="";input.placeholder="Kontrol ediliyor...";
+ const valid=v=>{const x=String(v||"").trim();return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(x)&&!x.toLowerCase().endsWith("@dijiyesor.app")?x:""};
+ let email=valid(currentFirm.ownerEmail)||valid(currentFirm.accountEmail)||valid(currentFirm.registeredEmail);
+ try{
+   if(!email && currentFirm.ownerUid){
+     const doc=await db.collection("institutionUsers").doc(String(currentFirm.ownerUid)).get();
+     if(doc.exists && String(doc.data()?.institutionId||"")===String(id))email=valid(doc.data()?.email);
+   }
+   if(!email){
+     const users=await db.collection("institutionUsers").where("institutionId","==",id).limit(5).get();
+     const linked=users.docs.map(d=>d.data()).find(x=>valid(x.email));
+     if(linked)email=valid(linked.email);
+   }
+   if(!email){
+     const apps=await db.collection("institutionApplications").where("approvedInstitutionId","==",id).limit(5).get();
+     const linked=apps.docs.map(d=>d.data()).find(x=>valid(x.accountEmail));
+     if(linked)email=valid(linked.accountEmail);
+   }
+   input.value=email||"";
+   input.placeholder=email?"":"Kayıtlı e-posta bulunamadı";
+   if(hint)hint.textContent=email?"İşletmenin kayıtlı giriş e-postası (salt okunur).":"Bu firmaya bağlı giriş hesabında e-posta bulunamadı. Üyeler bölümündeki hesap eşleştirmesini kontrol edin.";
+ }catch(err){
+   console.warn("Kayıtlı e-posta sorgulanamadı",err);
+   input.value=email||"";
+   input.placeholder=email?"":"E-posta okunamadı";
+   if(hint)hint.textContent=email?"İşletmenin kayıtlı giriş e-postası (salt okunur).":"Kayıtlı e-posta okunamadı; Firebase okuma yetkilerini kontrol edin.";
+ }
+}
 async function load(){
  if(!id){location.href="admin.html#firms";return}
  const s=await db.collection("institutions").doc(id).get();if(!s.exists){alert("Firma bulunamadı.");location.href="admin.html#firms";return}
  firm={id:s.id,...s.data()};
+ void loadRegisteredEmail(firm);
  galleryPhotoUrls=Array.isArray(firm.galleryUrls)?firm.galleryUrls.filter(Boolean):[];
  galleryVideoUrls=Array.isArray(firm.videoUrls)?firm.videoUrls.filter(Boolean):[];
  coverSliderUrls=Array.isArray(firm.coverUrls)?firm.coverUrls.filter(Boolean):[];
