@@ -592,7 +592,7 @@ async function loadRegisteredEmail(currentFirm){
  const input=$("registeredAccountEmail"),hint=$("registeredEmailHelp");
  if(!input)return;
  input.value="";input.placeholder="Kontrol ediliyor...";
- const valid=v=>{const x=String(v||"").trim();return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(x)&&!x.toLowerCase().endsWith("@dijiyesor.app")?x:""};
+ const valid=v=>{const x=String(v||"").trim();return x.length>5 && x.includes("@") && x.split("@")[1]?.includes(".") && !x.includes(" ") && !x.toLowerCase().endsWith("@dijiyesor.app")?x:""};
  let email=valid(currentFirm.ownerEmail)||valid(currentFirm.accountEmail)||valid(currentFirm.registeredEmail);
  try{
    if(!email && currentFirm.ownerUid){
