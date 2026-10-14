@@ -85,6 +85,7 @@
   .djs-business-dropdown[hidden]{display:none!important}
   .djs-business-dropdown a{display:block;padding:12px 11px;color:#1c3151;text-decoration:none;font-size:14px;font-weight:700;border-radius:9px}
   .djs-business-dropdown a:hover{background:#eef5ff;color:#1264e9}
+  .djs-business-dropdown a[hidden]{display:none!important}
   </style>
 
 </head>
@@ -216,6 +217,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD4SHYRiuSuHB-wSl8oWUFMCsfVu6j164E",
@@ -868,6 +870,20 @@
 
 <script>
 (function(){
+ const adminLink=document.getElementById("djsAdminMenuLink");
+ if(adminLink){
+   adminLink.hidden=true;
+   if(window.firebase && firebase.apps.length && typeof firebase.auth === "function"){
+     firebase.auth().onAuthStateChanged(function(user){
+       const isAdmin=Boolean(user && user.email &&
+         user.email.trim().toLowerCase()==="ftmotiondesign@gmail.com");
+       adminLink.hidden=!isAdmin;
+     },function(error){
+       console.warn("Yönetici oturumu kontrol edilemedi:",error);
+       adminLink.hidden=true;
+     });
+   }
+ }
  const b=document.getElementById("djsBusinessMenuToggle"),m=document.getElementById("djsBusinessDropdown");
  if(!b||!m)return;
  function close(){m.hidden=true;b.setAttribute("aria-expanded","false")}
