@@ -96,6 +96,22 @@ const cleanDistrictName=v=>String(v||"")
 
 const normDistrict=v=>norm(cleanDistrictName(v));
 
+// İlçe adları kimi kayıtlar için "Merkez", kimileri için "Çanakkale Merkez" şeklinde tutuluyor.
+// Yalnızca seçili ildeki merkez adlandırmalarını eşitle; başka ilçeleri birleştirme.
+function districtMatches(firmDistrict, selectedDistrict, selectedCity){
+  const selected=normDistrict(selectedDistrict);
+  if(!selected)return true;
+  const firm=normDistrict(firmDistrict);
+  if(!firm)return false;
+  if(firm===selected)return true;
+  const city=norm(selectedCity);
+  if(!city)return false;
+  const center=norm("Merkez");
+  const cityCenter=city+" "+center;
+  return (selected===center&&firm===cityCenter) ||
+    (selected===cityCenter&&firm===center);
+}
+
 /* Daha esnek Türkçe arama:
    - sürücü kursu / sürücü kursları
    - restoran / restoranlar
@@ -1389,7 +1405,7 @@ async function initHome(){
       // İlçe seçildiyse yalnızca o ilçedeki firmalar gösterilir.
       // İlçe boşsa seçilen ilin tüm ilçeleri gösterilir.
       const cityMatch=!c||norm(i.city)===c;
-      const districtMatch=!d||normDistrict(i.district)===normDistrict(d);
+      const districtMatch=districtMatches(i.district,district.value,city.value);
       const sectorMatch=!s||i.mainCategory===s;
       const subMatch=!sc||i.subCategory===sc||i.category===sc;
       const tourMatch=!(feature360||only360Active)||valid360Url(i.tour360Url);
