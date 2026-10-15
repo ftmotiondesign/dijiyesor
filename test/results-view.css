@@ -33,3 +33,21 @@
  #companyGrid.djs-view-grid .result-card-copy{padding:8px 7px 4px}
  #companyGrid.djs-view-grid .result-actions{padding:5px 7px 9px}
 }
+
+/* Mobile preview refinements: header and compact cards */
+@media(max-width:680px){
+ #resultsHead.results-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+ #resultsHead.results-head>div:first-child{width:100%!important;min-width:0!important}
+ #resultsHead #resultsContext{max-width:none!important;line-height:1.35!important}
+ #resultsHead .results-head-actions{width:100%!important;display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;align-items:center!important;gap:8px!important}
+ #resultsHead #resultSummary{flex-basis:100%!important}
+ #resultsHead .results-view-toggle{flex:0 0 auto}
+ #resultsHead .only360-btn{flex:0 1 auto;min-width:0}
+ #companyGrid.djs-view-grid .result-visual{aspect-ratio:5/3!important;max-height:130px!important}
+ #companyGrid.djs-view-grid .result-visual-fallback{padding:4px!important}
+ #companyGrid.djs-view-grid .result-card-copy{padding:8px 8px 3px!important}
+ #companyGrid.djs-view-grid .result-name-row h2{font-size:12px!important;line-height:1.3!important}
+ #companyGrid.djs-view-grid .result-compare-row{padding:5px 8px 3px!important}
+ #companyGrid.djs-view-grid .result-actions{padding:4px 8px 9px!important;gap:4px!important}
+ #companyGrid.djs-view-grid .result-primary,#companyGrid.djs-view-grid .result-secondary{min-height:32px!important;font-size:10px!important}
+}
