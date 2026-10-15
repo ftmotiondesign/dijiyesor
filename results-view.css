@@ -1,9 +1,11 @@
 /* DijiyeSor: search layout modes, isolated from existing filters and sponsors. */
-.results-view-toggle{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid #dce5f0;border-radius:12px;background:#f6f8fc}
+.results-view-toggle{display:none;align-items:center;gap:4px;padding:4px;border:1px solid #dce5f0;border-radius:12px;background:#f6f8fc}
 .results-view-toggle button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 10px;border:0;border-radius:9px;background:transparent;color:#61718b;font-size:12px;font-weight:800;cursor:pointer}
 .results-view-toggle button[aria-pressed="true"]{background:#fff;color:#1768e9;box-shadow:0 1px 5px #14233a17}
 .results-view-toggle button:focus-visible{outline:2px solid #1768e9;outline-offset:2px}
 @media(max-width:680px){
+ .results-view-toggle{display:flex}
+
  #companyGrid.djs-view-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;align-items:stretch}
  #companyGrid.djs-view-grid>.result-card{min-width:0;display:flex;flex-direction:column;border-radius:19px;overflow:hidden}
  #companyGrid.djs-view-grid>.result-card>.result-card-body{display:flex;flex:1;flex-direction:column;padding:0!important;min-width:0}
