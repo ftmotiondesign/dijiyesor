@@ -83,14 +83,15 @@
    document.body.style.overflow="hidden";
    firmDialog.querySelector("[data-close-firm]").focus();
  }
- grid.addEventListener("click",e=>{
-   const link=e.target.closest(".result-card a.result-primary");
-   if(!link || !grid.contains(link) || e.defaultPrevented || e.button!==0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey)return;
-   const url=new URL(link.href,document.baseURI);
+ document.addEventListener("click",e=>{
+   const link=e.target.closest?.("a.result-primary[href*=\"firma.html\"]");
+   if(!link || !grid.contains(link) || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || (e.button!==undefined && e.button!==0))return;
+   const url=new URL(link.getAttribute("href"),document.baseURI);
    if(url.origin!==location.origin || !url.pathname.endsWith("/firma.html"))return;
    e.preventDefault();
+   e.stopPropagation();
    openFirmPopup(url.href,link.closest(".result-card")?.querySelector(".result-name-row h2")?.textContent);
- });
+ },true);
  const key="dijiyesor-search-view-v1";
  let stored=null;
  try{stored=localStorage.getItem(key)}catch(_){}
