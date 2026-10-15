@@ -51,3 +51,15 @@
  #companyGrid.djs-view-grid .result-actions{padding:4px 8px 9px!important;gap:4px!important}
  #companyGrid.djs-view-grid .result-primary,#companyGrid.djs-view-grid .result-secondary{min-height:32px!important;font-size:10px!important}
 }
+
+/* Header layout fix: prevent title context from sharing a narrow row with controls */
+@media(max-width:680px){
+ #resultsHead.results-head{display:block!important}
+ #resultsHead.results-head>div:first-child{display:block!important;width:100%!important}
+ #resultsHead #resultsTitle{display:block!important;margin-bottom:6px!important}
+ #resultsHead #resultsContext{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;margin:0 0 12px!important;font-size:12px!important;line-height:1.45!important}
+ #resultsHead .results-head-actions{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;width:100%!important;gap:8px!important;align-items:center!important;justify-content:flex-start!important}
+ #resultsHead #resultSummary{display:none!important}
+ #resultsHead .results-view-toggle{flex:0 0 auto!important}
+ #resultsHead .only360-btn{flex:0 0 auto!important}
+}
