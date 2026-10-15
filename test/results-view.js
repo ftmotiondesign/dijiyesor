@@ -29,10 +29,15 @@
  grid.addEventListener("error",e=>{if(e.target?.tagName==="IMG")markMissingCovers()},true);
 
  // Test only: show the existing firm page in an accessible overlay.
- let firmDialog=null, firmFrame=null, priorFocus=null, previousOverflow="";
- function closeFirmPopup(){
+ let firmDialog=null, firmFrame=null, priorFocus=null, previousOverflow="", popupHistoryActive=false;
+ const popupHash="#djs-firma-popup";
+ function onFirmPopState(){if(firmDialog && !firmDialog.hidden)closeFirmPopup(false)}
+ window.addEventListener("popstate",onFirmPopState);
+ function closeFirmPopup(updateHistory=true){
    if(!firmDialog || firmDialog.hidden)return;
    firmDialog.hidden=true;
+   if(updateHistory && popupHistoryActive && location.hash===popupHash){history.back()}
+   popupHistoryActive=false;
    firmFrame.src="about:blank";
    document.body.style.overflow=previousOverflow;
    if(priorFocus?.isConnected)priorFocus.focus();
@@ -49,7 +54,7 @@
        .djs-firm-bar button,.djs-firm-bar a{border:1px solid #dbe3ee;background:#f8fafc;border-radius:10px;padding:9px 12px;font:inherit;text-decoration:none;color:#1e40af;cursor:pointer}
        .djs-firm-bar .djs-firm-close{background:#1e80f0;color:white;border-color:#1e80f0}
        .djs-firm-frame{flex:1;width:100%;border:0;background:white}
-       @media(max-width:680px){.djs-firm-dialog{padding:0}.djs-firm-shell{width:100%;height:100dvh;border-radius:0}.djs-firm-bar{padding:8px 10px;min-height:54px;gap:7px}.djs-firm-bar button,.djs-firm-bar a{font-size:13px;padding:8px}}
+       @media(max-width:680px){.djs-firm-dialog{padding:12px 8px 18px}.djs-firm-shell{width:100%;height:calc(100dvh - 30px);border-radius:16px}.djs-firm-bar{padding:8px 10px;min-height:54px;gap:7px}.djs-firm-bar button,.djs-firm-bar a{font-size:13px;padding:8px}}
      `;
      document.head.appendChild(style);
      firmDialog=document.createElement("div");
@@ -79,6 +84,7 @@
    const url=new URL(href,document.baseURI);
    firmDialog.querySelector(".djs-firm-external").href=url.href;
    firmFrame.src=url.href;
+   if(!popupHistoryActive){history.pushState({djsFirmPopup:true},"",popupHash);popupHistoryActive=true}
    firmDialog.hidden=false;
    document.body.style.overflow="hidden";
    firmDialog.querySelector("[data-close-firm]").focus();
