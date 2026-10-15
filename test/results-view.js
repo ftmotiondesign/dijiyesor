@@ -10,14 +10,22 @@
    grid.querySelectorAll(".result-card").forEach(card=>{
      const visual=card.querySelector(".result-visual");
      if(!visual)return;
-     const img=visual.querySelector("img");
-     const source=img?.getAttribute("src")||"";
-     const hasCover=!!img && !!source.trim() && !img.classList.contains("fallback") && !visual.classList.contains("result-visual-fallback");
-     card.classList.toggle("djs-no-cover",!hasCover || (img?.complete && img.naturalWidth===0));
+     const images=Array.from(visual.querySelectorAll("img"));
+     const loaded=images.some(img=>img.complete && img.naturalWidth>0);
+     const pending=images.some(img=>!img.complete && !!img.getAttribute("src"));
+     const hasRealImage=loaded || pending;
+     card.classList.toggle("djs-no-cover",!hasRealImage);
+     const badge=card.querySelectorAll(".result-badge");
+     badge.forEach(el=>{
+       if(!el.textContent.includes("Fotoğraflı"))return;
+       el.hidden=!hasRealImage;
+       el.style.display=hasRealImage?"":"none";
+     });
    });
  }
  const observer=new MutationObserver(markMissingCovers);
  observer.observe(grid,{childList:true,subtree:true,attributes:false});
+ grid.addEventListener("load",e=>{if(e.target?.tagName==="IMG")markMissingCovers()},true);
  grid.addEventListener("error",e=>{if(e.target?.tagName==="IMG")markMissingCovers()},true);
  const key="dijiyesor-search-view-v1";
  let stored=null;
