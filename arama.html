@@ -118,6 +118,7 @@
     }
   </style>
 
+  <link rel="stylesheet" href="results-view.css?v=20261015-1">
 </head>
 <body>
   <header class="top">
@@ -169,6 +170,10 @@
       </div>
       <div class="results-head-actions">
         <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
+        <div id="resultsViewToggle" class="results-view-toggle" role="group" aria-label="Sonuç görünümü">
+          <button type="button" data-results-view="grid" aria-pressed="false" aria-label="Izgara görünümü">▦ <span>Izgara</span></button>
+          <button type="button" data-results-view="list" aria-pressed="false" aria-label="Liste görünümü">☷ <span>Liste</span></button>
+        </div>
         <button id="only360Btn" class="only360-btn only360-btn-compact" type="button" aria-pressed="false">
           <span class="only360-icon">360°</span>
           <span class="only360-copy"><strong>360° olanlar</strong></span>
@@ -313,5 +318,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="app.js?v=20261014-district-fix"></script>
   <script src="bilgi-modal.js"></script>
+  <script src="results-view.js?v=20261015-1"></script>
 </body>
 </html>
