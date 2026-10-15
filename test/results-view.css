@@ -70,3 +70,12 @@
  .search-area .filters{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
  .search-area .filters select{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:10px!important;padding-right:24px!important;font-size:13px!important;text-overflow:ellipsis!important}
 }
+
+/* Definitive mobile overflow containment for native selects */
+@media(max-width:680px){
+ html,body{max-width:100%;overflow-x:clip}
+ main.page{width:calc(100% - 24px)!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ main.page .search-area{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ main.page .search-area .filters{width:100%!important;max-width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;box-sizing:border-box!important}
+ main.page .search-area .filters>select{grid-column:auto!important;min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;appearance:none!important;-webkit-appearance:none!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;background-image:none!important;padding:0 8px!important;font-size:12px!important}
+}
