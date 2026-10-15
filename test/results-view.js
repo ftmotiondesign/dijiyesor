@@ -18,8 +18,8 @@
      const badge=card.querySelectorAll(".result-badge");
      badge.forEach(el=>{
        if(!el.textContent.includes("Fotoğraflı"))return;
-       el.hidden=!hasRealImage;
-       el.style.display=hasRealImage?"":"none";
+       el.hidden=!loaded;
+       el.style.display=loaded?"":"none";
      });
    });
  }
