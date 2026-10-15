@@ -79,3 +79,24 @@
  main.page .search-area .filters{width:100%!important;max-width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;box-sizing:border-box!important}
  main.page .search-area .filters>select{grid-column:auto!important;min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;appearance:none!important;-webkit-appearance:none!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;background-image:none!important;padding:0 8px!important;font-size:12px!important}
 }
+
+/* Cards without a real cover: no oversized empty image panel */
+@media(max-width:680px){
+ #companyGrid.djs-view-grid>.result-card:has(.result-visual-fallback) .result-visual,
+ #companyGrid.djs-view-grid>.result-card.djs-no-cover .result-visual{
+   display:none!important;
+ }
+ #companyGrid.djs-view-grid>.result-card:has(.result-visual-fallback) .result-card-top,
+ #companyGrid.djs-view-grid>.result-card.djs-no-cover .result-card-top{
+   padding-top:50px!important;
+   min-height:0!important;
+ }
+ #companyGrid.djs-view-grid>.result-card:has(.result-visual-fallback) .result-logo,
+ #companyGrid.djs-view-grid>.result-card.djs-no-cover .result-logo{
+   top:9px!important;left:9px!important;width:38px!important;height:38px!important;min-width:38px!important;
+ }
+ #companyGrid.djs-view-grid>.result-card:has(.result-visual-fallback) .result-card-copy,
+ #companyGrid.djs-view-grid>.result-card.djs-no-cover .result-card-copy{
+   padding-top:4px!important;
+ }
+}
