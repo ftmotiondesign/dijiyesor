@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <base href="../">
+  
+  <link rel="icon" type="image/png" href="assets/diji-mascot-v2.png?v=20261004-1">
+  <link rel="apple-touch-icon" href="assets/diji-mascot-v2.png?v=20261004-1">
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TEST — Arama Sonuçları | DijiyeSor</title>
+  <meta name="description" content="DijiyeSor firma arama sonuçları.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="stylesheet" href="arama.css?v=20261006-56-phone">
+  <link rel="stylesheet" href="bilgi-modal.css?v=20261004-02">
+
+  <style>
+    /* Firma kartı: küçük logo solda, büyük kapak görseli sağda */
+    .result-card-top{
+      display:grid!important;
+      grid-template-columns:52px minmax(0,1fr) 150px!important;
+      gap:12px!important;
+      align-items:start!important;
+    }
+    .result-logo{
+      width:52px!important;
+      height:52px!important;
+      min-width:52px!important;
+      border-radius:12px!important;
+      overflow:hidden!important;
+      border:1px solid #e5e7eb!important;
+      background:#f8fafc!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+    }
+    .result-logo img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:contain!important;
+      display:block!important;
+      padding:4px!important;
+    }
+    .result-logo span{
+      font-size:16px!important;
+      font-weight:800!important;
+      color:#2563eb!important;
+    }
+    .result-card-copy{
+      min-width:0!important;
+      padding-top:1px!important;
+    }
+    .result-name-row h2{
+      margin-top:0!important;
+      line-height:1.2!important;
+    }
+    .result-visual{
+      width:150px!important;
+      height:112px!important;
+      min-width:150px!important;
+      border-radius:15px!important;
+      overflow:hidden!important;
+      align-self:start!important;
+    }
+    .result-visual img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:cover!important;
+      display:block!important;
+    }
+    .result-visual-fallback{
+      padding:12px!important;
+    }
+    .result-desc{
+      margin-top:14px!important;
+    }
+    /* Kaydırma sonrası eğitim alt kategori önerisi */
+    .education-suggest-modal{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px}
+    .education-suggest-modal.hidden{display:none}
+    .education-suggest-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(3px)}
+    .education-suggest-card{position:relative;width:min(520px,100%);background:#fff;border-radius:24px;padding:24px;box-shadow:0 24px 80px rgba(15,23,42,.28)}
+    .education-suggest-close{position:absolute;right:14px;top:12px;width:36px;height:36px;border:0;border-radius:50%;background:#f1f5f9;font-size:24px;line-height:1;cursor:pointer}
+    .education-suggest-kicker{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.08em;color:#0f766e;margin-bottom:8px}
+    .education-suggest-card h2{margin:0 42px 8px 0;font-size:23px;line-height:1.2;color:#0f172a}
+    .education-suggest-card p{margin:0 0 18px;color:#64748b;line-height:1.5}
+    .education-suggest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .education-suggest-btn{border:1px solid #e2e8f0;background:#f8fafc;border-radius:15px;padding:14px 12px;text-align:left;font-weight:800;color:#0f172a;cursor:pointer;transition:.18s ease}
+    .education-suggest-btn:hover{border-color:#14b8a6;background:#f0fdfa;transform:translateY(-1px)}
+    .education-suggest-btn.all{grid-column:1/-1;text-align:center;background:#0f172a;color:#fff;border-color:#0f172a}
+    @media (max-width:680px){
+      .education-suggest-modal{align-items:flex-end;padding:0}
+      .education-suggest-card{width:100%;border-radius:24px 24px 0 0;padding:22px 18px 20px}
+      .education-suggest-card h2{font-size:20px}
+      .education-suggest-grid{grid-template-columns:1fr 1fr}
+      .education-suggest-btn{padding:13px 10px;font-size:13px}
+      .result-card-top{
+        grid-template-columns:46px minmax(0,1fr) 112px!important;
+        gap:10px!important;
+      }
+      .result-logo{
+        width:46px!important;
+        height:46px!important;
+        min-width:46px!important;
+      }
+      .result-visual{
+        width:112px!important;
+        min-width:112px!important;
+        height:84px!important;
+        border-radius:12px!important;
+      }
+      .result-name-row h2{
+        font-size:16px!important;
+      }
+      .result-location{
+        font-size:11px!important;
+      }
+      .result-category{
+        font-size:11px!important;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="test/results-view.css?v=20261015-2">
+</head>
+<body>
+  <header class="top">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">D</span>
+      <span class="djs-brand-copy" style="display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;line-height:1.05!important;min-width:0!important;">
+  <strong style="display:block!important;font-size:14px!important;font-weight:900!important;color:inherit!important;white-space:nowrap!important;">DijiyeSor</strong>
+  <small style="display:block!important;margin-top:3px!important;font-size:8px!important;font-weight:700!important;color:inherit!important;opacity:.68!important;white-space:nowrap!important;">Türkiye’nin Dijital Rehberi</small>
+</span>
+    </a>
+  </header>
+
+  <main class="page">
+    <div style="padding:9px 12px;margin-bottom:12px;border-radius:10px;background:#fff7db;color:#755000;font-weight:800;font-size:12px;text-align:center">TEST ÖNİZLEME — Mevcut site değiştirilmedi</div>
+
+    <section class="search-area">
+      <div class="search-line">
+        <span class="search-icon">⌕</span>
+        <input id="searchInput" type="search" autocomplete="off" placeholder="Firma, kurum veya hizmet ara...">
+        <button id="searchBtn" type="button">Ara</button>
+      </div>
+
+      <div class="filters">
+        <select id="citySelect"><option value="">Tüm İller</option></select>
+        <select id="districtSelect" disabled><option value="">Tüm İlçeler</option></select>
+        <select id="sectorSelect">
+          <option value="">Tüm Sektörler</option>
+          <option value="egitim">Eğitim</option>
+          <option value="otomotiv">Otomotiv</option>
+          <option value="yemeicme">Yeme & İçme</option>
+          <option value="saglikguzellik">Sağlık & Güzellik</option>
+          <option value="evyapi">Ev & Yapı</option>
+          <option value="emlak">Emlak</option>
+          <option value="turizm">Turizm & Konaklama</option>
+          <option value="organizasyonmedya">Organizasyon & Medya</option>
+          <option value="tasimacilik">Taşımacılık & Teslimat</option>
+          <option value="profesyonel">Profesyonel Hizmetler</option>
+          <option value="alisveris">Alışveriş & Yerel Esnaf</option>
+          <option value="diger">Diğer</option>
+        </select>
+        <select id="subCategorySelect" disabled><option value="">Tüm Alt Kategoriler</option></select>
+      </div>
+      <div id="activeFilters" class="active-filters"></div>
+    </section>
+
+    <section id="resultsHead" class="results-head">
+      <div>
+        <h1 id="resultsTitle">Arama sonuçları</h1>
+        <p id="resultsContext">Aramana uygun işletmeler listeleniyor.</p>
+      </div>
+      <div class="results-head-actions">
+        <div id="resultSummary" class="count">Firmalar yükleniyor...</div>
+        <div id="resultsViewToggle" class="results-view-toggle" role="group" aria-label="Sonuç görünümü">
+          <button type="button" data-results-view="grid" aria-pressed="false" aria-label="Izgara görünümü">▦ <span>Izgara</span></button>
+          <button type="button" data-results-view="list" aria-pressed="false" aria-label="Liste görünümü">☷ <span>Liste</span></button>
+        </div>
+        <button id="only360Btn" class="only360-btn only360-btn-compact" type="button" aria-pressed="false">
+          <span class="only360-icon">360°</span>
+          <span class="only360-copy"><strong>360° olanlar</strong></span>
+          <span class="only360-switch" aria-hidden="true"></span>
+        </button>
+      </div>
+    </section>
+
+    <section id="cityHero" class="city-hero hidden" aria-hidden="true">
+      <img id="cityHeroImage" class="city-hero-image" alt="">
+      <div class="city-hero-overlay"></div>
+      <div class="city-hero-content">
+        <span id="cityHeroEyebrow">ŞEHRİ KEŞFET</span>
+        <strong id="cityHeroTitle"></strong>
+        <small id="cityHeroSubtitle"></small>
+      </div>
+      <aside id="cityHeroSponsor" class="city-hero-sponsor hidden">
+        <span class="city-hero-sponsor-badge">SPONSOR</span>
+        <img id="cityHeroSponsorLogo" class="city-hero-sponsor-logo hidden" alt="">
+        <div class="city-hero-sponsor-copy">
+          <strong id="cityHeroSponsorName">Sponsor</strong>
+          <small id="cityHeroSponsorText"></small>
+        </div>
+        <a id="cityHeroSponsorLink" href="#" rel="noopener">İncele</a>
+      </aside>
+    </section>
+
+    <div id="locationNotice" class="location-notice location-notice-compact hidden">
+      <div class="location-notice-left">
+        <img class="location-mascot" src="./assets/diji-mascot-search.png" alt="Diji büyüteçle arıyor">
+        <div>
+          <strong>Türkiye geneli sonuçlar</strong>
+          <span><strong class="location-prefix">Yakınındaki firmalar için</strong> konum seç.</span>
+        </div>
+      </div>
+      <button type="button" class="location-select-btn" data-open-location>📍 Konum Seç</button>
+    </div>
+
+    <section id="companyGrid" class="results-grid">
+      <div class="results-state">
+        <strong>Firmalar yükleniyor</strong>
+        <span>Lütfen kısa bir süre bekleyin.</span>
+      </div>
+    </section>
+  </main>
+
+  <div id="locationPickerModal" class="location-picker-modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationPickerTitle">
+    <div class="location-picker-backdrop" data-close-location></div>
+    <div class="location-picker-card">
+      <button type="button" class="location-picker-close" data-close-location aria-label="Kapat">×</button>
+      <span class="location-picker-kicker">KONUM SEÇ</span>
+      <h2 id="locationPickerTitle">Nerede arıyorsunuz?</h2>
+      <p><strong id="locationSearchLabel">Aramanız</strong> için konum seçin.</p>
+      <div class="location-picker-fields">
+        <label>
+          <span>İl</span>
+          <select id="popupCitySelect"><option value="">İl Seç</option></select>
+        </label>
+        <label>
+          <span>İlçe</span>
+          <select id="popupDistrictSelect" disabled><option value="">Tüm İlçeler</option></select>
+        </label>
+      </div>
+      <button type="button" id="applyPopupLocation" class="location-apply-btn">Konumu Uygula</button>
+      <button type="button" id="allTurkeyBtn" class="location-turkey-btn">🇹🇷 Tüm Türkiye’de Ara</button>
+    </div>
+  </div>
+
+  <div id="categoryPickerModal" class="category-modal hidden" role="dialog" aria-modal="true" aria-labelledby="categoryPickerTitle">
+    <div class="category-modal-backdrop" data-close-category-modal></div>
+    <div class="category-modal-card">
+      <button class="category-modal-close" type="button" data-close-category-modal aria-label="Kapat">×</button>
+      <span class="category-modal-kicker">DİJİYESOR</span>
+      <h2 id="categoryPickerTitle">Ne arıyorsunuz?</h2>
+      <p>Bir kategori seçin. Size sadece o alandaki kurumları gösterelim.</p>
+      <div id="categoryPickerGrid" class="category-picker-grid"></div>
+    </div>
+  </div>
+
+  <div id="educationSuggestModal" class="education-suggest-modal hidden" role="dialog" aria-modal="true" aria-labelledby="educationSuggestTitle">
+    <div class="education-suggest-backdrop" data-close-education-suggest></div>
+    <div class="education-suggest-card">
+      <button type="button" class="education-suggest-close" data-close-education-suggest aria-label="Kapat">×</button>
+      <span class="education-suggest-kicker">SONUÇLARI DARALT</span>
+      <h2 id="educationSuggestTitle">Hangi eğitim kurumunu arıyorsunuz?</h2>
+      <p>Eğitim kategorisindeki sonuçları daha hızlı bulmak için bir alan seçebilirsiniz.</p>
+      <div class="education-suggest-grid">
+        <button type="button" class="education-suggest-btn" data-education-sub="surucu">🚗 Sürücü Kursu</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="dershane">📚 Dershane / Kurs</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="kres">🧸 Kreş / Anaokulu</button>
+        <button type="button" class="education-suggest-btn" data-education-sub="yurt">🏠 Öğrenci Yurdu</button>
+        <button type="button" class="education-suggest-btn all" data-education-sub="">Tüm Eğitim Kurumlarını Gör</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="searchSponsorPopup" class="search-sponsor-popup hidden" role="dialog" aria-modal="true" aria-labelledby="searchSponsorTitle">
+    <div class="search-sponsor-backdrop" data-close-search-sponsor></div>
+    <div class="search-sponsor-card">
+      <button type="button" class="search-sponsor-close" data-close-search-sponsor aria-label="Kapat">×</button>
+      <span class="search-sponsor-label">SPONSORLU</span>
+      <div id="searchSponsorMedia" class="search-sponsor-media"></div>
+      <div class="search-sponsor-body">
+        <div class="search-sponsor-info">
+          <small id="searchSponsorRegion"></small>
+          <h2 id="searchSponsorTitle">Bölgenizde öne çıkan firma</h2>
+          <p id="searchSponsorText"></p>
+          <a id="searchSponsorLink" href="#" class="search-sponsor-link">Firmayı İncele</a>
+        </div>
+        <div id="searchSponsorMapBox" class="search-sponsor-mapbox hidden">
+          <a id="searchSponsorDirections" class="search-sponsor-directions" href="#" target="_blank" rel="noopener">📍 Yol Tarifi</a>
+          <iframe id="searchSponsorMap" class="search-sponsor-map" title="Firma konumu" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <a id="searchSponsorMapLink" class="search-sponsor-maplink" href="#" target="_blank" rel="noopener">Konumu Haritada Gör ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tour360Modal" class="tour360-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tour360Title">
+    <div class="tour360-backdrop" data-close-360></div>
+    <div class="tour360-card">
+      <div class="tour360-head">
+        <div>
+          <span>360° SANAL TUR</span>
+          <h2 id="tour360Title">Mekânı Gez</h2>
+        </div>
+        <button type="button" class="tour360-close" data-close-360 aria-label="Kapat">×</button>
+      </div>
+      <div class="tour360-frame-wrap">
+        <iframe id="tour360Frame" src="about:blank" title="360 derece mekan turu" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="tour360-foot">
+        <small>Fareyle sürükleyerek veya telefonda parmağınızla hareket ederek mekânı gezebilirsiniz.</small>
+        <a id="tour360External" href="#" target="_blank" rel="noopener">Tam ekranda aç ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 DijiyeSor</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="app.js?v=20261014-district-fix"></script>
+  <script src="bilgi-modal.js"></script>
+  <script src="test/results-view.js?v=20261015-2"></script>
+</body>
+</html>
