@@ -63,3 +63,10 @@
  #resultsHead .results-view-toggle{flex:0 0 auto!important}
  #resultsHead .only360-btn{flex:0 0 auto!important}
 }
+
+/* Keep mobile filter columns within viewport */
+@media(max-width:680px){
+ .search-area,.search-area .filters{max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ .search-area .filters{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .search-area .filters select{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:10px!important;padding-right:24px!important;font-size:13px!important;text-overflow:ellipsis!important}
+}
