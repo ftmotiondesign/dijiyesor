@@ -291,7 +291,11 @@ async function loadProvinces(select,district){
       }catch(_){}
     }
     if(!rows){
-      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),3500);
+      let r;
+      try{r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81",{signal:controller.signal});}
+      finally{clearTimeout(timeout);}
       const j=await r.json();
       rows=(j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
       try{sessionStorage.setItem("djs_province_rows",JSON.stringify(rows));}catch(_){}
@@ -307,6 +311,7 @@ async function loadProvinces(select,district){
     });
   }catch(_){
     select.innerHTML='<option value="">Tüm İller</option>';
+    ["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"].forEach((name,index)=>{const o=document.createElement('option');o.value=name;o.textContent=name;o.dataset.id=String(index+1);select.appendChild(o);});
   }
   if(district){
     district.innerHTML='<option value="">Tüm İlçeler</option>';
