@@ -1199,7 +1199,8 @@ async function initHome(){
   if(!search)return;
   const categoryLoadPromise=loadManagedSearchCategories();
   const provinceLoadPromise=loadProvinces(city,district);
-  await categoryLoadPromise;
+  // Do not block search initialization if remote category settings stall.
+  await Promise.race([categoryLoadPromise,new Promise(resolve=>setTimeout(resolve,2500))]);
   if(sector){const current=sector.value;sector.innerHTML='<option value="">Tüm Sektörler</option>'+Object.entries(categoryLabels).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");sector.value=current;}
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
 
@@ -1508,7 +1509,8 @@ async function initHome(){
     renderActiveFilters();
   });
 
-  await provinceLoadPromise;
+  // Search query must remain usable even if the external province API is slow.
+  await Promise.race([provinceLoadPromise,new Promise(resolve=>setTimeout(resolve,2500))]);
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
     city.value=params.get("city");
