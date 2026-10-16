@@ -945,7 +945,7 @@ function render(data,{keepLimit=false}={}){
   }
 
   if(!data.length){
-    grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
+    grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><a class="new-search-popup-btn" href="firma-ekle.html#basvuru" style="display:inline-block;text-decoration:none;background:#1877f2;color:white;padding:12px 18px;border-radius:12px;margin-top:12px">İşletmemi DijiyeSor'a Kaydet ↗</a><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
     return;
   }
 
