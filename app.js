@@ -291,11 +291,7 @@ async function loadProvinces(select,district){
       }catch(_){}
     }
     if(!rows){
-      const controller=new AbortController();
-      const timeout=setTimeout(()=>controller.abort(),3500);
-      let r;
-      try{r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81",{signal:controller.signal});}
-      finally{clearTimeout(timeout);}
+      const r=await fetch("https://api.turkiyeapi.dev/v2/provinces?fields=id,name&limit=81");
       const j=await r.json();
       rows=(j.data||[]).sort((a,b)=>a.name.localeCompare(b.name,"tr"));
       try{sessionStorage.setItem("djs_province_rows",JSON.stringify(rows));}catch(_){}
@@ -311,7 +307,6 @@ async function loadProvinces(select,district){
     });
   }catch(_){
     select.innerHTML='<option value="">Tüm İller</option>';
-    ["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Artvin","Aydın","Balıkesir","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Isparta","Mersin","İstanbul","İzmir","Kars","Kastamonu","Kayseri","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Kahramanmaraş","Mardin","Muğla","Muş","Nevşehir","Niğde","Ordu","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Tekirdağ","Tokat","Trabzon","Tunceli","Şanlıurfa","Uşak","Van","Yozgat","Zonguldak","Aksaray","Bayburt","Karaman","Kırıkkale","Batman","Şırnak","Bartın","Ardahan","Iğdır","Yalova","Karabük","Kilis","Osmaniye","Düzce"].forEach((name,index)=>{const o=document.createElement('option');o.value=name;o.textContent=name;o.dataset.id=String(index+1);select.appendChild(o);});
   }
   if(district){
     district.innerHTML='<option value="">Tüm İlçeler</option>';
@@ -487,7 +482,7 @@ async function loadCompanies(filters={}){
     }
 
     // Önce gerçek arama sonuçlarını getir. Sponsor sorgusu artık ilk sonuçları bekletmez.
-    const snap=await Promise.race([query.get(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Firma sorgusu zaman aşımına uğradı")),10000))]);
+    const snap=await query.get();
     const byId=new Map();
 
     snap.forEach(doc=>{
@@ -950,7 +945,7 @@ function render(data,{keepLimit=false}={}){
   }
 
   if(!data.length){
-    grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><a class="new-search-popup-btn" href="firma-ekle.html#basvuru" style="display:inline-block;text-decoration:none;background:#1877f2;color:white;padding:12px 18px;border-radius:12px;margin-top:12px">İşletmemi DijiyeSor'a Kaydet ↗</a><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
+    grid.innerHTML='<div class="results-state no-result-state"><button type="button" class="no-result-mascot" data-open-category-search aria-label="Yeni arama yap"><img src="./assets/diji-mascot-v2.png" alt="Diji maskotu"></button><strong>Uygun firma bulunamadı.</strong><span>Arama kelimesini, sektör veya konum filtresini değiştirerek tekrar deneyin.</span><button type="button" class="new-search-popup-btn" data-open-category-search>Yeni arama yap</button></div>';
     return;
   }
 
@@ -1204,7 +1199,7 @@ async function initHome(){
   if(!search)return;
   const categoryLoadPromise=loadManagedSearchCategories();
   const provinceLoadPromise=loadProvinces(city,district);
-  await Promise.race([categoryLoadPromise,new Promise(resolve=>setTimeout(resolve,1800))]);
+  await categoryLoadPromise;
   if(sector){const current=sector.value;sector.innerHTML='<option value="">Tüm Sektörler</option>'+Object.entries(categoryLabels).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");sector.value=current;}
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
 
@@ -1513,7 +1508,7 @@ async function initHome(){
     renderActiveFilters();
   });
 
-  await Promise.race([provinceLoadPromise,new Promise(resolve=>setTimeout(resolve,1800))]);
+  await provinceLoadPromise;
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
     city.value=params.get("city");
