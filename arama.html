@@ -309,6 +309,27 @@
 
   <footer class="footer">© 2026 DijiyeSor</footer>
 
+  <script>
+  (function(){
+    const params=new URLSearchParams(location.search);
+    const q=params.get('q')||'';
+    const search=document.getElementById('searchInput');
+    if(search && q)search.value=q;
+    const grid=document.getElementById('companyGrid');
+    if(!grid)return;
+    const timer=setTimeout(()=>{
+      const stillLoading=/Firmalar yükleniyor|Lütfen kısa bir süre bekleyin/i.test(grid.textContent||'');
+      if(!stillLoading)return;
+      const panel=document.createElement('div');
+      panel.style.cssText='padding:24px;text-align:center;border:1px solid #dbe3ee;border-radius:16px;background:#fff';
+      const heading=document.createElement('strong');heading.textContent='Arama şu anda tamamlanamadı.';
+      const desc=document.createElement('p');desc.textContent='İşletme kayıtlarına erişim gecikiyor. Yeni kayıt oluşturmadan önce tekrar deneyin.';
+      const retry=document.createElement('button');retry.type='button';retry.textContent='Tekrar Dene';retry.style.cssText='padding:12px 20px;background:#1877f2;color:#fff;border:0;border-radius:12px;font-weight:700';retry.onclick=()=>location.reload();
+      panel.append(heading,desc,retry);grid.replaceChildren(panel);
+    },12000);
+    window.addEventListener('pagehide',()=>clearTimeout(timer),{once:true});
+  })();
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="app.js?v=20261016-search-init-fix"></script>
