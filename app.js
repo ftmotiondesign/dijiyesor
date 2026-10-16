@@ -482,7 +482,7 @@ async function loadCompanies(filters={}){
     }
 
     // Önce gerçek arama sonuçlarını getir. Sponsor sorgusu artık ilk sonuçları bekletmez.
-    const snap=await query.get();
+    const snap=await Promise.race([query.get(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Firma sorgusu zaman aşımına uğradı")),10000))]);
     const byId=new Map();
 
     snap.forEach(doc=>{
@@ -1199,7 +1199,7 @@ async function initHome(){
   if(!search)return;
   const categoryLoadPromise=loadManagedSearchCategories();
   const provinceLoadPromise=loadProvinces(city,district);
-  await categoryLoadPromise;
+  await Promise.race([categoryLoadPromise,new Promise(resolve=>setTimeout(resolve,1800))]);
   if(sector){const current=sector.value;sector.innerHTML='<option value="">Tüm Sektörler</option>'+Object.entries(categoryLabels).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join("");sector.value=current;}
   const fillSubcategories=()=>{if(!subCategory)return;const map=subcategoryMap[sector.value]||{};subCategory.innerHTML='<option value="">Tüm Alt Kategoriler</option>'+Object.entries(map).map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join("");subCategory.disabled=!sector.value};
 
@@ -1508,7 +1508,7 @@ async function initHome(){
     renderActiveFilters();
   });
 
-  await provinceLoadPromise;
+  await Promise.race([provinceLoadPromise,new Promise(resolve=>setTimeout(resolve,1800))]);
   if(params.get("q"))search.value=params.get("q");
   if(params.get("city")){
     city.value=params.get("city");
